@@ -3350,7 +3350,7 @@ type
 
   //___________________________________________
 
-  Tswitch = class(TPersistent)       // a switch stored in the list.     0.77.a  7-6-02.
+  Tswitch = class       // a switch stored in the list.     0.77.a  7-6-02.
 
   public                         // 0.85.a
 

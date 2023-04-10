@@ -50,7 +50,12 @@ uses
   ComCtrls;
 
 type
+
+  { Tswitch_select_form }
+
   Tswitch_select_form = class(TForm)
+    Button1: TButton;
+    Button2: TButton;
     datestamp_label: TLabel;
     ok_panel: TPanel;
     switch_top_label: TLabel;
@@ -76,6 +81,8 @@ type
     help_shape: TShape;
     restore_settings_button: TButton;
 
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure ok_panelClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -213,6 +220,7 @@ implementation
 {$R *.lfm}
 
 uses
+  Generics.Collections,
   pad_unit,
   control_room,
   entry_sheet,
@@ -224,7 +232,13 @@ uses
   data_memo_unit,
   make_slip_unit,
   curve,
-  template;
+  template,
+  OTPersistent,
+  SwitchInfo,
+  otYaml,
+  otYamlEmitter,
+  otYamlParser,
+  otYamlEvent;
 
 var
   switch_index: integer = 0;
@@ -251,6 +265,178 @@ begin
   if Key = VK_F1 then
     help_button.Click;
 end;
+
+
+function CreateTSwitchInfoFrom(const AInfo: Tswitch_info): TSwitchInfo;
+var
+  i: Integer;
+  lastIndex: Integer;
+begin
+  Result := TSwitchInfo.Create(nil);
+  try
+    Result.switchPattern := AInfo.sw_pattern;
+    Result.planingLength := AInfo.planing;
+    Result.planingAngle := AInfo.planing_angle;
+    Result.switchRadius := AInfo.switch_radius_inchormax;
+    Result.switchRailLength := AInfo.switch_rail;
+    Result.stockRailLength := AInfo.stock_rail;
+    Result.heelLead := AInfo.heel_lead_inches;
+    Result.heelOffset := AInfo.heel_offset_inches;
+    Result.switchFront := AInfo.switch_front_inches;
+    Result.planingRadius := AInfo.planing_radius;
+    Result.sleeperJ1 := AInfo.sleeper_j1;
+    Result.sleeperJ2 := AInfo.sleeper_j2;
+
+    for i := 0 to swtimbco_c do begin
+      if AInfo.timber_centres[i] = 0 then
+        break;
+      Result.AddTimberCentres(AInfo.timber_centres[i]);
+    end;
+
+    Result.groupCode := AInfo.group_code;
+    Result.sizeCode := AInfo.size_code;
+    Result.joggleDepth := AInfo.joggle_depth;
+    Result.joggleLength := AInfo.joggle_length;
+    Result.groupCount := AInfo.group_count;
+    Result.validData := AInfo.valid_data;
+    Result.frontTimbered := AInfo.front_timbered;
+    Result.numBridgeChairsMainRail := AInfo.num_bridge_chairs_main_rail;
+    Result.fbTipOffset := AInfo.fb_tip_offset;
+    Result.sleeperJ3 := AInfo.sleeper_j3;
+    Result.sleeperJ4 := AInfo.sleeper_j4;
+    Result.sleeperJ5 := AInfo.sleeper_j5;
+    Result.numSlideChars := AInfo.num_slide_chairs;
+    Result.numBlockSlideChairs := AInfo.num_block_slide_chairs;
+    Result.numBlockHeelChars := AInfo.num_block_heel_chairs;
+  except
+    Result.Free;
+    raise;
+  end;
+end;
+
+procedure Tswitch_select_form.Button1Click(Sender: TObject);
+var
+  emitter: TYamlEmitter;
+  stream: TFileStream;
+  yamlVer: TYamlVersionDirective;
+  i: Integer;
+  switch: Tswitch;
+  newSwitch: TSwitchInfo;
+begin
+  // save switchinfo records to yaml
+
+  stream := nil;
+  emitter := TYamlEmitter.Create;
+  try
+    stream := TFileStream.Create('switch_info.yaml', fmCreate);
+    emitter.SetOutput(stream);
+    yamlVer.Initialize;
+
+    emitter.StreamStartEvent;
+    emitter.DocumentStartEvent(yamlVer, nil, True);
+    emitter.SequenceStartEvent('', '', True, ysqAnyStyle);
+
+    for i := 0 to switch_selector_listbox.Items.Count - 1 do begin
+      switch := Tswitch(switch_selector_listbox.Items.Objects[i]);
+
+      newSwitch := CreateTSwitchInfoFrom(switch.list_switch_info);
+      try
+        newSwitch.SaveToYaml(emitter);
+      finally
+        newSwitch.Free;
+      end;
+    end;
+
+    emitter.SequenceEndEvent;
+    emitter.DocumentEndEvent(True);
+    emitter.StreamEndEvent;
+
+  finally
+    emitter.Free;
+  end;
+end;
+
+procedure Tswitch_select_form.Button2Click(Sender: TObject);
+var
+  parser: TYamlParser;
+  event: TYamlEvent;
+  state: (
+    stExpectStreamStart,
+    stExpectDocumentStart,
+    stExpectSequenceStart,
+    stExpectMappingStart,
+    stExpectDocumentEnd
+  );
+  obj: TOTPersistent;
+  switches: TObjectList<TSwitchInfo>;
+  loader: TOTPersistentLoader;
+begin
+  // restore TSwitchInfo yaml to switchinfo records
+
+  switches := TObjectList<TSwitchInfo>.Create;
+  parser := TYamlParser.Create;
+  try
+    parser.SetInput(TFileStream.Create('switch_info.yaml', fmOpenRead));
+
+    state := stExpectStreamStart;
+    event := parser.Parse;
+    while not (event is TStreamEndEvent) do begin
+      case state of
+        stExpectStreamStart: begin
+          if not (event is TStreamStartEvent) then
+            raise Exception.Create('Expected Stream Start');
+          state := stExpectDocumentStart;
+        end;
+        stExpectDocumentStart: begin
+          if not (event is TDocumentStartEvent) then
+            raise Exception.Create('Expected Document Start');
+          state := stExpectSequenceStart;
+        end;
+        stExpectSequenceStart: begin
+          if not (event is TSequenceStartEvent) then
+            raise Exception.Create('Expected Sequence Start');
+          state := stExpectMappingStart;
+        end;
+        stExpectMappingStart: begin
+          if event is TSequenceEndEvent then begin
+            state := stExpectDocumentEnd;
+          end
+          else if event is TMappingStartEvent then begin
+            loader := TOTPersistentLoader.Create;
+            try
+              obj := TOTPersistent.RestoreYamlObject(nil, parser, event as TMappingStartEvent, loader);
+              if not (obj is TSwitchInfo) then begin
+                obj.Free;
+                raise Exception.Create('Expected TSwitchInfo instance');
+                end;
+
+            finally
+              loader.Free;
+            end;
+            switches.Add(obj as TSwitchInfo);
+          end
+          else
+            raise Exception.Create('Expected Mapping Start or Sequence End');
+        end;
+        stExpectDocumentEnd: begin
+          if not (event is TDocumentEndEvent) then
+            raise Exception.Create('Expected Document End');
+        end;
+      end;
+
+      FreeAndNil(event);
+      event := parser.Parse;
+    end;
+
+    // do something with the list of switches...
+
+  finally
+    parser.Free;
+    event.Free;
+    switches.Free;
+  end;
+end;
+
 //____________________________________________________________________________________________
 
 function check_valid_switch_selected: boolean;
