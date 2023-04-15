@@ -35,3 +35,11 @@ output/
 
 # Generated documentation
 docs/autodocs
+docs/.asciidoctor/
+docs/*.html
+docs/*.png
+
+# Codegen test files
+codegen/fred.pas
+codegen/sample.pas
+
