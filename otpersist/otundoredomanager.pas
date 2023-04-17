@@ -77,6 +77,7 @@ type
     procedure SetCreated(AObject: TOTPersistent);
     procedure SetDestroyed(AObject: TOTPersistent);
     procedure Commit;
+    procedure Rollback;
 
     procedure Undo;
     procedure Redo;
@@ -274,9 +275,28 @@ end;
 procedure TOTUndoRedoManager.Commit;
 begin
   if not Assigned(FCurrent) then
-    raise Exception.Create('UndoRedoManager.Commit with no active mark');
+    Exit; // nothing to commit, so ignore
 
   FUndo.Push(FCurrent);
+  FCurrent := nil;
+  FRedo.Clear;
+end;
+
+procedure TOTUndoRedoManager.Rollback;
+var
+  undo: TUndoEntry;
+begin
+  if not Assigned(FCurrent) then
+    Exit; // nothing to roll back, so ignore
+
+  undo := FCurrent;
+
+  FCurrent := TUndoEntry.Create('');
+
+  undo.Restore;
+
+  undo.Free;
+  FCurrent.Free;
   FCurrent := nil;
 end;
 

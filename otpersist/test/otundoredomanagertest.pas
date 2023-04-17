@@ -42,6 +42,11 @@ type
     procedure TestReferringListRemoveAndUndoRedo;
     procedure TestReferringListEditAndUndoRedo;
     procedure TestReferringListExtractAndUndoRedo;
+
+    procedure TestEditUndoEdit;
+    procedure TestEditsUndoRedo;
+    procedure TestEditRollback;
+    procedure TestEditCommitAfterRollback;
   end;
 
 implementation
@@ -944,6 +949,177 @@ begin
   finally
     list.Free;
     leaf1.Free;
+  end;
+end;
+
+procedure TTestOTUndoRedoManager.TestEditUndoEdit;
+var
+  leaf: TLeafClass;
+begin
+  //
+  // Given an object
+  //   and the object has been edited
+  //   and Undo has been called
+  // When the object is edited again
+  // Then the Redo list is cleared
+  //
+  leaf := TLeafClass.Create(nil);
+  try
+    // Given
+    leaf.str1 := 'Fred';
+    UndoRedoManager.Undo;
+    AssertEquals('redoCount after undo', 1, UndoRedoManager.RedoCount);
+
+    // When
+    leaf.str1 := 'Bert';
+
+    // Then
+    AssertEquals('redoCount after edit', 0, UndoRedoManager.RedoCount);
+
+  finally
+    leaf.Free;
+  end;
+end;
+
+procedure TTestOTUndoRedoManager.TestEditsUndoRedo;
+var
+  leaf: TLeafClass;
+  undoCount: Integer;
+begin
+  //
+  // Given an object
+  //   and multiple edits on that object
+  //
+  // When Undo is called several times
+  // Then the Redo count increases
+  //
+  // When Redo is called several times
+  // Then the redo count decreases
+  //  and the undo count increases
+  //
+  leaf := TLeafClass.Create(nil);
+  try
+    leaf.str1 := 'Fred';
+    leaf.int1 := 77;
+    leaf.int2 := 33;
+    leaf.AddArray1(23);
+
+
+    undoCount := UndoRedoManager.undoCount;
+
+    UndoRedoManager.Undo;
+    UndoRedoManager.Undo;
+    UndoRedoManager.Undo;
+
+    AssertEquals('undoCount after Undos', undoCount - 3, UndoRedoManager.undoCount);
+    AssertEquals('redoCount after Undos', 3, UndoRedoManager.redoCount);
+
+    UndoRedoManager.Redo;
+    AssertEquals('undoCount after Redo 1', undoCount - 2, UndoRedoManager.undoCount);
+    AssertEquals('redoCount after Redo 1', 2, UndoRedoManager.redoCount);
+
+    UndoRedoManager.Redo;
+    AssertEquals('undoCount after Redo 2', undoCount - 1, UndoRedoManager.undoCount);
+    AssertEquals('redoCount after Redo 2', 1, UndoRedoManager.redoCount);
+
+    UndoRedoManager.Redo;
+    AssertEquals('undoCount after Redo 3', undoCount, UndoRedoManager.undoCount);
+    AssertEquals('redoCount after Redo 3', 0, UndoRedoManager.redoCount);
+
+  finally
+    leaf.Free;
+  end;
+end;
+
+procedure TTestOTUndoRedoManager.TestEditRollback;
+var
+  leaf: TLeafClass;
+begin
+  //
+  // Given some edits have been made
+  //   and some edits have been undone
+  //   and a transaction has started
+  //   and edits have been made
+  // When Rollback is called
+  // Then the edits are undone
+  //  and *no* Redo is created
+  //  and the previous redos are unchanged
+  //
+  leaf := TLeafClass.Create(nil);
+  try
+    leaf.str1 := 'Fred';
+    leaf.int1 := 77;
+    leaf.int2 := 33;
+    leaf.AddArray1(23);
+    leaf.AddArray1(34);
+
+    UndoRedoManager.Undo;
+    UndoRedoManager.Undo;
+    AssertEquals('redoCount after initial Undos', 2, UndoRedoManager.redoCount);
+
+    UndoRedoManager.SetMark('');
+    leaf.str1 := 'Bert';
+    leaf.int1 := 666;
+    leaf.int2 := 22;
+
+    UndoRedoManager.Rollback;
+
+    AssertEquals('str1', 'Fred', leaf.str1);
+    AssertEquals('int1', 77, leaf.int1);
+    AssertEquals('int2', 33, leaf.int2);
+
+    AssertEquals('redoCount after Rollback', 2, UndoRedoManager.redoCount);
+
+
+  finally
+    leaf.Free;
+  end;
+end;
+
+procedure TTestOTUndoRedoManager.TestEditCommitAfterRollback;
+var
+  leaf: TLeafClass;
+  undoCount: Integer;
+begin
+  //
+  // Given an object has been edited
+  //   and Undo called
+  //   and transaction has started
+  //   and edits have been made
+  //   and Rollback has been called
+  // When Commit is called
+  // Then no error occurs
+  //  and no new undo entry is created
+  //  and the redo list is unchanged
+  //
+  leaf := TLeafClass.Create(nil);
+  try
+    leaf.str1 := 'Fred';
+    leaf.int1 := 77;
+    leaf.int2 := 33;
+    leaf.AddArray1(23);
+    leaf.AddArray1(34);
+
+    UndoRedoManager.Undo;
+    UndoRedoManager.Undo;
+    AssertEquals('redoCount after initial Undos', 2, UndoRedoManager.redoCount);
+
+    undoCount := UndoRedoManager.undoCount;
+
+    UndoRedoManager.SetMark('');
+    leaf.str1 := 'Bert';
+    leaf.int1 := 666;
+    leaf.int2 := 22;
+
+    UndoRedoManager.Rollback;
+
+    UndoRedoManager.Commit;
+
+    AssertEquals('undoCount after Rollback and Commit', undoCount, UndoRedoManager.undoCount);
+    AssertEquals('redoCount after Rollback and Commit', 2, UndoRedoManager.redoCount);
+
+  finally
+    leaf.Free;
   end;
 end;
 
