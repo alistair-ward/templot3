@@ -31,6 +31,9 @@ type
     procedure TestReferringRemove;
     procedure TestReferringExtract;
     procedure TestReferringEdit;
+
+    procedure TestExchange;
+    procedure TestMove;
   end;
 
 implementation
@@ -585,6 +588,117 @@ begin
     leaf1.Free;
     leaf2.Free;
   end;
+end;
+
+procedure TTestOTPersistentList.TestExchange;
+var
+  leaf1: TLeafClass;
+  leaf2: TLeafClass;
+  leaf3: TLeafClass;
+  list: TLeafClassOwningList;
+  oid1: TOID;
+  oid3: TOID;
+begin
+  //
+  // Given a list containing several objects
+  // When 2 items are exchanged
+  // Then those items are exchanged in the list
+  //
+  // When undo is called
+  // Then the items are returned to their original positions
+  //
+  list := TLeafClassOwningList.Create(nil);
+  try
+    leaf1 := TLeafClass.Create(nil);
+    oid1 := leaf1.oid;
+    list.Add(leaf1);
+
+    leaf2 := TLeafClass.Create(nil);
+    list.Add(leaf2);
+
+    leaf3 := TLeafClass.Create(nil);
+    oid3 := leaf3.oid;
+    list.Add(leaf3);
+
+    AssertEquals('list[0] initial', leaf1.oid, list[0].oid);
+    AssertEquals('list[2] initial', leaf3.oid, list[2].oid);
+
+    // When
+    list.Exchange(0, 2);
+
+    // Then
+    AssertEquals('list[0] exchange', leaf3.oid, list[0].oid);
+    AssertEquals('list[2] exchange', leaf1.oid, list[2].oid);
+
+    // When
+    UndoRedoManager.Undo;
+
+    // Then
+    AssertEquals('list[0] undo', leaf1.oid, list[0].oid);
+    AssertEquals('list[2] undo', leaf3.oid, list[2].oid);
+
+  finally
+    list.Free;
+  end;
+
+end;
+
+procedure TTestOTPersistentList.TestMove;
+var
+  leaf1: TLeafClass;
+  leaf2: TLeafClass;
+  leaf3: TLeafClass;
+  list: TLeafClassOwningList;
+  oid1: TOID;
+  oid2: TOID;
+  oid3: TOID;
+begin
+  //
+  // Given a list containing several objects
+  // When an item is moved
+  // Then those items are exchanged in the list
+  //
+  // When undo is called
+  // Then the items are returned to their original positions
+  //
+  list := TLeafClassOwningList.Create(nil);
+  try
+    leaf1 := TLeafClass.Create(nil);
+    oid1 := leaf1.oid;
+    list.Add(leaf1);
+
+    leaf2 := TLeafClass.Create(nil);
+    oid2 := leaf2.oid;
+    list.Add(leaf2);
+
+    leaf3 := TLeafClass.Create(nil);
+    oid3 := leaf3.oid;
+    list.Add(leaf3);
+
+    AssertEquals('list[0] initial', leaf1.oid, list[0].oid);
+    AssertEquals('list[1] initial', leaf2.oid, list[1].oid);
+    AssertEquals('list[2] initial', leaf3.oid, list[2].oid);
+
+    // When
+    list.Move(2, 0);
+
+    // Then
+    AssertEquals('list[0] move', leaf3.oid, list[0].oid);
+    AssertEquals('list[1] move', leaf1.oid, list[1].oid);
+    AssertEquals('list[2] move', leaf2.oid, list[2].oid);
+
+    // When
+    UndoRedoManager.Undo;
+
+    // Then
+    AssertEquals('list[0] undo', leaf1.oid, list[0].oid);
+    AssertEquals('list[1] undo', leaf2.oid, list[1].oid);
+    AssertEquals('list[2] undo', leaf3.oid, list[2].oid);
+
+  finally
+    list.Free;
+  end;
+
 end;
 
 initialization

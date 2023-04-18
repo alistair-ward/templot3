@@ -47,6 +47,9 @@ type
     procedure Remove(AValue: T);
     procedure Extract(AValue: T);
 
+    procedure Exchange(AIndex1, AIndex2: Integer);
+    procedure Move(AIndex, ADestination: Integer);
+
     property Items[AIndex: Integer]: T Read GetItem Write SetItem; default;
   end;
 
@@ -190,6 +193,42 @@ begin
   else begin
     AValue.DeleteReference(oid);
   end;
+
+  if not hasActiveMark then begin
+    UndoRedoManager.Commit;
+  end;
+end;
+
+procedure TOTPersistentList<T>.Exchange(AIndex1, AIndex2: Integer);
+var
+  hasActiveMark: Boolean;
+begin
+  hasActiveMark := UndoRedoManager.hasActiveMark;
+  if not hasActiveMark then begin
+    UndoRedoManager.SetMark('');
+  end;
+
+  SetModified;
+
+  FList.Exchange(AIndex1, AIndex2);
+
+  if not hasActiveMark then begin
+    UndoRedoManager.Commit;
+  end;
+end;
+
+procedure TOTPersistentList<T>.Move(AIndex, ADestination: Integer);
+var
+  hasActiveMark: Boolean;
+begin
+  hasActiveMark := UndoRedoManager.hasActiveMark;
+  if not hasActiveMark then begin
+    UndoRedoManager.SetMark('');
+  end;
+
+  SetModified;
+
+  FList.Move(AIndex, ADestination);
 
   if not hasActiveMark then begin
     UndoRedoManager.Commit;
