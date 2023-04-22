@@ -46,6 +46,8 @@ type
     function Count: Integer;
     procedure Remove(AValue: T);
     procedure Extract(AValue: T);
+    procedure Delete(AIndex: Integer);
+    procedure Clear;
 
     procedure Exchange(AIndex1, AIndex2: Integer);
     procedure Move(AIndex, ADestination: Integer);
@@ -193,6 +195,66 @@ begin
   else begin
     AValue.DeleteReference(oid);
   end;
+
+  if not hasActiveMark then begin
+    UndoRedoManager.Commit;
+  end;
+end;
+
+procedure TOTPersistentList<T>.Delete(AIndex: Integer);
+var
+  hasActiveMark: Boolean;
+  value: T;
+begin
+  hasActiveMark := UndoRedoManager.hasActiveMark;
+  if not hasActiveMark then begin
+    UndoRedoManager.SetMark('');
+  end;
+
+  SetModified;
+
+  value := T(FromOID(FList[AIndex]));
+
+  FList.Delete(AIndex);
+
+  if FOwnsObjects then begin
+   value.Free;
+  end
+  else begin
+    value.DeleteReference(oid);
+  end;
+
+  if not hasActiveMark then begin
+    UndoRedoManager.Commit;
+  end;
+end;
+
+procedure TOTPersistentList<T>.Clear;
+var
+  hasActiveMark: Boolean;
+  itemOID: TOID;
+  item: T;
+begin
+  hasActiveMark := UndoRedoManager.hasActiveMark;
+  if not hasActiveMark then begin
+    UndoRedoManager.SetMark('');
+  end;
+
+  SetModified;
+
+  for itemOID in FList do begin
+    item := T(FromOID(itemOID));
+    if Assigned(item) then begin
+      if FOwnsObjects then begin
+        item.Free;
+      end
+      else begin
+        item.DeleteReference(oid);
+      end;
+    end;
+  end;
+
+  FList.Clear;
 
   if not hasActiveMark then begin
     UndoRedoManager.Commit;

@@ -25,12 +25,16 @@ type
     procedure TestOwningRemove;
     procedure TestOwningExtract;
     procedure TestOwningEdit;
+    procedure TestOwningDelete;
+    procedure TestOwningClear;
     procedure TestContainerSaveRestoreYaml;
 
     procedure TestReferringBasicFunctions;
     procedure TestReferringRemove;
     procedure TestReferringExtract;
     procedure TestReferringEdit;
+    procedure TestReferringDelete;
+    procedure TestReferringClear;
 
     procedure TestExchange;
     procedure TestMove;
@@ -267,6 +271,89 @@ begin
   finally
     list.Free;
     leaf1.Free;
+  end;
+end;
+
+procedure TTestOTPersistentList.TestOwningDelete;
+var
+  list: TLeafClassOwningList;
+  leaf1: TLeafClass;
+  leaf2: TLeafClass;
+  index: Integer;
+  oid1: TOID;
+  oid2: TOID;
+begin
+  //
+  // Given a new list containing several leaf objects
+  //
+  // When an item is deleted
+  // Then the list count decreases by 1
+  //  and the item is Free'd
+  //
+
+  list := TLeafClassOwningList.Create(nil);
+  try
+    leaf1 := TLeafClass.Create(nil);
+    oid1 := leaf1.oid;
+    index := list.Add(leaf1);
+
+    leaf2 := TLeafClass.Create(nil);
+    oid2 := leaf2.oid;
+    index := list.Add(leaf2);
+
+    list.Delete(0);
+
+    AssertEquals('list.Count', 1, list.Count);
+
+    leaf1 := TLeafClass(OIDManager.FromOID(oid1));
+    AssertNull('leaf1 null', leaf1);
+
+    leaf2 := list[0];
+    AssertEquals('oid2', oid2, leaf2.oid);
+
+  finally
+    list.Free;
+  end;
+end;
+
+procedure TTestOTPersistentList.TestOwningClear;
+var
+  list: TLeafClassOwningList;
+  leaf1: TLeafClass;
+  leaf2: TLeafClass;
+  oid1: TOID;
+  oid2: TOID;
+begin
+  //
+  // Given an owning list
+  //   and several instances of TLeafClass
+  //
+  // When the list is cleared
+  // Then all the objects in the list are Free'd
+  //  and the list count is zero
+  //
+  list := TLeafClassOwningList.Create(nil);
+  try
+    leaf1 := TLeafClass.Create(nil);
+    oid1 := leaf1.oid;
+    list.Add(leaf1);
+
+    leaf2 := TLeafClass.Create(nil);
+    oid2 := leaf2.oid;
+    list.Add(leaf2);
+
+    list.Clear;
+
+    AssertEquals('list.Count', 0, list.Count);
+
+    leaf1 := TLeafClass(OIDManager.FromOID(oid1));
+    AssertNull('leaf1 null', leaf1);
+
+    leaf2 := TLeafClass(OIDManager.FromOID(oid2));
+    AssertNull('leaf2 null', leaf2);
+
+  finally
+    list.Free;
   end;
 end;
 
@@ -526,7 +613,7 @@ begin
     AssertNull('leaf1 parent', leaf1.parent);
     AssertEquals('leaf1 refcount', 0, leaf1.referencesCount);
 
-    FreeAndNil(list) ;
+    FreeAndNil(list);
 
     leaf1 := TLeafClass(OIDManager.FromOID(oid1));
     AssertNotNull('leaf1', leaf1);
@@ -582,6 +669,96 @@ begin
     AssertSame('leaf2 in list', list[0], leaf2);
     AssertNull('leaf2 parent', leaf2.parent);
     AssertEquals('leaf2 ref count', 1, leaf2.referencesCount);
+
+  finally
+    list.Free;
+    leaf1.Free;
+    leaf2.Free;
+  end;
+end;
+
+procedure TTestOTPersistentList.TestReferringDelete;
+var
+  list: TLeafClassReferenceList;
+  leaf1: TLeafClass;
+  leaf2: TLeafClass;
+  oid1: TOID;
+  oid2: TOID;
+begin
+  //
+  // Given a new list containing several leaf objects
+  //
+  // When an item is Deleted
+  // Then the list count decreases by 1
+  //  and the item is not Free'd
+  //  and the item reference count is 0
+  //
+
+  list := TLeafClassReferenceList.Create(nil);
+  try
+    leaf1 := TLeafClass.Create(nil);
+    oid1 := leaf1.oid;
+    list.Add(leaf1);
+
+    leaf2 := TLeafClass.Create(nil);
+    oid2 := leaf2.oid;
+    list.Add(leaf2);
+
+    list.Delete(0);
+
+    AssertEquals('list.Count', 1, list.Count);
+
+    leaf1 := TLeafClass(OIDManager.FromOID(oid1));
+    AssertNotNull('leaf1', leaf1);
+    AssertEquals('leaf1 no refs', 0, leaf1.referencesCount);
+
+    leaf2 := list[0];
+    AssertEquals('oid2', oid2, leaf2.oid);
+
+  finally
+    list.Free;
+    leaf1.Free;
+    leaf2.Free;
+  end;
+end;
+
+procedure TTestOTPersistentList.TestReferringClear;
+var
+  list: TLeafClassReferenceList;
+  leaf1: TLeafClass;
+  leaf2: TLeafClass;
+  oid1: TOID;
+  oid2: TOID;
+begin
+  //
+  // Given a referring list
+  //   and several instances of TLeafClass
+  //
+  // When the list is cleared
+  // Then the objects in the list are not Free'd
+  //  and the reference counts of the objects are 0
+  //
+  list := TLeafClassReferenceList.Create(nil);
+  try
+    leaf1 := TLeafClass.Create(nil);
+    oid1 := leaf1.oid;
+    list.Add(leaf1);
+
+    leaf2 := TLeafClass.Create(nil);
+    oid2 := leaf2.oid;
+    list.Add(leaf2);
+
+    list.Clear;
+
+    AssertEquals('list.Count', 0, list.Count);
+
+    leaf1 := TLeafClass(OIDManager.FromOID(oid1));
+    AssertNotNull('leaf1 null', leaf1);
+    AssertEquals('leaf1 refCount', 0, leaf1.referencesCount);
+
+    leaf2 := TLeafClass(OIDManager.FromOID(oid2));
+    AssertNotNull('leaf2 null', leaf2);
+    AssertEquals('leaf2 refCount', 0, leaf2.referencesCount);
 
   finally
     list.Free;
