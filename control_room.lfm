@@ -10,7 +10,7 @@ object control_room_form: Tcontrol_room_form
   AutoScroll = True
   BorderIcons = [biSystemMenu]
   Caption = '. . .  welcome'
-  ClientHeight = 307
+  ClientHeight = 308
   ClientWidth = 750
   Color = 11075576
   Enabled = False
@@ -27,7 +27,7 @@ object control_room_form: Tcontrol_room_form
   OnResize = FormResize
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '2.2.2.0'
   Scaled = False
   object reminder_label: TLabel
     Left = 84
@@ -10950,6 +10950,7 @@ object control_room_form: Tcontrol_room_form
     Font.Height = -17
     Font.Name = 'Trebuchet MS'
     Font.Style = [fsBold, fsItalic]
+    ParentColor = False
     ParentFont = False
     WordWrap = True
   end

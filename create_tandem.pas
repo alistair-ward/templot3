@@ -88,13 +88,9 @@ uses
   point_ex, pad_unit, math_unit, math2_unit, keep_select, alert_unit, info_unit,
   control_room, shove_timber,
   switch_select, { OT-FIRST web_browser_unit,} wait_message, help_sheet,
-  shoved_timber, template;
+  shoved_timber, template_records;
 
 var
-  savedCurrent: TTemplate;
-  saved_name_str: string;
-  saved_memo_str: string;
-
   trad_1st: double;
 
   first_atx: double;
@@ -164,11 +160,6 @@ var
   procedure restore_current;
 
   begin
-    copy_keep(savedCurrent);
-    // retrieve saved original control template.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
   end;
   ////////////////////////////////////////////////////////////////
@@ -304,12 +295,6 @@ begin
     // no re-entry until we are ready ..
     pad_form.ss_tandem_continue_menu_entry.Enabled := False;
 
-    savedCurrent := TTemplate.Create('');
-
-    fill_kd(savedCurrent);                              // save existing control template
-    saved_name_str := current_name_str;
-    saved_memo_str := current_memo_str;
-
     pad_form.reset_peg_menu_entry.Enabled := True;
     pad_form.reset_peg_menu_entry.Click;                 // peg on CTRL-0
 
@@ -437,8 +422,6 @@ begin
 
       //tandem_in_progress_id_str:='';    // tandem finished
 
-      savedCurrent.Free;
-
       pad_form.ds_tandem_begin_menu_entry.Enabled := True;
       // so can start a new one later
       pad_form.ss_tandem_begin_menu_entry.Enabled := True;
@@ -519,8 +502,6 @@ begin
 
         //tandem_in_progress_id_str:='';    // tandem finished
 
-        savedCurrent.Free;
-
         pad_form.ds_tandem_begin_menu_entry.Enabled := True;
         // so can start a new one later
         pad_form.ss_tandem_begin_menu_entry.Enabled := True;
@@ -565,8 +546,6 @@ begin
     creating_tandem := False;
 
     //tandem_in_progress_id_str:='';    // tandem finished
-
-    savedCurrent.Free;
 
     pad_form.ds_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
     pad_form.ss_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
@@ -968,8 +947,6 @@ begin
   finally
     creating_tandem := False;
 
-    savedCurrent.Free;
-
     pad_form.ds_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
     pad_form.ss_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
 
@@ -1069,11 +1046,6 @@ var
   procedure restore_current;
 
   begin
-    copy_keep(savedCurrent);
-    // retrieve saved original control template.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
   end;
   ////////////////////////////////////////////////////////////////
@@ -1288,12 +1260,6 @@ begin
     pad_form.ss_tandem_continue_menu_entry.Enabled := False;
 
 
-    savedCurrent := TTemplate.Create('');
-
-    fill_kd(savedCurrent);                              // save existing control template
-    saved_name_str := current_name_str;
-    saved_memo_str := current_memo_str;
-
     pad_form.reset_peg_menu_entry.Enabled := True;
     pad_form.reset_peg_menu_entry.Click;                 // peg on CTRL-0
 
@@ -1470,8 +1436,6 @@ begin
 
         //tandem_in_progress_id_str:='';    // tandem finished
 
-        savedCurrent.Free;
-
         pad_form.ds_tandem_begin_menu_entry.Enabled := True;
         // so can start a new one later
         pad_form.ss_tandem_begin_menu_entry.Enabled := True;
@@ -1539,8 +1503,6 @@ begin
 
         creating_tandem := False;
 
-        savedCurrent.Free;
-
         pad_form.ds_tandem_begin_menu_entry.Enabled := True;
         // so can start a new one later
         pad_form.ss_tandem_begin_menu_entry.Enabled := True;
@@ -1584,8 +1546,6 @@ begin
 
     creating_tandem := False;
 
-    savedCurrent.Free;
-
     pad_form.ds_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
     pad_form.ss_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
 
@@ -1617,8 +1577,6 @@ begin
     restore_current;
 
     creating_tandem := False;
-
-    savedCurrent.Free;
 
     pad_form.ds_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
     pad_form.ss_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
@@ -1659,8 +1617,6 @@ begin
     restore_current;
 
     creating_tandem := False;
-
-    savedCurrent.Free;
 
     pad_form.ds_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
     pad_form.ss_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
@@ -2074,8 +2030,6 @@ begin
   finally
 
     creating_tandem := False;
-
-    savedCurrent.Free;
 
     pad_form.ds_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later
     pad_form.ss_tandem_begin_menu_entry.Enabled := True;     // so can start a new one later

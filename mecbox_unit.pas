@@ -66,7 +66,7 @@ uses
   config_unit,
   keep_select, wait_message, pad_unit, info_unit, control_room, alert_unit,
   math_unit, shove_timber, rail_options_unit,
-  shoved_timber, template, box_file_unit;
+  shoved_timber, template_records, box_file_unit;
 
 {$R *.lfm}
 

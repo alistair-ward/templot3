@@ -209,7 +209,7 @@ uses Printers, control_room, grid_unit, alert_unit, math_unit, calibration_unit,
   bgnd_unit, print_unit, info_unit, help_sheet,
   print_settings_unit, pdf_unit, { OT-FIRST dtp_unit, dtp_settings_unit,} export_unit,
   rail_data_unit,
-  template;
+  template_records;
 
 var
   pvsx: double = 1;

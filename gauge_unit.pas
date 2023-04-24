@@ -169,7 +169,7 @@ uses
   math_unit, alert_unit,
   colour_unit, keep_select, info_unit, print_unit, shove_timber, print_settings_unit,
   shoved_timber,
-  template;
+  template_records;
 
 const
 
@@ -219,7 +219,6 @@ end;
 procedure group_scale_change;        // change a selected group to a new scale/gauge setting.
 
 var
-  saveCurrent: TTemplate;
   n, Count: integer;
   bgnd: integer;
   save_bgnd_option: boolean;
@@ -266,10 +265,6 @@ begin
   // so switch bgnd off radio item.
 
   Count := keeps_list.Count;
-
-  saveCurrent := TTemplate.Create('');
-  fill_kd(saveCurrent);
-  save_name := current_name_str;
 
   try
     Screen.Cursor := crHourglass;
@@ -328,13 +323,9 @@ begin
     pad_form.show_bgnd_keeps_menu_entry.Checked := save_bgnd_option;   // restore, radio item.
 
   finally
-    copy_keep(saveCurrent);        // restore control template...
-    current_name_str := save_name;
     info_form.ref_name_label.Caption := current_name_str;
 
     pad_form.show_bgnd_keeps_menu_entry.Checked := save_bgnd_option;   // restore, radio item.
-
-    saveCurrent.Free;
 
     Screen.Cursor := crDefault;
     do_rollback := False;

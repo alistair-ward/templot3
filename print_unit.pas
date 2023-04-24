@@ -192,7 +192,7 @@ uses
   curve,
   rail_data_unit,
   mark_unit,
-  template;
+  template_records;
 
 const
   print_help_str: string = '      Printing  Pages' +

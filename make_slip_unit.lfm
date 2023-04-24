@@ -3,14 +3,13 @@ object make_slip_form: Tmake_slip_form
   Height = 20
   Hint = ' drag this panel to set toolbars position - click to set number of rows  '
   Top = 2
-  Width = 72
+  Width = 120
   BorderIcons = []
   BorderStyle = bsToolWindow
   Caption = ' toolbars'
   ClientHeight = 20
-  ClientWidth = 72
+  ClientWidth = 120
   Color = clWhite
-  DesignTimePPI = 120
   Font.Color = clBlack
   Font.Height = -13
   Font.Name = 'Arial'
@@ -18,7 +17,7 @@ object make_slip_form: Tmake_slip_form
   OnChangeBounds = FormChangeBounds
   OnCreate = FormCreate
   ShowHint = True
-  LCLVersion = '1.8.4.0'
+  LCLVersion = '2.2.2.0'
   Scaled = False
   Visible = True
   object datestamp_label: TLabel

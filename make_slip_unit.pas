@@ -78,10 +78,12 @@ implementation
 {$R *.lfm}
 
 uses
+  OTUndoRedoManager,
   pad_unit, math_unit, keep_select, alert_unit, info_unit, control_room, shove_timber,
   switch_select,
   shoved_timber,
   curve,
+  template_records,
   template{ OT-FIRST , web_browser_unit};
 
 //______________________________________________________________________________
@@ -93,11 +95,6 @@ function make_slip(sides: integer; making_crossover: boolean): boolean;        /
 var
   dummy1, dummy2: double;
   i, n: integer;
-  savedControl: TTemplate;
-
-  saved_notch: Tnotch;
-  saved_name_str: string;
-  saved_memo_str: string;
 
   sw_info: Tswitch_info;
 
@@ -161,11 +158,7 @@ var
   procedure restore_current;
 
   begin
-    copy_keep(savedControl);
-    // retrieve saved original control template.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_memo_str;
-
+    UndoRedoManager.Rollback;
     info_form.ref_name_label.Caption := current_name_str;
   end;
   ////////////////////////////////////////////////////////////////
@@ -285,12 +278,8 @@ begin
 
   id_str := '[slip ' + FormatDateTime('hhmmss', Time) + ']';
 
-  savedControl := TTemplate.Create('');
+  UndoRedoManager.SetMark('make slip');
   try
-    fill_kd(savedControl);                              // save control template
-    saved_name_str := current_name_str;
-    saved_memo_str := current_memo_str;
-
     pad_form.reset_peg_menu_entry.Enabled := True;
     pad_form.reset_peg_menu_entry.Click;           //peg on CTRL-0
     gocalc(0, 0);
@@ -1043,7 +1032,7 @@ begin
     redraw(False);
 
   finally
-    savedControl.Free;
+    UndoRedoManager.Commit;
 
     pad_form.reset_notch_menu_entry.Enabled := True;
     pad_form.reset_notch_menu_entry.Click;

@@ -70,7 +70,7 @@ implementation
 {$R *.lfm}
 
 uses
-  pad_unit, switch_select, template;
+  pad_unit, switch_select, template_records;
 
 var
   template_showing: boolean = False;

@@ -1,46 +1,50 @@
+unit Curve;
 
-(*
-    This file is part of OpenTemplot, a computer program for the design of
-    model railway track.
-
-    Copyright (C) 2019  OpenTemplot project contributors
-
-    This program is free software: you may redistribute it and/or modify
-    it under the terms of the GNU General Public Licence as published by
-    the Free Software Foundation, either version 3 of the Licence, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-    See the GNU General Public Licence for more details.
-
-    You should have received a copy of the GNU General Public Licence
-    along with this program. See the files: licence.txt or opentemplot.lpr
-
-    Or if not, refer to the web site: https://www.gnu.org/licenses/
-
-                >>>     NOTE TO DEVELOPERS     <<<
-                     DO NOT EDIT THIS COMMENT
-              It is inserted in this file by running
-                  'python3 scripts/addComment.py'
-         The original text lives in scripts/addComment.py.
-
-====================================================================================
-*)
-
-unit curve;
-
-{$mode delphi}{$H+}
+{$MODE Delphi}
 
 interface
 
 uses
   Classes,
   SysUtils,
+  OTPersistent,
+  OTPersistentList,
+  OTYamlEmitter,
   point_ex,
   curve_calculator,
   curve_parameters_interface;
+
+
+{# class TCurve
+---
+class: TCurve
+attributes:
+  - name: fixedRadius
+    type: Double
+  - name: transitionStartRadius
+    type: Double
+  - name: transitionEndRadius
+    type: Double
+  - name: distanceToTransition
+    type: Double
+  - name: transitionLength
+    type: Double
+  - name: isSpiral
+    type: Boolean
+  - name: isSlewing
+    type: Boolean
+  - name: distanceToStartOfSlew
+    type: Double
+  - name: slewLength
+    type: Double
+  - name: slewAmount
+    type: Double
+  - name: slewMode
+    type: ESlewMode
+  - name: slewFactor
+    type: Double
+...
+}
 
 const
   maximum_segment_length = 1e100;
@@ -62,37 +66,35 @@ const
   max_rad_test: double = maximum_radius_value - 10000;
 
 
+
+
 type
 
-  { TCurve }
-
-  TCurve = class(ICurveParameters)
+  TCurve = class(TOTPersistent, ICurveParameters)
   private
-    FModified: boolean;
-    FFixedRadius: double;
-    FTransitionStartRadius: double;
-    FTransitionEndRadius: double;
-    FDistanceToTransition: double;
-    FTransitionLength: double;
-    FIsSpiral: boolean;
-
-    FIsSlewing: boolean;
-    FDistanceToStartOfSlew: double;
-    FSlewLength: double;
-    FSlewAmount: double;
+    //# genMemberVars
+    FFixedRadius: Double;
+    FTransitionStartRadius: Double;
+    FTransitionEndRadius: Double;
+    FDistanceToTransition: Double;
+    FTransitionLength: Double;
+    FIsSpiral: Boolean;
+    FIsSlewing: Boolean;
+    FDistanceToStartOfSlew: Double;
+    FSlewLength: Double;
+    FSlewAmount: Double;
     FSlewMode: ESlewMode;
-    FSlewFactor: double;
+    FSlewFactor: Double;
+    //# endGenMemberVars
 
     FCurveCalculator: TCurveCalculator;
 
-    procedure UpdateIfModified;
-    procedure CreateCurveCalculator;
-    procedure SetFixedRadius(const newRadius: double);
-    procedure SetTransitionStartRadius(const newRadius: double);
-    procedure SetTransitionEndRadius(const newRadius: double);
-    procedure SetDistanceToTransition(const newDistance: double);
-    procedure SetTransitionLength(const newLength: double);
-    procedure SetIsSpiral(const newIsSpiral: boolean);
+  protected
+    procedure Calculate; override;
+    procedure RestoreAttributes(AStream : TStream); override;
+    procedure SaveAttributes(AStream : TStream); override;
+
+    // ICurveParameters
     function GetIsSpiral: boolean;
     function GetFixedRadius: double;
     function GetTransitionStartRadius: double;
@@ -105,139 +107,94 @@ type
     function GetSlewAmount: double;
     function GetSlewMode: ESlewMode;
     function GetSlewFactor: double;
-    procedure SetIsSlewing(const newIsSlewing: boolean);
-    procedure SetDistanceToStartOfSlew(const newDistance: double);
-    procedure SetSlewLength(const newLength: double);
-    procedure SetSlewAmount(const newAmount: double);
-    procedure SetSlewMode(const newMode: ESlewMode);
-    procedure SetSlewFactor(const newFactor: double);
+
+
+    //# genGetSetDeclarations
+    procedure SetFixedRadius(const AValue: Double);
+    procedure SetTransitionStartRadius(const AValue: Double);
+    procedure SetTransitionEndRadius(const AValue: Double);
+    procedure SetDistanceToTransition(const AValue: Double);
+    procedure SetTransitionLength(const AValue: Double);
+    procedure SetIsSpiral(const AValue: Boolean);
+    procedure SetIsSlewing(const AValue: Boolean);
+    procedure SetDistanceToStartOfSlew(const AValue: Double);
+    procedure SetSlewLength(const AValue: Double);
+    procedure SetSlewAmount(const AValue: Double);
+    procedure SetSlewMode(const AValue: ESlewMode);
+    procedure SetSlewFactor(const AValue: Double);
+    //# endGenGetSetDeclarations
+
+    function StrToESlewMode(AValue: String): ESlewMode;
+    procedure SaveYamlESlewMode(AEmitter: TYamlEmitter; const AName: String; AValue: ESlewMode);
 
   protected
     property curveCalculator: TCurveCalculator read FCurveCalculator;
 
   public
-    constructor Create;
+    constructor Create(AParent: TOTPersistent; AOID: TOID = 0); override;
+    destructor Destroy; override;
 
-    property fixedRadius: double Read GetFixedRadius Write SetFixedRadius;
-    property transitionStartRadius: double Read GetTransitionStartRadius Write SetTransitionStartRadius;
-    property transitionEndRadius: double Read GetTransitionEndRadius Write SetTransitionEndRadius;
-    property distanceToTransition: double Read GetDistanceToTransition
-      Write SetDistanceToTransition;
-    property transitionLength: double Read GetTransitionLength Write SetTransitionLength;
-    property isSpiral: boolean Read GetIsSpiral Write SetIsSpiral;
+    //# genPublicDeclarations
+    //# endGenPublicDeclarations
 
-    property isSlewing: boolean Read GetIsSlewing Write SetIsSlewing;
-    property distanceToStartOfSlew: double Read GetDistanceToStartOfSlew
-      Write SetDistanceToStartOfSlew;
-    property slewLength: double Read GetSlewLength Write SetSlewLength;
-    property slewAmount: double Read GetSlewAmount Write SetSlewAmount;
-    property slewMode: ESlewMode Read GetSlewMode Write SetSlewMode;
-    property slewFactor: double Read GetSlewFactor Write SetSlewFactor;
+    procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
+    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
 
-    procedure CopyFrom(from: TCurve);
+
+    //# genProperty
+    property fixedRadius: Double read FFixedRadius write SetFixedRadius;
+    property transitionStartRadius: Double read FTransitionStartRadius write SetTransitionStartRadius;
+    property transitionEndRadius: Double read FTransitionEndRadius write SetTransitionEndRadius;
+    property distanceToTransition: Double read FDistanceToTransition write SetDistanceToTransition;
+    property transitionLength: Double read FTransitionLength write SetTransitionLength;
+    property isSpiral: Boolean read FIsSpiral write SetIsSpiral;
+    property isSlewing: Boolean read FIsSlewing write SetIsSlewing;
+    property distanceToStartOfSlew: Double read FDistanceToStartOfSlew write SetDistanceToStartOfSlew;
+    property slewLength: Double read FSlewLength write SetSlewLength;
+    property slewAmount: Double read FSlewAmount write SetSlewAmount;
+    property slewMode: ESlewMode read FSlewMode write SetSlewMode;
+    property slewFactor: Double read FSlewFactor write SetSlewFactor;
+    //# endGenProperty
   end;
+
+  TCurveOwningList = class(TOTOwningList<TCurve>);
+  TCurveReferenceList = class(TOTReferenceList<TCurve>);
+
 
 implementation
 
 uses
+  TLoggerUnit,
+  typinfo,
   Math,
   curve_segment_calculator,
   slew_calculator;
 
-//
-// TCurve
-//
-constructor TCurve.Create;
+var
+  log : ILogger;
+
+
+{ TCurve }
+
+constructor TCurve.Create(AParent: TOTPersistent; AOID: TOID);
 begin
-  // default is straight line
-  FModified := True;
-  FFixedRadius := max_rad;
-  FTransitionStartRadius := max_rad;
-  FTransitionEndRadius := max_rad;
-  FDistanceToTransition := 0;
-  FTransitionLength := 100;
-  FIsSpiral := False;
+  inherited Create(AParent, AOID);
+  //# genCreate
+  //# endGenCreate
 end;
 
-procedure TCurve.CopyFrom(from: TCurve);
+destructor TCurve.Destroy;
 begin
-  FFixedRadius := from.fixedRadius;
-  FTransitionStartRadius := from.transitionStartRadius;
-  FTransitionEndRadius := from.transitionEndRadius;
-  FDistanceToTransition := from.distanceToTransition;
-  FTransitionLength := from.transitionLength;
-  FIsSpiral := from.isSpiral;
-
-  FIsSlewing := from.isSlewing;
-  FDistanceToStartOfSlew := from.distanceToStartOfSlew;
-  FSlewLength := from.slewLength;
-  FSlewAmount := from.slewAmount;
-  FSlewMode := from.slewMode;
-  FSlewFactor := from.slewFactor;
-
-  FModified := true;
+  //# genDestroy
+  //# endGenDestroy
+  inherited;
 end;
 
-procedure TCurve.SetFixedRadius(const newRadius: double);
+procedure TCurve.Calculate;
 begin
-  if (newRadius <> FFixedRadius) then begin
-    FModified := True;
-    FFixedRadius := newRadius;
-  end;
-end;
-
-procedure TCurve.SetTransitionStartRadius(const newRadius: double);
-begin
-  if (newRadius <> FTransitionStartRadius) then begin
-    FModified := True;
-    FTransitionStartRadius := newRadius;
-  end;
-end;
-
-procedure TCurve.SetTransitionEndRadius(const newRadius: double);
-begin
-  if (newRadius <> FTransitionEndRadius) then begin
-    FModified := True;
-    FTransitionEndRadius := newRadius;
-  end;
-end;
-
-procedure TCurve.SetDistanceToTransition(const newDistance: double);
-begin
-  if (newDistance <> FDistanceToTransition) then begin
-    FModified := True;
-    FDistanceToTransition := newDistance;
-  end;
-end;
-
-procedure TCurve.SetTransitionLength(const newLength: double);
-begin
-  if (newLength <> FTransitionLength) then begin
-    FModified := True;
-    FTransitionLength := newLength;
-  end;
-end;
-
-procedure TCurve.SetIsSpiral(const newIsSpiral: boolean);
-begin
-  if (newIsSpiral <> FIsSpiral) then begin
-    FModified := True;
-    FIsSpiral := newIsSpiral;
-  end;
-end;
-
-procedure TCurve.UpdateIfModified;
-begin
-  if FModified then begin
-    FModified := False;
-    CreateCurveCalculator;
-  end;
-end;
-
-procedure TCurve.CreateCurveCalculator;
-begin
+  // Add your calculation code here, and cache the results...
   FreeAndNil(FCurveCalculator);
   FCurveCalculator := TCurveSegmentCalculator.Create(self);
 
@@ -246,18 +203,114 @@ begin
   end;
 end;
 
-procedure TCurve.CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
+procedure TCurve.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
 begin
-  UpdateIfModified;
-
-  if Assigned(FCurveCalculator) then
-    FCurveCalculator.CalculateCurveAt(distance, pt, direction, radius)
-  else begin
-    pt.set_xy(NaN, NaN);
-    direction.set_xy(NaN, NaN);
-    radius := NaN;
-  end;
+  //# genRestoreYamlVars
+  if AName = 'fixedRadius' then
+    FFixedRadius := StrToDouble(AValue)
+  else
+  if AName = 'transitionStartRadius' then
+    FTransitionStartRadius := StrToDouble(AValue)
+  else
+  if AName = 'transitionEndRadius' then
+    FTransitionEndRadius := StrToDouble(AValue)
+  else
+  if AName = 'distanceToTransition' then
+    FDistanceToTransition := StrToDouble(AValue)
+  else
+  if AName = 'transitionLength' then
+    FTransitionLength := StrToDouble(AValue)
+  else
+  if AName = 'isSpiral' then
+    FIsSpiral := StrToBoolean(AValue)
+  else
+  if AName = 'isSlewing' then
+    FIsSlewing := StrToBoolean(AValue)
+  else
+  if AName = 'distanceToStartOfSlew' then
+    FDistanceToStartOfSlew := StrToDouble(AValue)
+  else
+  if AName = 'slewLength' then
+    FSlewLength := StrToDouble(AValue)
+  else
+  if AName = 'slewAmount' then
+    FSlewAmount := StrToDouble(AValue)
+  else
+  if AName = 'slewMode' then
+    FSlewMode := StrToESlewMode(AValue)
+  else
+  if AName = 'slewFactor' then
+    FSlewFactor := StrToDouble(AValue)
+  else
+  //# endGenRestoreYamlVars
+    inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
+
+procedure TCurve.RestoreAttributes(AStream : TStream);
+  var
+    i: Integer;
+  begin
+  inherited;
+
+  //# genRestoreVars
+  AStream.ReadBuffer(FFixedRadius, sizeof(Double));
+  AStream.ReadBuffer(FTransitionStartRadius, sizeof(Double));
+  AStream.ReadBuffer(FTransitionEndRadius, sizeof(Double));
+  AStream.ReadBuffer(FDistanceToTransition, sizeof(Double));
+  AStream.ReadBuffer(FTransitionLength, sizeof(Double));
+  AStream.ReadBuffer(FIsSpiral, sizeof(Boolean));
+  AStream.ReadBuffer(FIsSlewing, sizeof(Boolean));
+  AStream.ReadBuffer(FDistanceToStartOfSlew, sizeof(Double));
+  AStream.ReadBuffer(FSlewLength, sizeof(Double));
+  AStream.ReadBuffer(FSlewAmount, sizeof(Double));
+  AStream.ReadBuffer(FSlewMode, sizeof(ESlewMode));
+  AStream.ReadBuffer(FSlewFactor, sizeof(Double));
+  //# endGenRestoreVars
+  end;
+
+procedure TCurve.SaveAttributes(AStream : TStream);
+  var
+    i: Integer;
+  begin
+  inherited;
+
+  //# genSaveVars
+  AStream.WriteBuffer(FFixedRadius, sizeof(Double));
+  AStream.WriteBuffer(FTransitionStartRadius, sizeof(Double));
+  AStream.WriteBuffer(FTransitionEndRadius, sizeof(Double));
+  AStream.WriteBuffer(FDistanceToTransition, sizeof(Double));
+  AStream.WriteBuffer(FTransitionLength, sizeof(Double));
+  AStream.WriteBuffer(FIsSpiral, sizeof(Boolean));
+  AStream.WriteBuffer(FIsSlewing, sizeof(Boolean));
+  AStream.WriteBuffer(FDistanceToStartOfSlew, sizeof(Double));
+  AStream.WriteBuffer(FSlewLength, sizeof(Double));
+  AStream.WriteBuffer(FSlewAmount, sizeof(Double));
+  AStream.WriteBuffer(FSlewMode, sizeof(ESlewMode));
+  AStream.WriteBuffer(FSlewFactor, sizeof(Double));
+  //# endGenSaveVars
+  end;
+  
+procedure TCurve.SaveYamlAttributes(AEmitter : TYamlEmitter);
+  var
+    i: Integer;
+  begin
+  inherited;
+  
+  //# genSaveYamlVars
+  SaveYamlDouble(AEmitter, 'fixedRadius', FFixedRadius);
+  SaveYamlDouble(AEmitter, 'transitionStartRadius', FTransitionStartRadius);
+  SaveYamlDouble(AEmitter, 'transitionEndRadius', FTransitionEndRadius);
+  SaveYamlDouble(AEmitter, 'distanceToTransition', FDistanceToTransition);
+  SaveYamlDouble(AEmitter, 'transitionLength', FTransitionLength);
+  SaveYamlBoolean(AEmitter, 'isSpiral', FIsSpiral);
+  SaveYamlBoolean(AEmitter, 'isSlewing', FIsSlewing);
+  SaveYamlDouble(AEmitter, 'distanceToStartOfSlew', FDistanceToStartOfSlew);
+  SaveYamlDouble(AEmitter, 'slewLength', FSlewLength);
+  SaveYamlDouble(AEmitter, 'slewAmount', FSlewAmount);
+  SaveYamlESlewMode(AEmitter, 'slewMode', FSlewMode);
+  SaveYamlDouble(AEmitter, 'slewFactor', FSlewFactor);
+  //# endGenSaveYamlVars
+  end;
 
 function TCurve.GetIsSpiral: boolean;
 begin
@@ -319,52 +372,145 @@ begin
   Result := FSlewFactor;
 end;
 
-procedure TCurve.SetIsSlewing(const newIsSlewing: boolean);
+//# genGetSetMethods
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetFixedRadius(const AValue: Double);
 begin
-  if FIsSlewing <> newIsSlewing then begin
-    FModified := True;
-    FIsSlewing := newIsSlewing;
+  if AValue <> FFixedRadius then begin
+    SetModified;
+    FFixedRadius := AValue;
   end;
 end;
 
-procedure TCurve.SetDistanceToStartOfSlew(const newDistance: double);
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetTransitionStartRadius(const AValue: Double);
 begin
-  if FDistanceToStartOfSlew <> newDistance then begin
-    FModified := True;
-    FDistanceToStartOfSlew := newDistance;
+  if AValue <> FTransitionStartRadius then begin
+    SetModified;
+    FTransitionStartRadius := AValue;
   end;
 end;
 
-procedure TCurve.SetSlewLength(const newLength: double);
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetTransitionEndRadius(const AValue: Double);
 begin
-  if FSlewLength <> newLength then begin
-    FModified := True;
-    FSlewLength := newLength;
+  if AValue <> FTransitionEndRadius then begin
+    SetModified;
+    FTransitionEndRadius := AValue;
   end;
 end;
 
-procedure TCurve.SetSlewAmount(const newAmount: double);
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetDistanceToTransition(const AValue: Double);
 begin
-  if FSlewAmount <> newAmount then begin
-    FModified := True;
-    FSlewAmount := newAmount;
+  if AValue <> FDistanceToTransition then begin
+    SetModified;
+    FDistanceToTransition := AValue;
   end;
 end;
 
-procedure TCurve.SetSlewMode(const newMode: ESlewMode);
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetTransitionLength(const AValue: Double);
 begin
-  if FSlewMode <> newMode then begin
-    FModified := True;
-    FSlewMode := newMode;
+  if AValue <> FTransitionLength then begin
+    SetModified;
+    FTransitionLength := AValue;
   end;
 end;
 
-procedure TCurve.SetSlewFactor(const newFactor: double);
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetIsSpiral(const AValue: Boolean);
 begin
-  if FSlewFactor <> newFactor then begin
-    FModified := True;
-    FSlewFactor := newFactor;
+  if AValue <> FIsSpiral then begin
+    SetModified;
+    FIsSpiral := AValue;
   end;
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetIsSlewing(const AValue: Boolean);
+begin
+  if AValue <> FIsSlewing then begin
+    SetModified;
+    FIsSlewing := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetDistanceToStartOfSlew(const AValue: Double);
+begin
+  if AValue <> FDistanceToStartOfSlew then begin
+    SetModified;
+    FDistanceToStartOfSlew := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetSlewLength(const AValue: Double);
+begin
+  if AValue <> FSlewLength then begin
+    SetModified;
+    FSlewLength := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetSlewAmount(const AValue: Double);
+begin
+  if AValue <> FSlewAmount then begin
+    SetModified;
+    FSlewAmount := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetSlewMode(const AValue: ESlewMode);
+begin
+  if AValue <> FSlewMode then begin
+    SetModified;
+    FSlewMode := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TCurve.SetSlewFactor(const AValue: Double);
+begin
+  if AValue <> FSlewFactor then begin
+    SetModified;
+    FSlewFactor := AValue;
+  end;
+end;
+
+//# endGenGetSetMethods
+
+function TCurve.StrToESlewMode(AValue: String): ESlewMode;
+begin
+  Result := ESlewMode(GetEnumValue(TypeInfo(ESlewMode), AValue));
+end;
+
+procedure TCurve.SaveYamlESlewMode(AEmitter: TYamlEmitter; const AName: String; AValue: ESlewMode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(ESlewMode), ord(AValue)));
+end;
+
+procedure TCurve.CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
+begin
+  CheckCalculated;
+
+  if Assigned(FCurveCalculator) then
+    FCurveCalculator.CalculateCurveAt(distance, pt, direction, radius)
+  else begin
+    pt.set_xy(NaN, NaN);
+    direction.set_xy(NaN, NaN);
+    radius := NaN;
+  end;
+
+end;
+
+initialization
+  TCurve.RegisterClass;
+  TCurveOwningList.RegisterClass;
+  TCurveReferenceList.RegisterClass;
+
+  //log := Logger.GetInstance('TCurve');
 end.

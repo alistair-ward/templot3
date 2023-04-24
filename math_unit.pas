@@ -59,7 +59,9 @@ uses
   dummy_vehicle,
   path_interface,
   rail_data_unit,
-  template, mark_unit,
+  template_records,
+  Template,
+  mark_unit,
   curve_parameters_interface;
 
 type
@@ -1210,8 +1212,6 @@ procedure set_pad_start_colours(change_flag: boolean);
 
 function calcturnout: boolean;             // calc all the turnout dimensions.
 
-procedure update_rollback_register;       // maintain the roll-back register.
-
 procedure enable_peg_positions;  // enable/disable the peg options (for Ctrl-# KB shortcuts).
 
 procedure do_info_colours; // indicate if control template visible and accessible...
@@ -1830,9 +1830,6 @@ begin
   else begin
     gocalc(2, 0);
 
-    if (do_rollback = True) and (pad_form.Active = True) then
-      update_rollback_register;                 // maintain the roll-back register.
-    do_rollback := True;                                // default setting for next call.
   end;
 end;
 //_______________________________________________________________________________________
@@ -20621,10 +20618,7 @@ function make_transition_from_current(control_loc, bgnd_loc, trans_hand: integer
 
 var
   temp, dummy, dummy1, dummy2: double;
-  savedCurrent: TTemplate;
   saved_notch: Tnotch;
-  saved_name_str: string;
-  saved_memo_str: string;
 
   got_transition: boolean;
 
@@ -20645,10 +20639,6 @@ var
       delete_keep(False, False);          // delete it.
     end;
 
-    copy_keep(savedCurrent);                    // retrieve saved current.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
   end;
   ////////////////////////////////////////////////////////////////////
@@ -20664,12 +20654,6 @@ begin
   // -------- ready to go...
 
   try
-    savedCurrent := TTemplate.Create('');
-    fill_kd(savedCurrent);
-    // save control template in case of error...
-    saved_name_str := current_name_str;
-    saved_memo_str := current_memo_str;
-
     //----------------
 
     if controlTemplate.curve.isSpiral      // 19-09-2015  212a this is a kludge bug-fix...
@@ -21054,7 +21038,6 @@ begin
     clicked_keep_index := -1;          // so can popup again.
     do_rollback := True;
 
-    savedCurrent.Free;
     show_and_redraw(True, True);                       // in case copy caused a current hide.
   end;//try
 end;
@@ -29154,9 +29137,6 @@ end;
 
 procedure make_separate_approach;
 
-var
-  currentTemplate: TTemplate;
-
 begin
 
   if (plain_track) then begin
@@ -29195,10 +29175,7 @@ begin
   if not check_control_template_is_valid('split') = False then
     EXIT;  // 0.93.a  zero length
 
-  currentTemplate := TTemplate.Create('');
   try
-    fill_kd(currentTemplate);                              // first save the current.
-
     crop_approach;       // then crop all approach.
     gocalc(0, 0);         // peg calcs.
 
@@ -29215,14 +29192,11 @@ begin
 
     store_and_background(False, False); // keep it and copy to background.
     if not keep_added then begin
-      copy_keep(currentTemplate);                  // restore original.
       show_and_redraw(True, False);
       EXIT;                                // he cancelled.
     end;
 
     // now change previous current to plain track...
-
-    copy_keep(currentTemplate);      // get it again.
 
     retain_on_make;    // do blanking, shoves, diffs, crossing entry straight, cancel platforms  213a
 
@@ -29249,7 +29223,6 @@ begin
     rail_options_form.restore_all_button.Click;  // 211c
 
   finally
-    currentTemplate.Free;
     show_and_redraw(True, True);                 // in case copy caused a current hide.
   end;//try
 end;
@@ -29277,7 +29250,6 @@ var
   dummy: double;
   i: integer;
   temp_str: string;
-  saveCurrent: TTemplate;
 
   sp, way_ft, way_ins: double;
   ft_str, ins_str, way_str, sp_str: string;
@@ -29396,11 +29368,7 @@ begin
       EXIT;
   end;
 
-  saveCurrent := TTemplate.Create('');
-
   try
-    fill_kd(saveCurrent);                              // in case he wants to cancel.
-
     //if adjacent_lines_code=1 then adjacent_lines_code:=0;   // 0.82.d  cancel any adjacent tracks.
 
     do_rollback := False;
@@ -29426,7 +29394,6 @@ begin
 
     if keep_added = False          // he cancelled because still on T-55, or no memory for it.
     then begin
-      copy_keep(saveCurrent);    // retrieve previous control template.
       // (this is OK even if gauge change on T-55, because
       //  gauge form is not showing Modal, we come back here first.)
       redraw_pad(True, False);
@@ -29525,7 +29492,6 @@ begin
               delete_keep(False, False);
               // then delete the current keep.
             end;
-            copy_keep(saveCurrent);   // retrieve previous control template.
             redraw(True);
           end;
         end;//case
@@ -29535,7 +29501,6 @@ begin
     Result := True;
 
   finally
-    saveCurrent.Free;
   end;//try
 end;
 //_____________________________________________________________________________________
@@ -29827,7 +29792,6 @@ var
   cos_new_hdk_inner, cos_new_k3: double;
   dummy: double;
   i: integer;
-  saveCurrent: TTemplate;
   saved_notch: Tnotch;
 
   old_trans_end, old_slew_end, old_rad_at_txp, new_rad_at_txp: double;  // 0.97.a
@@ -29976,12 +29940,7 @@ begin
     EXIT;  // 0.93.a  zero length
 
   saved_notch := get_current_notch;     // save his current notch position.
-
-  saveCurrent := TTemplate.Create('');
-
   try
-    fill_kd(saveCurrent);                              // in case he wants to cancel.
-
     do_rollback := False;
     pad_form.peg_on_txp_menu_entry.Click;   // put the peg on the mid-point.
 
@@ -30091,9 +30050,7 @@ begin
     gocalc(0, 0);                               // so can centralize pad.
 
   finally
-    saveCurrent.Free;
     set_current_notch(saved_notch);                  // restore his notch.
-
     pad_form.pad_on_peg_menu_entry.Click;            // centralize pad on it.
     show_and_redraw(True, True);
   end;//try
@@ -30189,45 +30146,12 @@ begin
 end;
 //__________________________________________________________________________________________
 
-procedure update_rollback_register;    // maintain the roll-back register.
-// undo_index always points to last-entered data, i.e. matching the control template.
-
-begin
-  if turnoutx = 0 then
-    EXIT;   // 0.93.a  don't put invalid (zero-length) template in register.
-
-  Inc(undo_index);                                 // roll forward to next slot.
-  if undo_index > undo_c then
-    undo_index := 0;
-  fill_kd(rollback_reg[undo_index].rollback_info); // put control template in slot.
-
-  rollback_reg[undo_index].rollback_name_str := current_name_str;   // 0.93.a
-  rollback_reg[undo_index].rollback_memo_str := current_memo_str;   // ...
-
-  rollback_reg[undo_index].valid_flag := True;       // and flag it valid.
-end;
-//_______________________________________________________________________________________
-
 procedure init_rollbacks;    // init all roll-backs and parking bays
 
 var
   i: integer;
 
 begin
-  for i := 0 to undo_c do begin
-    rollback_reg[i].valid_flag := False;        // initial flag no valid content.
-
-    rollback_reg[i].rollback_name_str := '';    // 0.93.a
-    rollback_reg[i].rollback_memo_str := '';    // ...
-
-    rollback_reg[i].rollback_info := TTemplate.Create('');
-  end;
-
-  undo_index := 0;
-  pad_form.undo_changes_menu_entry.Enabled := True;
-  pad_form.redo_changes_menu_entry.Enabled := True;
-
-
   for i := 0 to notch_c do begin     // also init the notch rollback...
     undo_notch[i].notch_x := 0;      // x
     undo_notch[i].notch_y := 0;      // y

@@ -214,7 +214,7 @@ uses
   alert_unit,
   action_unit,
   rail_data_unit,
-  template, mark_unit{ OT-FIRST , file_viewer};
+  template_records, mark_unit{ OT-FIRST , file_viewer};
 
 {$R *.lfm}
 //_________________________________________________________________________________________

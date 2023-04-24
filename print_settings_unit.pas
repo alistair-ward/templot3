@@ -194,7 +194,7 @@ implementation
 {$R *.lfm}
 
 uses control_room, pad_unit, math_unit, keep_select, help_sheet, shove_timber, wait_message,
-  shoved_timber, template;
+  shoved_timber, template_records, template, OTUndoRedoManager;
 
 //______________________________________________________________________________
 
@@ -336,10 +336,8 @@ begin
   pad_form.hide_bgnd_keeps_menu_entry.Checked := True;
 
   // save the current control template data.
-  savedControl := TTemplate.Create('');
+  UndoRedoManager.SetMark('kludge');
   try
-    fill_kd(savedControl);
-
     n_max := keeps_list.Count - 1;
 
     for n := 0 to n_max do begin
@@ -424,8 +422,7 @@ begin
     pad_form.show_bgnd_keeps_menu_entry.Checked := save_bgnd_option;   // restore, radio item.
 
     // reset current control template
-    copy_keep(savedControl);
-    savedControl.Free;
+    UndoRedoManager.Rollback;
     Screen.Cursor := crDefault;
 
   end;//try

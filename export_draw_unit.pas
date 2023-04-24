@@ -63,7 +63,7 @@ implementation
 uses
   control_room, pad_unit, math_unit, export_unit, print_settings_unit,
   preview_unit, print_unit, background_shapes, bgnd_unit,
-  rail_data_unit, mark_unit, template;
+  rail_data_unit, mark_unit, template_records;
 
 
 //______________________________________________________________________________

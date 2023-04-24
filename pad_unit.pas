@@ -47,7 +47,8 @@ uses
   dummy_vehicle,
   rail_data_unit,
   mark_unit,
-  template
+  template_records,
+  Template
   { OT-FIRST ,}{ OT-FIRST ReadHTML,}{ OT-FIRST framview}{,
   OleCtnrs, OleCtrls, SHDocVw};
 
@@ -3297,7 +3298,6 @@ const
   railen_c = 11;
   //  space for 12 different rail length settings (including custom).
 
-  undo_c = 79;                       //  80 slots 0-79 in the roll-back register.
   notch_c = 11;                      //  12 slots to rollback the notch.
 
   html_back_c = 7;                   //  8 slots in html_back history. // 0.91
@@ -3359,13 +3359,6 @@ type
   end;//class
 
 
-  TRollback = record
-    valid_flag: boolean;
-    rollback_info: TTemplate;
-    rollback_name_str: string;       // added 0.93.a
-    rollback_memo_str: string;       // ...
-  end;
-
   TRingCheckpoint = record
     x: integer;
     y: integer;
@@ -3377,8 +3370,6 @@ type
 
 var
   controlTemplate: TTemplate;
-
-  rollback_reg: array[0..undo_c] of TRollback;          // roll-back register.
 
   parking_bay: array[0..2] of TTemplate;            // parking bay.
 
@@ -11971,6 +11962,7 @@ begin
     EXIT;
   end;
 
+(*
   if (turnoutx = 0) and (snap_to_zero_menu_entry.Tag = 1) then begin
     snap_to_zero_menu_entry.Tag := 0;
     copy_keep(invalidated_zero_save);    // retrieve previous control template
@@ -11989,7 +11981,7 @@ begin
 
     turnout_i := 1;            // length locked at turnoutx.
   end;
-
+*)
   show_and_redraw(True, True);   // make the red Z visible.
 end;
 //______________________________________________________________________________
@@ -15004,7 +14996,6 @@ end;
 procedure Tpad_form.make_separate_exit_menu_entryClick(Sender: TObject);
 
 var
-  currentTemplate: TTemplate;
   newTemplate: TTemplate;
 
 begin
@@ -15017,7 +15008,6 @@ begin
     EXIT;
   end;
 
-
   if retpar_i = 1  // 0.82.a  not for a parallel crossing...
   then begin
     alert(6, '    make  separate  exit  track  -  parallel  V-crossing',
@@ -15027,7 +15017,6 @@ begin
       '', '', '', '', 'cancel', '', 0);
     EXIT;
   end;
-
 
   if turnoutx <= (mvjpx + minfp) then begin
     alert(6, '    no  exit  track',
@@ -15050,11 +15039,8 @@ begin
   if check_control_template_is_valid('split') = False then
     EXIT;  // 0.93.a  zero length
 
-  currentTemplate := TTemplate.Create('');
-  newTemplate := TTemplate.Create('');
+  newTemplate := TTemplate.Create(nil);
   try
-    fill_kd(currentTemplate);  // first save the current.
-
     turnoutx := mvjpx;   // crop all exit track.
     turnout_i := 1;      // length locked at turnoutx.
 
@@ -15080,15 +15066,11 @@ begin
     do_rollback := False;
     store_and_background(False, False);  // keep it and copy to background.
     if keep_added = False then begin
-      copy_keep(currentTemplate);           // restore original.
       show_and_redraw(True, False);
       EXIT;                         // he cancelled.
     end;
 
     // now change previous current to plain track...
-
-    copy_keep(currentTemplate);                // get it again.
-
     retain_on_make;    // do blanking, shoves, diffs, crossing entry straight, cancel platforms  213a
 
     turnoutx := turnoutx - mvjpx;          // only the exit track wanted.
@@ -15121,8 +15103,6 @@ begin
     rail_options_form.restore_all_button.Click;  // 211c
 
   finally
-    currentTemplate.Free;
-    newTemplate.Free;
     show_and_redraw(True, True);                 // in case copy caused a current hide.
   end;//try
 end;
@@ -15131,7 +15111,6 @@ end;
 procedure Tpad_form.make_split_at_peg_menu_entryClick(Sender: TObject);
 
 var
-  currentTemplate: TTemplate;
   new_len: double;
 
 begin
@@ -15174,10 +15153,7 @@ begin
 
   new_len := turnoutx - pegx;    // save for the new curent template
 
-  currentTemplate := TTemplate.Create('');
   try
-    fill_kd(currentTemplate);                              // first save the current.
-
     turnoutx := pegx;                       // shorten existing to peg
     xorg := turnoutx;
 
@@ -15191,15 +15167,11 @@ begin
 
     store_and_background(False, False);   // keep it and copy to background.
     if keep_added = False then begin
-      copy_keep(currentTemplate);            // restore original.
       show_and_redraw(True, False);
       EXIT;                          // he cancelled.
     end;
 
     // now change previous current...
-
-    copy_keep(currentTemplate);                // get it again.
-
     retain_on_make;    // do blanking, shoves, diffs, crossing entry straight, cancel platforms  213a
 
     gocalc(0, 0);            // init peg calcs.
@@ -15226,7 +15198,6 @@ begin
     end;
 
   finally
-    currentTemplate.Free;
     show_and_redraw(True, True);                 // in case copy caused a current hide.
   end;//try
 end;
@@ -15746,30 +15717,9 @@ var
   n: integer;
 
 begin
-  // first check previous slot contains valid data..
-
-  if turnoutx = 0 then
-    n := undo_index     // 0.93.a invalidated templates are not in the register
-  else
-    n := undo_index - 1;
-
-  if n < 0 then
-    n := undo_c;
-  if rollback_reg[n].valid_flag = False then
-    EXIT;
-
-  if turnoutx <> 0 then
-    Dec(undo_index);         // if 0.93.a, ok, roll back to previous slot.
-
-  if undo_index < 0 then
-    undo_index := undo_c;
-
-  copy_keep(rollback_reg[undo_index].rollback_info); // retrieve previous entry.
-
-  // 0.93.a ...
-
-  current_name_str := rollback_reg[undo_index].rollback_name_str;
-  current_memo_str := rollback_reg[undo_index].rollback_memo_str;
+  //
+  // UndoRedoManager.Undo;
+  //
   info_form.ref_name_label.Caption := current_name_str;
 
   // flag this is a undo changes redraw (no rollback)..
@@ -15784,29 +15734,9 @@ var
   n: integer;
 
 begin
-  // first check previous slot contains valid data..
-
-  if turnoutx = 0 then
-    n := undo_index     // 0.93.a invalidated templates are not in the register
-  else
-    n := undo_index + 1;
-
-  if n > undo_c then
-    n := 0;
-  if rollback_reg[n].valid_flag = False then
-    EXIT;
-
-  if turnoutx <> 0 then
-    Inc(undo_index);        // ok, roll forward to next slot.
-  if undo_index > undo_c then
-    undo_index := 0;
-
-  copy_keep(rollback_reg[undo_index].rollback_info);   // retrieve next entry.
-
-  // 0.93.a ...
-
-  current_name_str := rollback_reg[undo_index].rollback_name_str;
-  current_memo_str := rollback_reg[undo_index].rollback_memo_str;
+  //
+  // UndoRedoManager.Redo
+  //
   info_form.ref_name_label.Caption := current_name_str;
 
   // flag this is a redo changes redraw (no rollback)..
@@ -16906,9 +16836,6 @@ procedure Tpad_form.duplicate_group_menu_entryClick(Sender: TObject);
 
 var
   n, n_max: integer;
-  savedCurrent: TTemplate;
-  saved_name_str: string;
-  saved_current_memo_str: string;
 
   i: integer;
 
@@ -16959,11 +16886,6 @@ begin
     turnout_i := 1;
     // length locked at turnoutx.  so that plain track or approach and exit tracks can be drawn.
 
-    savedCurrent := TTemplate.Create('');
-    fill_kd(savedCurrent);                              // save control template for restore.
-    saved_name_str := current_name_str;
-    saved_current_memo_str := current_memo_str;
-
     n_max := keeps_list.Count - 1;  // Count will change as more templates added.
 
     for n := 0 to n_max do begin
@@ -16995,13 +16917,7 @@ begin
     end;//next n
 
   finally
-    copy_keep(savedCurrent);                 // restore his control template.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_current_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
-
-    savedCurrent.Free;
 
     save_done := False;
     backup_wanted := True;
@@ -18474,24 +18390,13 @@ begin
     turnout_i := 1;
     // length locked at turnoutx.  so that plain track or approach and exit tracks can be drawn.
 
-    savedCurrent := TTemplate.Create('');
-    fill_kd(savedCurrent);                              // save control template for restore.
-    saved_name_str := current_name_str;
-    saved_current_memo_str := current_memo_str;
-
     n := clicked_keep_index;
 
     list_position := n;                                 // make it current in the keeps box.
     copy_keep_to_current(False, False, False, False);    // copy to pad.
     store_unused(False, False);
   finally
-    copy_keep(savedCurrent);                 // restore his control template.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_current_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
-
-    savedCurrent.Free;
 
     save_done := False;
     backup_wanted := True;
@@ -27930,7 +27835,7 @@ end;
 //______________________________________________________________________________
 
 initialization
-  controlTemplate := TTemplate.Create('');
+  controlTemplate := TTemplate.Create(nil);
 
 finalization
   controlTemplate.Free;

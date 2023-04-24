@@ -189,6 +189,7 @@ uses
   curve,
   rail_data_unit,
   mark_unit,
+  template_records,
   template;
 
 const

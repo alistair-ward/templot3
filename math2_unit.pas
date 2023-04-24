@@ -40,7 +40,7 @@ uses
   Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, MaskEdit, FileCtrl, Math,
   pad_unit,
-  template;      //  need Tpex declaration in this part for parameters to routines.
+  template_records;      //  need Tpex declaration in this part for parameters to routines.
 
 function do_notch_on_intersection(making_diamond, move_notch: boolean;
   rail_offset_control, rail_offset_bgnd: integer; top_str, next_str: string): boolean;
@@ -365,12 +365,7 @@ function notch_on_intersection(move_notch: boolean;
   // move_notch=False means here for calcs only, no visual change
 
 var
-  savedCurrent: TTemplate;
-
   new_notch_data: Tnotch;
-
-  saved_name_str: string;
-  saved_memo_str: string;
 
   x1, y1, r1: double;
   x2, y2, r2: double;
@@ -385,10 +380,6 @@ var
   procedure restore_current;
 
   begin
-    copy_keep(savedCurrent);                    // retrieve saved current.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
   end;
   ////////////////////////////////////////////////////////////////////
@@ -426,11 +417,6 @@ begin
   end;
 
   // save the control ...
-
-  savedCurrent := TTemplate.Create('');
-  fill_kd(savedCurrent);                              // save control template
-  saved_name_str := current_name_str;
-  saved_memo_str := current_memo_str;
 
   try   // finally
 
@@ -527,8 +513,7 @@ begin
     end;//try
 
   finally
-    restore_current;                                  // restore the original control
-    savedCurrent.Free;
+    restore_current;
   end;//try
 end;
 //______________________________________________________________________________
@@ -807,11 +792,6 @@ function make_diamond_crossing_at_intersection: boolean;
 
 var
   way: integer;  // 1 = similar curvature, -1 = opposed curvature
-
-  savedCurrent: TTemplate;
-  saved_name_str: string;
-  saved_memo_str: string;
-
 
   //////////////////////////////////////////////////////////////////////////
 
@@ -1103,21 +1083,12 @@ var
   procedure restore_current;
 
   begin
-    copy_keep(savedCurrent);                    // retrieve saved current.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_memo_str;
-
     info_form.ref_name_label.Caption := current_name_str;
   end;
   //////////////////////////////////////////////////////////////////////////
 
 begin
   Result := False; // init fail result
-
-  savedCurrent := TTemplate.Create('');
-  fill_kd(savedCurrent);                              // save control template
-  saved_name_str := current_name_str;
-  saved_memo_str := current_memo_str;
 
   try
     if do_notch_on_intersection(True, True, 0, 0,
@@ -1144,7 +1115,6 @@ begin
     redraw(True);
 
   finally
-    savedCurrent.Free;
   end;//try
 end;
 //______________________________________________________________________________

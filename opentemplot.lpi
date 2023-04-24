@@ -21,6 +21,7 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
+      <BuildNr Value="1"/>
       <Language Value="0809"/>
       <StringTable InternalName="OpenTemplot" LegalCopyright="(c) OpenTemplot Contributors 2019" ProductName="OpenTemplot" ProductVersion="0.0.dev"/>
     </VersionInfo>
@@ -133,7 +134,9 @@
       <Unit13>
         <Filename Value="gauge_unit.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="gauge_form"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit13>
       <Unit14>
         <Filename Value="metric_unit.pas"/>
@@ -529,6 +532,7 @@
       <Unit90>
         <Filename Value="model\curve\curve.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Curve"/>
       </Unit90>
       <Unit91>
         <Filename Value="model\curve\curve_calculator.pas"/>
@@ -563,7 +567,7 @@
         <IsPartOfProject Value="True"/>
       </Unit98>
       <Unit99>
-        <Filename Value="model\template.pas"/>
+        <Filename Value="model\template_records.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit99>
       <Unit100>
@@ -598,31 +602,32 @@
         <IsPartOfProject Value="True"/>
       </Unit106>
       <Unit107>
-        <Filename Value="box3_file_unit.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit107>
-      <Unit108>
         <Filename Value="model\switchinfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="SwitchInfo"/>
-      </Unit108>
-      <Unit109>
+      </Unit107>
+      <Unit108>
         <Filename Value="otpersist\otpersistent.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="OTPersistent"/>
-      </Unit109>
-      <Unit110>
+      </Unit108>
+      <Unit109>
         <Filename Value="submodules\otYaml\src\otYaml.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit110>
-      <Unit111>
+      </Unit109>
+      <Unit110>
         <Filename Value="submodules\otYaml\src\otyamlemitter.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="otYamlEmitter"/>
-      </Unit111>
-      <Unit112>
+      </Unit110>
+      <Unit111>
         <Filename Value="submodules\otYaml\src\otyamlparser.pas"/>
         <IsPartOfProject Value="True"/>
+      </Unit111>
+      <Unit112>
+        <Filename Value="model\template.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Template"/>
       </Unit112>
     </Units>
   </ProjectOptions>

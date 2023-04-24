@@ -39,7 +39,8 @@ interface
 uses
   Classes,
   SysUtils,
-  template;
+  template_records,
+  Template;
 
 // 290a - these type declarations moved into the interface for mecbox_unit
 
@@ -138,8 +139,7 @@ uses
   math_unit,
   pad_unit,
   shoved_timber,
-  wait_message,
-  box3_file_unit;
+  wait_message;
 
 
 //________________________________________________________________________________________
@@ -166,8 +166,8 @@ var
 
   save_bw: boolean; // 0.93.a
 
-  templatesToSave: TTemplateList;
-  gridInfo: TGridInfo;
+  templatesToSave: TTemplateReferenceList;
+  //gridInfo: TGridInfo;
 
   /////////////////////////////////////////////////////////////
 
@@ -405,12 +405,13 @@ begin
         Application.ProcessMessages;
       // so let the form repaint (if not called from quit_alert).
 
+      (*
       gridInfo.unitsCode := grid_labels_code_i;
       gridInfo.spaceX := grid_spacex;
       gridInfo.spaceY := grid_spacey;
-
+      *)
       // create a non-owning list of templates that we want to save
-      templatesToSave := TTemplateList.Create(False);
+      templatesToSave := TTemplateReferenceList.Create(nil);
       try
         for i := 0 to keeps_list.Count - 1 do begin
           // 0.94.a  fb_kludge templates are created on output/printing, and destroyed afterwards. Don't save any remaining..
@@ -439,10 +440,12 @@ begin
         end;
 
         try
+          (*
           SaveBox3(templatesToSave, save_option, save_done, box_str,
             box_project_title_str, gridInfo);
+          *)
         except
-          on ExSaveBox do begin
+          on {ExSaveBox} Exception do begin
             if save_option = eSO_Normal then
               file_error(box_str);
             Result := False;
@@ -521,17 +524,11 @@ var
   saved_cursor: TCursor;
   restored_save_done: boolean;
   project_title: string;
-  grid_info: TGridInfo;
-  loaded_templates: TTemplateList;
-
-  savedControl: TTemplate;
-  saved_notch: Tnotch;
-
-  saved_control_name_str: string;
-  saved_control_memo_str: string;
+  //grid_info: TGridInfo;
+  loaded_templates: TTemplateOwningList;
 
   loadDialog: TOpenDialog;
-  backupRestoreOptions: TBackupRestoreOptions;
+  //backupRestoreOptions: TBackupRestoreOptions;
   t: TTemplate;
   waitMessage: IAutoWaitMessage;
 
@@ -633,11 +630,6 @@ begin
   end;
 
   // added 0.78.d 19-02-03...
-  savedControl := TTemplate.Create('');
-  fill_kd(savedControl);                             // save control template.
-  saved_control_name_str := current_name_str;
-  saved_control_memo_str := current_memo_str;
-
   resave_needed := False;                         // init.
   restored_save_done := False;                    // init.
   loaded_version := 50000;                        // init for lowest template version in the file.
@@ -662,6 +654,7 @@ begin
 
 
       if load_options = eLB_Backup then begin
+        (*
         try
           backupRestoreOptions := LoadBox3BackupRestoreOptions(box_str);
         except
@@ -727,7 +720,7 @@ begin
 
           end;// ask startup pref
         end;//not abnormal termination
-
+        *)
       end;
 
       waitMessage := TWaitForm.ShowWaitMessage('loading  templates ...');
@@ -735,10 +728,10 @@ begin
         Application.ProcessMessages;           // let the wait form fully paint.
 
       try
-        LoadBox3(box_str, project_title, grid_info, loaded_templates);
+        //LoadBox3(box_str, project_title, grid_info, loaded_templates);
 
       except
-        on ExLoadBox do begin
+        on {ExLoadBox} Exception do begin
           if load_options <> eLB_Backup then
             file_error(box_str);
           Exit;
@@ -796,6 +789,7 @@ begin
         //     0.79.a 20-05-06  -- saved grid info -- read from last template only...
         //     0.91.d -- read these only if prefs not being used on startup.
 
+        (*
         if (grid_info.unitsCode <> 0) and (not user_prefs_in_use)
         // 0.79 file or later --- change grid to as loaded...
         then begin
@@ -809,7 +803,7 @@ begin
             update_ruler_div;   // 0.93.a ruler as grid option
 
         end;// if 0.79 or later
-
+        *)
         save_done := not resave_needed;        // this boxful matches file.
         if load_options <> eLB_Backup then begin
           keep_form.box_file_label.Caption := ' last reloaded from :  ' + loaded_str;
@@ -895,12 +889,7 @@ begin
       Screen.Cursor := saved_cursor;
       current_state(-1);                   // tidy up after any error exits.
 
-      copy_keep(savedControl);            // retrieve saved current...
-      current_name_str := saved_control_name_str;
-      current_memo_str := saved_control_memo_str;
       info_form.ref_name_label.Caption := current_name_str;
-
-      savedControl.Free;
 
     end;//try
 

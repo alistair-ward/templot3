@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="55">
+    <Units Count="72">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -168,6 +168,7 @@
       <Unit34>
         <Filename Value="model\curve\curve.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Curve"/>
       </Unit34>
       <Unit35>
         <Filename Value="model\curve\curve_calculator.pas"/>
@@ -249,6 +250,90 @@
         <Filename Value="test\shoved_timber_test.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit54>
+      <Unit55>
+        <Filename Value="otpersist\otoidmanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OTOIDManager"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="otpersist\otpersistent.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OTPersistent"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="otpersist\otpersistentlist.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OTPersistentList"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="otpersist\otundoredomanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OTUndoRedoManager"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="submodules\otYaml\src\murmur3.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Murmur3"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="submodules\otYaml\src\otqueue.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otQueue"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="submodules\otYaml\src\otstack.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otStack"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="submodules\otYaml\src\otYaml.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="submodules\otYaml\src\otyamlchars.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlChars"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="submodules\otYaml\src\otyamldom.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlDOM"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="submodules\otYaml\src\otyamlemitter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlEmitter"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="submodules\otYaml\src\otyamlevent.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlEvent"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="submodules\otYaml\src\otyamlparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlParser"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="submodules\otYaml\src\otyamlreader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlReader"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="submodules\otYaml\src\otyamlscanner.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlScanner"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="submodules\otYaml\src\otyamltoken.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlToken"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="submodules\otYaml\src\otyamlwriter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlWriter"/>
+      </Unit71>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -259,7 +344,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="model;test;log4delphi\util;log4delphi;model\curve;test\curve;t2box_reader"/>
+      <OtherUnitFiles Value="model;test;log4delphi\util;log4delphi;model\curve;test\curve;t2box_reader;otpersist;submodules\otYaml\src"/>
       <UnitOutputDirectory Value="libtest\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
   </CompilerOptions>

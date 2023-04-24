@@ -42,7 +42,8 @@ uses
   Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, Buttons, Menus, ExtCtrls, ComCtrls, FileCtrl, { OT-FIRST, Psock, NMHttp}
   shoved_timber,
-  template;
+  template_records,
+  Template;
 
 type
 
@@ -277,7 +278,6 @@ type
     procedure reload_buttonClick(Sender: TObject);
     procedure clear_templates_menu_entryClick(Sender: TObject);
     procedure clear_shapes_menu_entryClick(Sender: TObject);
-    procedure keeps_list_change(Sender: TObject);
     procedure click_move_click_menu_entryClick(Sender: TObject);
     procedure button_down_menu_entryClick(Sender: TObject);
     procedure either_action_menu_entryClick(Sender: TObject);
@@ -445,7 +445,7 @@ var
 
   html_path_str: string = '';        // for html viewer. 0.91
 
-  keeps_list: TTemplateList;                    // 8-2-99
+  keeps_list: TTemplateOwningList;                    // 8-2-99
 
   tag_list: TStringList;                  // 206b
 
@@ -1444,10 +1444,6 @@ begin
       else begin                    // normal redraw on changed data.
         gocalc(2, 0);
 
-        if (do_rollback = True) and (pad_form.Active = True) then
-          update_rollback_register;   // maintain the roll-back register.
-        do_rollback := True;
-        // default for next call.                                      // only one redraw per undo.
       end;
       data_changed := False;    //  not again until flagchange (also set False in gocalc).
 
@@ -1897,8 +1893,6 @@ begin
     if FileExists(pbo_str) = False then
       first_time_here_label.Show;  // 0.97.b  // beginner first few times (no prior-previous)
 
-    init_rollbacks;         // also inits notch rollback and parking bays.
-
     if (FileExists(ebk1_str) = True) and (FileExists(ebk2_str) = True)
     // faulty backup (e.g. power failure while writing disk?)
     then begin
@@ -1963,13 +1957,12 @@ begin
     end;
 
 
-    update_rollback_register;   // so can roll back to the T-55 startup.
-
+(*
     for i := 0 to 2 do begin
       parking_bay[i] := TTemplate.Create('');
       fill_kd(parking_bay[i]);   // ditto initial fill all parking bays per current pad.
     end;
-
+*)
     on_idle_can_run := True;
 
     if user_prefs_in_use = True
@@ -2990,14 +2983,11 @@ begin
 
   user_prefs_list.Free;        // 0.91.d
 
-  for index := 0 to undo_c do
-    rollback_reg[index].rollback_info.Free;
-
   current_shove_list.Free;
-
+(*
   for index := 0 to 2 do
     parking_bay[index].Free;
-
+*)
   offdraw_bmp.Free;
   backdrop_bmp.Free;
 end;
@@ -3759,7 +3749,7 @@ begin
 
   info_text_list := TStringList.Create;            // 0.78.a  15-11-02.
   printer_list := TStringList.Create;
-  keeps_list := TTemplateList.Create;
+  keeps_list := TTemplateOwningList.Create(nil);
 
   tag_list := TStringList.Create;                  // 206b
 
@@ -3779,8 +3769,6 @@ begin
   // 0.91.d pref_options...
 
   user_prefs_list := TStringList.Create;        // 0.91.d
-
-  keeps_list.OnChange := keeps_list_change;
 
   Application.OnActivate := AppActivate;
 
@@ -3856,13 +3844,7 @@ begin
 
   backup_wanted := False;             // backup has been updated.
 end;
-//______________________________________________________________________________________
 
-procedure Tcontrol_room_form.keeps_list_change(Sender: TObject);        // list OnChange event
-
-begin
-  backup_wanted := True;
-end;
 //_______________________________________________________________________________________
 
 procedure Tcontrol_room_form.AppActivate(Sender: TObject);

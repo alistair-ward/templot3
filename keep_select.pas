@@ -49,7 +49,8 @@ uses
   pad_unit,
   HtmlGlobals,
   box_file_unit,
-  template;      // moved 290a
+  template_records,
+  Template;      // moved 290a
 
 type
 
@@ -444,7 +445,6 @@ type
     procedure print_all_text_menu_entryClick(Sender: TObject);
     procedure all_to_bgnd_menu_entryClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure undo_delete_menu_entryClick(Sender: TObject);
     //procedure mint_from_final_and_show_menu_entryClick(Sender: TObject);
     //procedure current_template_unchanged_on_reload_menu_entryClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -913,13 +913,10 @@ function rebuild_it(n, move_bgnd_peg_to_code, move_bgnd_peg_to_peg_rail: integer
 
   // move_bgnd_peg_to_code:integer; move_bgnd_peg:boolean   added 205c
 
-var
-  saveTemplate: TTemplate;
-
 begin
   Result := False;                                       // default init.
-  saveTemplate := TTemplate.Create('');
-  fill_kd(saveTemplate);
+  //saveTemplate := TTemplate.Create('');
+  //fill_kd(saveTemplate);
   // temporarily store the existing settings (control template or box).
   try
 
@@ -1053,8 +1050,8 @@ begin
     Result := True;
 
   finally
-    copy_keep(saveTemplate);                       // restore previous settings
-    saveTemplate.Free;
+    //copy_keep(saveTemplate);                       // restore previous settings
+    //saveTemplate.Free;
   end;//try
 end;
 //______________________________________________________________________________________
@@ -1224,14 +1221,8 @@ begin
       end;
     end;
 
-    if t = deletedKeep then begin
-      // we're keeping it for undo, so only remove it from the list
-      keeps_list.ExtractIndex(n)
-    end
-    else begin
-      // we're not keep it for undo, so it needs to be removed and Free'd
-      keeps_list.Delete(n);
-    end;
+    keeps_list.Delete(n);
+
     save_done := False;
     backup_wanted := True;
 
@@ -3096,7 +3087,7 @@ procedure keep_draw(index: integer);              // draw this template on the k
 //!!! mods 16-5-99 to remove grid...
 var
 
-  savedControl: TTemplate;  // save existing control template on the pad.
+  //savedControl: TTemplate;  // save existing control template on the pad.
 
   xrange, yrange: double;
   xmax, ymax: integer;
@@ -3221,11 +3212,11 @@ begin
     EXIT;   // no drawing if the box is closed or the box is empty or the index is out of range.
   // otherwise onActivate code will not have been done.
 
-  savedControl := TTemplate.Create('');
+  //savedControl := TTemplate.Create('');
   try
-    fill_kd(savedControl);        // fill the keep record with the saved control template.
+    //fill_kd(savedControl);        // fill the keep record with the saved control template.
 
-    copy_keep(keeps_list[index]);    // get the current keep.
+    //copy_keep(keeps_list[index]);    // get the current keep.
 
     with keeps_list[index].template_info.keep_dims.box_dims1 do begin      // 213b
 
@@ -3876,8 +3867,8 @@ begin
 
     end;//with Canvas
   finally
-    copy_keep(savedControl);                         // restore the control template on the pad.
-    savedControl.Free;
+    //copy_keep(savedControl);                         // restore the control template on the pad.
+    //savedControl.Free;
   end;//try
 end;
 //_______________________________________________________________________________________________________________________________
@@ -3942,7 +3933,7 @@ var
   newTemplate: TTemplate;
 
 begin
-
+(*
   if (keep_form.Active) and (not control_template_on_save) then begin
     // the box was opened unchanged.
     if not valid_calcs then begin
@@ -4059,6 +4050,7 @@ begin
   finally
     newTemplate.Free;
   end;//try
+*)
 end;
 //____________________________________________________________________________________________
 
@@ -4527,10 +4519,6 @@ procedure copy_or_wipe_background;
 var
   n: integer;
 
-  savedCurrent: TTemplate;
-  saved_name_str: string;
-  saved_current_memo_str: string;
-
 begin
   n := list_position;
   if (n < 0) or (n > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
@@ -4541,11 +4529,6 @@ begin
 
   if keep_form.Active = True then
     keep_form.Cursor := crHourGlass;        // might take a while.
-
-  savedCurrent := TTemplate.Create('');
-  fill_kd(savedCurrent);                              // save control template for restore.
-  saved_name_str := current_name_str;
-  saved_current_memo_str := current_memo_str;
 
   try
     if keeps_list[n].bg_copied = True       // wipe it...
@@ -4565,12 +4548,6 @@ begin
       current_state(-1);
     end;
   finally
-    copy_keep(savedCurrent);                 // restore his control template.
-    current_name_str := saved_name_str;
-    current_memo_str := saved_current_memo_str;
-    info_form.ref_name_label.Caption := current_name_str;
-    savedCurrent.Free;
-
     keep_form.Cursor := crDefault;
   end;//try
 
@@ -6133,16 +6110,12 @@ var
 
 begin
 
-  saveCurrent := TTemplate.Create('');
-
   try
     if egg_timer = True then
       Screen.Cursor := crHourglass;
 
     pad_form.length_locked_popup_entry.Click;
     //  so that plain track or approach and exit tracks can be drawn.
-
-    fill_kd(saveCurrent);               // temporarily store the control template.
 
     if keeps_list.Count < 1 then
       EXIT;
@@ -6239,11 +6212,7 @@ begin
     end;//for next n
 
   finally
-    copy_keep(saveCurrent);       // restore the control template.
-    backup_wanted := True;
     redraw_pad(True, False);
-
-    saveCurrent.Free;
     if egg_timer = True then
       Screen.Cursor := crDefault;
   end;//try
@@ -6764,8 +6733,6 @@ procedure Tkeep_form.all_to_bgnd_menu_entryClick(Sender: TObject);
 // all unused keeps to background.
 var
   n: integer;
-  saveCurrent: TTemplate;
-
 begin
   if any_unused = 0 then begin
     alert_no_unused;
@@ -6775,14 +6742,10 @@ begin
   if keeps_list.Count < 1 then
     EXIT;
 
-  saveCurrent := TTemplate.Create('');
-
   try
     Screen.Cursor := crHourGlass;        // might take a while.
     if Application.Terminated = False then
       Application.ProcessMessages;
-
-    fill_kd(saveCurrent);                  // fill with the control template data.
 
     for n := 0 to (keeps_list.Count - 1) do begin
       if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 =
@@ -6793,13 +6756,10 @@ begin
       end;
     end;//for
 
-    copy_keep(saveCurrent);
-    // reset for pad redraws after copy to background calcs.
     pad_form.fit_bgnd_menu_entry.Click;     // show the new background.
     current_state(-1);
     //]]]if open_bgnd_list_menu_entry.Checked=True then do_bgkeeps;
   finally
-    saveCurrent.Free;
     Screen.Cursor := crDefault;
   end;//try
   backup_wanted := True;
@@ -6839,8 +6799,6 @@ procedure toggle_unused_bgnd(group: boolean);
 // swap all or group of unused keeps to background and vice versa.
 var
   n: integer;
-  saveCurrent: TTemplate;
-
 begin
   if keeps_list.Count < 1 then
     EXIT;
@@ -6848,9 +6806,6 @@ begin
   Screen.Cursor := crHourGlass;        // might take a while.
   if Application.Terminated = False then
     Application.ProcessMessages;
-
-  saveCurrent := TTemplate.Create('');
-  fill_kd(saveCurrent);
 
   try
     for n := 0 to (keeps_list.Count - 1) do begin
@@ -6881,8 +6836,6 @@ begin
 
   finally
     current_state(-1);
-    copy_keep(saveCurrent);
-    saveCurrent.Free;
     Screen.Cursor := crDefault;
   end;//try
 
@@ -6930,76 +6883,7 @@ begin
     empty_boxmru;   // file tampered with?
 
 end;
-//___________________________________________________________________________________________
 
-procedure Tkeep_form.undo_delete_menu_entryClick(Sender: TObject);
-
-var
-  n: integer;
-  str: string;
-
-begin     // menu is not enabled until there is something there.
-
-  n := -1;   // keep compiler happy
-
-  try
-    n := keeps_list.Add(TTemplate.Create(deletedKeep.Name));        // add line to info.
-  except
-    alert(5, '    undo  delete  error',
-      '|||There is an internal problem with undo.' + '||Please quote fail code 901.',
-      '', '', '', '', 'cancel  undo', '', 0);
-    EXIT;
-  end;//try
-
-  keeps_list[n].Memo := deletedKeep.Memo;
-
-  // need a fresh save.
-  save_done := False;
-  // init flags for new keep.
-  init_ttemplate(n);
-  // data into list.
-  keeps_list[n].CopyFrom(deletedKeep);
-  FreeAndNil(deletedKeep);
-
-  backup_wanted := True;
-
-  if list_position > (keeps_list.Count - 1) then
-    list_position := keeps_list.Count - 1;
-  if n <= (keeps_list.Count - 1) then
-    list_position := n;
-
-  current_state(0);       // update the listbox before any copy to background.
-
-  // refresh or clear backgrounds for newly loaded keep...
-
-  if deletedKeep.template_info.keep_dims.box_dims1.bgnd_code_077 = 1 then begin
-    if update_background_menu_entry.Checked = True then
-      copy_keep_to_background(n, False, False)
-    // put it in background.
-    else begin
-      with keeps_list[n].template_info.keep_dims.box_dims1 do begin
-        bgnd_code_077 := 0;             // set it unused instead.
-        pre077_bgnd_flag := False;
-        // in case reloaded in older version than 0.77.a
-      end;//with
-    end;
-  end;
-
-  current_state(1);
-  if keep_form.list_panel.Visible = True then
-    show_list_button.Click;      // update the list.
-
-  if classic_templot = True     // 0.93.a
-  then
-    do_hide_current
-  else begin
-    pad_form.snap_to_zero_menu_entry.Click;   // 0.93.a invalidate after storing.
-    xshift := zoom_offsetx + (screenx - turnoutx) / 2;
-    // put it on the centre of the pad,
-    yshift := (zoom_offsety + screeny / 2.5 - y_datum) * hand_i - g / 2;
-    // 0.93.a was /2.0 // and on main centre-line (if straight turnout).
-  end;
-end;
 //_________________________________________________________________________________________
 
 function any_selected: integer;      // any templates group-selected?  return count.
@@ -8242,13 +8126,9 @@ procedure rebuild_group(use_modify_options, egg_timer: boolean);
 
 var
   n: integer;
-  saveCurrent: TTemplate;
-
 begin
   if any_selected = 0 then
     EXIT;
-
-  saveCurrent := TTemplate.Create('');
 
   try
     if egg_timer = True then
@@ -8256,8 +8136,6 @@ begin
 
     pad_form.length_locked_popup_entry.Click;
     //  so that plain track or approach and exit tracks can be drawn.
-
-    fill_kd(saveCurrent);                        // temporarily store the control template.
 
     for n := 0 to (keeps_list.Count - 1) do begin
 
@@ -8353,8 +8231,6 @@ begin
       end;//with template
     end;//next n
   finally
-    copy_keep(saveCurrent);                         // draw the old template on the pad.
-    saveCurrent.Free;
     backup_wanted := True;
     redraw_pad(True, False);
     if egg_timer = True then
@@ -8478,8 +8354,6 @@ end;
 procedure normalize_templates;        // update box contents to latest file format.
 
 var
-  saveCurrent: Ttemplate;
-  save_current_memo_str: string;
   n, Count: integer;
   bgnd: integer;
   save_bgnd_option: boolean;
@@ -8508,10 +8382,6 @@ begin
     Application.ProcessMessages;
 
   Count := keeps_list.Count;
-
-  saveCurrent := TTemplate.Create('');
-  fill_kd(saveCurrent);
-  save_current_memo_str := current_memo_str;
 
   try
     n := 0;
@@ -8570,11 +8440,7 @@ begin
     save_box(0, eSB_SaveAll, eSO_Normal, '');   // don't need result flag.
 
   finally
-    copy_keep(saveCurrent);                                         // restore control template.
     pad_form.show_bgnd_keeps_menu_entry.Checked := save_bgnd_option;   // restore, radio item.
-    current_memo_str := save_current_memo_str;
-
-    saveCurrent.Free;
     do_rollback := False;
     redraw(True);
   end;//try
@@ -9294,6 +9160,7 @@ var
   comparer: IComparer<TTemplate>;
 
 begin
+(*
   if keeps_list.Count < 1 then
     EXIT;
 
@@ -9316,6 +9183,7 @@ begin
   backup_wanted := True;
 
   current_state(0);    // set to highest
+*)
 end;
 //______________________________________________________________________________
 

@@ -232,7 +232,7 @@ uses
   data_memo_unit,
   make_slip_unit,
   curve,
-  template,
+  template_records,
   OTPersistent,
   SwitchInfo,
   otYaml,

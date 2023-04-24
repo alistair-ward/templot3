@@ -158,7 +158,7 @@ uses
   control_room, pad_unit, help_sheet, chat_unit, colour_unit, math_unit, alert_unit,
   bgkeeps_unit, keep_select,
   background_shapes,
-  bgnd_unit, preview_unit, print_unit, print_settings_unit, rail_data_unit, template, mark_unit;
+  bgnd_unit, preview_unit, print_unit, print_settings_unit, rail_data_unit, template_records, mark_unit;
 
 var
   layer_str: array[0..17] of string;

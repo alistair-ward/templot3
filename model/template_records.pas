@@ -30,7 +30,7 @@
 ====================================================================================
 *)
 
-unit box3_file_unit;
+unit template_records;
 
 {$mode delphi}
 
@@ -39,160 +39,96 @@ interface
 uses
   Classes,
   SysUtils,
-  template_records,
-  box_file_unit,
-  math_unit;
-
-type
-  ExSaveBox = class(Exception)
-  end;
-
-  ExLoadBox = class(Exception)
-  end;
-
-  TGridInfo = record
-    unitsCode: integer;
-    spaceX: double;
-    spaceY: double;
-  end;
-
-  TBackupRestoreOptions = record
-    autoRestoreOnStartup: boolean;
-    askRestoreOnStartup: boolean;
-    saveDone: boolean;
-  end;
-
-procedure SaveBox3(templatesToSave: TTemplateList;
-  saveOption: ESaveOption;
-  saveDone: boolean;
-  const boxFilename: string;
-  const projectTitle: string;
-  const gridInfo: TGridInfo);
-
-procedure LoadBox3(
-  const boxFilename: string;
-  var projectTitle: string;
-  var gridInfo: TGridInfo;
-  out loadedTemplates: TTemplateList);
-
-function LoadBox3BackupRestoreOptions(const boxFilename: string): TBackupRestoreOptions;
-
-implementation
-
-uses
   Generics.Collections,
-  control_room,
-  shoved_timber;
+  point_ex,
+  shoved_timber,
+  mark_unit,
+  rail_data_unit,
+  curve,
+  curve_parameters_interface;
 
-// new file format including text 17-2-00. (v:0.48 on).
-// newer file format including unlimited shoves in StringList 1-5-01 (v:0.71.a on).
 
-// The 071 file format is the same as the 048 format with the addition of "Data Blocks" at the end of the file.
+const
+  //  max number of switch timbers = 42,  [ ,0-41] + zero end marker [ ,42].
+  swtimbco_c = 42;
 
-// The Data Blocks section commences with a byte containing an underscore character '_',
-// Then 7 more bytes containing '85A_|.x' , where x is the version build letter  (ASCII single-byte characters).
-// Then a 16-byte starter record containing the version info and 12 bytes of zeroes (spares):
+  //  maximum of 52 sleepers per length.
+  psleep_c = 51;
 
-//        Tblock_start=record
-//                       version_number:integer; // the Templot0 version number.
-//                       zero1:integer;          // 12 spares (zero)...
-//                       zero2:integer;
-//                       zero3:integer;
-//                     end;
-
-// Each DATA BLOCK comprises:
-
-// 16 byte Tblock_ident comprising...
-
-// 4 bytes = length of data segment x.
-// 4 bytes = template index count.
-// 4 bytes = code indicating content of block.
-// 4 bytes = spare - set to zero.
-
-// then x bytes = data segment.
-
-// DATA BLOCKS are repeated until the END BLOCK, which comprises
-
-// 16 byte Tblock_ident comprising all zeroes (segment length=0).
 
 type
 
-  TBox3PointEx = record
-    x: double;
-    y: double;
-  end;
-
-  TBox3Notch = record      //  a notch position.
+  Tnotch = record      //  a notch position.
     notch_x: double;
     notch_y: double;
     notch_k: double;
   end;
 
 
-  TBox3SnapPegPositions = record
+  Tsnap_peg_positions = record
     // snapping positions for F7 shift mouse action  0.79.a  27-05-06
     // and background popup snap options.
 
-    ctrl_peg_now_pos: TBox3Notch;
-    ctrl_0_pos: TBox3Notch;
-    ctrl_1_pos: TBox3Notch;
+    ctrl_peg_now_pos: Tnotch;
+    ctrl_0_pos: Tnotch;
+    ctrl_1_pos: Tnotch;
 
-    ctrl_2_pos: TBox3Notch;  // added 205c
+    ctrl_2_pos: Tnotch;  // added 205c
 
-    ctrl_planing_pos: TBox3Notch;
+    ctrl_planing_pos: Tnotch;
     // added 205e for obtain turnout radius to control
-    ctrl_heel_pos: TBox3Notch;
-    // added 205e for obtain turnout radius to control
-
-    ctrl_3_pos: TBox3Notch;
-
-    ctrl_cesp_pos: TBox3Notch;
+    ctrl_heel_pos: Tnotch;
     // added 205e for obtain turnout radius to control
 
-    ctrl_4_pos: TBox3Notch;
-    ctrl_5_pos: TBox3Notch;
-    ctrl_6_pos: TBox3Notch;
-    ctrl_7_pos: TBox3Notch;
-    ctrl_8_pos: TBox3Notch;
-    ctrl_9_pos: TBox3Notch;
-    ctrl_tcp_pos: TBox3Notch;   // TCP
-    ctrl_mcp_pos: TBox3Notch;   // MCP
-    ctrl_tolp_pos: TBox3Notch;  // TOLP
+    ctrl_3_pos: Tnotch;
 
-    ctrl_tminp_pos: TBox3Notch;     // TMINP     // 213b
-    ctrl_texitp_pos: TBox3Notch;    // TEXITP    // 213b
+    ctrl_cesp_pos: Tnotch;
+    // added 205e for obtain turnout radius to control
 
-    ctrl_mminp_pos: TBox3Notch;     // MMINP     // 217a
-    ctrl_mexitp_pos: TBox3Notch;    // MEXITP    // 217a
+    ctrl_4_pos: Tnotch;
+    ctrl_5_pos: Tnotch;
+    ctrl_6_pos: Tnotch;
+    ctrl_7_pos: Tnotch;
+    ctrl_8_pos: Tnotch;
+    ctrl_9_pos: Tnotch;
+    ctrl_tcp_pos: Tnotch;   // TCP
+    ctrl_mcp_pos: Tnotch;   // MCP
+    ctrl_tolp_pos: Tnotch;  // TOLP
 
-    ctrl_tsmidp_pos: TBox3Notch;    // TS curve mid-point  218a
+    ctrl_tminp_pos: Tnotch;     // TMINP     // 213b
+    ctrl_texitp_pos: Tnotch;    // TEXITP    // 213b
 
-    ctrl_knucklebend_pos: TBox3Notch;  // start of knuckle bend  218a
+    ctrl_mminp_pos: Tnotch;     // MMINP     // 217a
+    ctrl_mexitp_pos: Tnotch;    // MEXITP    // 217a
 
-    ctrl_atimb_pos: TBox3Notch;     // "A" timber 218a
+    ctrl_tsmidp_pos: Tnotch;    // TS curve mid-point  218a
 
-    ctrl_mid_pos: TBox3Notch;      // mid-length  216a
+    ctrl_knucklebend_pos: Tnotch;  // start of knuckle bend  218a
 
-    ctrl_user_pos: TBox3Notch;  // user-defined peg pos    added 205c
+    ctrl_atimb_pos: Tnotch;     // "A" timber 218a
+
+    ctrl_mid_pos: Tnotch;      // mid-length  216a
+
+    ctrl_user_pos: Tnotch;  // user-defined peg pos    added 205c
 
   end;//record
 
-  TBox3BoundaryInfo = record            // 213b  for extend to boundary function
+  Tboundary_info = record            // 213b  for extend to boundary function
 
-    loc_0: TBox3Notch;     // CTRL-0
-    loc_6: TBox3Notch;     // CTRL-6
-    loc_9: TBox3Notch;     // CTRL-9
-    loc_240: TBox3Notch;   // TMINP
-    loc_241: TBox3Notch;   // TEXITP
-    loc_260: TBox3Notch;   // MMINP     // 217a
-    loc_261: TBox3Notch;   // MEXITP    // 217a
-    loc_600: TBox3Notch;   // TOLP
+    loc_0: Tnotch;     // CTRL-0
+    loc_6: Tnotch;     // CTRL-6
+    loc_9: Tnotch;     // CTRL-9
+    loc_240: Tnotch;   // TMINP
+    loc_241: Tnotch;   // TEXITP
+    loc_260: Tnotch;   // MMINP     // 217a
+    loc_261: Tnotch;   // MEXITP    // 217a
+    loc_600: Tnotch;   // TOLP
 
     boundary_diag: double; // diagonal length between boundaries
   end;
 
 
-  TBox3ProtoInfo = record              // was Tgauge_info.
+  Tproto_info = record              // was Tgauge_info.
 
     name_str_pi: string[15];       // gauge designation: 9 chars max actually used
 
@@ -324,9 +260,86 @@ type
   end;
 
 
+  Tbgnd_keep = record
+
+    xlist_max: integer;     // max and min list values for printing calcs and DXF,
+    xlist_min: integer;     // and pad reset...
+    ylist_max: integer;
+    ylist_min: integer;
+
+    planing_end_aq1: integer;   // list index for these locations for printing.
+    planing_end_aq2: integer;
+
+    text_begin_X: integer;
+    // name label text locations for mouse select (screen pixels).
+    text_begin_Y: integer;
+
+    text_end_X: integer;      // rectangle for mouse hover detect.
+    text_end_Y: integer;
+
+    requested_label_string: string;   // his settings.
+    full_label_string: string;        // full number+name.
+    showing_label_string: string;     // actual string showing.
+
+    text_font_height: integer;   // 211b was textfontsize:integer;
+
+    timber_numbers_string: string;
+    // the complete numbers sequence, separated by ESC ($1B) characters.
+
+    list_bgnd_marks: Tmark_array;
+    // pointers only, so can't save this data in a file (of Tbgnd_keep).
+    list_bgnd_rails: array[ERailData] of TPoint_array;
+
+    bgnd_endmarks: array[ERailData, 0..1] of TPoint;
+    // rail end mark points. 1/100th mm , curved ready for drawing.
+    bgnd_endmarks_yn: array[ERailData, 0..1] of boolean; // flag end points exist.
+  end;
+
   //-----------------------
 
-  TBox3TransformInfo = record             //  datums, shifts and rotations ...
+  Tspares = record         // some spare slots for patching future changes...
+
+    spare_int1: integer;
+    spare_int2: integer;
+
+    spare_flag1: boolean;
+    spare_flag2: boolean;
+    spare_flag3: boolean;
+    spare_flag4: boolean;
+
+    spare_float1: double;
+    spare_float2: double;
+    spare_float3: double;
+
+    spare_str: string[250];
+
+    alignment_byte_1: byte;   // D5 0.81 12-06-05
+    alignment_byte_2: byte;   // D5 0.81 12-06-05
+    alignment_byte_3: byte;   // D5 0.81 12-06-05
+
+  end;//record
+
+  Tgauge_scale = record              // was part of Tgauge_info.
+    // now used only for the list, not in file. 0.71.a
+
+
+    name_str_glist: string;           // 215a gauge designation.
+
+
+    scale_glist: double;       // mm per ft.
+    gauge_glist: double;       // mm.
+    fw_glist: double;       // mm flangeway.
+    fwe_glist: double;       // mm flangeway end gap (flangeway+flare).
+
+    old_fwe_glist: double;       // old pre-215a flangeway end gap.
+
+    trtscent_glist: double;       // mm track centres, turnout side.
+    trmscent_glist: double;       // mm ditto, main side.
+    min_radius_glist: double;       // mm minimum radius for check.
+  end;
+
+
+  Ttransform_info = record             //  datums, shifts and rotations ...
     //  (yes I know the plural of datum is data !)
 
     datum_y: double;  // y_datum, y datum point (green dot).
@@ -344,7 +357,7 @@ type
     x2_shift: double;  //  mm
     y2_shift: double;  //  mm
 
-    peg_pos: TBox3PointEx;      //  mm  peg position.
+    peg_pos: Tpex;      //  mm  peg position.
 
     alignment_byte_2: byte;   // D5 0.81 12-06-05
     alignment_byte_3: byte;   // D5 0.81 12-06-05
@@ -366,7 +379,7 @@ type
     spare_flag3: boolean;
     spare_flag4: boolean;
 
-    notch_info: TBox3Notch;      {spare_float1:double;}    // 11-4-00 version 0.53
+    notch_info: Tnotch;      {spare_float1:double;}    // 11-4-00 version 0.53
     {spare_float2:double;}
     {spare_float3:double;}
 
@@ -378,7 +391,7 @@ type
 
   end;//record
 
-  TBox3PlatformTrackbedInfo = record   // 0.93.a was  Tcheck_rail_mints=record
+  Tplatform_trackbed_info = record   // 0.93.a was  Tcheck_rail_mints=record
 
     adjacent_edges_keep: boolean;
     // False=adjacent tracks,  True=trackbed edges and platform edges.
@@ -466,7 +479,7 @@ type
   end;
 
 
-  TBox3AlignmentInfo = record              //  curving and transition info...
+  Talignment_info = record              //  curving and transition info...
 
     curving_flag: boolean;
     // !!! no longer used 0.77.a !!! True=curved, False=straight.
@@ -520,10 +533,14 @@ type
 
     spare_int: integer;
 
+
+    function ByteToSlewMode(b: Byte): ESlewMode;
+    function SlewModeToByte(sm: ESlewMode): Byte;
+
   end;//record
 
 
-  TBox3RailInfo = record     // rail switch settings.  23-5-01.
+  Trail_info = record     // rail switch settings.  23-5-01.
 
     // !!! 17-1-00 - exhaustive testing done to get file match with previous version.
     // !!! with both same file size and correct reading of bgnd_flag.
@@ -574,7 +591,7 @@ type
 
   // plain-track record includes user-defined peg data...
 
-  TBox3PlainTrackInfo = record
+  Tplain_track_info = record
 
     pt_custom: boolean;        // custom plain track flag.
 
@@ -626,7 +643,7 @@ type
 
   //  these record types apply to turnouts only...
 
-  TBox3SwitchInfo = record      // switch stuff...
+  Tswitch_info = record      // switch stuff...
 
     old_size: integer;       // old index into list of switches (pre 0.77.a).
     sw_name_str: string[100];   // name of switch.
@@ -703,7 +720,7 @@ type
 
   end;//record
 
-  TBox3CheckFlareInfo_081 = record
+  Tcheck_flare_info_081 = record
     // not used 0.93.a
 
     // 0.81 new flare lengths.  04-08-03.
@@ -736,7 +753,7 @@ type
 
   end;//record
 
-  TBox3CrossingInfo = record        // crossing stuff...
+  Tcrossing_info = record        // crossing stuff...
 
     pattern: integer;     // 0=straight, 1=curviform, 2=parallel, -1=generic.
 
@@ -808,7 +825,7 @@ type
 
     hdkn_unit_angle: double;    // half-diamond hdkn angle in units.
 
-    check_flare_info_081: TBox3CheckFlareInfo_081;   // not used 0.93.a
+    check_flare_info_081: Tcheck_flare_info_081;   // not used 0.93.a
 
     k_custom_wing_long_keep: double;   // 0.95.a inches full-size k-crossing wing rails
     k_custom_point_long_keep: double;
@@ -823,7 +840,7 @@ type
 
   end;//record
 
-  TBox3TurnoutInfo1 = record          // data for the turnout size...
+  Tturnout_info1 = record          // data for the turnout size...
 
     plain_track_flag: boolean;      //  True=plain track only.
 
@@ -862,7 +879,7 @@ type
 
   end;//tturnout_info1 record
 
-  TBox3HdkCheckRailInfo = record         // K-crossing check and wing rail lengths. 0.79.a
+  Thdk_check_rail_info = record         // K-crossing check and wing rail lengths. 0.79.a
 
     k_check_ms_1: double;
     // full-size inches - size 1 MS k-crossing check rail length.
@@ -875,7 +892,7 @@ type
     // full-size inches - size 2 DS k-crossing check rail length.
   end;
 
-  TBox3VeeCheckRailInfo = record         // V-crossing check and wing rail lengths. 0.79.a
+  Tvee_check_rail_info = record         // V-crossing check and wing rail lengths. 0.79.a
 
     v_check_ms_working1: double;
     // full-size inches - size 1 MS check rail working length (back from "A").
@@ -912,7 +929,7 @@ type
     // full-size inches - size 2 TS wing rail reach length (forward from "A").
   end;
 
-  TBox3CheckEndDiff = record    // 0.94.a
+  Tcheck_end_diff = record    // 0.94.a
     len_diff: double;   // length differ  inches f-s
     flr_diff: double;   // flare length   inches f-s
     gap_diff: double;   // end gap        model mm
@@ -921,21 +938,23 @@ type
     // 0=no diff   1=change to bent flare    2=change to machined flare   3= change to no flare
   end;
 
-  TBox3CheckDiffs = record    // 0.94.a
-    end_diff_mw: TBox3CheckEndDiff;
-    end_diff_me: TBox3CheckEndDiff;
-    end_diff_mr: TBox3CheckEndDiff;
-    end_diff_tw: TBox3CheckEndDiff;
-    end_diff_te: TBox3CheckEndDiff;
-    end_diff_tr: TBox3CheckEndDiff;
-    end_diff_mk: TBox3CheckEndDiff;
-    end_diff_dk: TBox3CheckEndDiff;
+  Tcheck_diffs = record    // 0.94.a
+    end_diff_mw: Tcheck_end_diff;
+    end_diff_me: Tcheck_end_diff;
+    end_diff_mr: Tcheck_end_diff;
+    end_diff_tw: Tcheck_end_diff;
+    end_diff_te: Tcheck_end_diff;
+    end_diff_tr: Tcheck_end_diff;
+    end_diff_mk: Tcheck_end_diff;
+    end_diff_dk: Tcheck_end_diff;
   end;
 
-  TBox3TurnoutInfo2 = record
-    switch_info: TBox3SwitchInfo;      //  all the switch dimensions.
-    crossing_info: TBox3CrossingInfo;    //  all the crossing dimensions.
-    plain_track_info: TBox3PlainTrackInfo;
+
+  // but is not used in the program.
+  Tturnout_info2 = record
+    switch_info: Tswitch_info;      //  all the switch dimensions.
+    crossing_info: Tcrossing_info;    //  all the crossing dimensions.
+    plain_track_info: Tplain_track_info;
     //  need the plain track info for approach and exit tracks.
 
     diamond_auto_code: integer;
@@ -982,9 +1001,9 @@ type
     diamond_fixed_flag: boolean;     // True = fixed-diamond.
 
 
-    hdk_check_rail_info: TBox3HdkCheckRailInfo;
+    hdk_check_rail_info: Thdk_check_rail_info;
 
-    vee_check_rail_info: TBox3VeeCheckRailInfo;
+    vee_check_rail_info: Tvee_check_rail_info;
 
     turnout_road_endx_infile: double;
     // 209a length of turnout road from CTRL-1   //spare_float:double;
@@ -1019,7 +1038,9 @@ type
   end;//Tturnout_info2 record
 
 
-  TBox3Dims1 = record
+  //!!!  was Tkeep_data=record  , Tkeep_dims has the shove timber data omitted.  v:0.71.a  29-4-01.
+
+  Tbox_dims1 = record
 
     box_ident: string[10];   // first 11 bytes. in BOX3,   (string[11], 12 bytes in BOX)
 
@@ -1112,12 +1133,12 @@ type
     spare_boolean2: boolean;    // 208a      //spare_str:string[13];
 
 
-    transform_info: TBox3TransformInfo;
+    transform_info: Ttransform_info;
 
-    platform_trackbed_info: TBox3PlatformTrackbedInfo;
+    platform_trackbed_info: Tplatform_trackbed_info;
     // 0.93.a  was check_rail_mints:Tcheck_rail_mints;
 
-    align_info: TBox3AlignmentInfo;
+    align_info: Talignment_info;
 
 
     rail_type: integer;
@@ -1143,7 +1164,7 @@ type
     flatbottom_width: double;
     // width of flatbottom rail base (mm).    //spare_float3:double;
 
-    check_diffs: TBox3CheckDiffs;      // 0.94.a check rail end modifiers - 248 bytes
+    check_diffs: Tcheck_diffs;      // 0.94.a check rail end modifiers - 248 bytes
 
 
     retain_diffs_on_make_flag: boolean;    // 0.94.a check rail diffs
@@ -1159,700 +1180,171 @@ type
     retain_shoves_on_make_flag: boolean;
     retain_shoves_on_mint_flag: boolean;
 
-    turnout_info1: TBox3TurnoutInfo1;
+    turnout_info1: Tturnout_info1;
 
   end;//record
 
 
-  TBox3KeepDims = record
-    box_dims1: TBox3Dims1;
-    turnout_info2: TBox3TurnoutInfo2;
-  end;
+  Tkeep_dims = record
 
-  TBox3ShoveData = record     // shove data for a single timber ( version 0.71 11-4-01 ).
-
-    sv_code: TShoveCode;
-    sv_x: double;    // xtb modifier.
-    sv_k: double;    // angle modifier.
-    sv_o: double;    // offset modifier (near end).
-    sv_l: double;    // length modifier (far end).
-    sv_w: double;    // width modifier (per side).
-    sv_c: double;    // crab modifier.  0.78.c  01-02-03.
-    sv_t: double;    // spare (thickness 3-D modifier - nyi).
-
-    alignment_byte_1: byte;   // D5 0.81 12-06-05
-    alignment_byte_2: byte;   // D5 0.81 12-06-05
-
-    sv_sp_int: integer;     // spare integer.
+    box_dims1: Tbox_dims1;
+    turnout_info2: Tturnout_info2;
 
   end;//record
 
-  TBox3ShoveForFile = record    // Used in the SHOVE DATA BLOCKS in the 071 files.
-    // But not used within the program - see Ttimber_shove.shove_data instead.
-    // Conversion takes place in 071 on loading.
+  Ttemplate_info = record       // template data.
 
-    sf_str: string[6];           // timber number string.
-    alignment_byte_1: byte;   // D5 0.81 12-06-05
-    sf_shove_data: TBox3ShoveData;  // all the data.
+    keep_dims: Tkeep_dims;           // all the template dimemsions.
 
-    procedure CopyFrom(src: TShovedTimber);
-    procedure CopyTo(dest: TShovedTimber);
+    // the list of shoved timbers. (v:0.71.a  27-4-01).
+    keep_shove_list: TShovedTimberList;
   end;//record
 
+(*
+  TTemplate = class       // a whole stored template
 
-  TBox3Template = class
-    Name: string;
-    memo: string;
-    keepDims: TBox3KeepDims;
-    shovedTimbers: array of TBox3ShoveForFile;
+  private
+    FName: String;
+    FMemo: String;
+    FCurve: TCurve;
+
+
+  public
+    // True=has been copied to the background. (not included in file).
+    bg_copied: boolean;
+    // True=selected as one of a group.
+    group_selected: boolean;
+    // True=has been shifted/rotated/mirrored, needs a new timestamp on rebuilding.
+    new_stamp_wanted: boolean;
+
+    // snapping positions for F7 shift mouse action  0.79.a  27-05-06
+    snap_peg_positions: Tsnap_peg_positions;
+    boundary_info: Tboundary_info;              // 213b for extend to boundary
+
+    // used for peg snapping checks. (also in the template_info for file).  0.79.a  27-05-06
+    bgnd_half_diamond: boolean;
+    bgnd_plain_track: boolean;         // ditto
+    bgnd_retpar: boolean;              // ditto parallel crossing
+    bgnd_peg_on_zero: boolean;         // ditto Ctrl-0 or not.
+
+    // added 205e for obtain tradius to control...
+
+    bgnd_xing_type: integer;
+    bgnd_spiral: boolean;
+    bgnd_turnout_radius: double;
+
+    bgnd_gaunt: boolean;               // 218a
+
+    // 218d   temp flag   template is within a rectangle (e.g. on screen)
+    bgnd_is_in_rect: boolean;
+
+    // 211b position of name label...
+
+    bgnd_label_x: double;   // mm
+    bgnd_label_y: double;   // mm
+
+    bgnd_blanked: boolean;        // 215a
+    bgnd_no_xing: boolean;        // 215a
+
+    this_is_tandem_first: boolean;  // 218a
+
+    template_info: Ttemplate_info;    // the template data.
+
+    bgnd_keep: Tbgnd_keep;    // drawn data for a background template.
+
+    property Name: String Read FName Write FName;
+    property Memo: String Read FMemo Write FMemo;
+
+    property curve: TCurve Read FCurve;
+
+    constructor Create(AName: string);
+    destructor Destroy; override;
+
+    function Clone: TTemplate;
+    procedure CopyFrom(from: TTemplate);
+  end;//class
+
+
+  TTemplateList = class(TObjectList<TTemplate>)
+  private
+    FOnChange: TNotifyEvent;
+  protected
+    procedure Notify(constref AValue: TTemplate; ACollectionNotification: TCollectionNotification);
+      override;
+  published
+    property OnChange: TNotifyEvent Read FOnChange Write FOnChange;
   end;
+*)
 
-  TBox3TemplateList = class(TObjectList<TBox3Template>)
-  end;
+implementation
 
 
-  // start record for trailing data blocks...
-  TBox3BlockStart = record
-    versionNumber: integer; // the Templot0 version number.
-    zero1: integer;          // 12 spares (zero)...
-    zero2: integer;
-    zero3: integer;
-  end;
-
-  TBox3BlockIdent = record
-    segmentLength: integer;
-    templateIndex: integer;
-    blockCode: integer;   // 10 = timber shove data.
-    spareZeroes: integer;
-  end;
-
-procedure TBox3ShoveForFile.CopyFrom(src: TShovedTimber);
+function Talignment_info.ByteToSlewMode(b: Byte): ESlewMode;
 begin
-  sf_str := src.timberString;
-  sf_shove_data.sv_code := src.shoveCode;
-  sf_shove_data.sv_x := src.xtbModifier;
-  sf_shove_data.sv_k := src.angleModifier;
-  sf_shove_data.sv_o := src.offsetModifier;
-  sf_shove_data.sv_l := src.lengthModifier;
-  sf_shove_data.sv_w := src.widthModifier;
-  sf_shove_data.sv_c := src.crabModifier;
-  sf_shove_data.sv_t := 0;
-  sf_shove_data.sv_sp_int := 0;
-end;
-
-procedure TBox3ShoveForFile.CopyTo(dest: TShovedTimber);
-begin
-  dest.timberString := sf_str;
-  dest.shoveCode := sf_shove_data.sv_code;
-  dest.xtbModifier := sf_shove_data.sv_x;
-  dest.angleModifier := sf_shove_data.sv_k;
-  dest.offsetModifier := sf_shove_data.sv_o;
-  dest.lengthModifier := sf_shove_data.sv_l;
-  dest.widthModifier := sf_shove_data.sv_w;
-  dest.crabModifier := sf_shove_data.sv_c;
-end;
-
-procedure ConvertShovedTimberToBox3(shoveList: TShovedTimberList; box3Template: TBox3Template);
-var
-  i: integer;
-begin
-  SetLength(box3Template.shovedTimbers, shoveList.Count);
-  for i := 0 to shoveList.Count - 1 do begin
-    box3Template.shovedTimbers[i].CopyFrom(shoveList[i]);
-  end;
-end;
-
-function ConvertTemplateToBox3(template_records: TTemplate): TBox3Template;
-begin
-  Result := TBox3Template.Create;
-  try
-    Assert(sizeof(template_records.template_info.keep_dims) = sizeof(Result.keepDims));
-    Result.Name := template_records.Name;
-    Result.memo := template_records.memo;
-    Move(template_records.template_info.keep_dims, Result.keepDims, sizeof(Result.keepDims));
-
-    ConvertShovedTimberToBox3(template_records.template_info.keep_shove_list, Result);
-  except
-    Result.Free;
-    raise;
-  end;
-end;
-
-function ConvertTemplatesToBox3(templates: TTemplateList): TBox3TemplateList;
-var
-  t: TTemplate;
-  bt: TBox3Template;
-begin
-  Result := TBox3TemplateList.Create;
-  try
-    for t in templates do begin
-      bt := ConvertTemplateToBox3(t);
-      Result.Add(bt);
-    end;
-  except
-    Result.Free;
-    raise;
-  end;
-end;
-
-
-procedure ConvertBox3ToShovedTimbers(const box3Timbers: array of TBox3ShoveForFile;
-  template_records: TTemplate);
-var
-  i: integer;
-  timbers: TShovedTimberList;
-  t: TShovedTimber;
-begin
-  timbers := TShovedTimberList.Create;
-  try
-    for i := 0 to High(box3Timbers) do begin
-      t := TShovedTimber.Create;
-      box3Timbers[i].CopyTo(t);
-      timbers.Add(t);
-    end;
-  except
-    timbers.Free;
-    raise;
-  end;
-  template_records.template_info.keep_shove_list := timbers;
-end;
-
-function ConvertBox3ToTemplate(box3Template: TBox3Template): TTemplate;
-begin
-  Result := TTemplate.Create('');
-  try
-    Assert(sizeof(Result.template_info.keep_dims) = sizeof(box3Template.keepDims));
-    Result.Name := box3Template.Name;
-    Result.memo := box3Template.memo;
-    Move(box3Template.keepDims, Result.template_info.keep_dims, sizeof(box3Template.keepDims));
-
-    ConvertBox3ToShovedTimbers(box3Template.shovedTimbers, Result);
-  except
-    Result.Free;
-    raise;
-  end;
-end;
-
-function ConvertBox3ToTemplates(box3Templates: TBox3TemplateList): TTemplateList;
-var
-  t: TTemplateList;
-  b: TBox3Template;
-begin
-  t := TTemplateList.Create;
-  try
-    for b in box3Templates do begin
-      t.Add(ConvertBox3ToTemplate(b));
-    end;
-  except
-    t.Free;
-    raise;
-  end;
-  Result := t;
-end;
-
-procedure FileWriteError;
-begin
-  raise ExSaveBox.Create('File write error');
-end;
-
-procedure WriteTemplateRecords(
-  var boxFile: file;
-  box3ToSave: TBox3TemplateList;
-  saveOption: ESaveOption;
-  saveDone: boolean;
-  const projectTitle: string;
-  const gridInfo: TGridInfo);
-var
-  i: integer;
-  numberWritten: integer;
-  template_records: TBox3Template;
-begin
-  for i := 0 to box3ToSave.Count - 1 do begin     // first write the template data.
-    template_records := box3ToSave[i];
-
-    template_records.keepDims.box_dims1.file_format_code := 1;
-    // OT format      // put format in file
-
-    if i = (box3ToSave.Count - 1) then
-      template_records.keepDims.box_dims1.box_ident := 'NX' + IntToStr(i)
-    // last one in file. (string[10])
-    else
-      template_records.keepDims.box_dims1.box_ident := 'N ' + IntToStr(i);
-
-    template_records.keepDims.box_dims1.id_byte := 255;
-    // identify file as BOX3 rather than BOX      290a
-
-
-    case saveOption of
-      eSO_BackupOnExit: begin    // final backup on exit ..
-        template_records.keepDims.box_dims1.auto_restore_on_startup := False;
-        // these three only read from the first keep in the file,
-        template_records.keepDims.box_dims1.ask_restore_on_startup := True;
-        // but go in every one.
-        template_records.keepDims.box_dims1.box_save_done := saveDone;
-      end;
-
-      eSO_Normal: begin    // normal box save (these are never read) ..
-        template_records.keepDims.box_dims1.auto_restore_on_startup := False;
-        // not used for normal file save/reload
-        template_records.keepDims.box_dims1.ask_restore_on_startup := False;
-        // not used for normal file save/reload
-        template_records.keepDims.box_dims1.box_save_done := False;
-      end;
-
-      eSO_RollingBackup: begin    // rolling backup..
-        template_records.keepDims.box_dims1.auto_restore_on_startup := True;
-        // if both True on loading = abnormal termination.
-        template_records.keepDims.box_dims1.ask_restore_on_startup := True;
-        template_records.keepDims.box_dims1.box_save_done := False;
-      end;
-
-    end;//case
-
-    //  these go in every template but only the first or last in is read back...
-
-    template_records.keepDims.box_dims1.project_for := Copy(projectTitle, 1, 49);
-    // goes in every template but only the last in is read back.
-
-    // 0.79.a  20-05-06  save grid info -- to be read from final template...
-
-    //%%%% 0.91.d -- now also in user preferences, these used only if not prefs.
-
-    template_records.keepDims.box_dims1.grid_units_code := gridInfo.unitsCode;
-    template_records.keepDims.box_dims1.x_grid_spacing := gridInfo.spaceX;
-    template_records.keepDims.box_dims1.y_grid_spacing := gridInfo.spaceY;
-
-    //--------------------
-
-    BlockWrite(boxFile, template_records.keepDims, SizeOf(TBox3KeepDims), numberWritten);
-    // write all the data.
-
-    if numberWritten <> SizeOf(TBox3KeepDims) then begin
-      FileWriteError;
-    end;
-  end;//next i
-
-end;
-
-procedure WriteStrings(var boxFile: file; box3ToSave: TBox3TemplateList);
-var
-  i: integer;
-  template_records: TBox3Template;
-  numberWritten: integer;
-  len: integer;
-  s: string;
-begin
-  for i := 0 to box3ToSave.Count - 1 do begin        // now add the texts.
-    template_records := box3ToSave[i];
-
-    // 0.94.a  fb_kludge templates are created on printing, and destroyed afterwards. Don't save any remaining..
-
-    if template_records.keepDims.box_dims1.fb_kludge_template_code <> 0 then
-      CONTINUE;
-
-    s := remove_esc_str(template_records.Name) + Char($1B) + remove_esc_str(
-      template_records.Memo) + Char($1B) + Char($1B);
-    // use ESC chars as terminators, plus one for luck on the end.
-
-    UniqueString(s);  // make sure it's in continuous memory.
-
-    len := Length(s) * SizeOf(Char);
-
-    BlockWrite(boxFile, len, SizeOf(integer), numberWritten);
-    // first the length as an integer (4 bytes)
-    if numberWritten <> SizeOf(integer) then begin
-      FileWriteError;
-    end;
-
-    BlockWrite(boxFile, s[1], len, numberWritten);   // then the text.
-    if numberWritten <> len then begin
-      FileWriteError;
-    end;
-
-  end;//next i
-end;
-
-procedure WriteDataBlocks(var boxFile: file; box3ToSave: TBox3TemplateList);
-var
-  s: string;
-  i: integer;
-  numberWritten: integer;
-  template_records: TBox3Template;
-
-  blockStart: TBox3BlockStart;
-  blockIdent: TBox3BlockIdent;
-
-  shoveCount: integer;
-  st: integer;
-begin
-  // now add the DATA BLOCKS section...
-
-  s := '_85A_|    ';  // start marker.
-  BlockWrite(boxFile, s[1], 8, numberWritten);
-  // 8 bytes of '_85A_|  ' as a DATA BLOCKS start marker.
-  if numberWritten <> 8 then begin
-    FileWriteError;
-  end;
-
-  with blockStart do begin
-    versionNumber := file_version;
-    zero1 := 0;
-    zero2 := 0;
-    zero3 := 0;
-  end;//with
-
-  BlockWrite(boxFile, blockStart, SizeOf(blockStart), numberWritten);
-  // 16 bytes = version number + 12 bytes of zero (spares).
-  if numberWritten <> SizeOf(blockStart) then begin
-    FileWriteError;
-  end;
-
-  // now the data blocks for each of the loaded templates...
-  for i := 0 to box3ToSave.Count - 1 do begin
-    template_records := box3ToSave[i];
-
-    // first block is the shove timber data...
-
-    // shove data = code 10. 4 bytes containing the count of shoved timbers,
-    //                       + a series of TBox3ShoveData data records for each one.
-
-    shoveCount := Length(template_records.shovedTimbers);
-
-    blockIdent.segmentLength := SizeOf(integer) + shoveCount * SizeOf(TBox3ShoveForFile);
-    blockIdent.templateIndex := i;
-    blockIdent.blockCode := 10;         // = timber shove data.
-    blockIdent.spareZeroes := 0;
-
-    BlockWrite(boxFile, blockIdent, SizeOf(blockIdent), numberWritten);
-    // the data block ident.
-    if numberWritten <> SizeOf(blockIdent) then begin
-      FileWriteError;
-    end;
-
-    // now the shove data segment itself..
-
-    BlockWrite(boxFile, shoveCount, SizeOf(integer), numberWritten);
-    // first the count of shoved timbers.
-    if numberWritten <> SizeOf(integer) then begin
-      FileWriteError;
-    end;
-
-    BlockWrite(boxFile, template_records.shovedTimbers[0], shoveCount * sizeof(TBox3ShoveForFile),
-      numberWritten);      // first the count of shoved timbers.
-    if numberWritten <> shoveCount * sizeof(TBox3ShoveForFile) then begin
-      FileWriteError;
-    end;//next st
-
-    // no more DATA BLOCKS yet defined for this template, so on to the next..
-
-  end;//next i
-
-  // all templates done, so add the end zeroes ident (zero-length data segment).
-
-  with blockIdent do begin
-    segmentLength := 0;
-    templateIndex := 0;
-    blockCode := 0;
-    spareZeroes := 0;
-  end;//with
-
-  BlockWrite(boxFile, blockIdent, SizeOf(blockIdent), numberWritten);
-  // finally the end zeroes.
-  if numberWritten <> SizeOf(blockIdent) then begin
-    FileWriteError;
-  end;
-end;
-
-procedure SaveBox3(templatesToSave: TTemplateList;
-  saveOption: ESaveOption;
-  saveDone: boolean;
-  const boxFilename: string;
-  const projectTitle: string;
-  const gridInfo: TGridInfo);
-var
-  fileSize: integer;
-  boxFile: file;               // untyped file.
-  box3ToSave: TBox3TemplateList;
-begin
-  if (boxFilename = '') then begin
-    raise Exception.Create('No filename provided');
-  end;
-
-  box3ToSave := ConvertTemplatesToBox3(templatesToSave);
-  try
-    try
-      AssignFile(boxFile, boxFilename);
-      Rewrite(boxFile, 1);               // open for writing, record size = 1 byte.
-      try
-        WriteTemplateRecords(boxFile, box3ToSave, saveOption, saveDone, projectTitle, gridInfo);
-        WriteStrings(boxFile, box3ToSave);
-        WriteDataBlocks(boxFile, box3ToSave);
-
-        fileSize := System.FileSize(boxFile);      // (file must be open to get the size).
-        if (not FileExists(boxFilename)) or (fileSize = 0) then begin
-          FileWriteError;
-        end;
-
-      finally
-        CloseFile(boxFile);
-      end;
-
-    except
-      on EInOutError do begin
-        FileWriteError;
-      end;
-    end;//try-except
-
-
-  finally
-    box3ToSave.Free;
-  end;//try
-end;
-
-
-procedure ReadFileError;
-begin
-  raise ExLoadBox.Create('Error reading file');
-end;
-
-procedure ReadFirstTemplateRecord(var boxFile: file; var box3KeepDims: TBox3KeepDims);
-var
-  numberRead: integer;
-begin
-  BlockRead(boxFile, box3KeepDims, SizeOf(TBox3KeepDims), numberRead);
-  if (numberRead <> Sizeof(TBox3KeepDims)) then begin
-    ReadFileError;
-  end;
-end;
-
-procedure ReadTemplateRecords(var boxFile: file; var box3Templates: TBox3TemplateList);
-var
-  n: integer;
-  template_records: TBox3Template;
-  numberRead: integer;
-  s: string;
-begin
-  repeat
-    n := box3Templates.Add(TBox3Template.Create());
-    template_records := box3Templates[n];
-    BlockRead(boxFile, template_records.keepDims, SizeOf(TBox3KeepDims), numberRead);
-    s := template_records.keepDims.box_dims1.box_ident;
-    if (numberRead <> SizeOf(TBox3KeepDims)) or
-      ((s <> ('N ' + IntToStr(n))) and (s <> ('NX' + IntToStr(n)))) then begin
-      // error reading, or this is not a template.
-      ReadFileError;
-    end;
-  until Copy(s, 1, 2) = 'NX';      // last template marker.
-end;
-
-
-procedure ReadStrings(var boxFile: file; var box3Templates: TBox3TemplateList);
-var
-  n: integer;
-  numberRead: integer;
-  stringLength: integer;
-  s: string;
-  i: integer;
-  infoString: string;
-  memoString: string;
-begin
-  for n := 0 to box3Templates.Count - 1 do begin
-    // now get the proper texts.
-
-    // first get the length as an integer (4 bytes)
-    BlockRead(boxFile, stringLength, SizeOf(integer), numberRead);
-    if numberRead <> SizeOf(integer) then begin
-      ReadFileError;
-    end;
-
-    // read len bytes into string s...
-
-    s := StringOfChar('0', stringLength);
-    BlockRead(boxFile, s[1], stringLength, numberRead);
-
-    if numberRead <> stringLength then begin
-      ReadFileError;
-    end;
-
-    i := Pos(Char($1B), s);          // find info part terminator.
-
-    if i <> 0 then begin
-      infoString := Copy(s, 1, i - 1); // info string (don't include the ESC).
-      Delete(s, 1, i);          // remove info string and terminator from input.
-
-      i := Pos(Char($1B), s);             // find memo part terminator.
-
-      if i <> 0 then begin
-        memoString := Copy(s, 1, i - 1); // memo string (don't incude the ESC).
-
-        // we don't change either unless we've got both..
-        box3Templates[n].Name := remove_esc_str(infoString);
-        // remove any ESC is belt and braces...
-        box3Templates[n].Memo := remove_esc_str(memoString);
-      end;
-    end;
-  end;//next n
-end;
-
-procedure ReadShoveBlock(var boxFile: file; box3Template: TBox3Template; segmentLength: integer);
-var
-  numberRead: integer;
-  shoveCount: integer;
-begin
-  // first get the count of shoved timbers for this template...
-  BlockRead(boxFile, shoveCount,
-    SizeOf(integer), numberRead);
-  if (numberRead <> SizeOf(integer)) then begin
-    ReadFileError;
-  end;
-
-  if segmentLength <> (SizeOf(integer) + shoveCount * SizeOf(TBox3ShoveForFile)) then
-    ReadFileError;  // the integer is the shove count just read.
-
-  if shoveCount > 0 then begin
-    // now get the data for all the shoved timbers...
-    SetLength(box3Template.shovedTimbers, shoveCount);
-
-    BlockRead(boxFile, box3Template.shovedTimbers[0], SizeOf(TBox3ShoveForFile) *
-      shoveCount, numberRead);
-    if (numberRead <> SizeOf(TBox3ShoveForFile) * shoveCount) then begin
-      ReadFileError;
-    end;
-  end;
-end;
-
-procedure ReadDataBlocks(var boxFile: file; var box3Templates: TBox3TemplateList);
-var
-  s: string;
-  numberRead: integer;
-  blockStart: TBox3BlockStart;
-  blockIdent: TBox3BlockIdent;
-begin
-  s := StringOfChar(' ', 8);
-  BlockRead(boxFile, s[1], 8, numberRead);
-  if numberRead <> 8 then begin
-    ReadFileError;
-  end;
-
-  if Copy(s, 1, 6) <> '_85A_|' then begin
-    ReadFileError;
-  end;
-
-  BlockRead(boxFile, blockStart, SizeOf(TBox3BlockStart), numberRead);
-  if numberRead <> SizeOf(TBox3BlockStart) then begin
-    ReadFileError;
-  end;
-
-  // get all the data blocks
-  while not EOF(boxFile) do begin
-    // get the ident for the next data block..
-
-    BlockRead(boxFile, blockIdent, SizeOf(TBox3BlockIdent), numberRead);
-    if numberRead <> SizeOf(TBox3BlockIdent) then begin
-      ReadFileError;
-    end;
-
-    if blockIdent.segmentLength = 0 then
-      Exit;    // end of data blocks.
-
-    if (blockIdent.templateIndex < 0) or (blockIdent.templateIndex >= box3Templates.Count) then
-    begin
-      ReadFileError;
-    end;
-
-    case blockIdent.blockCode of
-
-      10:
-        ReadShoveBlock(boxFile, box3Templates[blockIdent.templateIndex], blockIdent.segmentLength);
-      else begin    // no other codes defined for version 071. 6-5-01.
-        Seek(boxFile, FilePos(boxFile) + blockIdent.segmentLength);
-      end;
-    end;//case  // no other codes defined for version 071. 6-5-01.
-  end;
-  // shouldn't get here, EXITs on a zero segment length.
-end;
-
-function ExtractProjectTitle(box3: TBox3TemplateList): string;
-begin
-  if box3.Count > 0 then
-    Result := box3[0].keepDims.box_dims1.project_for
+  case b of
+  1: Result := smCosine;
+  2: Result := smTanH;
   else
-    Result := '';
-end;
-
-function ExtractGridInfo(box3: TBox3TemplateList): TGridInfo;
-var
-  b: TBox3Template;
-begin
-  if box3.Count > 0 then begin
-    b := box3[0];
-    Result.unitsCode := b.keepDims.box_dims1.grid_units_code;
-    Result.spaceX := b.keepDims.box_dims1.x_grid_spacing;
-    Result.spaceY := b.keepDims.box_dims1.y_grid_spacing;
-  end
-  else begin
-    Result.unitsCode := 0; // this means the following will not be used..
-    Result.spaceX := 50;
-    Result.spaceY := 50;
-  end;
-
-end;
-
-procedure LoadBox3(
-  const boxFilename: string;
-  var projectTitle: string;
-  var gridInfo: TGridInfo;
-  out loadedTemplates: TTemplateList);
-var
-  boxFile: file;                // new format untyped file.
-  n, i, len: integer;
-  box3Templates: TBox3TemplateList;
-begin
-  loadedTemplates := nil;
-  box3Templates := nil;
-  try
-    try
-      AssignFile(boxFile, boxFilename);
-      Reset(boxFile, 1);              // open for reading, record size = 1 byte.
-      try
-        box3Templates := TBox3TemplateList.Create;
-
-        ReadTemplateRecords(boxFile, box3Templates);
-        ReadStrings(boxFile, box3Templates);
-        ReadDataBlocks(boxFile, box3Templates);
-      finally
-        CloseFile(boxFile);
-      end;
-
-      projectTitle := ExtractProjectTitle(box3Templates);
-      gridInfo := ExtractGridInfo(box3Templates);
-      loadedTemplates := ConvertBox3ToTemplates(box3Templates);
-    except
-      loadedTemplates.Free;
-      raise;
-    end
-  finally
-    box3Templates.Free;
+    Result := smCosine;  // why not?
   end;
 end;
 
-function LoadBox3BackupRestoreOptions(const boxFilename: string): TBackupRestoreOptions;
-var
-  boxFile: file;                // new format untyped file.
-  box3KeepDims: TBox3KeepDims;
-  n, i, len: integer;
+function Talignment_info.SlewModeToByte(sm: ESlewMode): Byte;
 begin
-  AssignFile(boxFile, boxFilename);
-  Reset(boxFile, 1);              // open for reading, record size = 1 byte.
-  try
-    ReadFirstTemplateRecord(boxFile, box3KeepDims);
-  finally
-    CloseFile(boxFile);
+  case sm of
+  smCosine: Result := 1;
+  smTanH: Result := 2;
+  else
+    Result := 1;
   end;
-
-  Result.askRestoreOnStartup:= box3KeepDims.box_dims1.ask_restore_on_startup;
-  Result.autoRestoreOnStartup:= box3KeepDims.box_dims1.auto_restore_on_startup;
-  Result.saveDone:= box3KeepDims.box_dims1.box_save_done;
 end;
 
+(*
+constructor TTemplate.Create(AName: String);
+begin
+  inherited Create;
+
+  FCurve := TCurve.Create;
+
+  Name := AName;
+
+  template_info.keep_shove_list := TShovedTimberList.Create;
+end;
+
+
+destructor TTemplate.Destroy;
+begin
+  FCurve.Free;
+  template_info.keep_shove_list.Free;
+
+  inherited;
+end;
+
+function TTemplate.Clone;
+begin
+  Result := TTemplate.Create(Name);
+  Result.CopyFrom(self);
+end;
+
+procedure TTemplate.CopyFrom(from: TTemplate);
+begin
+  FName := from.Name;
+  FMemo := from.Memo;
+
+  FCurve.CopyFrom(from.Curve);
+  template_info.keep_dims := from.template_info.keep_dims;
+
+  template_info.keep_shove_list.CopyFrom(from.template_info.keep_shove_list);
+end;
+
+
+procedure TTemplateList.Notify(constref AValue: TTemplate;
+  ACollectionNotification: TCollectionNotification);
+begin
+  inherited Notify(AValue, ACollectionNotification);
+
+  if Assigned(FOnChange) then
+    FOnChange(self);
+end;
+*)
 end.
