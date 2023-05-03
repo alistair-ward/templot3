@@ -13,6 +13,9 @@ class: TSample
 attributes:
   - name: tom
     type: integer
+    setExtraCode: |
+      FCode := eModified;
+      FStatus := 'Modified';
   - name: dick
     type: double
   - name: harry
@@ -143,6 +146,8 @@ begin
   if AValue <> FTom then begin
     SetModified;
     FTom := AValue;
+    FCode := eModified;
+    FStatus := 'Modified';
   end;
 end;
 

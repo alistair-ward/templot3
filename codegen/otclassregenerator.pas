@@ -44,6 +44,17 @@ type
   TAccessControl = (acGet, acSet);
   TAccessControlSet = set of TAccessControl;
 
+  TAttributeUpdate = class
+    private
+      FName: String;
+      FValue: String;
+    public
+      constructor Create(const AName, AValue: String);
+
+      property name: String read FName;
+      property value: String read FValue;
+  end;
+
   TAttribute = class
   private
     FName: string;
@@ -60,6 +71,7 @@ type
     FIsObject: boolean;
     FOwnsObject: boolean;
     FCreatesObject: boolean;
+    FExtraSetCode: TStrings;
 
   public
     constructor Create;
@@ -82,6 +94,7 @@ type
     property isObject: Boolean Read FIsObject;
     property ownsObject: Boolean Read FOwnsObject;
     property createsObject: Boolean Read FCreatesObject;
+    property extraSetCode: TStrings Read FExtraSetCode;
   end;
 
   { TOTClassRegenerator }
@@ -135,6 +148,7 @@ implementation
 
 uses
   LazFileUtils,
+  OTYaml,
   OTYamlParser,
   OTYamlEvent,
   OTTemplateGenerator;
@@ -176,6 +190,16 @@ begin
   FFollowingLine := AFollowingLine;
 end;
 
+{ TAttributeUpdate }
+
+constructor TAttributeUpdate.Create(const AName, AValue: String);
+begin
+  inherited Create;
+
+  FName := AName;
+  FValue := AValue;
+end;
+
 { TAttribute }
 
 constructor TAttribute.Create;
@@ -193,11 +217,13 @@ begin
   FIsObject := False;
   FOwnsObject := False;
   FCreatesObject := False;
+  FExtraSetCode := TStringList.Create;
 end;
 
 destructor TAttribute.Destroy;
 begin
   FComment.Free;
+  FExtraSetCode.Free;
 
   inherited;
 end;
@@ -250,6 +276,9 @@ begin
     end
     else
       raise Exception.CreateFmt('unexpected attribute name/value-- %s: %s', [AName, AValue]);
+  end
+  else if AName = 'setExtraCode' then begin
+    FExtraSetCode.Text := AValue;
   end
   else
     raise Exception.CreateFmt('unexpected attribute name/value-- %s: %s', [AName, AValue]);
@@ -520,12 +549,13 @@ begin
             state := pyExpectingValueSequence;
           end
           else begin
-            if not (event is TScalarEvent) then
+            if (event is TScalarEvent) then begin
+              newAttr.SetProperty(currentName, TScalarEvent(event).Value);
+              currentName := '';
+              state := pyExpectingName;
+              end
+            else
               raise Exception.Create('Expected Yaml Scalar (value)');
-
-            newAttr.SetProperty(currentName, TScalarEvent(event).Value);
-            currentName := '';
-            state := pyExpectingName;
           end;
         end;
 
@@ -537,12 +567,14 @@ begin
             state := pyExpectingName;
           end
           else begin
-            if not (event is TScalarEvent) then
+            if (event is TScalarEvent) then begin
+              SetLength(currentSequence, Length(currentSequence) + 1);
+              currentSequence[High(currentSequence)] := TScalarEvent(event).Value;
+            end
+            else
               raise Exception.Create('Expected Yaml Scalar (value sequence)');
-            SetLength(currentSequence, Length(currentSequence) + 1);
-            currentSequence[High(currentSequence)] := TScalarEvent(event).Value;
+            end;
           end;
-        end;
       end;
       FreeAndNil(event);
       event := parser.parse;
@@ -997,6 +1029,7 @@ begin
       (t['HasAdd'] as TOTTemplateCondition).userValue := (opAdd in attr.operations);
       (t['HasDelete'] as TOTTemplateCondition).userValue := (opDelete in attr.operations);
       (t['HasClear'] as TOTTemplateCondition).userValue := (opClear in attr.operations);
+      (t['ExtraSetCode'] as TOTTemplateMultiSubstitution).userValues.SetStrings(attr.extraSetCode);
 
       t.Generate(Result);
     finally

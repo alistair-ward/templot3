@@ -13,6 +13,9 @@ class: TSample
 attributes:
   - name: tom
     type: integer
+    setExtraCode: |
+      FCode := eModified;
+      FStatus := 'Modified';
   - name: dick
     type: double
   - name: harry
