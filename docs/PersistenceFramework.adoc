@@ -15,7 +15,6 @@ The OpenTemplot Persistence Framework is a framework developed in Free Pascal to
 All persistent objects need to be descendant classes of `TOTPersistent`, and the source files created using the `codegen` tool. Properties of the class that are to be persisted need to be defined in a comment section at the head of the file using a YAML structure defined later. The `codegen` tool reads the YAML data, and generates all the boiler-plate code required by the framework.
 
 === Steps to create a new class
-.Ordered
 . Use `codegen` to create a new unit
 +
 ----
@@ -110,6 +109,18 @@ Example:
 ----
 
 This will generate `AddSample` and `ClearSample` methods.
+
+=== extraSetCode
+Specifies additional Pascal code that will be inserted to the Set method for the property. This can be a single line or a multi-line block literal.
+
+Example:
+----
+  - name: sample
+    type: Double
+    extraSetCode: |
+      FCode := eUpdated;
+      FStatus := 'Updated';
+----
 
 === comment
 Defines a comment that included with the property definition (that may then get picked up by PasDoc). The comment can be either a single line comment, or a multiline block comment.

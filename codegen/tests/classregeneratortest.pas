@@ -514,6 +514,8 @@ const
     '  if AValue <> FTom then begin',
     '    SetModified;',
     '    FTom := AValue;',
+    '    FCode := eModified;',
+    '    FStatus := ''Modified'';',
     '  end;',
     'end;',
     '',

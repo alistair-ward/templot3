@@ -11,6 +11,7 @@ IsDynamic=condition
 HasAdd=condition
 HasDelete=condition
 HasClear=condition
+ExtraSetCode=msub
 ||
 |IF HasGet|
 |IF IsCollection|
@@ -38,6 +39,9 @@ begin
   if AValue <> F|Name|[AIndex] then begin
     SetModified;
     F|Name|[AIndex] := AValue;
+|REPEAT ExtraSetCode|
+    |'ExtraSetCode'|
+|ENDREPEAT ExtraSetCode|
   end;
 end;
 |ELSE IsCollection|
@@ -56,6 +60,9 @@ begin
   if AValue <> F|Name| then begin
     SetModified;
     F|Name| := AValue;
+|REPEAT ExtraSetCode|
+    |'ExtraSetCode'|
+|ENDREPEAT ExtraSetCode|
   end;
 end;
 |ENDIF IsObject|
