@@ -35,7 +35,7 @@ program templottest;
 
 uses
   Classes, consoletestrunner, dummy_vehicle_test, extended_utils,
-  extended_utils_test, path_interface, matrix_2d, shoved_timber, matrix_2d_test,
+  extended_utils_test, path_interface, matrix_2d, ShovedTimber, matrix_2d_test,
   point_ex_test, utils_test, curve, curve_test, curve_calculator, curve_segment,
   transition_segment_test, straight_segment_test, straight_segment,
   circle_segment, circle_segment_test, transition_segment,

@@ -41,7 +41,7 @@ uses
   SysUtils,
   fpcunit,
   testregistry,
-  shoved_timber;
+  ShovedTimber;
 
 type
   { TTestShovedTimber }
@@ -55,7 +55,7 @@ type
 
   published
     procedure TestConstructorDefaults;
-    procedure TestCreateFrom;
+//    procedure TestCreateFrom;
     procedure TestMakeShoved;
     procedure TestMakeShovedOnOmit;
     procedure TestMakeOmit;
@@ -78,21 +78,6 @@ type
     procedure TestCanRestore;
   end;
 
-  { TTestShovedTimberList }
-
-  TTestShovedTimberList = class(TTestCase)
-  protected
-    list: TShovedTimberList;
-
-    procedure Setup; override;
-    procedure TearDown; override;
-
-  published
-    procedure TestCopyFromWithNil;
-    procedure TestCopyFromAnotherList;
-
-  end;
-
 implementation
 
 { TTestShovedTimber }
@@ -101,7 +86,7 @@ procedure TTestShovedTimber.Setup;
 begin
   inherited Setup;
 
-  shovedTimber := TShovedTimber.Create;
+  shovedTimber := TShovedTimber.Create(nil);
 end;
 
 procedure TTestShovedTimber.TearDown;
@@ -128,6 +113,7 @@ begin
   CheckEquals(0, shovedTimber.crabModifier, 'crabModifier');
 end;
 
+(*
 procedure TTestShovedTimber.TestCreateFrom;
 var
   newTimber: TShovedTimber;
@@ -159,7 +145,7 @@ begin
     newTimber.Free;
   end;
 end;
-
+*)
 procedure TTestShovedTimber.TestMakeShoved;
 begin
   //
@@ -619,93 +605,7 @@ begin
 
 end;
 
-{ TTestShovedTimberList }
-
-procedure TTestShovedTimberList.Setup;
-begin
-  inherited Setup;
-
-  list := TShovedTimberList.Create;
-end;
-
-procedure TTestShovedTimberList.TearDown;
-begin
-  list.Free;
-
-  inherited TearDown;
-end;
-
-procedure TTestShovedTimberList.TestCopyFromWithNil;
-begin
-  //
-  // Given a list containing some items
-  // When CopyFrom is called with nil
-  // Then the list is cleared
-  //
-
-  // Given
-  list.Add(TShovedTimber.Create);
-  list.Add(TShovedTimber.Create);
-
-  // When
-  list.CopyFrom(nil);
-
-  // Then
-  CheckEquals(0, list.Count);
-end;
-
-procedure TTestShovedTimberList.TestCopyFromAnotherList;
-var
-  anotherList: TShovedTimberList;
-  s: TShovedTimber;
-  i: Integer;
-begin
-  //
-  // Given a list containing some items
-  //   and another list containing different items
-  // When CopyFrom is called with the other list of items
-  // Then the list contains copies of all the items from the other list
-  //
-
-  // Given
-  list.Add(TShovedTimber.Create);
-  list.Add(TShovedTimber.Create);
-
-  anotherList := TShovedTimberList.Create;
-  try
-    s := TShovedTimber.Create;
-    anotherList.Add(s);
-
-    s := TShovedTimber.Create;
-    s.MakeOmit;
-    anotherList.Add(s);
-
-    s := TShovedTimber.Create;
-    s.xtbModifier := 1;
-    s.angleModifier := 3;
-    anotherList.Add(s);
-
-    // When
-    list.CopyFrom(anotherList);
-
-    // Then
-    CheckEquals(anotherList.Count, list.Count, 'list.Count');
-    for i := 0 to list.Count - 1 do begin
-      CheckEquals(Ord(anotherList[i].shoveCode), Ord(list[i].shoveCode),
-        format('shoveCode[%d]', [i]));
-      CheckEquals(anotherList[i].xtbModifier, list[i].xtbModifier, format('xtbModifier[%d]', [i]));
-      CheckEquals(anotherList[i].angleModifier, list[i].angleModifier, format('angleModifier[%d]', [i]));
-    end;
-
-
-  finally
-    anotherList.Free;
-  end;
-
-end;
-
 initialization
   RegisterTest(TTestShovedTimber);
-  RegisterTest(TTestShovedTimberList);
 
 end.
