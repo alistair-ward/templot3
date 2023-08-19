@@ -548,19 +548,10 @@ type
 
     flared_ends_ri: integer;  // 0=straight bent, 1=straight machined
 
-    // spares..
-
-    spare_int1: integer;
-
     knuckle_code_ri: integer;
     // 214a spare_int2:integer;     0=normal, -1=sharp, 1=use custom knuckle_radius_ri
     knuckle_radius_ri: double;
     // 214a spare_float1:double;  custom setting - inches full-size
-
-    spare_float2: double;
-
-    spare_bool1: boolean;
-    spare_bool2: boolean;
 
     isolated_crossing_sw: boolean;            //  217a   spare_bool3:boolean;
 
@@ -581,10 +572,6 @@ type
     main_road_crossing_rail_sw: boolean;
     main_road_check_rail_sw: boolean;
     main_road_stock_rail_sw: boolean;
-
-    alignment_byte_1: byte;   // D5 0.81 12-06-05
-    alignment_byte_2: byte;   // D5 0.81 12-06-05
-
 
   end;
 
@@ -1260,8 +1247,6 @@ type
     constructor Create(AName: string);
     destructor Destroy; override;
 
-    function Clone: TTemplate;
-    procedure CopyFrom(from: TTemplate);
   end;//class
 
 
@@ -1319,24 +1304,6 @@ begin
 
   inherited;
 end;
-
-function TTemplate.Clone;
-begin
-  Result := TTemplate.Create(Name);
-  Result.CopyFrom(self);
-end;
-
-procedure TTemplate.CopyFrom(from: TTemplate);
-begin
-  FName := from.Name;
-  FMemo := from.Memo;
-
-  FCurve.CopyFrom(from.Curve);
-  template_info.keep_dims := from.template_info.keep_dims;
-
-  template_info.keep_shove_list.CopyFrom(from.template_info.keep_shove_list);
-end;
-
 
 procedure TTemplateList.Notify(constref AValue: TTemplate;
   ACollectionNotification: TCollectionNotification);
