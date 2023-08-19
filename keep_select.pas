@@ -66,16 +66,6 @@ type
     load_t2box_dialog: TOpenDialog;
     import_t2box_menu_entry: TMenuItem;
     MainMenu1: TMainMenu;
-    MenuItem1: TMenuItem;
-    import_mecbox_menu_entry: TMenuItem;
-    MenuItem2: TMenuItem;
-    MenuItem3: TMenuItem;
-    MenuItem4: TMenuItem;
-    export_mecbox_menu_entry: TMenuItem;
-    MenuItem5: TMenuItem;
-    MenuItem6: TMenuItem;
-    N54: TMenuItem;
-    MenuItem8: TMenuItem;
     transfer_menu: TMenuItem;
     save_dialog: TSaveDialog;
     colour_panel: TPanel;
@@ -378,11 +368,9 @@ type
     remove_reminder_menu_entry: TMenuItem;
     procedure copy_to_pad_buttonClick(Sender: TObject);
     procedure escape_buttonClick(Sender: TObject);
-    procedure export_mecbox_menu_entryClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormActivate(Sender: TObject);
     procedure colour_patchClick(Sender: TObject);
-    procedure import_mecbox_menu_entryClick(Sender: TObject);
     procedure import_t2box_menu_entryClick(Sender: TObject);
     procedure keep_html_viewHotSpotClick(Sender: TObject; const SRC: ThtString;
       var Handled: Boolean);
@@ -709,7 +697,7 @@ uses
   xing_select, entry_sheet, gauge_unit, colour_unit, info_unit, chat_unit, print_unit,
   dxf_unit, bgkeeps_unit, grid_unit, Clipbrd, edit_memo_unit, wait_message, shove_timber,
   jotter_unit, print_settings_unit, data_memo_unit,
-  MetaFilePrinter, { OT-FIRST file_viewer,} panning_unit, mecbox_unit,
+  MetaFilePrinter, { OT-FIRST file_viewer,} panning_unit,
   t2box_unit,
   curve,
   rail_data_unit,
@@ -9512,12 +9500,6 @@ begin
 end;
 //______________________________________________________________________________
 
-procedure Tkeep_form.import_mecbox_menu_entryClick(Sender: TObject);
-
-begin
-  import_mecbox('');    // in mecbox_unit
-end;
-
 procedure Tkeep_form.import_t2box_menu_entryClick(Sender: TObject);
 var
     last_bgnd_loaded: integer;
@@ -9545,12 +9527,5 @@ end;
 
 //________________________________________________________________________________________
 
-
-procedure Tkeep_form.export_mecbox_menu_entryClick(Sender: TObject);
-
-begin
-  export_mecbox(True, '');     // True=show export result
-end;
-//______________________________________________________________________________
 
 end.
