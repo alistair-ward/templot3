@@ -277,7 +277,7 @@ begin
     else
       raise Exception.CreateFmt('unexpected attribute name/value-- %s: %s', [AName, AValue]);
   end
-  else if AName = 'setExtraCode' then begin
+  else if AName = 'extraSetCode' then begin
     FExtraSetCode.Text := AValue;
   end
   else
