@@ -13,7 +13,7 @@ class: TSample
 attributes:
   - name: tom
     type: integer
-    setExtraCode: |
+    extraSetCode: |
       FCode := eModified;
       FStatus := 'Modified';
   - name: dick
