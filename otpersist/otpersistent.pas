@@ -107,11 +107,14 @@ function StrToInteger(const AValue: String): Integer;
 function StrToDouble(const AValue: String): Double;
 function StrToBoolean(const AValue: String): Boolean;
 function StrToString(const AValue: String): String;
+function StrToTDateTime(const AValue: String): TDateTime;
+
 
 procedure SaveYamlInteger(AEmitter: TYamlEmitter; const AName: String; AValue: Integer);
 procedure SaveYamlDouble(AEmitter: TYamlEmitter; const AName: String; AValue: Double);
 procedure SaveYamlBoolean(AEmitter: TYamlEmitter; const AName: String; AValue: Boolean);
 procedure SaveYamlString(AEmitter: TYamlEmitter; const AName: String; AValue: String);
+procedure SaveYamlTDateTime(AEmitter: TYamlEmitter; const AName: String; AValue: TDateTime);
 procedure SaveYamlObject(AEmitter: TYamlEmitter; const AName: String; AValue: TOID);
 procedure SaveYamlObjectReference(AEmitter: TYamlEmitter; const AName: String; AValue: TOID);
 procedure SaveYamlSequence(AEmitter: TYamlEmitter; const AName: String);
@@ -164,6 +167,24 @@ begin
   Result := AValue;
 end;
 
+function StrToTDateTime(const AValue: String): TDateTime;
+var
+  time: TSystemTime;
+begin
+  if Length(AValue) <> 18 then
+    Exit(0);
+
+  time.Year := StrToInt(Copy(AValue, 1, 4));
+  time.Month := StrToInt(Copy(AValue, 5, 2));
+  time.Day := StrToInt(Copy(AValue, 7, 2));
+  time.Hour := StrToInt(Copy(AValue, 10, 2));
+  time.Minute := StrToInt(Copy(AValue, 12, 2));
+  time.Second := StrToInt(Copy(AValue, 14, 2));
+  time.Millisecond := StrToInt(Copy(AValue, 16, 3));
+
+  Result := SystemTimeToDateTime(time);
+end;
+
 procedure SaveYamlInteger(AEmitter: TYamlEmitter; const AName: String; AValue: Integer);
 begin
   AEmitter.ScalarEvent('', '', AName, True, False, yssPlainScalar);
@@ -186,6 +207,11 @@ procedure SaveYamlString(AEmitter: TYamlEmitter; const AName: String; AValue: St
 begin
   AEmitter.ScalarEvent('', '', AName, True, False, yssPlainScalar);
   AEmitter.ScalarEvent('', '', AValue, True, True, yssDoubleQuotedScalar);
+end;
+
+procedure SaveYamlTDateTime(AEmitter: TYamlEmitter; const AName: String; aValue: TDateTime);
+begin
+  SaveYamlString(AEmitter, AName, FormatDateTime('yyyymmdd"T"hhmmsszzz', AValue));
 end;
 
 procedure SaveYamlObject(AEmitter: TYamlEmitter; const AName: String; AValue: TOID);

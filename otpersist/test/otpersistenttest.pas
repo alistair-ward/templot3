@@ -79,6 +79,8 @@ var
   yamlText: String;
   emitter: TYamlEmitter;
   obj: TOTPersistent;
+  theTime: TSystemTime;
+  newTime: TSystemTime;
 begin
   //
   // Given an instance of TLeafClass with assigned properties
@@ -99,6 +101,15 @@ begin
     for i := 0 to 4 do begin
       leaf.array2[i] := 'Fred ' + IntToStr(i);
     end;
+
+    theTime.Year := 2023;
+    theTime.Month := 8;
+    theTime.Day := 23;
+    theTime.Hour := 7;
+    theTime.Minute := 13;
+    theTime.Second := 45;
+    theTime.Millisecond := 123;
+    leaf.timestamp := SystemTimeToDateTime(theTime);
 
     // When save...
     stream := nil;
@@ -141,6 +152,16 @@ begin
 
       for i := 0 to 4 do
         AssertEquals('array2#' + IntToStr(i), leaf.array2[i], newLeaf.array2[i]);
+
+      DateTimeToSystemTime(newLeaf.timestamp, newTime);
+      AssertEquals('Year', theTime.Year, newTime.Year);
+      AssertEquals('Month', theTime.Month, newTime.Month);
+      AssertEquals('Day', theTime.Day, newTime.Day);
+      AssertEquals('Hour', theTime.Hour, newTime.Hour);
+      AssertEquals('Minute', theTime.Minute, newTime.Minute);
+      AssertEquals('Second', theTime.Second, newTime.Second);
+      AssertEquals('Millisecond', theTime.Millisecond, newTime.Millisecond);
+
     finally
       obj.Free;
     end;
