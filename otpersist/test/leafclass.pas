@@ -36,6 +36,8 @@ attributes:
   - name: array2
     type: String
     array: 0..4
+  - name: timestamp
+    type: TDateTime
 ...
 }
 
@@ -49,6 +51,7 @@ type
     FStr1: String;
     FArray1: array of Double;
     FArray2: array[0..4] of String;
+    FTimestamp: TDateTime;
     //# endGenMemberVars
 
     // calculated values...
@@ -70,6 +73,7 @@ type
     procedure SetStr1(const AValue: String);
     procedure SetArray1(AIndex: Integer; const AValue: Double);
     procedure SetArray2(AIndex: Integer; const AValue: String);
+    procedure SetTimestamp(const AValue: TDateTime);
     //# endGenGetSetDeclarations
 
     function GetSum: Integer;
@@ -94,6 +98,7 @@ type
     property array1[AIndex: Integer]: Double read GetArray1 write SetArray1;
     property array1Count: Integer read GetArray1Count;
     property array2[AIndex: Integer]: String read GetArray2 write SetArray2;
+    property timestamp: TDateTime read FTimestamp write SetTimestamp;
     //# endGenProperty
 
     property sum: Integer Read GetSum;
@@ -152,6 +157,9 @@ begin
   if AName = 'array2' then
     FArray2[Integer(Ord(Low(FArray2))+AIndex)] := StrToString(AValue)
   else
+  if AName = 'timestamp' then
+    FTimestamp := StrToTDateTime(AValue)
+  else
     //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -170,6 +178,7 @@ begin
   AStream.ReadBuffer(FArray1[Low(FArray1)], (Ord(High(FArray1))-Ord(Low(FArray1)) + 1)*sizeof(Double));
   for i := Ord(Low(FArray2)) to Ord(High(FArray2)) do
     FArray2[Integer(i)] := AStream.ReadAnsiString;
+  AStream.ReadBuffer(FTimestamp, sizeof(TDateTime));
   //# endGenRestoreVars
 end;
 
@@ -187,6 +196,7 @@ begin
   AStream.WriteBuffer(FArray1[Low(FArray1)], (Ord(High(FArray1))-Ord(Low(FArray1)) + 1)*sizeof(Double));
   for i := Ord(Low(FArray2)) to Ord(High(FArray2)) do
     AStream.WriteAnsiString(FArray2[Integer(i)]);
+  AStream.WriteBuffer(FTimestamp, sizeof(TDateTime));
   //# endGenSaveVars
 end;
 
@@ -209,6 +219,7 @@ begin
   for i := Ord(Low(FArray2)) to Ord(High(FArray2)) do
     SaveYamlSequenceString(AEmitter, FArray2[Integer(i)]);
   SaveYamlEndSequence(AEmitter);
+  SaveYamlTDateTime(AEmitter, 'timestamp', FTimestamp);
   //# endGenSaveYamlVars
 end;
 
@@ -296,6 +307,15 @@ begin
   if AValue <> FArray2[AIndex] then begin
     SetModified;
     FArray2[AIndex] := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TLeafClass.SetTimestamp(const AValue: TDateTime);
+begin
+  if AValue <> FTimestamp then begin
+    SetModified;
+    FTimestamp := AValue;
   end;
 end;
 
