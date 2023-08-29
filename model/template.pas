@@ -11,7 +11,10 @@ uses
   OTPersistentList,
   OTYamlEmitter,
   Curve,
-  template_records;
+  template_records,
+  BoxDims,
+  TurnoutInfo2,
+  ShovedTimber;
 
 
 {# class TTemplate
@@ -25,6 +28,19 @@ attributes:
   - name: curve
     type: TCurve
     owns: create
+    access: [get]
+  - name: boxDims
+    type: TBoxDims
+    owns: create
+    access: [get]
+  - name: turnoutInfo2
+    type: TTurnoutInfo2
+    owns: create
+    access: [get]
+  - name: shovedTimbers
+    type: TShovedTimberOwningList
+    owns: create
+    access: [get]
 ...
 }
 
@@ -36,6 +52,9 @@ type
     FName: String;
     FMemo: String;
     FCurve: TOID;
+    FBoxDims: TOID;
+    FTurnoutInfo2: TOID;
+    FShovedTimbers: TOID;
     //# endGenMemberVars
 
   protected
@@ -45,9 +64,11 @@ type
 
     //# genGetSetDeclarations
     function GetCurve: TCurve;
+    function GetBoxDims: TBoxDims;
+    function GetTurnoutInfo2: TTurnoutInfo2;
+    function GetShovedTimbers: TShovedTimberOwningList;
     procedure SetName(const AValue: String);
     procedure SetMemo(const AValue: String);
-    procedure SetCurve(const AValue: TCurve);
     //# endGenGetSetDeclarations
 
   public
@@ -105,7 +126,10 @@ type
     //# genProperty
     property name: String read FName write SetName;
     property memo: String read FMemo write SetMemo;
-    property curve: TCurve read GetCurve write SetCurve;
+    property curve: TCurve read GetCurve;
+    property boxDims: TBoxDims read GetBoxDims;
+    property turnoutInfo2: TTurnoutInfo2 read GetTurnoutInfo2;
+    property shovedTimbers: TShovedTimberOwningList read GetShovedTimbers;
     //# endGenProperty
   end;
 
@@ -132,6 +156,18 @@ begin
     FCurve := TCurve.Create(nil).oid
   else
     FCurve := 0;
+  if AOID = 0 then
+    FBoxDims := TBoxDims.Create(nil).oid
+  else
+    FBoxDims := 0;
+  if AOID = 0 then
+    FTurnoutInfo2 := TTurnoutInfo2.Create(nil).oid
+  else
+    FTurnoutInfo2 := 0;
+  if AOID = 0 then
+    FShovedTimbers := TShovedTimberOwningList.Create(nil).oid
+  else
+    FShovedTimbers := 0;
   //# endGenCreate
 end;
 
@@ -139,6 +175,9 @@ destructor TTemplate.Destroy;
 begin
   //# genDestroy
   SetOwned(FCurve, nil);
+  SetOwned(FBoxDims, nil);
+  SetOwned(FTurnoutInfo2, nil);
+  SetOwned(FShovedTimbers, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -160,6 +199,15 @@ begin
   if AName = 'curve' then
     RestoreYamlObjectOwn(FCurve, StrToInteger(AValue), ALoader)
   else
+  if AName = 'boxDims' then
+    RestoreYamlObjectOwn(FBoxDims, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'turnoutInfo2' then
+    RestoreYamlObjectOwn(FTurnoutInfo2, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'shovedTimbers' then
+    RestoreYamlObjectOwn(FShovedTimbers, StrToInteger(AValue), ALoader)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -174,6 +222,9 @@ procedure TTemplate.RestoreAttributes(AStream : TStream);
   FName := AStream.ReadAnsiString;
   FMemo := AStream.ReadAnsiString;
   AStream.ReadBuffer(FCurve, sizeof(TOID));
+  AStream.ReadBuffer(FBoxDims, sizeof(TOID));
+  AStream.ReadBuffer(FTurnoutInfo2, sizeof(TOID));
+  AStream.ReadBuffer(FShovedTimbers, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -187,6 +238,9 @@ procedure TTemplate.SaveAttributes(AStream : TStream);
   AStream.WriteAnsiString(FName);
   AStream.WriteAnsiString(FMemo);
   AStream.WriteBuffer(FCurve, sizeof(TOID));
+  AStream.WriteBuffer(FBoxDims, sizeof(TOID));
+  AStream.WriteBuffer(FTurnoutInfo2, sizeof(TOID));
+  AStream.WriteBuffer(FShovedTimbers, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -200,6 +254,9 @@ procedure TTemplate.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlString(AEmitter, 'name', FName);
   SaveYamlString(AEmitter, 'memo', FMemo);
   SaveYamlObject(AEmitter, 'curve', FCurve);
+  SaveYamlObject(AEmitter, 'boxDims', FBoxDims);
+  SaveYamlObject(AEmitter, 'turnoutInfo2', FTurnoutInfo2);
+  SaveYamlObject(AEmitter, 'shovedTimbers', FShovedTimbers);
   //# endGenSaveYamlVars
   end;
 
@@ -229,9 +286,21 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TTemplate.SetCurve(const AValue: TCurve);
+function TTemplate.GetBoxDims: TBoxDims;
 begin
-  SetOwned(FCurve, AValue);
+  Result := TBoxDims(FromOID(FBoxDims));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TTemplate.GetTurnoutInfo2: TTurnoutInfo2;
+begin
+  Result := TTurnoutInfo2(FromOID(FTurnoutInfo2));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TTemplate.GetShovedTimbers: TShovedTimberOwningList;
+begin
+  Result := TShovedTimberOwningList(FromOID(FShovedTimbers));
 end;
 
 //# endGenGetSetMethods

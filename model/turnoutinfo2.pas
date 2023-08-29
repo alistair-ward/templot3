@@ -1,4 +1,4 @@
-unit Project;
+unit TurnoutInfo2;
 
 {$MODE Delphi}
 
@@ -9,29 +9,21 @@ uses
   SysUtils,
   OTPersistent,
   OTPersistentList,
-  OTYamlEmitter,
-  template;
+  OTYamlEmitter;
 
 
-{# class TProject
+{# class TTurnoutInfo2
 ---
-class: TProject
+class: TTurnoutInfo2
 attributes:
-- name: title
-  type: String;
-- name: templates
-  type: TTemplateOwningList
-  owns: create
-  access: [get]
 ...
 }
 
 type
 
-  TProject = class(TOTPersistent)
+  TTurnoutInfo2 = class(TOTPersistent)
   private
     //# genMemberVars
-    FTemplates: TOID;
     //# endGenMemberVars
 
   protected
@@ -40,7 +32,6 @@ type
     procedure SaveAttributes(AStream : TStream); override;
 
     //# genGetSetDeclarations
-    function GetTemplates: TTemplateOwningList;
     //# endGenGetSetDeclarations
 
   public
@@ -54,12 +45,11 @@ type
     procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property templates: TTemplateOwningList read GetTemplates;
     //# endGenProperty
   end;
 
-  TProjectOwningList = class(TOTOwningList<TProject>);
-  TProjectReferenceList = class(TOTReferenceList<TProject>);
+  TTurnoutInfo2OwningList = class(TOTOwningList<TTurnoutInfo2>);
+  TTurnoutInfo2ReferenceList = class(TOTReferenceList<TTurnoutInfo2>);
 
 
 implementation
@@ -71,88 +61,71 @@ var
   log : ILogger;
 
 
-{ TProject }
+{ TTurnoutInfo2 }
 
-constructor TProject.Create(AParent: TOTPersistent; AOID: TOID);
+constructor TTurnoutInfo2.Create(AParent: TOTPersistent; AOID: TOID);
 begin
   inherited Create(AParent);
   //# genCreate
-  if AOID = 0 then
-    FTemplates := TTemplateOwningList.Create(nil).oid
-  else
-    FTemplates := 0;
   //# endGenCreate
 end;
 
-destructor TProject.Destroy;
+destructor TTurnoutInfo2.Destroy;
 begin
   //# genDestroy
-  SetOwned(FTemplates, nil);
   //# endGenDestroy
   inherited;
 end;
 
-procedure TProject.Calculate;
+procedure TTurnoutInfo2.Calculate;
 begin
   // Add your calculation code here, and cache the results...
 end;
 
-procedure TProject.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
+procedure TTurnoutInfo2.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
-  if AName = 'templates' then
-    RestoreYamlObjectOwn(FTemplates, StrToInteger(AValue), ALoader)
-  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
 
-procedure TProject.RestoreAttributes(AStream : TStream);
+procedure TTurnoutInfo2.RestoreAttributes(AStream : TStream);
   var
     i: Integer;
   begin
   inherited;
 
   //# genRestoreVars
-  AStream.ReadBuffer(FTemplates, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
-procedure TProject.SaveAttributes(AStream : TStream);
+procedure TTurnoutInfo2.SaveAttributes(AStream : TStream);
   var
     i: Integer;
   begin
   inherited;
 
   //# genSaveVars
-  AStream.WriteBuffer(FTemplates, sizeof(TOID));
   //# endGenSaveVars
   end;
   
-procedure TProject.SaveYamlAttributes(AEmitter : TYamlEmitter);
+procedure TTurnoutInfo2.SaveYamlAttributes(AEmitter : TYamlEmitter);
   var
     i: Integer;
   begin
   inherited;
   
   //# genSaveYamlVars
-  SaveYamlObject(AEmitter, 'templates', FTemplates);
   //# endGenSaveYamlVars
   end;
 
 //# genGetSetMethods
-// GENERATED METHOD - DO NOT EDIT
-function TProject.GetTemplates: TTemplateOwningList;
-begin
-  Result := TTemplateOwningList(FromOID(FTemplates));
-end;
-
 //# endGenGetSetMethods
 
 initialization
-  TProject.RegisterClass;
-  TProjectOwningList.RegisterClass;
-  TProjectReferenceList.RegisterClass;
+  TTurnoutInfo2.RegisterClass;
+  TTurnoutInfo2OwningList.RegisterClass;
+  TTurnoutInfo2ReferenceList.RegisterClass;
 
-  //log := Logger.GetInstance('TProject');
+  //log := Logger.GetInstance('TTurnoutInfo2');
 end.
