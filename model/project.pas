@@ -18,11 +18,17 @@ uses
 class: TProject
 attributes:
 - name: title
-  type: String;
+  type: String
 - name: templates
   type: TTemplateOwningList
   owns: create
   access: [get]
+- name: autoRestoreOnStartup
+  type: Boolean
+- name: askRestoreOnStartup
+  type: Boolean
+- name: templotVersion
+  type: Integer
 ...
 }
 
@@ -31,7 +37,11 @@ type
   TProject = class(TOTPersistent)
   private
     //# genMemberVars
+    FTitle: String;
     FTemplates: TOID;
+    FAutoRestoreOnStartup: Boolean;
+    FAskRestoreOnStartup: Boolean;
+    FTemplotVersion: Integer;
     //# endGenMemberVars
 
   protected
@@ -41,6 +51,10 @@ type
 
     //# genGetSetDeclarations
     function GetTemplates: TTemplateOwningList;
+    procedure SetTitle(const AValue: String);
+    procedure SetAutoRestoreOnStartup(const AValue: Boolean);
+    procedure SetAskRestoreOnStartup(const AValue: Boolean);
+    procedure SetTemplotVersion(const AValue: Integer);
     //# endGenGetSetDeclarations
 
   public
@@ -54,7 +68,11 @@ type
     procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
+    property title: String read FTitle write SetTitle;
     property templates: TTemplateOwningList read GetTemplates;
+    property autoRestoreOnStartup: Boolean read FAutoRestoreOnStartup write SetAutoRestoreOnStartup;
+    property askRestoreOnStartup: Boolean read FAskRestoreOnStartup write SetAskRestoreOnStartup;
+    property templotVersion: Integer read FTemplotVersion write SetTemplotVersion;
     //# endGenProperty
   end;
 
@@ -100,8 +118,20 @@ end;
 procedure TProject.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
+  if AName = 'title' then
+    FTitle := StrToString(AValue)
+  else
   if AName = 'templates' then
     RestoreYamlObjectOwn(FTemplates, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'autoRestoreOnStartup' then
+    FAutoRestoreOnStartup := StrToBoolean(AValue)
+  else
+  if AName = 'askRestoreOnStartup' then
+    FAskRestoreOnStartup := StrToBoolean(AValue)
+  else
+  if AName = 'templotVersion' then
+    FTemplotVersion := StrToInteger(AValue)
   else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -114,7 +144,11 @@ procedure TProject.RestoreAttributes(AStream : TStream);
   inherited;
 
   //# genRestoreVars
+  FTitle := AStream.ReadAnsiString;
   AStream.ReadBuffer(FTemplates, sizeof(TOID));
+  AStream.ReadBuffer(FAutoRestoreOnStartup, sizeof(Boolean));
+  AStream.ReadBuffer(FAskRestoreOnStartup, sizeof(Boolean));
+  AStream.ReadBuffer(FTemplotVersion, sizeof(Integer));
   //# endGenRestoreVars
   end;
 
@@ -125,7 +159,11 @@ procedure TProject.SaveAttributes(AStream : TStream);
   inherited;
 
   //# genSaveVars
+  AStream.WriteAnsiString(FTitle);
   AStream.WriteBuffer(FTemplates, sizeof(TOID));
+  AStream.WriteBuffer(FAutoRestoreOnStartup, sizeof(Boolean));
+  AStream.WriteBuffer(FAskRestoreOnStartup, sizeof(Boolean));
+  AStream.WriteBuffer(FTemplotVersion, sizeof(Integer));
   //# endGenSaveVars
   end;
   
@@ -136,15 +174,55 @@ procedure TProject.SaveYamlAttributes(AEmitter : TYamlEmitter);
   inherited;
   
   //# genSaveYamlVars
+  SaveYamlString(AEmitter, 'title', FTitle);
   SaveYamlObject(AEmitter, 'templates', FTemplates);
+  SaveYamlBoolean(AEmitter, 'autoRestoreOnStartup', FAutoRestoreOnStartup);
+  SaveYamlBoolean(AEmitter, 'askRestoreOnStartup', FAskRestoreOnStartup);
+  SaveYamlInteger(AEmitter, 'templotVersion', FTemplotVersion);
   //# endGenSaveYamlVars
   end;
 
 //# genGetSetMethods
 // GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetTitle(const AValue: String);
+begin
+  if AValue <> FTitle then begin
+    SetModified;
+    FTitle := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
 function TProject.GetTemplates: TTemplateOwningList;
 begin
   Result := TTemplateOwningList(FromOID(FTemplates));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetAutoRestoreOnStartup(const AValue: Boolean);
+begin
+  if AValue <> FAutoRestoreOnStartup then begin
+    SetModified;
+    FAutoRestoreOnStartup := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetAskRestoreOnStartup(const AValue: Boolean);
+begin
+  if AValue <> FAskRestoreOnStartup then begin
+    SetModified;
+    FAskRestoreOnStartup := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetTemplotVersion(const AValue: Integer);
+begin
+  if AValue <> FTemplotVersion then begin
+    SetModified;
+    FTemplotVersion := AValue;
+  end;
 end;
 
 //# endGenGetSetMethods

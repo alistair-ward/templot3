@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="116">
+    <Units Count="117">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -642,6 +642,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="RailInfo"/>
       </Unit115>
+      <Unit116>
+        <Filename Value="model\protoinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtoInfo"/>
+      </Unit116>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

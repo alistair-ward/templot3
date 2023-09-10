@@ -10,7 +10,8 @@ uses
   OTPersistent,
   OTPersistentList,
   OTYamlEmitter,
-  RailInfo;
+  RailInfo,
+  ProtoInfo;
 
 
 { Tbox_dims record...
@@ -37,29 +38,29 @@ uses
 
 (/) rail_info: Trail_info;  // 23-5-01.
 
-auto_restore_on_startup: boolean;
+(x - move to TProject) auto_restore_on_startup: boolean;
 // these two only read from the first keep in the file..
-ask_restore_on_startup: boolean;
+(x - move to TProject) ask_restore_on_startup: boolean;
 
 //---------------------
 
-pre077_bgnd_flag: boolean;
+(x - not used)pre077_bgnd_flag: boolean;
 // no longer used, 0.77.a 2-sep-02. When true, this keep is to be drawn on the background.
 
-alignment_byte_3: byte;   // D5 0.81 12-06-05
+(x - not used) alignment_byte_3: byte;   // D5 0.81 12-06-05
 
-templot_version: integer;
+(x - moved to TProject) templot_version: integer;
 // program version number (*100, e.g Templot0 v:1.3 = 130).
 
-file_format_code: integer;  // 0= D5 format,    1= OT format  //spare_int1
+(x - not used) file_format_code: integer;  // 0= D5 format,    1= OT format  //spare_int1
 
-gauge_index: integer;      // current index into the gauge list.
+(/)gauge_index: integer;      // current index into the gauge list.
 
-gauge_exact: Boolean;      // nyi  // If true this is an exact-scale template.
-gauge_custom: Boolean;
+(/)gauge_exact: Boolean;      // nyi  // If true this is an exact-scale template.
+(/)gauge_custom: Boolean;
 // nyi  // If true this is (or was when saved) a custom gauge setting.
 
-proto_info: Tproto_info;
+(/)proto_info: Tproto_info;
 // !!! modified for 0.71.a 11-5-01. was Tgauge_info.
 
 railtop_inches: double;
@@ -161,17 +162,29 @@ turnout_info1: Tturnout_info1;
 ---
 class: TBoxDims
 attributes:
-  - name: uniqueId
-    type: Integer
-    access: [get]
-  - name: keepTimestamp
-    type: TDateTime
-    access: [get]
-  - name: railInfo
-    type: TRailInfo
-    owns: create
-    access: [get]
-...
+- name: uniqueId
+  type: Integer
+  access: [get]
+- name: keepTimestamp
+  type: TDateTime
+  access: [get]
+- name: railInfo
+  type: TRailInfo
+  owns: create
+  access: [get]
+- name: gaugeIndex
+  type: Integer
+  comment: current index into the gauge list.
+- name: gaugeExact
+  type: Boolean
+  comment: NYI - If true this is an exact-scale template...
+- name: gaugeCustom
+  type: Boolean
+  comment: NYI - If true this is (or was when saved) a custom gauge setting
+- name: protoInfo
+  type: TProtoInfo
+  owns: create
+  access: [get]
 }
 
 type
@@ -182,6 +195,10 @@ type
     FUniqueId: Integer;
     FKeepTimestamp: TDateTime;
     FRailInfo: TOID;
+    FGaugeIndex: Integer;
+    FGaugeExact: Boolean;
+    FGaugeCustom: Boolean;
+    FProtoInfo: TOID;
     //# endGenMemberVars
 
   protected
@@ -191,6 +208,10 @@ type
 
     //# genGetSetDeclarations
     function GetRailInfo: TRailInfo;
+    function GetProtoInfo: TProtoInfo;
+    procedure SetGaugeIndex(const AValue: Integer);
+    procedure SetGaugeExact(const AValue: Boolean);
+    procedure SetGaugeCustom(const AValue: Boolean);
     //# endGenGetSetDeclarations
 
   public
@@ -207,6 +228,16 @@ type
     property uniqueId: Integer read FUniqueId;
     property keepTimestamp: TDateTime read FKeepTimestamp;
     property railInfo: TRailInfo read GetRailInfo;
+
+    // current index into the gauge list.
+    property gaugeIndex: Integer read FGaugeIndex write SetGaugeIndex;
+
+    // NYI - If true this is an exact-scale template...
+    property gaugeExact: Boolean read FGaugeExact write SetGaugeExact;
+
+    // NYI - If true this is (or was when saved) a custom gauge setting
+    property gaugeCustom: Boolean read FGaugeCustom write SetGaugeCustom;
+    property protoInfo: TProtoInfo read GetProtoInfo;
     //# endGenProperty
   end;
 
@@ -233,6 +264,10 @@ begin
     FRailInfo := TRailInfo.Create(nil).oid
   else
     FRailInfo := 0;
+  if AOID = 0 then
+    FProtoInfo := TProtoInfo.Create(nil).oid
+  else
+    FProtoInfo := 0;
   //# endGenCreate
 end;
 
@@ -240,6 +275,7 @@ destructor TBoxDims.Destroy;
 begin
   //# genDestroy
   SetOwned(FRailInfo, nil);
+  SetOwned(FProtoInfo, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -261,6 +297,18 @@ begin
   if AName = 'railInfo' then
     RestoreYamlObjectOwn(FRailInfo, StrToInteger(AValue), ALoader)
   else
+  if AName = 'gaugeIndex' then
+    FGaugeIndex := StrToInteger(AValue)
+  else
+  if AName = 'gaugeExact' then
+    FGaugeExact := StrToBoolean(AValue)
+  else
+  if AName = 'gaugeCustom' then
+    FGaugeCustom := StrToBoolean(AValue)
+  else
+  if AName = 'protoInfo' then
+    RestoreYamlObjectOwn(FProtoInfo, StrToInteger(AValue), ALoader)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -275,6 +323,10 @@ procedure TBoxDims.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FUniqueId, sizeof(Integer));
   AStream.ReadBuffer(FKeepTimestamp, sizeof(TDateTime));
   AStream.ReadBuffer(FRailInfo, sizeof(TOID));
+  AStream.ReadBuffer(FGaugeIndex, sizeof(Integer));
+  AStream.ReadBuffer(FGaugeExact, sizeof(Boolean));
+  AStream.ReadBuffer(FGaugeCustom, sizeof(Boolean));
+  AStream.ReadBuffer(FProtoInfo, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -288,6 +340,10 @@ procedure TBoxDims.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FUniqueId, sizeof(Integer));
   AStream.WriteBuffer(FKeepTimestamp, sizeof(TDateTime));
   AStream.WriteBuffer(FRailInfo, sizeof(TOID));
+  AStream.WriteBuffer(FGaugeIndex, sizeof(Integer));
+  AStream.WriteBuffer(FGaugeExact, sizeof(Boolean));
+  AStream.WriteBuffer(FGaugeCustom, sizeof(Boolean));
+  AStream.WriteBuffer(FProtoInfo, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -301,6 +357,10 @@ procedure TBoxDims.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlInteger(AEmitter, 'uniqueId', FUniqueId);
   SaveYamlTDateTime(AEmitter, 'keepTimestamp', FKeepTimestamp);
   SaveYamlObject(AEmitter, 'railInfo', FRailInfo);
+  SaveYamlInteger(AEmitter, 'gaugeIndex', FGaugeIndex);
+  SaveYamlBoolean(AEmitter, 'gaugeExact', FGaugeExact);
+  SaveYamlBoolean(AEmitter, 'gaugeCustom', FGaugeCustom);
+  SaveYamlObject(AEmitter, 'protoInfo', FProtoInfo);
   //# endGenSaveYamlVars
   end;
 
@@ -309,6 +369,39 @@ procedure TBoxDims.SaveYamlAttributes(AEmitter : TYamlEmitter);
 function TBoxDims.GetRailInfo: TRailInfo;
 begin
   Result := TRailInfo(FromOID(FRailInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetGaugeIndex(const AValue: Integer);
+begin
+  if AValue <> FGaugeIndex then begin
+    SetModified;
+    FGaugeIndex := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetGaugeExact(const AValue: Boolean);
+begin
+  if AValue <> FGaugeExact then begin
+    SetModified;
+    FGaugeExact := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetGaugeCustom(const AValue: Boolean);
+begin
+  if AValue <> FGaugeCustom then begin
+    SetModified;
+    FGaugeCustom := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TBoxDims.GetProtoInfo: TProtoInfo;
+begin
+  Result := TProtoInfo(FromOID(FProtoInfo));
 end;
 
 //# endGenGetSetMethods
