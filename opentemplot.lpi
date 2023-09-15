@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="117">
+    <Units Count="119">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -647,6 +647,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ProtoInfo"/>
       </Unit116>
+      <Unit117>
+        <Filename Value="model\transforminfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TransformInfo"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="model\notchinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NotchInfo"/>
+      </Unit118>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

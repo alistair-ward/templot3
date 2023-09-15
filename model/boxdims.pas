@@ -11,7 +11,8 @@ uses
   OTPersistentList,
   OTYamlEmitter,
   RailInfo,
-  ProtoInfo;
+  ProtoInfo,
+  TransformInfo;
 
 
 { Tbox_dims record...
@@ -63,48 +64,48 @@ uses
 (/)proto_info: Tproto_info;
 // !!! modified for 0.71.a 11-5-01. was Tgauge_info.
 
-railtop_inches: double;
+(x)railtop_inches: double;
 // full-size inches railtop width - was spare_float1:double;
-railbottom_inches: double;
+(x)railbottom_inches: double;
 // full-size inches railbottom width - was spare_float2:double;
 
-alignment_byte_4: byte;   // D5 0.81 12-06-05
-alignment_byte_5: byte;   // D5 0.81 12-06-05
+(x)alignment_byte_4: byte;   // D5 0.81 12-06-05
+(x)alignment_byte_5: byte;   // D5 0.81 12-06-05
 
-version_as_loaded: integer;
+(x)version_as_loaded: integer;
 // mod 0.78.d  14-Feb-2003. the version number as loaded.
 
-bgnd_code_077: integer;          // 0=unused, 1=bgnd, -1=library   0.77.a  2-Sep-02.
+(/)bgnd_code_077: integer;          // 0=unused, 1=bgnd, -1=library   0.77.a  2-Sep-02.
 
-print_mapping_colour: integer;   // 0.76.a  27-10-01 //spare_inta:integer;
-pad_marker_colour: integer;      // 0.76.a  27-10-01 //spare_intb:integer;
+(/)print_mapping_colour: integer;   // 0.76.a  27-10-01 //spare_inta:integer;
+(/)pad_marker_colour: integer;      // 0.76.a  27-10-01 //spare_intb:integer;
 
-use_print_mapping_colour: boolean;  //spare_boola:boolean;
-use_pad_marker_colour: boolean;     //spare_boolb:boolean;
+(/)use_print_mapping_colour: boolean;  //spare_boola:boolean;
+(/)use_pad_marker_colour: boolean;     //spare_boolb:boolean;
 
 //-------------------------
 
 //  0.79.a 20-05-06  -- saved grid info -- read from last template only...
 
-spare_bool1: boolean;
+(x)spare_bool1: boolean;
 
-spare_bool2: boolean;  // out 0.93.a   was show_page_margins_on_pad:boolean;
+(x)spare_bool2: boolean;  // out 0.93.a   was show_page_margins_on_pad:boolean;
 
-spare_int2: integer;
+(x)spare_int2: integer;
 
-grid_units_code: integer;
+(x - moved to TProject)grid_units_code: integer;
 
-x_grid_spacing: double;
-y_grid_spacing: double;
+(x - moved to TProject)x_grid_spacing: double;
+(x - moved to TProject)y_grid_spacing: double;
 
-total_length_of_timbering: double;  // 0.96.a
+(x - calculated value)total_length_of_timbering: double;  // 0.96.a
 
 
-id_number: integer;         // 208a
-id_number_str: string[7];   // 208a     -N00000
+(/)id_number: integer;         // 208a
+(/)id_number_str: string[7];   // 208a     -N00000
 
-spare_boolean1: boolean;    // 208a
-spare_boolean2: boolean;    // 208a      //spare_str:string[13];
+(x)spare_boolean1: boolean;    // 208a
+(x)spare_boolean2: boolean;    // 208a      //spare_str:string[13];
 
 
 transform_info: Ttransform_info;
@@ -185,9 +186,28 @@ attributes:
   type: TProtoInfo
   owns: create
   access: [get]
+- name: backgroundCode
+  type: TBackgroundCode
+- name: printMappingColour
+  type: Integer
+- name: padMarkerColour
+  type: Integer
+- name: usePrintMappingColour
+  type: Boolean
+- name: usePadMarkerColour
+  type: Boolean
+- name: idNumber
+  type: Integer
+- name: idNumberStr
+  type: String
+- name: transformInfo
+  type: TTransformInfo
+  owns: create
+  access: [get]
 }
 
 type
+  TBackgroundCode = (bkcLibrary = -1, bkcUnused = 0, bkcBackground = 1);
 
   TBoxDims = class(TOTPersistent)
   private
@@ -199,6 +219,14 @@ type
     FGaugeExact: Boolean;
     FGaugeCustom: Boolean;
     FProtoInfo: TOID;
+    FBackgroundCode: TBackgroundCode;
+    FPrintMappingColour: Integer;
+    FPadMarkerColour: Integer;
+    FUsePrintMappingColour: Boolean;
+    FUsePadMarkerColour: Boolean;
+    FIdNumber: Integer;
+    FIdNumberStr: String;
+    FTransformInfo: TOID;
     //# endGenMemberVars
 
   protected
@@ -209,9 +237,17 @@ type
     //# genGetSetDeclarations
     function GetRailInfo: TRailInfo;
     function GetProtoInfo: TProtoInfo;
+    function GetTransformInfo: TTransformInfo;
     procedure SetGaugeIndex(const AValue: Integer);
     procedure SetGaugeExact(const AValue: Boolean);
     procedure SetGaugeCustom(const AValue: Boolean);
+    procedure SetBackgroundCode(const AValue: TBackgroundCode);
+    procedure SetPrintMappingColour(const AValue: Integer);
+    procedure SetPadMarkerColour(const AValue: Integer);
+    procedure SetUsePrintMappingColour(const AValue: Boolean);
+    procedure SetUsePadMarkerColour(const AValue: Boolean);
+    procedure SetIdNumber(const AValue: Integer);
+    procedure SetIdNumberStr(const AValue: String);
     //# endGenGetSetDeclarations
 
   public
@@ -238,7 +274,19 @@ type
     // NYI - If true this is (or was when saved) a custom gauge setting
     property gaugeCustom: Boolean read FGaugeCustom write SetGaugeCustom;
     property protoInfo: TProtoInfo read GetProtoInfo;
+    property backgroundCode: TBackgroundCode read FBackgroundCode write SetBackgroundCode;
+    property printMappingColour: Integer read FPrintMappingColour write SetPrintMappingColour;
+    property padMarkerColour: Integer read FPadMarkerColour write SetPadMarkerColour;
+    property usePrintMappingColour: Boolean read FUsePrintMappingColour write SetUsePrintMappingColour;
+    property usePadMarkerColour: Boolean read FUsePadMarkerColour write SetUsePadMarkerColour;
+    property idNumber: Integer read FIdNumber write SetIdNumber;
+    property idNumberStr: String read FIdNumberStr write SetIdNumberStr;
+    property transformInfo: TTransformInfo read GetTransformInfo;
     //# endGenProperty
+
+    function StrToTBackgroundCode(AValue: String): TBackgroundCode;
+    procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String; AValue: TBackgroundCode);
+
   end;
 
   TBoxDimsOwningList = class(TOTOwningList<TBoxDims>);
@@ -248,7 +296,8 @@ type
 implementation
 
 uses
-  TLoggerUnit;
+  TLoggerUnit,
+  Typinfo;
 
 var
   log : ILogger;
@@ -268,6 +317,10 @@ begin
     FProtoInfo := TProtoInfo.Create(nil).oid
   else
     FProtoInfo := 0;
+  if AOID = 0 then
+    FTransformInfo := TTransformInfo.Create(nil).oid
+  else
+    FTransformInfo := 0;
   //# endGenCreate
 end;
 
@@ -276,6 +329,7 @@ begin
   //# genDestroy
   SetOwned(FRailInfo, nil);
   SetOwned(FProtoInfo, nil);
+  SetOwned(FTransformInfo, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -309,6 +363,30 @@ begin
   if AName = 'protoInfo' then
     RestoreYamlObjectOwn(FProtoInfo, StrToInteger(AValue), ALoader)
   else
+  if AName = 'backgroundCode' then
+    FBackgroundCode := StrToTBackgroundCode(AValue)
+  else
+  if AName = 'printMappingColour' then
+    FPrintMappingColour := StrToInteger(AValue)
+  else
+  if AName = 'padMarkerColour' then
+    FPadMarkerColour := StrToInteger(AValue)
+  else
+  if AName = 'usePrintMappingColour' then
+    FUsePrintMappingColour := StrToBoolean(AValue)
+  else
+  if AName = 'usePadMarkerColour' then
+    FUsePadMarkerColour := StrToBoolean(AValue)
+  else
+  if AName = 'idNumber' then
+    FIdNumber := StrToInteger(AValue)
+  else
+  if AName = 'idNumberStr' then
+    FIdNumberStr := StrToString(AValue)
+  else
+  if AName = 'transformInfo' then
+    RestoreYamlObjectOwn(FTransformInfo, StrToInteger(AValue), ALoader)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -327,6 +405,14 @@ procedure TBoxDims.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FGaugeExact, sizeof(Boolean));
   AStream.ReadBuffer(FGaugeCustom, sizeof(Boolean));
   AStream.ReadBuffer(FProtoInfo, sizeof(TOID));
+  AStream.ReadBuffer(FBackgroundCode, sizeof(TBackgroundCode));
+  AStream.ReadBuffer(FPrintMappingColour, sizeof(Integer));
+  AStream.ReadBuffer(FPadMarkerColour, sizeof(Integer));
+  AStream.ReadBuffer(FUsePrintMappingColour, sizeof(Boolean));
+  AStream.ReadBuffer(FUsePadMarkerColour, sizeof(Boolean));
+  AStream.ReadBuffer(FIdNumber, sizeof(Integer));
+  FIdNumberStr := AStream.ReadAnsiString;
+  AStream.ReadBuffer(FTransformInfo, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -344,6 +430,14 @@ procedure TBoxDims.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FGaugeExact, sizeof(Boolean));
   AStream.WriteBuffer(FGaugeCustom, sizeof(Boolean));
   AStream.WriteBuffer(FProtoInfo, sizeof(TOID));
+  AStream.WriteBuffer(FBackgroundCode, sizeof(TBackgroundCode));
+  AStream.WriteBuffer(FPrintMappingColour, sizeof(Integer));
+  AStream.WriteBuffer(FPadMarkerColour, sizeof(Integer));
+  AStream.WriteBuffer(FUsePrintMappingColour, sizeof(Boolean));
+  AStream.WriteBuffer(FUsePadMarkerColour, sizeof(Boolean));
+  AStream.WriteBuffer(FIdNumber, sizeof(Integer));
+  AStream.WriteAnsiString(FIdNumberStr);
+  AStream.WriteBuffer(FTransformInfo, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -361,6 +455,14 @@ procedure TBoxDims.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'gaugeExact', FGaugeExact);
   SaveYamlBoolean(AEmitter, 'gaugeCustom', FGaugeCustom);
   SaveYamlObject(AEmitter, 'protoInfo', FProtoInfo);
+  SaveYamlTBackgroundCode(AEmitter, 'backgroundCode', FBackgroundCode);
+  SaveYamlInteger(AEmitter, 'printMappingColour', FPrintMappingColour);
+  SaveYamlInteger(AEmitter, 'padMarkerColour', FPadMarkerColour);
+  SaveYamlBoolean(AEmitter, 'usePrintMappingColour', FUsePrintMappingColour);
+  SaveYamlBoolean(AEmitter, 'usePadMarkerColour', FUsePadMarkerColour);
+  SaveYamlInteger(AEmitter, 'idNumber', FIdNumber);
+  SaveYamlString(AEmitter, 'idNumberStr', FIdNumberStr);
+  SaveYamlObject(AEmitter, 'transformInfo', FTransformInfo);
   //# endGenSaveYamlVars
   end;
 
@@ -404,7 +506,86 @@ begin
   Result := TProtoInfo(FromOID(FProtoInfo));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetBackgroundCode(const AValue: TBackgroundCode);
+begin
+  if AValue <> FBackgroundCode then begin
+    SetModified;
+    FBackgroundCode := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetPrintMappingColour(const AValue: Integer);
+begin
+  if AValue <> FPrintMappingColour then begin
+    SetModified;
+    FPrintMappingColour := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetPadMarkerColour(const AValue: Integer);
+begin
+  if AValue <> FPadMarkerColour then begin
+    SetModified;
+    FPadMarkerColour := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetUsePrintMappingColour(const AValue: Boolean);
+begin
+  if AValue <> FUsePrintMappingColour then begin
+    SetModified;
+    FUsePrintMappingColour := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetUsePadMarkerColour(const AValue: Boolean);
+begin
+  if AValue <> FUsePadMarkerColour then begin
+    SetModified;
+    FUsePadMarkerColour := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetIdNumber(const AValue: Integer);
+begin
+  if AValue <> FIdNumber then begin
+    SetModified;
+    FIdNumber := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetIdNumberStr(const AValue: String);
+begin
+  if AValue <> FIdNumberStr then begin
+    SetModified;
+    FIdNumberStr := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TBoxDims.GetTransformInfo: TTransformInfo;
+begin
+  Result := TTransformInfo(FromOID(FTransformInfo));
+end;
+
 //# endGenGetSetMethods
+
+function TBoxDims.StrToTBackgroundCode(AValue: String): TBackgroundCode;
+begin
+  Result := TBackgroundCode(GetEnumValue(TypeInfo(TBackgroundCode), AValue));
+end;
+
+procedure TBoxDims.SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String; AValue: TBackgroundCode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TBackgroundCode), ord(AValue)));
+end;
 
 initialization
   TBoxDims.RegisterClass;

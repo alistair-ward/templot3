@@ -29,10 +29,17 @@ attributes:
   type: Boolean
 - name: templotVersion
   type: Integer
+- name: gridUnits
+  type: TGridUnitCode
+- name: gridSpaceX
+  type: Double
+- name: gridSpaceY
+  type: Double
 ...
 }
 
 type
+  TGridUnitCode = (gucFeet, gucInches, gucProtoFeet, gucCentimetres, gucMillimetres);
 
   TProject = class(TOTPersistent)
   private
@@ -42,6 +49,9 @@ type
     FAutoRestoreOnStartup: Boolean;
     FAskRestoreOnStartup: Boolean;
     FTemplotVersion: Integer;
+    FGridUnits: TGridUnitCode;
+    FGridSpaceX: Double;
+    FGridSpaceY: Double;
     //# endGenMemberVars
 
   protected
@@ -55,6 +65,9 @@ type
     procedure SetAutoRestoreOnStartup(const AValue: Boolean);
     procedure SetAskRestoreOnStartup(const AValue: Boolean);
     procedure SetTemplotVersion(const AValue: Integer);
+    procedure SetGridUnits(const AValue: TGridUnitCode);
+    procedure SetGridSpaceX(const AValue: Double);
+    procedure SetGridSpaceY(const AValue: Double);
     //# endGenGetSetDeclarations
 
   public
@@ -73,7 +86,14 @@ type
     property autoRestoreOnStartup: Boolean read FAutoRestoreOnStartup write SetAutoRestoreOnStartup;
     property askRestoreOnStartup: Boolean read FAskRestoreOnStartup write SetAskRestoreOnStartup;
     property templotVersion: Integer read FTemplotVersion write SetTemplotVersion;
+    property gridUnits: TGridUnitCode read FGridUnits write SetGridUnits;
+    property gridSpaceX: Double read FGridSpaceX write SetGridSpaceX;
+    property gridSpaceY: Double read FGridSpaceY write SetGridSpaceY;
     //# endGenProperty
+
+    function StrToTGridUnitCode(AValue: String): TGridUnitCode;
+    procedure SaveYamlTGridUnitCode(AEmitter: TYamlEmitter; const AName: String; AValue: TGridUnitCode);
+
   end;
 
   TProjectOwningList = class(TOTOwningList<TProject>);
@@ -83,7 +103,8 @@ type
 implementation
 
 uses
-  TLoggerUnit;
+  TLoggerUnit,
+  Typinfo;
 
 var
   log : ILogger;
@@ -133,6 +154,15 @@ begin
   if AName = 'templotVersion' then
     FTemplotVersion := StrToInteger(AValue)
   else
+  if AName = 'gridUnits' then
+    FGridUnits := StrToTGridUnitCode(AValue)
+  else
+  if AName = 'gridSpaceX' then
+    FGridSpaceX := StrToDouble(AValue)
+  else
+  if AName = 'gridSpaceY' then
+    FGridSpaceY := StrToDouble(AValue)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -149,6 +179,9 @@ procedure TProject.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FAutoRestoreOnStartup, sizeof(Boolean));
   AStream.ReadBuffer(FAskRestoreOnStartup, sizeof(Boolean));
   AStream.ReadBuffer(FTemplotVersion, sizeof(Integer));
+  AStream.ReadBuffer(FGridUnits, sizeof(TGridUnitCode));
+  AStream.ReadBuffer(FGridSpaceX, sizeof(Double));
+  AStream.ReadBuffer(FGridSpaceY, sizeof(Double));
   //# endGenRestoreVars
   end;
 
@@ -164,6 +197,9 @@ procedure TProject.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FAutoRestoreOnStartup, sizeof(Boolean));
   AStream.WriteBuffer(FAskRestoreOnStartup, sizeof(Boolean));
   AStream.WriteBuffer(FTemplotVersion, sizeof(Integer));
+  AStream.WriteBuffer(FGridUnits, sizeof(TGridUnitCode));
+  AStream.WriteBuffer(FGridSpaceX, sizeof(Double));
+  AStream.WriteBuffer(FGridSpaceY, sizeof(Double));
   //# endGenSaveVars
   end;
   
@@ -179,6 +215,9 @@ procedure TProject.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'autoRestoreOnStartup', FAutoRestoreOnStartup);
   SaveYamlBoolean(AEmitter, 'askRestoreOnStartup', FAskRestoreOnStartup);
   SaveYamlInteger(AEmitter, 'templotVersion', FTemplotVersion);
+  SaveYamlTGridUnitCode(AEmitter, 'gridUnits', FGridUnits);
+  SaveYamlDouble(AEmitter, 'gridSpaceX', FGridSpaceX);
+  SaveYamlDouble(AEmitter, 'gridSpaceY', FGridSpaceY);
   //# endGenSaveYamlVars
   end;
 
@@ -225,7 +264,46 @@ begin
   end;
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetGridUnits(const AValue: TGridUnitCode);
+begin
+  if AValue <> FGridUnits then begin
+    SetModified;
+    FGridUnits := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetGridSpaceX(const AValue: Double);
+begin
+  if AValue <> FGridSpaceX then begin
+    SetModified;
+    FGridSpaceX := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetGridSpaceY(const AValue: Double);
+begin
+  if AValue <> FGridSpaceY then begin
+    SetModified;
+    FGridSpaceY := AValue;
+  end;
+end;
+
 //# endGenGetSetMethods
+
+function TProject.StrToTGridUnitCode(AValue: String): TGridUnitCode;
+begin
+  Result := TGridUnitCode(GetEnumValue(TypeInfo(TGridUnitCode), AValue));
+end;
+
+procedure TProject.SaveYamlTGridUnitCode(AEmitter: TYamlEmitter; const AName: String; AValue: TGridUnitCode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TGridUnitCode), ord(AValue)));
+end;
+
+
 
 initialization
   TProject.RegisterClass;

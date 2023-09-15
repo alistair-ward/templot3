@@ -38,7 +38,8 @@ interface
 
 uses
   Classes,
-  SysUtils;
+  SysUtils,
+  OTYamlEmitter;
 
 type
   Tpex = record                      // x,y point floats (TPoint is integer).
@@ -58,6 +59,7 @@ type
     class operator -(a, b: Tpex): Tpex;
     class operator * (a: TPex; b: double): TPex;
     class operator / (a: TPex; b: double): TPex;
+    class operator = (a, b: TPex): boolean;
   end;
   Ppex = ^Tpex;
 
@@ -66,11 +68,17 @@ type
     max: Tpex;
   end;
 
+function StrToTpex(const AValue: String): Tpex;
+procedure SaveYamlTpex(AEmitter: TYamlEmitter; const AName: String; AValue: Tpex);
 
 implementation
 
 uses
-  Math;
+  Math,
+  OTPersistent;
+
+var
+  decimalPointFormat: TFormatSettings;
 
 class function Tpex.xy(x, y: double): Tpex;
 begin
@@ -114,6 +122,11 @@ begin
   Result.y := a.y / b;
 end;
 
+class operator Tpex. = (a, b: TPex): boolean;
+begin
+  Result := (a.x = b.x) and (a.y = b.y);
+end;
+
 function Tpex.magnitude: double;
 begin
   Result := sqrt(x * x + y * y);
@@ -145,6 +158,26 @@ begin
   Result := arctan2(yy, xx);
 end;
 
+function StrToTpex(const AValue: String): Tpex;
+var
+  comma: Integer;
+  xStr: String;
+  yStr: String;
+begin
+  comma := Pos(AValue, ',');
+  xStr := Trim(Copy(AValue, 1, comma - 1));
+  yStr := Trim(Copy(AValue, comma + 1, Length(AValue) - comma + 1));
+
+  Result.set_xy( StrToFloat(xStr, decimalPointFormat), StrToFloat(yStr, decimalPointFormat));
+end;
+
+procedure SaveYamlTpex(AEmitter: TYamlEmitter; const AName: String; AValue: Tpex);
+begin
+  SaveYamlString(AEmitter, AName, Format('%f,%f', [AValue.x, AValue.y], decimalPointFormat));
+end;
+
+initialization
+  decimalPointFormat.DecimalSeparator := '.';
 end.
 
 
