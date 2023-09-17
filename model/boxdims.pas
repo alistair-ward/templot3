@@ -12,7 +12,8 @@ uses
   OTYamlEmitter,
   RailInfo,
   ProtoInfo,
-  TransformInfo;
+  TransformInfo,
+  PlatformTrackbedInfo;
 
 
 { Tbox_dims record...
@@ -108,9 +109,9 @@ uses
 (x)spare_boolean2: boolean;    // 208a      //spare_str:string[13];
 
 
-transform_info: Ttransform_info;
+(/) transform_info: Ttransform_info;
 
-platform_trackbed_info: Tplatform_trackbed_info;
+(/) platform_trackbed_info: Tplatform_trackbed_info;
 // 0.93.a  was check_rail_mints:Tcheck_rail_mints;
 
 align_info: Talignment_info;
@@ -202,6 +203,10 @@ attributes:
   type: String
 - name: transformInfo
   type: TTransformInfo
+  owns: create
+  access: [get]
+- name: platformTrackbedInfo
+  type: TPlatformTrackbedInfo
   owns: create
   access: [get]
 }

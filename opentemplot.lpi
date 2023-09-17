@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="119">
+    <Units Count="120">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -657,6 +657,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="NotchInfo"/>
       </Unit118>
+      <Unit119>
+        <Filename Value="model\platformtrackbedinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PlatformTrackbedInfo"/>
+      </Unit119>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
