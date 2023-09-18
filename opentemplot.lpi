@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="120">
+    <Units Count="121">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -662,6 +662,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="PlatformTrackbedInfo"/>
       </Unit119>
+      <Unit120>
+        <Filename Value="model\alignmentinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AlignmentInfo"/>
+      </Unit120>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

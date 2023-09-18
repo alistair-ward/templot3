@@ -13,7 +13,8 @@ uses
   RailInfo,
   ProtoInfo,
   TransformInfo,
-  PlatformTrackbedInfo;
+  PlatformTrackbedInfo,
+  AlignmentInfo;
 
 
 { Tbox_dims record...
@@ -114,7 +115,7 @@ uses
 (/) platform_trackbed_info: Tplatform_trackbed_info;
 // 0.93.a  was check_rail_mints:Tcheck_rail_mints;
 
-align_info: Talignment_info;
+(/) align_info: Talignment_info;
 
 
 rail_type: integer;
@@ -209,6 +210,10 @@ attributes:
   type: TPlatformTrackbedInfo
   owns: create
   access: [get]
+- name: alignmentInfo
+  type: TAlignmentInfo
+  owns: create
+  access: [get]
 }
 
 type
@@ -232,6 +237,8 @@ type
     FIdNumber: Integer;
     FIdNumberStr: String;
     FTransformInfo: TOID;
+    FPlatformTrackbedInfo: TOID;
+    FAlignmentInfo: TOID;
     //# endGenMemberVars
 
   protected
@@ -243,6 +250,8 @@ type
     function GetRailInfo: TRailInfo;
     function GetProtoInfo: TProtoInfo;
     function GetTransformInfo: TTransformInfo;
+    function GetPlatformTrackbedInfo: TPlatformTrackbedInfo;
+    function GetAlignmentInfo: TAlignmentInfo;
     procedure SetGaugeIndex(const AValue: Integer);
     procedure SetGaugeExact(const AValue: Boolean);
     procedure SetGaugeCustom(const AValue: Boolean);
@@ -287,6 +296,8 @@ type
     property idNumber: Integer read FIdNumber write SetIdNumber;
     property idNumberStr: String read FIdNumberStr write SetIdNumberStr;
     property transformInfo: TTransformInfo read GetTransformInfo;
+    property platformTrackbedInfo: TPlatformTrackbedInfo read GetPlatformTrackbedInfo;
+    property alignmentInfo: TAlignmentInfo read GetAlignmentInfo;
     //# endGenProperty
 
     function StrToTBackgroundCode(AValue: String): TBackgroundCode;
@@ -326,6 +337,14 @@ begin
     FTransformInfo := TTransformInfo.Create(nil).oid
   else
     FTransformInfo := 0;
+  if AOID = 0 then
+    FPlatformTrackbedInfo := TPlatformTrackbedInfo.Create(nil).oid
+  else
+    FPlatformTrackbedInfo := 0;
+  if AOID = 0 then
+    FAlignmentInfo := TAlignmentInfo.Create(nil).oid
+  else
+    FAlignmentInfo := 0;
   //# endGenCreate
 end;
 
@@ -335,6 +354,8 @@ begin
   SetOwned(FRailInfo, nil);
   SetOwned(FProtoInfo, nil);
   SetOwned(FTransformInfo, nil);
+  SetOwned(FPlatformTrackbedInfo, nil);
+  SetOwned(FAlignmentInfo, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -392,6 +413,12 @@ begin
   if AName = 'transformInfo' then
     RestoreYamlObjectOwn(FTransformInfo, StrToInteger(AValue), ALoader)
   else
+  if AName = 'platformTrackbedInfo' then
+    RestoreYamlObjectOwn(FPlatformTrackbedInfo, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'alignmentInfo' then
+    RestoreYamlObjectOwn(FAlignmentInfo, StrToInteger(AValue), ALoader)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -418,6 +445,8 @@ procedure TBoxDims.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FIdNumber, sizeof(Integer));
   FIdNumberStr := AStream.ReadAnsiString;
   AStream.ReadBuffer(FTransformInfo, sizeof(TOID));
+  AStream.ReadBuffer(FPlatformTrackbedInfo, sizeof(TOID));
+  AStream.ReadBuffer(FAlignmentInfo, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -443,6 +472,8 @@ procedure TBoxDims.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FIdNumber, sizeof(Integer));
   AStream.WriteAnsiString(FIdNumberStr);
   AStream.WriteBuffer(FTransformInfo, sizeof(TOID));
+  AStream.WriteBuffer(FPlatformTrackbedInfo, sizeof(TOID));
+  AStream.WriteBuffer(FAlignmentInfo, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -468,6 +499,8 @@ procedure TBoxDims.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlInteger(AEmitter, 'idNumber', FIdNumber);
   SaveYamlString(AEmitter, 'idNumberStr', FIdNumberStr);
   SaveYamlObject(AEmitter, 'transformInfo', FTransformInfo);
+  SaveYamlObject(AEmitter, 'platformTrackbedInfo', FPlatformTrackbedInfo);
+  SaveYamlObject(AEmitter, 'alignmentInfo', FAlignmentInfo);
   //# endGenSaveYamlVars
   end;
 
@@ -578,6 +611,18 @@ end;
 function TBoxDims.GetTransformInfo: TTransformInfo;
 begin
   Result := TTransformInfo(FromOID(FTransformInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TBoxDims.GetPlatformTrackbedInfo: TPlatformTrackbedInfo;
+begin
+  Result := TPlatformTrackbedInfo(FromOID(FPlatformTrackbedInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TBoxDims.GetAlignmentInfo: TAlignmentInfo;
+begin
+  Result := TAlignmentInfo(FromOID(FAlignmentInfo));
 end;
 
 //# endGenGetSetMethods
