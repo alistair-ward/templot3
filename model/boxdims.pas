@@ -14,7 +14,8 @@ uses
   ProtoInfo,
   TransformInfo,
   PlatformTrackbedInfo,
-  AlignmentInfo;
+  AlignmentInfo,
+  CheckDiffs;
 
 
 { Tbox_dims record...
@@ -118,27 +119,27 @@ uses
 (/) align_info: Talignment_info;
 
 
-rail_type: integer;
+(/) rail_type: integer;
 // 0=no rails, 1=head only (bullhead), 2=head+foot (flatbottom).   // spare_int1:integer
 
-fb_kludge_template_code: integer;
+(/) fb_kludge_template_code: integer;
 // 0.94.a   0=normal template, 1=inner foot lines, 2=outer foot lines   //spare_int3:integer;
 
-box_save_done: boolean;
+(x - move to TProject) box_save_done: boolean;
 // read only from first keep on restore previous contents. 23-6-00 v:0.62.a      //spare_flag1:boolean;
 
-uninclined_rails: boolean;      // True = rails vertical.
+(/)uninclined_rails: boolean;      // True = rails vertical.
 
-disable_f7_snap: boolean;       //  0.82.a  spare_bool3:boolean;
+(/)disable_f7_snap: boolean;       //  0.82.a  spare_bool3:boolean;
 
-spare_bool4: boolean;
+(x)spare_bool4: boolean;
 
-mod_text_x: double;
+(/)mod_text_x: double;
 // (mm) label position modifiers..   //spare_float1:double;
-mod_text_y: double;
+(/)mod_text_y: double;
 //spare_float2:double;
 
-flatbottom_width: double;
+(/)flatbottom_width: double;
 // width of flatbottom rail base (mm).    //spare_float3:double;
 
 check_diffs: Tcheck_diffs;      // 0.94.a check rail end modifiers - 248 bytes
@@ -214,10 +215,34 @@ attributes:
   type: TAlignmentInfo
   owns: create
   access: [get]
+- name: railSection
+  type: TRailSection
+- name: flatbottomKludge
+  type: Integer
+  comment: 0=normal template, 1=inner foot lines, 2=outer foot lines
+- name: railsInclined
+  type: TRailsInclined
+- name: disableF7Snap
+  type: Boolean
+- name: labelModifierX
+  type: Double
+  comment: (mm) label position modifier
+- name: labelModifierY
+  type: Double
+  comment: (mm) label position modifier
+- name: flatbottomWidth
+  type: Double
+  comment: width of flatbottom rail base (mm)
+- name: checkDiffs
+  type: TCheckDiffs
+  owns: create
+  access: [get]
 }
 
 type
   TBackgroundCode = (bkcLibrary = -1, bkcUnused = 0, bkcBackground = 1);
+  TRailSection = (rsNoRails, rsBullhead, rsFlatbottom);
+  TRailsInclined = (riVertical, riInclined);
 
   TBoxDims = class(TOTPersistent)
   private
@@ -239,12 +264,15 @@ type
     FTransformInfo: TOID;
     FPlatformTrackbedInfo: TOID;
     FAlignmentInfo: TOID;
+    FRailSection: TRailSection;
+    FFlatbottomKludge: Integer;
+    FRailsInclined: TRailsInclined;
     //# endGenMemberVars
 
   protected
     procedure Calculate; override;
-    procedure RestoreAttributes(AStream : TStream); override;
-    procedure SaveAttributes(AStream : TStream); override;
+    procedure RestoreAttributes(AStream: TStream); override;
+    procedure SaveAttributes(AStream: TStream); override;
 
     //# genGetSetDeclarations
     function GetRailInfo: TRailInfo;
@@ -262,6 +290,9 @@ type
     procedure SetUsePadMarkerColour(const AValue: Boolean);
     procedure SetIdNumber(const AValue: Integer);
     procedure SetIdNumberStr(const AValue: String);
+    procedure SetRailSection(const AValue: TRailSection);
+    procedure SetFlatbottomKludge(const AValue: Integer);
+    procedure SetRailsInclined(const AValue: TRailsInclined);
     //# endGenGetSetDeclarations
 
   public
@@ -271,8 +302,9 @@ type
     //# genPublicDeclarations
     //# endGenPublicDeclarations
 
-    procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
-    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+    procedure RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+      ALoader: TOTPersistentLoader); override;
+    procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
     property uniqueId: Integer read FUniqueId;
@@ -298,15 +330,28 @@ type
     property transformInfo: TTransformInfo read GetTransformInfo;
     property platformTrackbedInfo: TPlatformTrackbedInfo read GetPlatformTrackbedInfo;
     property alignmentInfo: TAlignmentInfo read GetAlignmentInfo;
-    //# endGenProperty
+    property railSection: TRailSection read FRailSection write SetRailSection;
 
-    function StrToTBackgroundCode(AValue: String): TBackgroundCode;
-    procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String; AValue: TBackgroundCode);
+    // 0=normal template, 1=inner foot lines, 2=outer foot lines
+    property flatbottomKludge: Integer read FFlatbottomKludge write SetFlatbottomKludge;
+    property railsInclined: TRailsInclined read FRailsInclined write SetRailsInclined;
+    //# endGenProperty
 
   end;
 
   TBoxDimsOwningList = class(TOTOwningList<TBoxDims>);
   TBoxDimsReferenceList = class(TOTReferenceList<TBoxDims>);
+
+
+function StrToTBackgroundCode(AValue: String): TBackgroundCode;
+procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TBackgroundCode);
+function StrToTRailSection(AValue: String): TRailSection;
+procedure SaveYamlTRailSection(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TRailSection);
+function StrToTRailsInclined(AValue: String): TRailsInclined;
+procedure SaveYamlTRailsInclined(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TRailsInclined);
 
 
 implementation
@@ -316,8 +361,40 @@ uses
   Typinfo;
 
 var
-  log : ILogger;
+  log: ILogger;
 
+
+function StrToTBackgroundCode(AValue: String): TBackgroundCode;
+begin
+  Result := TBackgroundCode(GetEnumValue(TypeInfo(TBackgroundCode), AValue));
+end;
+
+procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TBackgroundCode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TBackgroundCode), Ord(AValue)));
+end;
+
+function StrToTRailSection(AValue: String): TRailSection;
+begin
+  Result := TRailSection(GetEnumValue(TypeInfo(TRailSection), AValue));
+end;
+
+procedure SaveYamlTRailSection(AEmitter: TYamlEmitter; const AName: String; AValue: TRailSection);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TRailSection), Ord(AValue)));
+end;
+
+function StrToTRailsInclined(AValue: String): TRailsInclined;
+begin
+  Result := TRailsInclined(GetEnumValue(TypeInfo(TRailsInclined), AValue));
+end;
+
+procedure SaveYamlTRailsInclined(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TRailsInclined);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TRailsInclined), Ord(AValue)));
+end;
 
 { TBoxDims }
 
@@ -365,7 +442,8 @@ begin
   // Add your calculation code here, and cache the results...
 end;
 
-procedure TBoxDims.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
+procedure TBoxDims.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+  ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
   if AName = 'uniqueId' then
@@ -419,14 +497,23 @@ begin
   if AName = 'alignmentInfo' then
     RestoreYamlObjectOwn(FAlignmentInfo, StrToInteger(AValue), ALoader)
   else
-  //# endGenRestoreYamlVars
+  if AName = 'railSection' then
+    FRailSection := StrToTRailSection(AValue)
+  else
+  if AName = 'flatbottomKludge' then
+    FFlatbottomKludge := StrToInteger(AValue)
+  else
+  if AName = 'railsInclined' then
+    FRailsInclined := StrToTRailsInclined(AValue)
+  else
+    //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
 
-procedure TBoxDims.RestoreAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TBoxDims.RestoreAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genRestoreVars
@@ -447,13 +534,16 @@ procedure TBoxDims.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FTransformInfo, sizeof(TOID));
   AStream.ReadBuffer(FPlatformTrackbedInfo, sizeof(TOID));
   AStream.ReadBuffer(FAlignmentInfo, sizeof(TOID));
+  AStream.ReadBuffer(FRailSection, sizeof(TRailSection));
+  AStream.ReadBuffer(FFlatbottomKludge, sizeof(Integer));
+  AStream.ReadBuffer(FRailsInclined, sizeof(TRailsInclined));
   //# endGenRestoreVars
-  end;
+end;
 
-procedure TBoxDims.SaveAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TBoxDims.SaveAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genSaveVars
@@ -474,15 +564,18 @@ procedure TBoxDims.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FTransformInfo, sizeof(TOID));
   AStream.WriteBuffer(FPlatformTrackbedInfo, sizeof(TOID));
   AStream.WriteBuffer(FAlignmentInfo, sizeof(TOID));
+  AStream.WriteBuffer(FRailSection, sizeof(TRailSection));
+  AStream.WriteBuffer(FFlatbottomKludge, sizeof(Integer));
+  AStream.WriteBuffer(FRailsInclined, sizeof(TRailsInclined));
   //# endGenSaveVars
-  end;
-  
-procedure TBoxDims.SaveYamlAttributes(AEmitter : TYamlEmitter);
-  var
-    i: Integer;
-  begin
+end;
+
+procedure TBoxDims.SaveYamlAttributes(AEmitter: TYamlEmitter);
+var
+  i: Integer;
+begin
   inherited;
-  
+
   //# genSaveYamlVars
   SaveYamlInteger(AEmitter, 'uniqueId', FUniqueId);
   SaveYamlTDateTime(AEmitter, 'keepTimestamp', FKeepTimestamp);
@@ -501,8 +594,11 @@ procedure TBoxDims.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlObject(AEmitter, 'transformInfo', FTransformInfo);
   SaveYamlObject(AEmitter, 'platformTrackbedInfo', FPlatformTrackbedInfo);
   SaveYamlObject(AEmitter, 'alignmentInfo', FAlignmentInfo);
+  SaveYamlTRailSection(AEmitter, 'railSection', FRailSection);
+  SaveYamlInteger(AEmitter, 'flatbottomKludge', FFlatbottomKludge);
+  SaveYamlTRailsInclined(AEmitter, 'railsInclined', FRailsInclined);
   //# endGenSaveYamlVars
-  end;
+end;
 
 //# genGetSetMethods
 // GENERATED METHOD - DO NOT EDIT
@@ -625,17 +721,34 @@ begin
   Result := TAlignmentInfo(FromOID(FAlignmentInfo));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRailSection(const AValue: TRailSection);
+begin
+  if AValue <> FRailSection then begin
+    SetModified;
+    FRailSection := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetFlatbottomKludge(const AValue: Integer);
+begin
+  if AValue <> FFlatbottomKludge then begin
+    SetModified;
+    FFlatbottomKludge := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRailsInclined(const AValue: TRailsInclined);
+begin
+  if AValue <> FRailsInclined then begin
+    SetModified;
+    FRailsInclined := AValue;
+  end;
+end;
+
 //# endGenGetSetMethods
-
-function TBoxDims.StrToTBackgroundCode(AValue: String): TBackgroundCode;
-begin
-  Result := TBackgroundCode(GetEnumValue(TypeInfo(TBackgroundCode), AValue));
-end;
-
-procedure TBoxDims.SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String; AValue: TBackgroundCode);
-begin
-  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TBackgroundCode), ord(AValue)));
-end;
 
 initialization
   TBoxDims.RegisterClass;

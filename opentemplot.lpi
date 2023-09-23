@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="121">
+    <Units Count="123">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -667,6 +667,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="AlignmentInfo"/>
       </Unit120>
+      <Unit121>
+        <Filename Value="model\checkdiffs.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CheckDiffs"/>
+      </Unit121>
+      <Unit122>
+        <Filename Value="model\checkenddiff.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CheckEndDiff"/>
+      </Unit122>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

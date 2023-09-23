@@ -35,6 +35,8 @@ attributes:
   type: Double
 - name: gridSpaceY
   type: Double
+- name: boxSaveDone
+  type: Boolean
 ...
 }
 
@@ -52,6 +54,7 @@ type
     FGridUnits: TGridUnitCode;
     FGridSpaceX: Double;
     FGridSpaceY: Double;
+    FBoxSaveDone: Boolean;
     //# endGenMemberVars
 
   protected
@@ -68,6 +71,7 @@ type
     procedure SetGridUnits(const AValue: TGridUnitCode);
     procedure SetGridSpaceX(const AValue: Double);
     procedure SetGridSpaceY(const AValue: Double);
+    procedure SetBoxSaveDone(const AValue: Boolean);
     //# endGenGetSetDeclarations
 
   public
@@ -89,6 +93,7 @@ type
     property gridUnits: TGridUnitCode read FGridUnits write SetGridUnits;
     property gridSpaceX: Double read FGridSpaceX write SetGridSpaceX;
     property gridSpaceY: Double read FGridSpaceY write SetGridSpaceY;
+    property boxSaveDone: Boolean read FBoxSaveDone write SetBoxSaveDone;
     //# endGenProperty
 
     function StrToTGridUnitCode(AValue: String): TGridUnitCode;
@@ -163,6 +168,9 @@ begin
   if AName = 'gridSpaceY' then
     FGridSpaceY := StrToDouble(AValue)
   else
+  if AName = 'boxSaveDone' then
+    FBoxSaveDone := StrToBoolean(AValue)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -182,6 +190,7 @@ procedure TProject.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FGridUnits, sizeof(TGridUnitCode));
   AStream.ReadBuffer(FGridSpaceX, sizeof(Double));
   AStream.ReadBuffer(FGridSpaceY, sizeof(Double));
+  AStream.ReadBuffer(FBoxSaveDone, sizeof(Boolean));
   //# endGenRestoreVars
   end;
 
@@ -200,6 +209,7 @@ procedure TProject.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FGridUnits, sizeof(TGridUnitCode));
   AStream.WriteBuffer(FGridSpaceX, sizeof(Double));
   AStream.WriteBuffer(FGridSpaceY, sizeof(Double));
+  AStream.WriteBuffer(FBoxSaveDone, sizeof(Boolean));
   //# endGenSaveVars
   end;
   
@@ -218,6 +228,7 @@ procedure TProject.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlTGridUnitCode(AEmitter, 'gridUnits', FGridUnits);
   SaveYamlDouble(AEmitter, 'gridSpaceX', FGridSpaceX);
   SaveYamlDouble(AEmitter, 'gridSpaceY', FGridSpaceY);
+  SaveYamlBoolean(AEmitter, 'boxSaveDone', FBoxSaveDone);
   //# endGenSaveYamlVars
   end;
 
@@ -288,6 +299,15 @@ begin
   if AValue <> FGridSpaceY then begin
     SetModified;
     FGridSpaceY := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TProject.SetBoxSaveDone(const AValue: Boolean);
+begin
+  if AValue <> FBoxSaveDone then begin
+    SetModified;
+    FBoxSaveDone := AValue;
   end;
 end;
 
