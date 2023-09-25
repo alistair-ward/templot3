@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="123">
+    <Units Count="124">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -677,6 +677,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="CheckEndDiff"/>
       </Unit122>
+      <Unit123>
+        <Filename Value="model\turnoutinfo1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TurnoutInfo1"/>
+      </Unit123>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

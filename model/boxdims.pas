@@ -15,7 +15,8 @@ uses
   TransformInfo,
   PlatformTrackbedInfo,
   AlignmentInfo,
-  CheckDiffs;
+  CheckDiffs,
+  TurnoutInfo1;
 
 
 { Tbox_dims record...
@@ -142,23 +143,23 @@ uses
 (/)flatbottom_width: double;
 // width of flatbottom rail base (mm).    //spare_float3:double;
 
-check_diffs: Tcheck_diffs;      // 0.94.a check rail end modifiers - 248 bytes
+(/)check_diffs: Tcheck_diffs;      // 0.94.a check rail end modifiers - 248 bytes
 
 
-retain_diffs_on_make_flag: boolean;    // 0.94.a check rail diffs
-retain_diffs_on_mint_flag: boolean;    // 0.94.a check rail diffs
+(/)retain_diffs_on_make_flag: boolean;    // 0.94.a check rail diffs
+(/)retain_diffs_on_mint_flag: boolean;    // 0.94.a check rail diffs
 
-retain_entry_straight_on_make_flag: boolean;
+(/)retain_entry_straight_on_make_flag: boolean;
 // 213a  spare_byte1:byte;   // 0.94.a
-retain_entry_straight_on_mint_flag: boolean;
+(/)retain_entry_straight_on_mint_flag: boolean;
 // 213a  spare_byte2:byte;   // 0.94.a
 
 // 0.94.a timber shoving mods..
 
-retain_shoves_on_make_flag: boolean;
-retain_shoves_on_mint_flag: boolean;
+(/)retain_shoves_on_make_flag: boolean;
+(/)retain_shoves_on_mint_flag: boolean;
 
-turnout_info1: Tturnout_info1;
+(/)turnout_info1: Tturnout_info1;
 }
 
 
@@ -237,6 +238,22 @@ attributes:
   type: TCheckDiffs
   owns: create
   access: [get]
+- name: retainDiffsOnMake
+  type: Boolean
+- name: retainDiffsOnMint
+  type: Boolean
+- name: retainEntryStraightOnMake
+  type: Boolean
+- name: retainEntryStraightOnMint
+  type: Boolean
+- name: retainShovesOnMake
+  type: Boolean
+- name: retainShovesOnMint
+  type: Boolean
+- name: turnoutInfo1
+  type: TTurnoutInfo1
+  owns: create
+  access: [get]
 }
 
 type
@@ -267,6 +284,18 @@ type
     FRailSection: TRailSection;
     FFlatbottomKludge: Integer;
     FRailsInclined: TRailsInclined;
+    FDisableF7Snap: Boolean;
+    FLabelModifierX: Double;
+    FLabelModifierY: Double;
+    FFlatbottomWidth: Double;
+    FCheckDiffs: TOID;
+    FRetainDiffsOnMake: Boolean;
+    FRetainDiffsOnMint: Boolean;
+    FRetainEntryStraightOnMake: Boolean;
+    FRetainEntryStraightOnMint: Boolean;
+    FRetainShovesOnMake: Boolean;
+    FRetainShovesOnMint: Boolean;
+    FTurnoutInfo1: TOID;
     //# endGenMemberVars
 
   protected
@@ -280,6 +309,8 @@ type
     function GetTransformInfo: TTransformInfo;
     function GetPlatformTrackbedInfo: TPlatformTrackbedInfo;
     function GetAlignmentInfo: TAlignmentInfo;
+    function GetCheckDiffs: TCheckDiffs;
+    function GetTurnoutInfo1: TTurnoutInfo1;
     procedure SetGaugeIndex(const AValue: Integer);
     procedure SetGaugeExact(const AValue: Boolean);
     procedure SetGaugeCustom(const AValue: Boolean);
@@ -293,6 +324,16 @@ type
     procedure SetRailSection(const AValue: TRailSection);
     procedure SetFlatbottomKludge(const AValue: Integer);
     procedure SetRailsInclined(const AValue: TRailsInclined);
+    procedure SetDisableF7Snap(const AValue: Boolean);
+    procedure SetLabelModifierX(const AValue: Double);
+    procedure SetLabelModifierY(const AValue: Double);
+    procedure SetFlatbottomWidth(const AValue: Double);
+    procedure SetRetainDiffsOnMake(const AValue: Boolean);
+    procedure SetRetainDiffsOnMint(const AValue: Boolean);
+    procedure SetRetainEntryStraightOnMake(const AValue: Boolean);
+    procedure SetRetainEntryStraightOnMint(const AValue: Boolean);
+    procedure SetRetainShovesOnMake(const AValue: Boolean);
+    procedure SetRetainShovesOnMint(const AValue: Boolean);
     //# endGenGetSetDeclarations
 
   public
@@ -335,6 +376,24 @@ type
     // 0=normal template, 1=inner foot lines, 2=outer foot lines
     property flatbottomKludge: Integer read FFlatbottomKludge write SetFlatbottomKludge;
     property railsInclined: TRailsInclined read FRailsInclined write SetRailsInclined;
+    property disableF7Snap: Boolean read FDisableF7Snap write SetDisableF7Snap;
+
+    // (mm) label position modifier
+    property labelModifierX: Double read FLabelModifierX write SetLabelModifierX;
+
+    // (mm) label position modifier
+    property labelModifierY: Double read FLabelModifierY write SetLabelModifierY;
+
+    // width of flatbottom rail base (mm)
+    property flatbottomWidth: Double read FFlatbottomWidth write SetFlatbottomWidth;
+    property checkDiffs: TCheckDiffs read GetCheckDiffs;
+    property retainDiffsOnMake: Boolean read FRetainDiffsOnMake write SetRetainDiffsOnMake;
+    property retainDiffsOnMint: Boolean read FRetainDiffsOnMint write SetRetainDiffsOnMint;
+    property retainEntryStraightOnMake: Boolean read FRetainEntryStraightOnMake write SetRetainEntryStraightOnMake;
+    property retainEntryStraightOnMint: Boolean read FRetainEntryStraightOnMint write SetRetainEntryStraightOnMint;
+    property retainShovesOnMake: Boolean read FRetainShovesOnMake write SetRetainShovesOnMake;
+    property retainShovesOnMint: Boolean read FRetainShovesOnMint write SetRetainShovesOnMint;
+    property turnoutInfo1: TTurnoutInfo1 read GetTurnoutInfo1;
     //# endGenProperty
 
   end;
@@ -422,6 +481,14 @@ begin
     FAlignmentInfo := TAlignmentInfo.Create(nil).oid
   else
     FAlignmentInfo := 0;
+  if AOID = 0 then
+    FCheckDiffs := TCheckDiffs.Create(nil).oid
+  else
+    FCheckDiffs := 0;
+  if AOID = 0 then
+    FTurnoutInfo1 := TTurnoutInfo1.Create(nil).oid
+  else
+    FTurnoutInfo1 := 0;
   //# endGenCreate
 end;
 
@@ -433,6 +500,8 @@ begin
   SetOwned(FTransformInfo, nil);
   SetOwned(FPlatformTrackbedInfo, nil);
   SetOwned(FAlignmentInfo, nil);
+  SetOwned(FCheckDiffs, nil);
+  SetOwned(FTurnoutInfo1, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -506,6 +575,42 @@ begin
   if AName = 'railsInclined' then
     FRailsInclined := StrToTRailsInclined(AValue)
   else
+  if AName = 'disableF7Snap' then
+    FDisableF7Snap := StrToBoolean(AValue)
+  else
+  if AName = 'labelModifierX' then
+    FLabelModifierX := StrToDouble(AValue)
+  else
+  if AName = 'labelModifierY' then
+    FLabelModifierY := StrToDouble(AValue)
+  else
+  if AName = 'flatbottomWidth' then
+    FFlatbottomWidth := StrToDouble(AValue)
+  else
+  if AName = 'checkDiffs' then
+    RestoreYamlObjectOwn(FCheckDiffs, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'retainDiffsOnMake' then
+    FRetainDiffsOnMake := StrToBoolean(AValue)
+  else
+  if AName = 'retainDiffsOnMint' then
+    FRetainDiffsOnMint := StrToBoolean(AValue)
+  else
+  if AName = 'retainEntryStraightOnMake' then
+    FRetainEntryStraightOnMake := StrToBoolean(AValue)
+  else
+  if AName = 'retainEntryStraightOnMint' then
+    FRetainEntryStraightOnMint := StrToBoolean(AValue)
+  else
+  if AName = 'retainShovesOnMake' then
+    FRetainShovesOnMake := StrToBoolean(AValue)
+  else
+  if AName = 'retainShovesOnMint' then
+    FRetainShovesOnMint := StrToBoolean(AValue)
+  else
+  if AName = 'turnoutInfo1' then
+    RestoreYamlObjectOwn(FTurnoutInfo1, StrToInteger(AValue), ALoader)
+  else
     //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -537,6 +642,18 @@ begin
   AStream.ReadBuffer(FRailSection, sizeof(TRailSection));
   AStream.ReadBuffer(FFlatbottomKludge, sizeof(Integer));
   AStream.ReadBuffer(FRailsInclined, sizeof(TRailsInclined));
+  AStream.ReadBuffer(FDisableF7Snap, sizeof(Boolean));
+  AStream.ReadBuffer(FLabelModifierX, sizeof(Double));
+  AStream.ReadBuffer(FLabelModifierY, sizeof(Double));
+  AStream.ReadBuffer(FFlatbottomWidth, sizeof(Double));
+  AStream.ReadBuffer(FCheckDiffs, sizeof(TOID));
+  AStream.ReadBuffer(FRetainDiffsOnMake, sizeof(Boolean));
+  AStream.ReadBuffer(FRetainDiffsOnMint, sizeof(Boolean));
+  AStream.ReadBuffer(FRetainEntryStraightOnMake, sizeof(Boolean));
+  AStream.ReadBuffer(FRetainEntryStraightOnMint, sizeof(Boolean));
+  AStream.ReadBuffer(FRetainShovesOnMake, sizeof(Boolean));
+  AStream.ReadBuffer(FRetainShovesOnMint, sizeof(Boolean));
+  AStream.ReadBuffer(FTurnoutInfo1, sizeof(TOID));
   //# endGenRestoreVars
 end;
 
@@ -567,6 +684,18 @@ begin
   AStream.WriteBuffer(FRailSection, sizeof(TRailSection));
   AStream.WriteBuffer(FFlatbottomKludge, sizeof(Integer));
   AStream.WriteBuffer(FRailsInclined, sizeof(TRailsInclined));
+  AStream.WriteBuffer(FDisableF7Snap, sizeof(Boolean));
+  AStream.WriteBuffer(FLabelModifierX, sizeof(Double));
+  AStream.WriteBuffer(FLabelModifierY, sizeof(Double));
+  AStream.WriteBuffer(FFlatbottomWidth, sizeof(Double));
+  AStream.WriteBuffer(FCheckDiffs, sizeof(TOID));
+  AStream.WriteBuffer(FRetainDiffsOnMake, sizeof(Boolean));
+  AStream.WriteBuffer(FRetainDiffsOnMint, sizeof(Boolean));
+  AStream.WriteBuffer(FRetainEntryStraightOnMake, sizeof(Boolean));
+  AStream.WriteBuffer(FRetainEntryStraightOnMint, sizeof(Boolean));
+  AStream.WriteBuffer(FRetainShovesOnMake, sizeof(Boolean));
+  AStream.WriteBuffer(FRetainShovesOnMint, sizeof(Boolean));
+  AStream.WriteBuffer(FTurnoutInfo1, sizeof(TOID));
   //# endGenSaveVars
 end;
 
@@ -597,6 +726,18 @@ begin
   SaveYamlTRailSection(AEmitter, 'railSection', FRailSection);
   SaveYamlInteger(AEmitter, 'flatbottomKludge', FFlatbottomKludge);
   SaveYamlTRailsInclined(AEmitter, 'railsInclined', FRailsInclined);
+  SaveYamlBoolean(AEmitter, 'disableF7Snap', FDisableF7Snap);
+  SaveYamlDouble(AEmitter, 'labelModifierX', FLabelModifierX);
+  SaveYamlDouble(AEmitter, 'labelModifierY', FLabelModifierY);
+  SaveYamlDouble(AEmitter, 'flatbottomWidth', FFlatbottomWidth);
+  SaveYamlObject(AEmitter, 'checkDiffs', FCheckDiffs);
+  SaveYamlBoolean(AEmitter, 'retainDiffsOnMake', FRetainDiffsOnMake);
+  SaveYamlBoolean(AEmitter, 'retainDiffsOnMint', FRetainDiffsOnMint);
+  SaveYamlBoolean(AEmitter, 'retainEntryStraightOnMake', FRetainEntryStraightOnMake);
+  SaveYamlBoolean(AEmitter, 'retainEntryStraightOnMint', FRetainEntryStraightOnMint);
+  SaveYamlBoolean(AEmitter, 'retainShovesOnMake', FRetainShovesOnMake);
+  SaveYamlBoolean(AEmitter, 'retainShovesOnMint', FRetainShovesOnMint);
+  SaveYamlObject(AEmitter, 'turnoutInfo1', FTurnoutInfo1);
   //# endGenSaveYamlVars
 end;
 
@@ -746,6 +887,108 @@ begin
     SetModified;
     FRailsInclined := AValue;
   end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetDisableF7Snap(const AValue: Boolean);
+begin
+  if AValue <> FDisableF7Snap then begin
+    SetModified;
+    FDisableF7Snap := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetLabelModifierX(const AValue: Double);
+begin
+  if AValue <> FLabelModifierX then begin
+    SetModified;
+    FLabelModifierX := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetLabelModifierY(const AValue: Double);
+begin
+  if AValue <> FLabelModifierY then begin
+    SetModified;
+    FLabelModifierY := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetFlatbottomWidth(const AValue: Double);
+begin
+  if AValue <> FFlatbottomWidth then begin
+    SetModified;
+    FFlatbottomWidth := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TBoxDims.GetCheckDiffs: TCheckDiffs;
+begin
+  Result := TCheckDiffs(FromOID(FCheckDiffs));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRetainDiffsOnMake(const AValue: Boolean);
+begin
+  if AValue <> FRetainDiffsOnMake then begin
+    SetModified;
+    FRetainDiffsOnMake := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRetainDiffsOnMint(const AValue: Boolean);
+begin
+  if AValue <> FRetainDiffsOnMint then begin
+    SetModified;
+    FRetainDiffsOnMint := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRetainEntryStraightOnMake(const AValue: Boolean);
+begin
+  if AValue <> FRetainEntryStraightOnMake then begin
+    SetModified;
+    FRetainEntryStraightOnMake := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRetainEntryStraightOnMint(const AValue: Boolean);
+begin
+  if AValue <> FRetainEntryStraightOnMint then begin
+    SetModified;
+    FRetainEntryStraightOnMint := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRetainShovesOnMake(const AValue: Boolean);
+begin
+  if AValue <> FRetainShovesOnMake then begin
+    SetModified;
+    FRetainShovesOnMake := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetRetainShovesOnMint(const AValue: Boolean);
+begin
+  if AValue <> FRetainShovesOnMint then begin
+    SetModified;
+    FRetainShovesOnMint := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TBoxDims.GetTurnoutInfo1: TTurnoutInfo1;
+begin
+  Result := TTurnoutInfo1(FromOID(FTurnoutInfo1));
 end;
 
 //# endGenGetSetMethods
