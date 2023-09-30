@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="124">
+    <Units Count="125">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -631,6 +631,7 @@
       <Unit113>
         <Filename Value="model\turnoutinfo2.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="TurnoutInfo2"/>
       </Unit113>
       <Unit114>
         <Filename Value="model\shovedtimber.pas"/>
@@ -682,6 +683,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="TurnoutInfo1"/>
       </Unit123>
+      <Unit124>
+        <Filename Value="model\crossinginfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CrossingInfo"/>
+      </Unit124>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
