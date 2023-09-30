@@ -482,7 +482,7 @@ begin
 
         pyExpectingMappingStart: begin
           if not (event is TMappingStartEvent) then
-            raise Exception.Create('Expected Yaml Mapping Start');
+            raise Exception.CreateFmt('Expected Yaml Mapping Start, line: %d, col: %d', [event.startMark.Line, event.startMark.Column]);
           state := pyExpectingClassInfo;
         end;
 
@@ -522,7 +522,7 @@ begin
           end
           else begin
             if not (event is TMappingStartEvent) then
-              raise Exception.Create('Expected Yaml Mapping Start');
+              raise Exception.CreateFmt('Expecting Attribute Start, expected Yaml Mapping Start, line: %d, col: %d', [event.startMark.Line, event.startMark.Column]);
             newAttr := TAttribute.Create;
             state := pyExpectingName;
           end;

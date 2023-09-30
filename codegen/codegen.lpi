@@ -54,6 +54,7 @@
       <Unit>
         <Filename Value="..\submodules\otYaml\src\otyamlevent.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="otYamlEvent"/>
       </Unit>
       <Unit>
         <Filename Value="..\submodules\otYaml\src\otyamlparser.pas"/>
