@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="125">
+    <Units Count="126">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -688,6 +688,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="CrossingInfo"/>
       </Unit124>
+      <Unit125>
+        <Filename Value="model\plaintrackinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PlainTrackInfo"/>
+      </Unit125>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

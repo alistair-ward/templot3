@@ -11,13 +11,14 @@ uses
   OTPersistentList,
   OTYamlEmitter,
   SwitchInfo,
-  CrossingInfo;
+  CrossingInfo,
+  PlainTrackInfo;
 
 {
 Tturnout_info2 = record
 (/)  switch_info: Tswitch_info;      //  all the switch dimensions.
-  crossing_info: Tcrossing_info;    //  all the crossing dimensions.
-  plain_track_info: Tplain_track_info;
+(/)  crossing_info: Tcrossing_info;    //  all the crossing dimensions.
+(/)  plain_track_info: Tplain_track_info;
   //  need the plain track info for approach and exit tracks.
 
   diamond_auto_code: integer;
@@ -110,6 +111,9 @@ attributes:
   type: TCrossingInfo
   owns: create
   access: [get]
+- name: plainTrackInfo
+  type: TPlainTrackInfo
+  comment: need the plain track info for approach and exit tracks.
 ...
 }
 
