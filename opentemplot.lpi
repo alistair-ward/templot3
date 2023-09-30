@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="126">
+    <Units Count="128">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -693,6 +693,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="PlainTrackInfo"/>
       </Unit125>
+      <Unit126>
+        <Filename Value="model\hdkcheckrailinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HdkCheckRailInfo"/>
+      </Unit126>
+      <Unit127>
+        <Filename Value="model\veecheckrailinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="VeeCheckRailInfo"/>
+      </Unit127>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
