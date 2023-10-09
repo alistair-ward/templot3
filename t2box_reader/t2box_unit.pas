@@ -86,15 +86,33 @@ uses
   pad_unit,
   rail_options_unit,
   shove_timber,
-  shoved_timber,
   t2box_parsers_unit,
   template_records,
   template,
   wait_message,
   switch_select,
+  curve_parameters_interface,
   curve,
   OTUndoRedoManager,
-  project;
+  project,
+  shovedTimber,
+  BoxDims,
+  RailInfo,
+  ProtoInfo,
+  TransformInfo,
+  point_ex,
+  NotchInfo,
+  PlatformTrackbedInfo,
+  AlignmentInfo,
+  CheckDiffs,
+  CheckEndDiff,
+  TurnoutInfo1,
+  TurnoutInfo2,
+  SwitchInfo,
+  CrossingInfo,
+  PlainTrackInfo,
+  HdkCheckRailInfo,
+  VeeCheckRailInfo;
 
 
 {$R *.lfm}
@@ -1058,7 +1076,7 @@ type
     gauge_custom: Boolean;
     // nyi  // If true this is (or was when saved) a custom gauge setting.
 
-    proto_info: Tproto_info;
+    proto_info: TBox2ProtoInfo;
     // !!! modified for 0.71.a 11-5-01. was Tgauge_info.
 
     railtop_inches: double;
@@ -2173,7 +2191,7 @@ begin
     on EInOutError do begin
       file_error(filename);
       clear_keeps(False, False);
-      Exit(false);
+      Exit(False);
     end;
   end;//try-except
 
@@ -2300,7 +2318,7 @@ begin
   end;
 end;
 
-procedure ReadBlockStart(var boxFile: File; var blockStart: TBox2BlockStart);
+procedure ReadBlockStart(var boxFile: file; var blockStart: TBox2BlockStart);
 begin
   blockStart.versionNumber := parse_integer(boxFile, 'versionNumber');
   blockStart.zero1 := parse_integer(boxFile, 'zero1');
@@ -2308,7 +2326,7 @@ begin
   blockStart.zero3 := parse_integer(boxFile, 'zero3');
 end;
 
-procedure ReadBlockIdent(var boxFile: File; var blockIdent: TBox2BlockIdent);
+procedure ReadBlockIdent(var boxFile: file; var blockIdent: TBox2BlockIdent);
 begin
   blockIdent.segmentLength := parse_integer(boxFile, 'segmentLength');
   blockIdent.templateIndex := parse_integer(boxFile, 'templateIndex');
@@ -2316,7 +2334,7 @@ begin
   blockIdent.spareZeroes := parse_integer(boxFile, 'spareZeroes');
 end;
 
-procedure ReadDataBlocks(var boxFile: File; var box2Templates: TBox2TemplateList);
+procedure ReadDataBlocks(var boxFile: file; var box2Templates: TBox2TemplateList);
 var
   s: string;
   numberRead: integer;
@@ -2343,7 +2361,8 @@ begin
     if blockIdent.segmentLength = 0 then
       Exit;    // end of data blocks.
 
-    if (blockIdent.templateIndex < 0) or (blockIdent.templateIndex >= box2Templates.Count) then begin
+    if (blockIdent.templateIndex < 0) or (blockIdent.templateIndex >= box2Templates.Count) then
+    begin
       ReadFileError;
     end;
 
@@ -2387,41 +2406,618 @@ end;
 
 function ConvertBox2ToShovedTimber(const box2Timber: TBox2ShoveForFile): TShovedTimber;
 begin
-  result := TShovedTimber.Create;
+  Result := TShovedTimber.Create(nil);
   try
-    result.timberString := box2Timber.sf_str;
-    result.shoveCode := TShoveCode(box2Timber.sf_shove_data.sv_code);
-    result.xtbModifier := box2Timber.sf_shove_data.sv_x;
-    result.angleModifier := box2Timber.sf_shove_data.sv_k;
-    result.offsetModifier := box2Timber.sf_shove_data.sv_o;
-    result.lengthModifier := box2Timber.sf_shove_data.sv_l;
-    result.widthModifier := box2Timber.sf_shove_data.sv_w;
-    result.crabModifier := box2Timber.sf_shove_data.sv_c;
+    Result.timberString := box2Timber.sf_str;
+    Result.shoveCode := TShoveCode(box2Timber.sf_shove_data.sv_code);
+    Result.xtbModifier := box2Timber.sf_shove_data.sv_x;
+    Result.angleModifier := box2Timber.sf_shove_data.sv_k;
+    Result.offsetModifier := box2Timber.sf_shove_data.sv_o;
+    Result.lengthModifier := box2Timber.sf_shove_data.sv_l;
+    Result.widthModifier := box2Timber.sf_shove_data.sv_w;
+    Result.crabModifier := box2Timber.sf_shove_data.sv_c;
   except
-    result.Free;
+    Result.Free;
     raise;
   end;
 end;
 
 procedure ConvertBox2ToShovedTimbers(const box2Timbers: array of TBox2ShoveForFile;
-  template_records: TTemplate);
+  template: TTemplate);
 var
   i: integer;
-  timbers: TShovedTimberList;
   t: TShovedTimber;
 begin
-  timbers := TShovedTimberList.Create;
-  try
-    for i := 0 to High(box2Timbers) do begin
-      timbers.Add(ConvertBox2ToShovedTimber(box2Timbers[i]));
-    end;
-  except
-    timbers.Free;
-    raise;
+  for i := 0 to High(box2Timbers) do begin
+    template.shovedTimbers.Add(ConvertBox2ToShovedTimber(box2Timbers[i]));
   end;
-  template_records.template_info.keep_shove_list := timbers;
 end;
 
+function ConvertBox2BackgroundCode(bgnd_code_077: Integer): TBackgroundCode;
+begin
+  case bgnd_code_077 of
+    -1:
+      Result := bkcLibrary;
+    0:
+      Result := bkcUnused;
+    1:
+      Result := bkcBackground;
+    else
+      raise Exception.CreateFmt('Unknown bgnd_code_077: %d', [bgnd_code_077]);
+  end;
+end;
+
+function ConvertBox2RailType(rail_type: Integer): TRailSection;
+begin
+  case rail_type of
+    0:
+      Result := rsNoRails;
+    1:
+      Result := rsBullhead;
+    2:
+      Result := rsFlatbottom;
+    else
+      raise Exception.CreateFmt('Unknown rail_type: %d', [rail_type]);
+  end;
+end;
+
+function ConvertBox2UninclinedRails(uninclined_rails: Boolean): TRailsInclined;
+begin
+  if uninclined_rails then
+    Result := riVertical
+  else
+    Result := riInclined;
+end;
+
+function ConvertBox2FlaredEnd(flared_ends: Integer): TFlaredEnd;
+begin
+  case flared_ends of
+    0:
+      Result := feBent;
+    1:
+      Result := feMachined;
+    else
+      raise Exception.CreateFmt('Unknown flared_ends: %d', [flared_ends]);
+  end;
+end;
+
+function ConvertBox2KnuckleCode(knuckle_code: Integer): TKnuckleCode;
+begin
+  case knuckle_code of
+    -1:
+      Result := kcSharp;
+    0:
+      Result := kcNormal;
+    1:
+      Result := kcCustom;
+    else
+      raise Exception.CreateFmt('Unknown knuckle_code: %d', [knuckle_code]);
+  end;
+end;
+
+procedure ConvertBox2ToRailInfo(rail_info: TBox2RailInfo; template: TTemplate);
+var
+  ri: TRailInfo;
+begin
+  ri := template.boxDims.railInfo;
+
+  ri.flaredEnds := ConvertBox2FlaredEnd(rail_info.flared_ends_ri);
+  ri.knuckleCode := ConvertBox2KnuckleCode(rail_info.knuckle_code_ri);
+  ri.knuckleRadius := rail_info.knuckle_radius_ri;
+  ri.isolatedCrossing := rail_info.isolated_crossing_sw;
+  ri.kDiagonalSideCheckRail := rail_info.k_diagonal_side_check_rail_sw;
+  ri.kMainSideCheckRail := rail_info.k_main_side_check_rail_sw;
+  ri.switchDrive := rail_info.switch_drive_sw;
+  ri.trackCentreLines := rail_info.track_centre_lines_sw;
+  ri.turnoutRoadStockRail := rail_info.turnout_road_stock_rail_sw;
+  ri.turnoutRoadCheckRail := rail_info.turnout_road_check_rail_sw;
+  ri.turnoutRoadCrossingRail := rail_info.turnout_road_crossing_rail_sw;
+  ri.crossingVee := rail_info.crossing_vee_sw;
+  ri.mainRoadCrossingRail := rail_info.main_road_crossing_rail_sw;
+  ri.mainRoadCheckRail := rail_info.main_road_check_rail_sw;
+  ri.mainRoadStockRail := rail_info.main_road_stock_rail_sw;
+end;
+
+procedure ConvertBox2ToProtoInfo(proto_info: TBox2ProtoInfo; template: TTemplate);
+var
+  pi: TProtoInfo;
+begin
+  pi := template.boxDims.protoInfo;
+
+  pi.Name := proto_info.name_str_pi;
+  pi.scale := proto_info.scale_pi;
+  pi.gauge := proto_info.gauge_pi;
+  pi.flangeway := proto_info.fw_pi;
+  pi.flangewayEnd := proto_info.fwe_pi;
+  pi.flareLength := proto_info.xing_fl_pi;
+  pi.railtopWidth := proto_info.railtop_pi;
+  pi.turnoutSideTrackCentres := proto_info.trtscent_pi;
+  pi.mainSideTrackCentres := proto_info.trmscent_pi;
+  pi.returnCurveTrackCentres := proto_info.retcent_pi;
+  pi.minimumRadius := proto_info.min_radius_pi;
+  pi.turnoutTimberWidth := proto_info.tbwide_pi;
+  pi.sleeperWidth := proto_info.slwide_pi;
+  pi.maxTimberSpacing := proto_info.ftimbspmax_pi;
+  pi.sleeperLength := proto_info.tb_pi;
+  pi.mainsideEnds := proto_info.mainside_ends_pi;
+  pi.sleeperWidthAtRailJoint := proto_info.jt_slwide_pi;
+  pi.timberEndRandomising := proto_info.random_end_pi;
+  pi.timberThickness := proto_info.timber_thick_pi;
+  pi.timberEndRandomising := proto_info.random_angle_pi;
+
+  pi.checkRailLengthMainSide1 := proto_info.ck_ms_working1_pi;
+  pi.checkRailLengthMainSide2 := proto_info.ck_ms_working2_pi;
+  pi.checkRailLengthMainSide3 := proto_info.ck_ms_working3_pi;
+
+  pi.checkRailExtensionMainSide1 := proto_info.ck_ms_ext1_pi;
+  pi.checkRailExtensionMainSide2 := proto_info.ck_ms_ext2_pi;
+  pi.wingRailReachMainSide1 := proto_info.wing_ms_reach1_pi;
+  pi.wingRailReachMainSide2 := proto_info.wing_ms_reach2_pi;
+  pi.railBottom := proto_info.railbottom_pi;
+  pi.railHeight := proto_info.rail_height_pi;
+  pi.seatThick := proto_info.seat_thick_pi;
+
+  pi.oldPlainSleeperLength := proto_info.old_tb_pi;
+  pi.railInclination := proto_info.rail_inclination_pi;
+  pi.footHeight := proto_info.foot_height_pi;
+  pi.chairOutLength := proto_info.chair_outlen_pi;
+  pi.chairInLength := proto_info.chair_inlen_pi;
+  pi.chairWidth := proto_info.chair_width_pi;
+  pi.chairCornerRadius := proto_info.chair_corner_pi;
+
+end;
+
+function ConvertBox2Point(pt: TBox2PointEx): Tpex;
+begin
+  Result.set_xy(pt.x, pt.y);
+end;
+
+procedure ConvertBox2ToNotchInfo(const notch: TBox2Notch; template: TTemplate);
+var
+  ni: TNotchInfo;
+begin
+  ni := template.boxDims.transformInfo.notchInfo;
+
+  ni.x := notch.notch_x;
+  ni.y := notch.notch_y;
+  ni.k := notch.notch_k;
+end;
+
+procedure ConvertBox2ToTransformInfo(const transform: TBox2TransformInfo; template: TTemplate);
+var
+  ti: TTransformInfo;
+begin
+  ti := template.boxDims.transformInfo;
+
+  ti.datumY := transform.datum_y;
+  ti.x1Shift := transform.x1_shift;
+  ti.y1Shift := transform.y1_shift;
+  ti.kShift := transform.k_shift;
+  ti.x2Shift := transform.x2_shift;
+  ti.y2Shift := transform.y2_shift;
+  ti.pegPos := ConvertBox2Point(transform.peg_pos);
+  ti.pegPointCode := transform.peg_point_code;
+  ti.pegPointRail := transform.peg_point_rail;
+  ti.mirrorOnX := transform.mirror_on_x;
+  ti.mirrorOnY := transform.mirror_on_y;
+
+  ConvertBox2ToNotchInfo(transform.notch_info, template);
+end;
+
+procedure ConvertBox2ToPlatformTrackbedInfo(platform: TBox2PlatformTrackbedInfo;
+  template: TTemplate);
+var
+  pi: TPlatformTrackbedInfo;
+begin
+  pi := template.boxDims.platformTrackbedInfo;
+
+  pi.adjacentEdges := platform.adjacent_edges_keep;
+  pi.drawMSTrackbedEdge := platform.draw_ms_trackbed_edge_keep;
+  pi.drawTSTrackbedEdge := platform.draw_ts_trackbed_edge_keep;
+
+  pi.drawTSPlatform := platform.draw_ts_platform_keep;
+  pi.drawTSPlatformEndEdge := platform.draw_ts_platform_end_edge_keep;
+  pi.drawTSPlatformRearEdge := platform.draw_ts_platform_end_edge_keep;
+
+  pi.platformTSFrontEdgeIns := platform.platform_ts_front_edge_ins_keep;
+  pi.platformTSStartWidthIns := platform.platform_ts_start_width_ins_keep;
+  pi.platformTSEndWidthIns := platform.platform_ts_end_width_ins_keep;
+  pi.platformTSStartMM := platform.platform_ts_start_mm_keep;
+  pi.platformTSLengthMM := platform.platform_ts_length_mm_keep;
+
+  pi.drawMSPlatform := platform.draw_ms_platform_keep;
+  pi.drawMSPlatformStartEdge := platform.draw_ms_platform_start_edge_keep;
+  pi.drawMSPlatformEndEdge := platform.draw_ms_platform_end_edge_keep;
+  pi.drawMSPlatformRearEdge := platform.draw_ms_platform_rear_edge_keep;
+
+  pi.platformMSFrontEdgeIns := platform.platform_ms_front_edge_ins_keep;
+  pi.platformMSStartWidthIns := platform.platform_ms_start_width_ins_keep;
+  pi.platformMSEndWidthIns := platform.platform_ms_end_width_ins_keep;
+  pi.platformMSStartMM := platform.platform_ms_start_mm_keep;
+  pi.platformMSLengthMM := platform.platform_ms_length_mm_keep;
+
+  pi.platformMSStartSkewMM := platform.platform_ms_start_skew_mm_keep;
+  pi.platformMSEndSkewMM := platform.platform_ms_end_skew_mm_keep;
+  pi.platformTSStartSkewMM := platform.platform_ts_start_skew_mm_keep;
+  pi.platformTSEndSkewMM := platform.platform_ts_end_skew_mm_keep;
+
+  pi.trackbedMSWidthIns := platform.trackbed_ms_width_ins_keep;
+  pi.trackbedTSWidthIns := platform.trackbed_ts_width_ins_keep;
+  pi.cessMSWidthIns := platform.cess_ms_width_ins_keep;
+  pi.cessTSWidthIns := platform.cess_ts_width_ins_keep;
+  pi.drawMSTrackbedCessEdge := platform.draw_ms_trackbed_cess_edge_keep;
+  pi.drawTSTrackbedCessEdge := platform.draw_ts_trackbed_cess_edge_keep;
+
+  pi.trackbedMSStartMM := platform.trackbed_ms_start_mm_keep;
+  pi.trackbedMSLengthMM := platform.trackbed_ms_length_mm_keep;
+  pi.trackbedTSStartMM := platform.trackbed_ts_start_mm_keep;
+  pi.trackbedTSLengthMM := platform.trackbed_ts_length_mm_keep;
+end;
+
+procedure ConvertBox2ToAlignmentInfo(const align: TBox2AlignmentInfo; template: TTemplate);
+var
+  ai: TAlignmentInfo;
+begin
+  ai := template.boxDims.alignmentInfo;
+
+  ai.drawCentrelineOnly := align.cl_only_flag;
+  ai.dummyTemplateFlag := align.dummy_template_flag;
+  ai.centrelineOptionsCode := align.cl_options_code_int;
+  ai.centrelineOptionsCustomOffset := align.cl_options_custom_offset_ext;
+  ai.reminderFlag := align.reminder_flag;
+  ai.reminderColour := align.reminder_colour;
+  ai.reminderStr := align.reminder_str;
+end;
+
+function ConvertBox2SlewMode(slew_type: Byte): ESlewMode;
+begin
+  case slew_type of
+    1:
+      Result := smCosine;
+    2:
+      Result := smTanH;
+    else
+      raise Exception.CreateFmt('Unknown slew_type: %d', [slew_type]);
+  end;
+end;
+
+procedure ConvertBox2ToCurve(const align: TBox2AlignmentInfo; template: TTemplate);
+var
+  c: TCurve;
+begin
+  c := template.curve;
+
+  c.isSpiral := align.trans_flag;
+  c.fixedRadius := align.fixed_rad;
+  c.transitionStartRadius := align.trans_rad1;
+  c.transitionEndRadius := align.trans_rad2;
+  c.transitionLength := align.trans_length;
+  c.distanceToTransition := align.trans_start;
+
+  c.isSlewing := align.slewing_flag;
+  c.slewMode := ConvertBox2SlewMode(align.slew_type);
+  c.slewFactor := align.tanh_kmax;
+  c.distanceToStartOfSlew := align.slew_start;
+  c.slewLength := align.slew_length;
+  c.slewAmount := align.slew_amount;
+
+  //
+  // TODO: perform some magic to make T2 slew parameters match
+  //       OT slew parameters...
+  //
+end;
+
+function ConvertBox2TypeDiff(type_diff: Integer): TDiffType;
+begin
+  case type_diff of
+    0:
+      Result := dtNoDiff;
+    1:
+      Result := dtBentFlare;
+    2:
+      Result := dtMachinedFlare;
+    3:
+      Result := dtNoFlare;
+    else
+      raise Exception.CreateFmt('Unknown type_diff: %d', [type_diff]);
+  end;
+end;
+
+procedure ConvertBox2CheckEndDiffs(const end_diff: TBox2CheckEndDiff; ed: TCheckEndDiff);
+begin
+  ed.lenDiff := end_diff.len_diff;
+  ed.flareDiff := end_diff.flr_diff;
+  ed.gapDiff := end_diff.gap_diff;
+  ed.typeDiff := ConvertBox2TypeDiff(end_diff.type_diff);
+end;
+
+procedure ConvertBox2ToCheckDiffs(const check_diffs: TBox2CheckDiffs; template: TTemplate);
+var
+  cd: TCheckDiffs;
+begin
+  cd := template.boxDims.checkDiffs;
+
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_mw, cd.endDiffMW);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_me, cd.endDiffME);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_mr, cd.endDiffMR);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_tw, cd.endDiffTW);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_te, cd.endDiffTE);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_tr, cd.endDiffTR);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_mk, cd.endDiffMK);
+  ConvertBox2CheckEndDiffs(check_diffs.end_diff_dk, cd.endDiffDK);
+end;
+
+procedure ConvertBox2ToTurnoutInfo1(const turnout_info1: TBox2TurnoutInfo1; template: TTemplate);
+var
+  ti: TTurnoutInfo1;
+begin
+  ti := template.boxDims.turnoutInfo1;
+
+  ti.plainTrack := turnout_info1.plain_track_flag;
+  ti.rolledInSleepered := turnout_info1.rolled_in_sleepered_flag;
+  ti.frontTimbers := turnout_info1.front_timbers_flag;
+  ti.approachRailsOnly := turnout_info1.approach_rails_only_flag;
+  ti.hand := turnout_info1.hand;
+  ti.timbering := turnout_info1.timbering_flag;
+  ti.switchTimbers := turnout_info1.switch_timbers_flag;
+  ti.closureTimbers := turnout_info1.closure_timbers_flag;
+  ti.xingTimbers := turnout_info1.xing_timbers_flag;
+  ti.exitTimbering := turnout_info1.exit_timbering;
+  ti.turnoutRoadCode := turnout_info1.turnout_road_code;
+  ti.turnoutLength := turnout_info1.turnout_length;
+  ti.originToToe := turnout_info1.origin_to_toe;
+  ti.stepSize := turnout_info1.step_size;
+  ti.turnoutRoadIsAdjustable := turnout_info1.turnout_road_is_adjustable;
+  ti.turnoutRoadIsMinimum := turnout_info1.turnout_road_is_minimum;
+end;
+
+procedure ConvertBox2ToBoxDims1(const boxDims1: TBox2Dims1; template: TTemplate);
+var
+  bd: TBoxDims;
+begin
+  bd := template.boxDims;
+  //bd.keepTimestamp :=
+  bd.gaugeIndex := boxDims1.gauge_index;
+  bd.gaugeExact := boxDims1.gauge_exact;
+  bd.gaugeCustom := boxDims1.gauge_custom;
+
+  bd.backgroundCode := ConvertBox2BackgroundCode(boxDims1.bgnd_code_077);
+  bd.printMappingColour := boxDims1.print_mapping_colour;
+  bd.padMarkerColour := boxDims1.pad_marker_colour;
+  bd.usePrintMappingColour := boxDims1.use_print_mapping_colour;
+  bd.usePadMarkerColour := boxDims1.use_pad_marker_colour;
+
+  bd.idNumber := boxDims1.id_number;
+  bd.idNumberStr := boxDims1.id_number_str;
+  bd.railSection := ConvertBox2RailType(boxDims1.rail_type);
+  bd.flatbottomKludge := boxDims1.fb_kludge_template_code;
+  bd.railsInclined := ConvertBox2UninclinedRails(boxDims1.uninclined_rails);
+  bd.disableF7Snap := boxDims1.disable_f7_snap;
+  bd.labelModifierX := boxDims1.mod_text_x;
+  bd.labelModifierY := boxDims1.mod_text_y;
+  bd.flatbottomWidth := boxDims1.flatbottom_width;
+
+  bd.retainDiffsOnMake := boxDims1.retain_diffs_on_make_flag;
+  bd.retainDiffsOnMint := boxDims1.retain_diffs_on_mint_flag;
+  bd.retainEntryStraightOnMake := boxDims1.retain_entry_straight_on_make_flag;
+  bd.retainEntryStraightOnMint := boxDims1.retain_entry_straight_on_mint_flag;
+  bd.retainShovesOnMake := boxDims1.retain_shoves_on_make_flag;
+  bd.retainShovesOnMint := boxDims1.retain_shoves_on_mint_flag;
+
+  ConvertBox2ToRailInfo(boxDims1.rail_info, template);
+  ConvertBox2ToProtoInfo(boxDims1.proto_info, template);
+  ConvertBox2ToTransformInfo(boxDims1.transform_info, template);
+  ConvertBox2ToPlatformTrackbedInfo(boxDims1.platform_trackbed_info, template);
+  ConvertBox2ToAlignmentInfo(boxDims1.align_info, template);
+  ConvertBox2ToCurve(boxDims1.align_info, template);
+  ConvertBox2ToCheckDiffs(boxDims1.check_diffs, template);
+  ConvertBox2ToTurnoutInfo1(boxDims1.turnout_info1, template);
+end;
+
+procedure ConvertBox2SwitchTimberCentres(const switch_info: TBox2SwitchInfo; sw: TSwitchInfo);
+var
+  i: Integer;
+begin
+  sw.ClearTimberCentres;
+  for i := 0 to swtimbco_c do begin
+    if switch_info.timber_centres[i] = 0 then
+      Exit;
+
+    sw.AddTimberCentres(switch_info.timber_centres[i]);
+  end;
+end;
+
+procedure ConvertBox2ToSwitchInfo(const switch_info: TBox2SwitchInfo; template: TTemplate);
+var
+  sw: TSwitchInfo;
+begin
+  sw := template.turnoutInfo2.switchInfo;
+
+  sw.switchPattern := switch_info.sw_pattern;
+  sw.planingLength := switch_info.planing;
+  sw.planingAngle := switch_info.planing_angle;
+  sw.switchRadius := switch_info.switch_radius_inchormax;
+  sw.switchRailLength := switch_info.switch_rail;
+  sw.stockRailLength := switch_info.stock_rail;
+  sw.heelLead := switch_info.heel_lead_inches;
+  sw.heelOffset := switch_info.heel_offset_inches;
+  sw.switchFront := switch_info.switch_front_inches;
+  sw.planingRadius := switch_info.planing_radius;
+  sw.sleeperJ1 := switch_info.sleeper_j1;
+  sw.sleeperJ2 := switch_info.sleeper_j2;
+  sw.groupCode := switch_info.group_code;
+  sw.sizeCode := switch_info.size_code;
+  sw.joggleDepth := switch_info.joggle_depth;
+  sw.joggleLength := switch_info.joggle_length;
+  sw.groupCount := switch_info.group_count;
+  sw.joggledStockRail := switch_info.joggled_stock_rail;
+  sw.validData := switch_info.valid_data;
+  sw.frontTimbered := switch_info.front_timbered;
+  sw.numBridgeChairsMainRail := switch_info.num_bridge_chairs_main_rail;
+  sw.numBridgeChairsTurnoutRail := switch_info.num_bridge_chairs_turnout_rail;
+  sw.fbTipOffset := switch_info.fb_tip_offset;
+  sw.sleeperJ3 := switch_info.sleeper_j3;
+  sw.sleeperJ4 := switch_info.sleeper_j4;
+  sw.sleeperJ5 := switch_info.sleeper_j5;
+  sw.numSlideChairs := switch_info.num_slide_chairs;
+  sw.numBlockSlideChairs := switch_info.num_block_slide_chairs;
+  sw.numBlockHeelChairs := switch_info.num_block_heel_chairs;
+
+  ConvertBox2SwitchTimberCentres(switch_info, sw);
+end;
+
+procedure ConvertBox2ToCrossingInfo(const crossing: TBox2CrossingInfo; template: TTemplate);
+var
+  ci: TCrossingInfo;
+begin
+  ci := template.turnoutInfo2.crossingInfo;
+
+  ci.pattern := crossing.pattern;
+  ci.slMode := crossing.sl_mode;
+  ci.returnCentresMode := crossing.retcent_mode;
+  ci.k3nUnitAngle := crossing.k3n_unit_angle;
+  ci.fixedSt := crossing.fixed_st;
+  ci.hdTimbersCode := crossing.hd_timbers_code;
+  ci.hdVchecksCode := crossing.hd_vchecks_code;
+  ci.kCheckLength1 := crossing.k_check_length_1;
+  ci.kCheckLength2 := crossing.k_check_length_2;
+  ci.kCheckModDS := crossing.k_check_mod_ds;
+  ci.kCheckModMS := crossing.k_check_mod_ms;
+  ci.kCheckFlare := crossing.k_check_flare;
+  ci.curviformTimbering := crossing.curviform_timbering_keep;
+  ci.mainRoadCode := crossing.main_road_code;
+  ci.tandemTimberCode := crossing.tandem_timber_code;
+  ci.bluntNoseWidth := crossing.blunt_nose_width;
+  ci.bluntNoseToTimber := crossing.blunt_nose_to_timb;
+  ci.veeJointHalfSpacing := crossing.vee_joint_half_spacing;
+  ci.wingJointSpacing := crossing.wing_joint_spacing;
+  ci.wingTimberSpacing := crossing.wing_timber_spacing;
+  ci.veeTimberSpacing := crossing.vee_timber_spacing;
+  ci.veeJointSpaceCo1 := crossing.vee_joint_space_co1;
+  ci.veeJointSpaceCo2 := crossing.vee_joint_space_co2;
+  ci.veeJointSpaceCo3 := crossing.vee_joint_space_co3;
+  ci.veeJointSpaceCo4 := crossing.vee_joint_space_co4;
+  ci.veeJointSpaceCo5 := crossing.vee_joint_space_co5;
+  ci.veeJointSpaceCo6 := crossing.vee_joint_space_co6;
+  ci.wingJointSpaceCo1 := crossing.wing_joint_space_co1;
+  ci.wingJointSpaceCo2 := crossing.wing_joint_space_co2;
+  ci.wingJointSpaceCo3 := crossing.wing_joint_space_co3;
+  ci.wingJointSpaceCo4 := crossing.wing_joint_space_co4;
+  ci.wingJointSpaceCo5 := crossing.wing_joint_space_co5;
+  ci.wingJointSpaceCo6 := crossing.wing_joint_space_co6;
+  ci.mainRoadEndX := crossing.main_road_endx_infile;
+  ci.hdkn := crossing.hdkn_unit_angle;
+  ci.kCustomWingLong := crossing.k_custom_wing_long_keep;
+  ci.kCustomPointLong := crossing.k_custom_point_long_keep;
+  ci.useKCustomWingRails := crossing.use_k_custom_wing_rails_keep;
+  ci.useKCustomPointRails := crossing.use_k_custom_point_rails_keep;
+end;
+
+procedure ConvertBox2SleeperCentres(const track: TBox2PlainTrackInfo; pi: TPlainTrackInfo);
+var
+  i: Integer;
+begin
+  for i := 0 to psleep_c do
+    pi.sleeperCentres[i] := track.sleeper_centres[i];
+end;
+
+procedure ConvertBox2ToPlainTrackInfo(const track: TBox2PlainTrackInfo; template: TTemplate);
+var
+  pi: TPlainTrackInfo;
+begin
+  pi := template.turnoutInfo2.plainTrackInfo;
+
+  pi.customPlainTrack := track.pt_custom;
+  pi.listIndex := track.list_index;
+  pi.railLength := track.rail_length;
+  pi.sleepersPerLength := track.sleepers_per_length;
+  pi.railJointsCode := track.rail_joints_code;
+  pi.userPegRail := track.user_peg_rail;
+  pi.userPegX := track.user_pegx;
+  pi.userPegY := track.user_pegy;
+  pi.userPegK := track.user_pegk;
+  pi.plainTrackSpacingName := track.pt_spacing_name_str;
+  pi.gauntSleeperModInches := track.gaunt_sleeper_mod_inches;
+
+  ConvertBox2SleeperCentres(track, pi);
+end;
+
+procedure ConvertBox2ToHdkCheckRailInfo(const hdk: TBox2HdkCheckRailInfo; template: TTemplate);
+var
+  h: THdkCheckRailInfo;
+begin
+  h := template.turnoutInfo2.hdkCheckRailInfo;
+
+  h.kCheckMS1 := hdk.k_check_ms_1;
+  h.kCheckMS2 := hdk.k_check_ms_2;
+  h.kCheckDS1 := hdk.k_check_ds_1;
+  h.kCheckDS2 := hdk.k_check_ds_2;
+end;
+
+procedure ConvertBox2ToVeeCheckRailInfo(const vee: TBox2VeeCheckRailInfo; template: TTemplate);
+var
+  v: TVeeCheckRailInfo;
+begin
+  v := template.turnoutInfo2.veeCheckRailInfo;
+
+  v.vCheckMSWorking1 := vee.v_check_ms_working1;
+  v.vCheckMSWorking2 := vee.v_check_ms_working2;
+  v.vCheckMSWorking3 := vee.v_check_ms_working3;
+  v.vCheckTSWorking1 := vee.v_check_ts_working1;
+  v.vCheckTSWorking2 := vee.v_check_ts_working2;
+  v.vCheckTSWorking3 := vee.v_check_ts_working3;
+  v.vCheckMSExt1 := vee.v_check_ms_ext1;
+  v.vCheckMSExt2 := vee.v_check_ms_ext2;
+  v.vCheckTSExt1 := vee.v_check_ts_ext1;
+  v.vCheckTSExt2 := vee.v_check_ts_ext2;
+  v.vWingMSReach1 := vee.v_wing_ms_reach1;
+  v.vWingMSReach2 := vee.v_wing_ms_reach2;
+  v.vWingTSReach1 := vee.v_wing_ts_reach1;
+  v.vWingTSReach2 := vee.v_wing_ts_reach2;
+end;
+
+procedure ConvertBox2ToTurnoutInfo2(const info2: TBox2TurnoutInfo2; template: TTemplate);
+var
+  ti: TTurnoutInfo2;
+begin
+  ti := template.turnoutInfo2;
+
+  ti.diamondAutoCode := info2.diamond_auto_code;
+  ti.bonusTimberCount := info2.bonus_timber_count;
+  ti.equalizingFixed := info2.equalizing_fixed_flag;
+  ti.noTimbering := info2.no_timbering_flag;
+  ti.angledOn := info2.angled_on_flag;
+  ti.chairing := info2.chairing_flag;
+  ti.startDrawX := info2.start_draw_x;
+  ti.timberLengthInc := info2.timber_length_inc;
+  ti.omitSwitchFrontJoints := info2.omit_switch_front_joints;
+  ti.omitSwitchRailJoints := info2.omit_switch_rail_joints;
+  ti.omitStockRailJoints := info2.omit_stock_rail_joints;
+  ti.omitWingRailJoints := info2.omit_wing_rail_joints;
+  ti.omitVeeRailJoints := info2.omit_vee_rail_joints;
+  ti.omitKCrossingStockRailJoints := info2.omit_k_crossing_stock_rail_joints;
+  ti.diamondSwitchTimbering := info2.diamond_switch_timbering_flag;
+  ti.gaunt := info2.gaunt_flag;
+  ti.diamondProtoTimbering := info2.diamond_proto_timbering_flag;
+  ti.semiDiamond := info2.semi_diamond_flag;
+  ti.diamondFixed := info2.diamond_fixed_flag;
+  ti.turnoutRoadEndX := info2.turnout_road_endx_infile;
+  ti.templateType := info2.template_type_str;
+  ti.smallestRadius := info2.smallest_radius_stored;
+  ti.dpx := info2.dpx_stored;
+  ti.ipx := info2.ipx_stored;
+  ti.fpx := info2.fpx_stored;
+  ti.gauntOffsetInches := info2.gaunt_offset_inches;
+  ti.dxfConnector0 := info2.dxf_connector_0;
+  ti.dxfConnectorT := info2.dxf_connector_t;
+  ti.dxfConnector9 := info2.dxf_connector_9;
+
+  ConvertBox2ToSwitchInfo(info2.switch_info, template);
+  ConvertBox2ToCrossingInfo(info2.crossing_info, template);
+  ConvertBox2ToPlainTrackInfo(info2.plain_track_info, template);
+  ConvertBox2ToHdkCheckRailInfo(info2.hdk_check_rail_info, template);
+  ConvertBox2ToVeeCheckRailInfo(info2.vee_check_rail_info, template);
+end;
 
 function ConvertBox2ToTemplate(box2Template: TBox2Template): TTemplate;
 begin
@@ -2430,15 +3026,15 @@ begin
     Assert(sizeof(Result.template_info.keep_dims) = sizeof(box2Template.keepDims));
     Result.Name := box2Template.Name;
     Result.memo := box2Template.memo;
-    Move(box2Template.keepDims, Result.template_info.keep_dims, sizeof(box2Template.keepDims));
 
+    ConvertBox2ToBoxDims1(box2Template.keepDims.old_keep_dims1.box_dims1, Result);
+    ConvertBox2ToTurnoutInfo2(box2Template.keepDims.old_keep_dims2.turnout_info2, Result);
     ConvertBox2ToShovedTimbers(box2Template.shovedTimbers, Result);
   except
     Result.Free;
     raise;
   end;
 end;
-
 
 
 function ConvertBox2ToProject(box2Templates: TBox2TemplateList): TProject;
@@ -2457,7 +3053,6 @@ begin
   end;
   Result := project;
 end;
-
 
 
 procedure LoadNewFormat(
@@ -2550,7 +3145,6 @@ var
   projectTitle: string;
   gridInfo: TGridInfo;
   newProject: TProject;
-
 
 begin
 
@@ -2690,7 +3284,6 @@ begin
         // file loaded, check it and update the background drawing...
         with old_next_data.old_keep_dims1.box_dims1 do begin
 
-
           //     0.79.a 20-05-06  -- saved grid info -- read from last template only...
           //     0.91.d -- read these only if prefs not being used on startup.
 
@@ -2731,7 +3324,7 @@ begin
 
       with keep_form do begin
 
-          i := 0;
+        i := 0;
 
         for n := i to (keeps_list.Count - 1) do begin
           if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 =
