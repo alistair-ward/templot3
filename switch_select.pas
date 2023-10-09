@@ -305,9 +305,9 @@ begin
     Result.sleeperJ3 := AInfo.sleeper_j3;
     Result.sleeperJ4 := AInfo.sleeper_j4;
     Result.sleeperJ5 := AInfo.sleeper_j5;
-    Result.numSlideChars := AInfo.num_slide_chairs;
+    Result.numSlideChairs := AInfo.num_slide_chairs;
     Result.numBlockSlideChairs := AInfo.num_block_slide_chairs;
-    Result.numBlockHeelChars := AInfo.num_block_heel_chairs;
+    Result.numBlockHeelChairs := AInfo.num_block_heel_chairs;
   except
     Result.Free;
     raise;

@@ -64,7 +64,7 @@ attributes:
   type: Boolean
 - name: kDiagonalSideCheckRail
   type: Boolean
-- name: kMainSizeCheckRail
+- name: kMainSideCheckRail
   type: Boolean
 - name: switchDrive
   type: Boolean
@@ -100,7 +100,7 @@ type
     FKnuckleRadius: Double;
     FIsolatedCrossing: Boolean;
     FKDiagonalSideCheckRail: Boolean;
-    FKMainSizeCheckRail: Boolean;
+    FKMainSideCheckRail: Boolean;
     FSwitchDrive: Boolean;
     FTrackCentreLines: Boolean;
     FTurnoutRoadStockRail: Boolean;
@@ -123,7 +123,7 @@ type
     procedure SetKnuckleRadius(const AValue: Double);
     procedure SetIsolatedCrossing(const AValue: Boolean);
     procedure SetKDiagonalSideCheckRail(const AValue: Boolean);
-    procedure SetKMainSizeCheckRail(const AValue: Boolean);
+    procedure SetKMainSideCheckRail(const AValue: Boolean);
     procedure SetSwitchDrive(const AValue: Boolean);
     procedure SetTrackCentreLines(const AValue: Boolean);
     procedure SetTurnoutRoadStockRail(const AValue: Boolean);
@@ -153,7 +153,7 @@ type
     property knuckleRadius: Double read FKnuckleRadius write SetKnuckleRadius;
     property isolatedCrossing: Boolean read FIsolatedCrossing write SetIsolatedCrossing;
     property kDiagonalSideCheckRail: Boolean read FKDiagonalSideCheckRail write SetKDiagonalSideCheckRail;
-    property kMainSizeCheckRail: Boolean read FKMainSizeCheckRail write SetKMainSizeCheckRail;
+    property kMainSideCheckRail: Boolean read FKMainSideCheckRail write SetKMainSideCheckRail;
     property switchDrive: Boolean read FSwitchDrive write SetSwitchDrive;
     property trackCentreLines: Boolean read FTrackCentreLines write SetTrackCentreLines;
     property turnoutRoadStockRail: Boolean read FTurnoutRoadStockRail write SetTurnoutRoadStockRail;
@@ -244,8 +244,8 @@ begin
   if AName = 'kDiagonalSideCheckRail' then
     FKDiagonalSideCheckRail := StrToBoolean(AValue)
   else
-  if AName = 'kMainSizeCheckRail' then
-    FKMainSizeCheckRail := StrToBoolean(AValue)
+  if AName = 'kMainSideCheckRail' then
+    FKMainSideCheckRail := StrToBoolean(AValue)
   else
   if AName = 'switchDrive' then
     FSwitchDrive := StrToBoolean(AValue)
@@ -290,7 +290,7 @@ procedure TRailInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FKnuckleRadius, sizeof(Double));
   AStream.ReadBuffer(FIsolatedCrossing, sizeof(Boolean));
   AStream.ReadBuffer(FKDiagonalSideCheckRail, sizeof(Boolean));
-  AStream.ReadBuffer(FKMainSizeCheckRail, sizeof(Boolean));
+  AStream.ReadBuffer(FKMainSideCheckRail, sizeof(Boolean));
   AStream.ReadBuffer(FSwitchDrive, sizeof(Boolean));
   AStream.ReadBuffer(FTrackCentreLines, sizeof(Boolean));
   AStream.ReadBuffer(FTurnoutRoadStockRail, sizeof(Boolean));
@@ -315,7 +315,7 @@ procedure TRailInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FKnuckleRadius, sizeof(Double));
   AStream.WriteBuffer(FIsolatedCrossing, sizeof(Boolean));
   AStream.WriteBuffer(FKDiagonalSideCheckRail, sizeof(Boolean));
-  AStream.WriteBuffer(FKMainSizeCheckRail, sizeof(Boolean));
+  AStream.WriteBuffer(FKMainSideCheckRail, sizeof(Boolean));
   AStream.WriteBuffer(FSwitchDrive, sizeof(Boolean));
   AStream.WriteBuffer(FTrackCentreLines, sizeof(Boolean));
   AStream.WriteBuffer(FTurnoutRoadStockRail, sizeof(Boolean));
@@ -340,7 +340,7 @@ procedure TRailInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlDouble(AEmitter, 'knuckleRadius', FKnuckleRadius);
   SaveYamlBoolean(AEmitter, 'isolatedCrossing', FIsolatedCrossing);
   SaveYamlBoolean(AEmitter, 'kDiagonalSideCheckRail', FKDiagonalSideCheckRail);
-  SaveYamlBoolean(AEmitter, 'kMainSizeCheckRail', FKMainSizeCheckRail);
+  SaveYamlBoolean(AEmitter, 'kMainSideCheckRail', FKMainSideCheckRail);
   SaveYamlBoolean(AEmitter, 'switchDrive', FSwitchDrive);
   SaveYamlBoolean(AEmitter, 'trackCentreLines', FTrackCentreLines);
   SaveYamlBoolean(AEmitter, 'turnoutRoadStockRail', FTurnoutRoadStockRail);
@@ -400,11 +400,11 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetKMainSizeCheckRail(const AValue: Boolean);
+procedure TRailInfo.SetKMainSideCheckRail(const AValue: Boolean);
 begin
-  if AValue <> FKMainSizeCheckRail then begin
+  if AValue <> FKMainSideCheckRail then begin
     SetModified;
-    FKMainSizeCheckRail := AValue;
+    FKMainSideCheckRail := AValue;
   end;
 end;
 

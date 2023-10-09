@@ -19,10 +19,10 @@ attributes:
 - name: lenDiff
   type: Double
   comment: length differ inches f-s
-- name: flareLength
+- name: flareDiff
   type: Double
   comment: flare Length inches f-s
-- name: getDiff
+- name: gapDiff
   type: Double
   comment: end gap model mm
 - name: typeDiff
@@ -38,8 +38,8 @@ type
   private
     //# genMemberVars
     FLenDiff: Double;
-    FFlareLength: Double;
-    FGetDiff: Double;
+    FFlareDiff: Double;
+    FGapDiff: Double;
     FTypeDiff: TDiffType;
     //# endGenMemberVars
 
@@ -50,8 +50,8 @@ type
 
     //# genGetSetDeclarations
     procedure SetLenDiff(const AValue: Double);
-    procedure SetFlareLength(const AValue: Double);
-    procedure SetGetDiff(const AValue: Double);
+    procedure SetFlareDiff(const AValue: Double);
+    procedure SetGapDiff(const AValue: Double);
     procedure SetTypeDiff(const AValue: TDiffType);
     //# endGenGetSetDeclarations
 
@@ -72,10 +72,10 @@ type
     property lenDiff: Double read FLenDiff write SetLenDiff;
 
     // flare Length inches f-s
-    property flareLength: Double read FFlareLength write SetFlareLength;
+    property flareDiff: Double read FFlareDiff write SetFlareDiff;
 
     // end gap model mm
-    property getDiff: Double read FGetDiff write SetGetDiff;
+    property gapDiff: Double read FGapDiff write SetGapDiff;
     property typeDiff: TDiffType read FTypeDiff write SetTypeDiff;
     //# endGenProperty
   end;
@@ -137,11 +137,11 @@ begin
   if AName = 'lenDiff' then
     FLenDiff := StrToDouble(AValue)
   else
-  if AName = 'flareLength' then
-    FFlareLength := StrToDouble(AValue)
+  if AName = 'flareDiff' then
+    FFlareDiff := StrToDouble(AValue)
   else
-  if AName = 'getDiff' then
-    FGetDiff := StrToDouble(AValue)
+  if AName = 'gapDiff' then
+    FGapDiff := StrToDouble(AValue)
   else
   if AName = 'typeDiff' then
     FTypeDiff := StrToTDiffType(AValue)
@@ -158,8 +158,8 @@ begin
 
   //# genRestoreVars
   AStream.ReadBuffer(FLenDiff, sizeof(Double));
-  AStream.ReadBuffer(FFlareLength, sizeof(Double));
-  AStream.ReadBuffer(FGetDiff, sizeof(Double));
+  AStream.ReadBuffer(FFlareDiff, sizeof(Double));
+  AStream.ReadBuffer(FGapDiff, sizeof(Double));
   AStream.ReadBuffer(FTypeDiff, sizeof(TDiffType));
   //# endGenRestoreVars
 end;
@@ -172,8 +172,8 @@ begin
 
   //# genSaveVars
   AStream.WriteBuffer(FLenDiff, sizeof(Double));
-  AStream.WriteBuffer(FFlareLength, sizeof(Double));
-  AStream.WriteBuffer(FGetDiff, sizeof(Double));
+  AStream.WriteBuffer(FFlareDiff, sizeof(Double));
+  AStream.WriteBuffer(FGapDiff, sizeof(Double));
   AStream.WriteBuffer(FTypeDiff, sizeof(TDiffType));
   //# endGenSaveVars
 end;
@@ -186,8 +186,8 @@ begin
 
   //# genSaveYamlVars
   SaveYamlDouble(AEmitter, 'lenDiff', FLenDiff);
-  SaveYamlDouble(AEmitter, 'flareLength', FFlareLength);
-  SaveYamlDouble(AEmitter, 'getDiff', FGetDiff);
+  SaveYamlDouble(AEmitter, 'flareDiff', FFlareDiff);
+  SaveYamlDouble(AEmitter, 'gapDiff', FGapDiff);
   SaveYamlTDiffType(AEmitter, 'typeDiff', FTypeDiff);
   //# endGenSaveYamlVars
 end;
@@ -203,20 +203,20 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TCheckEndDiff.SetFlareLength(const AValue: Double);
+procedure TCheckEndDiff.SetFlareDiff(const AValue: Double);
 begin
-  if AValue <> FFlareLength then begin
+  if AValue <> FFlareDiff then begin
     SetModified;
-    FFlareLength := AValue;
+    FFlareDiff := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TCheckEndDiff.SetGetDiff(const AValue: Double);
+procedure TCheckEndDiff.SetGapDiff(const AValue: Double);
 begin
-  if AValue <> FGetDiff then begin
+  if AValue <> FGapDiff then begin
     SetModified;
-    FGetDiff := AValue;
+    FGapDiff := AValue;
   end;
 end;
 

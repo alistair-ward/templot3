@@ -90,11 +90,11 @@ attributes:
   - name: sleeperJ5
     type: Double
     comment: fifth switch-front sleeper spacing back from the fourth (NEGATIVE inches).
-  - name: numSlideChars
+  - name: numSlideChairs
     type: Integer
   - name: numBlockSlideChairs
     type: Integer
-  - name: numBlockHeelChars
+  - name: numBlockHeelChairs
     type: Integer
 ...
 }
@@ -131,9 +131,9 @@ type
     FSleeperJ3: Double;
     FSleeperJ4: Double;
     FSleeperJ5: Double;
-    FNumSlideChars: Integer;
+    FNumSlideChairs: Integer;
     FNumBlockSlideChairs: Integer;
-    FNumBlockHeelChars: Integer;
+    FNumBlockHeelChairs: Integer;
     //# endGenMemberVars
 
   protected
@@ -171,9 +171,9 @@ type
     procedure SetSleeperJ3(const AValue: Double);
     procedure SetSleeperJ4(const AValue: Double);
     procedure SetSleeperJ5(const AValue: Double);
-    procedure SetNumSlideChars(const AValue: Integer);
+    procedure SetNumSlideChairs(const AValue: Integer);
     procedure SetNumBlockSlideChairs(const AValue: Integer);
-    procedure SetNumBlockHeelChars(const AValue: Integer);
+    procedure SetNumBlockHeelChairs(const AValue: Integer);
     //# endGenGetSetDeclarations
 
   public
@@ -254,9 +254,9 @@ type
 
     // fifth switch-front sleeper spacing back from the fourth (NEGATIVE inches).
     property sleeperJ5: Double read FSleeperJ5 write SetSleeperJ5;
-    property numSlideChars: Integer read FNumSlideChars write SetNumSlideChars;
+    property numSlideChairs: Integer read FNumSlideChairs write SetNumSlideChairs;
     property numBlockSlideChairs: Integer read FNumBlockSlideChairs write SetNumBlockSlideChairs;
-    property numBlockHeelChars: Integer read FNumBlockHeelChars write SetNumBlockHeelChars;
+    property numBlockHeelChairs: Integer read FNumBlockHeelChairs write SetNumBlockHeelChairs;
     //# endGenProperty
   end;
 
@@ -381,14 +381,14 @@ begin
   if AName = 'sleeperJ5' then
     FSleeperJ5 := StrToDouble(AValue)
   else
-  if AName = 'numSlideChars' then
-    FNumSlideChars := StrToInteger(AValue)
+  if AName = 'numSlideChairs' then
+    FNumSlideChairs := StrToInteger(AValue)
   else
   if AName = 'numBlockSlideChairs' then
     FNumBlockSlideChairs := StrToInteger(AValue)
   else
-  if AName = 'numBlockHeelChars' then
-    FNumBlockHeelChars := StrToInteger(AValue)
+  if AName = 'numBlockHeelChairs' then
+    FNumBlockHeelChairs := StrToInteger(AValue)
   else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -429,9 +429,9 @@ procedure TSwitchInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FSleeperJ3, sizeof(Double));
   AStream.ReadBuffer(FSleeperJ4, sizeof(Double));
   AStream.ReadBuffer(FSleeperJ5, sizeof(Double));
-  AStream.ReadBuffer(FNumSlideChars, sizeof(Integer));
+  AStream.ReadBuffer(FNumSlideChairs, sizeof(Integer));
   AStream.ReadBuffer(FNumBlockSlideChairs, sizeof(Integer));
-  AStream.ReadBuffer(FNumBlockHeelChars, sizeof(Integer));
+  AStream.ReadBuffer(FNumBlockHeelChairs, sizeof(Integer));
   //# endGenRestoreVars
   end;
 
@@ -470,9 +470,9 @@ procedure TSwitchInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FSleeperJ3, sizeof(Double));
   AStream.WriteBuffer(FSleeperJ4, sizeof(Double));
   AStream.WriteBuffer(FSleeperJ5, sizeof(Double));
-  AStream.WriteBuffer(FNumSlideChars, sizeof(Integer));
+  AStream.WriteBuffer(FNumSlideChairs, sizeof(Integer));
   AStream.WriteBuffer(FNumBlockSlideChairs, sizeof(Integer));
-  AStream.WriteBuffer(FNumBlockHeelChars, sizeof(Integer));
+  AStream.WriteBuffer(FNumBlockHeelChairs, sizeof(Integer));
   //# endGenSaveVars
   end;
   
@@ -514,9 +514,9 @@ procedure TSwitchInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlDouble(AEmitter, 'sleeperJ3', FSleeperJ3);
   SaveYamlDouble(AEmitter, 'sleeperJ4', FSleeperJ4);
   SaveYamlDouble(AEmitter, 'sleeperJ5', FSleeperJ5);
-  SaveYamlInteger(AEmitter, 'numSlideChars', FNumSlideChars);
+  SaveYamlInteger(AEmitter, 'numSlideChairs', FNumSlideChairs);
   SaveYamlInteger(AEmitter, 'numBlockSlideChairs', FNumBlockSlideChairs);
-  SaveYamlInteger(AEmitter, 'numBlockHeelChars', FNumBlockHeelChars);
+  SaveYamlInteger(AEmitter, 'numBlockHeelChairs', FNumBlockHeelChairs);
   //# endGenSaveYamlVars
   end;
 
@@ -800,11 +800,11 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetNumSlideChars(const AValue: Integer);
+procedure TSwitchInfo.SetNumSlideChairs(const AValue: Integer);
 begin
-  if AValue <> FNumSlideChars then begin
+  if AValue <> FNumSlideChairs then begin
     SetModified;
-    FNumSlideChars := AValue;
+    FNumSlideChairs := AValue;
   end;
 end;
 
@@ -818,11 +818,11 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetNumBlockHeelChars(const AValue: Integer);
+procedure TSwitchInfo.SetNumBlockHeelChairs(const AValue: Integer);
 begin
-  if AValue <> FNumBlockHeelChars then begin
+  if AValue <> FNumBlockHeelChairs then begin
     SetModified;
-    FNumBlockHeelChars := AValue;
+    FNumBlockHeelChairs := AValue;
   end;
 end;
 

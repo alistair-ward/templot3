@@ -123,7 +123,7 @@ attributes:
 - name: platformTSFrontEdgeIns
   type: Double
   comment: centre-line to platform front edge 57 inches   4ft-9in  215a
-- name: platformTSStartWidthInsp
+- name: platformTSStartWidthIns
   type: Double
 - name: platformTSEndWidthIns
   type: Double
@@ -142,9 +142,9 @@ attributes:
 - name: platformMSFrontEdgeIns
   type: Double
   comment: centre-line to platform front edge 57 inches   4ft-9in  215a
-- name: platformMSStartWidthInsp
+- name: platformMSStartWidthIns
   type: Double
-- name: platformMSEndSWdthInsKeep
+- name: platformMSEndWidthIns
   type: Double
 - name: platformMSStartMM
   type: Double
@@ -194,7 +194,7 @@ type
     FDrawTSPlatformEndEdge: Boolean;
     FDrawTSPlatformRearEdge: Boolean;
     FPlatformTSFrontEdgeIns: Double;
-    FPlatformTSStartWidthInsp: Double;
+    FPlatformTSStartWidthIns: Double;
     FPlatformTSEndWidthIns: Double;
     FPlatformTSStartMM: Double;
     FPlatformTSLengthMM: Double;
@@ -203,8 +203,8 @@ type
     FDrawMSPlatformEndEdge: Boolean;
     FDrawMSPlatformRearEdge: Boolean;
     FPlatformMSFrontEdgeIns: Double;
-    FPlatformMSStartWidthInsp: Double;
-    FPlatformMSEndSWdthInsKeep: Double;
+    FPlatformMSStartWidthIns: Double;
+    FPlatformMSEndWidthIns: Double;
     FPlatformMSStartMM: Double;
     FPlatformMSLengthMM: Double;
     FPlatformMSStartSkewMM: Double;
@@ -237,7 +237,7 @@ type
     procedure SetDrawTSPlatformEndEdge(const AValue: Boolean);
     procedure SetDrawTSPlatformRearEdge(const AValue: Boolean);
     procedure SetPlatformTSFrontEdgeIns(const AValue: Double);
-    procedure SetPlatformTSStartWidthInsp(const AValue: Double);
+    procedure SetPlatformTSStartWidthIns(const AValue: Double);
     procedure SetPlatformTSEndWidthIns(const AValue: Double);
     procedure SetPlatformTSStartMM(const AValue: Double);
     procedure SetPlatformTSLengthMM(const AValue: Double);
@@ -246,8 +246,8 @@ type
     procedure SetDrawMSPlatformEndEdge(const AValue: Boolean);
     procedure SetDrawMSPlatformRearEdge(const AValue: Boolean);
     procedure SetPlatformMSFrontEdgeIns(const AValue: Double);
-    procedure SetPlatformMSStartWidthInsp(const AValue: Double);
-    procedure SetPlatformMSEndSWdthInsKeep(const AValue: Double);
+    procedure SetPlatformMSStartWidthIns(const AValue: Double);
+    procedure SetPlatformMSEndWidthIns(const AValue: Double);
     procedure SetPlatformMSStartMM(const AValue: Double);
     procedure SetPlatformMSLengthMM(const AValue: Double);
     procedure SetPlatformMSStartSkewMM(const AValue: Double);
@@ -289,7 +289,7 @@ type
 
     // centre-line to platform front edge 57 inches   4ft-9in  215a
     property platformTSFrontEdgeIns: Double read FPlatformTSFrontEdgeIns write SetPlatformTSFrontEdgeIns;
-    property platformTSStartWidthInsp: Double read FPlatformTSStartWidthInsp write SetPlatformTSStartWidthInsp;
+    property platformTSStartWidthIns: Double read FPlatformTSStartWidthIns write SetPlatformTSStartWidthIns;
     property platformTSEndWidthIns: Double read FPlatformTSEndWidthIns write SetPlatformTSEndWidthIns;
     property platformTSStartMM: Double read FPlatformTSStartMM write SetPlatformTSStartMM;
     property platformTSLengthMM: Double read FPlatformTSLengthMM write SetPlatformTSLengthMM;
@@ -300,8 +300,8 @@ type
 
     // centre-line to platform front edge 57 inches   4ft-9in  215a
     property platformMSFrontEdgeIns: Double read FPlatformMSFrontEdgeIns write SetPlatformMSFrontEdgeIns;
-    property platformMSStartWidthInsp: Double read FPlatformMSStartWidthInsp write SetPlatformMSStartWidthInsp;
-    property platformMSEndSWdthInsKeep: Double read FPlatformMSEndSWdthInsKeep write SetPlatformMSEndSWdthInsKeep;
+    property platformMSStartWidthIns: Double read FPlatformMSStartWidthIns write SetPlatformMSStartWidthIns;
+    property platformMSEndWidthIns: Double read FPlatformMSEndWidthIns write SetPlatformMSEndWidthIns;
     property platformMSStartMM: Double read FPlatformMSStartMM write SetPlatformMSStartMM;
     property platformMSLengthMM: Double read FPlatformMSLengthMM write SetPlatformMSLengthMM;
     property platformMSStartSkewMM: Double read FPlatformMSStartSkewMM write SetPlatformMSStartSkewMM;
@@ -382,8 +382,8 @@ begin
   if AName = 'platformTSFrontEdgeIns' then
     FPlatformTSFrontEdgeIns := StrToDouble(AValue)
   else
-  if AName = 'platformTSStartWidthInsp' then
-    FPlatformTSStartWidthInsp := StrToDouble(AValue)
+  if AName = 'platformTSStartWidthIns' then
+    FPlatformTSStartWidthIns := StrToDouble(AValue)
   else
   if AName = 'platformTSEndWidthIns' then
     FPlatformTSEndWidthIns := StrToDouble(AValue)
@@ -409,11 +409,11 @@ begin
   if AName = 'platformMSFrontEdgeIns' then
     FPlatformMSFrontEdgeIns := StrToDouble(AValue)
   else
-  if AName = 'platformMSStartWidthInsp' then
-    FPlatformMSStartWidthInsp := StrToDouble(AValue)
+  if AName = 'platformMSStartWidthIns' then
+    FPlatformMSStartWidthIns := StrToDouble(AValue)
   else
-  if AName = 'platformMSEndSWdthInsKeep' then
-    FPlatformMSEndSWdthInsKeep := StrToDouble(AValue)
+  if AName = 'platformMSEndWidthIns' then
+    FPlatformMSEndWidthIns := StrToDouble(AValue)
   else
   if AName = 'platformMSStartMM' then
     FPlatformMSStartMM := StrToDouble(AValue)
@@ -482,7 +482,7 @@ procedure TPlatformTrackbedInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FDrawTSPlatformEndEdge, sizeof(Boolean));
   AStream.ReadBuffer(FDrawTSPlatformRearEdge, sizeof(Boolean));
   AStream.ReadBuffer(FPlatformTSFrontEdgeIns, sizeof(Double));
-  AStream.ReadBuffer(FPlatformTSStartWidthInsp, sizeof(Double));
+  AStream.ReadBuffer(FPlatformTSStartWidthIns, sizeof(Double));
   AStream.ReadBuffer(FPlatformTSEndWidthIns, sizeof(Double));
   AStream.ReadBuffer(FPlatformTSStartMM, sizeof(Double));
   AStream.ReadBuffer(FPlatformTSLengthMM, sizeof(Double));
@@ -491,8 +491,8 @@ procedure TPlatformTrackbedInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FDrawMSPlatformEndEdge, sizeof(Boolean));
   AStream.ReadBuffer(FDrawMSPlatformRearEdge, sizeof(Boolean));
   AStream.ReadBuffer(FPlatformMSFrontEdgeIns, sizeof(Double));
-  AStream.ReadBuffer(FPlatformMSStartWidthInsp, sizeof(Double));
-  AStream.ReadBuffer(FPlatformMSEndSWdthInsKeep, sizeof(Double));
+  AStream.ReadBuffer(FPlatformMSStartWidthIns, sizeof(Double));
+  AStream.ReadBuffer(FPlatformMSEndWidthIns, sizeof(Double));
   AStream.ReadBuffer(FPlatformMSStartMM, sizeof(Double));
   AStream.ReadBuffer(FPlatformMSLengthMM, sizeof(Double));
   AStream.ReadBuffer(FPlatformMSStartSkewMM, sizeof(Double));
@@ -527,7 +527,7 @@ procedure TPlatformTrackbedInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FDrawTSPlatformEndEdge, sizeof(Boolean));
   AStream.WriteBuffer(FDrawTSPlatformRearEdge, sizeof(Boolean));
   AStream.WriteBuffer(FPlatformTSFrontEdgeIns, sizeof(Double));
-  AStream.WriteBuffer(FPlatformTSStartWidthInsp, sizeof(Double));
+  AStream.WriteBuffer(FPlatformTSStartWidthIns, sizeof(Double));
   AStream.WriteBuffer(FPlatformTSEndWidthIns, sizeof(Double));
   AStream.WriteBuffer(FPlatformTSStartMM, sizeof(Double));
   AStream.WriteBuffer(FPlatformTSLengthMM, sizeof(Double));
@@ -536,8 +536,8 @@ procedure TPlatformTrackbedInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FDrawMSPlatformEndEdge, sizeof(Boolean));
   AStream.WriteBuffer(FDrawMSPlatformRearEdge, sizeof(Boolean));
   AStream.WriteBuffer(FPlatformMSFrontEdgeIns, sizeof(Double));
-  AStream.WriteBuffer(FPlatformMSStartWidthInsp, sizeof(Double));
-  AStream.WriteBuffer(FPlatformMSEndSWdthInsKeep, sizeof(Double));
+  AStream.WriteBuffer(FPlatformMSStartWidthIns, sizeof(Double));
+  AStream.WriteBuffer(FPlatformMSEndWidthIns, sizeof(Double));
   AStream.WriteBuffer(FPlatformMSStartMM, sizeof(Double));
   AStream.WriteBuffer(FPlatformMSLengthMM, sizeof(Double));
   AStream.WriteBuffer(FPlatformMSStartSkewMM, sizeof(Double));
@@ -572,7 +572,7 @@ procedure TPlatformTrackbedInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'drawTSPlatformEndEdge', FDrawTSPlatformEndEdge);
   SaveYamlBoolean(AEmitter, 'drawTSPlatformRearEdge', FDrawTSPlatformRearEdge);
   SaveYamlDouble(AEmitter, 'platformTSFrontEdgeIns', FPlatformTSFrontEdgeIns);
-  SaveYamlDouble(AEmitter, 'platformTSStartWidthInsp', FPlatformTSStartWidthInsp);
+  SaveYamlDouble(AEmitter, 'platformTSStartWidthIns', FPlatformTSStartWidthIns);
   SaveYamlDouble(AEmitter, 'platformTSEndWidthIns', FPlatformTSEndWidthIns);
   SaveYamlDouble(AEmitter, 'platformTSStartMM', FPlatformTSStartMM);
   SaveYamlDouble(AEmitter, 'platformTSLengthMM', FPlatformTSLengthMM);
@@ -581,8 +581,8 @@ procedure TPlatformTrackbedInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'drawMSPlatformEndEdge', FDrawMSPlatformEndEdge);
   SaveYamlBoolean(AEmitter, 'drawMSPlatformRearEdge', FDrawMSPlatformRearEdge);
   SaveYamlDouble(AEmitter, 'platformMSFrontEdgeIns', FPlatformMSFrontEdgeIns);
-  SaveYamlDouble(AEmitter, 'platformMSStartWidthInsp', FPlatformMSStartWidthInsp);
-  SaveYamlDouble(AEmitter, 'platformMSEndSWdthInsKeep', FPlatformMSEndSWdthInsKeep);
+  SaveYamlDouble(AEmitter, 'platformMSStartWidthIns', FPlatformMSStartWidthIns);
+  SaveYamlDouble(AEmitter, 'platformMSEndWidthIns', FPlatformMSEndWidthIns);
   SaveYamlDouble(AEmitter, 'platformMSStartMM', FPlatformMSStartMM);
   SaveYamlDouble(AEmitter, 'platformMSLengthMM', FPlatformMSLengthMM);
   SaveYamlDouble(AEmitter, 'platformMSStartSkewMM', FPlatformMSStartSkewMM);
@@ -676,11 +676,11 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TPlatformTrackbedInfo.SetPlatformTSStartWidthInsp(const AValue: Double);
+procedure TPlatformTrackbedInfo.SetPlatformTSStartWidthIns(const AValue: Double);
 begin
-  if AValue <> FPlatformTSStartWidthInsp then begin
+  if AValue <> FPlatformTSStartWidthIns then begin
     SetModified;
-    FPlatformTSStartWidthInsp := AValue;
+    FPlatformTSStartWidthIns := AValue;
   end;
 end;
 
@@ -757,20 +757,20 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TPlatformTrackbedInfo.SetPlatformMSStartWidthInsp(const AValue: Double);
+procedure TPlatformTrackbedInfo.SetPlatformMSStartWidthIns(const AValue: Double);
 begin
-  if AValue <> FPlatformMSStartWidthInsp then begin
+  if AValue <> FPlatformMSStartWidthIns then begin
     SetModified;
-    FPlatformMSStartWidthInsp := AValue;
+    FPlatformMSStartWidthIns := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TPlatformTrackbedInfo.SetPlatformMSEndSWdthInsKeep(const AValue: Double);
+procedure TPlatformTrackbedInfo.SetPlatformMSEndWidthIns(const AValue: Double);
 begin
-  if AValue <> FPlatformMSEndSWdthInsKeep then begin
+  if AValue <> FPlatformMSEndWidthIns then begin
     SetModified;
-    FPlatformMSEndSWdthInsKeep := AValue;
+    FPlatformMSEndWidthIns := AValue;
   end;
 end;
 
