@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="128">
+    <Units Count="129">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -703,6 +703,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="VeeCheckRailInfo"/>
       </Unit127>
+      <Unit128>
+        <Filename Value="model\converttemplatetoglobals.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ConvertTemplateToGlobals"/>
+      </Unit128>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

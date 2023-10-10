@@ -1122,12 +1122,6 @@ procedure shove_length_mouse_action;
 procedure shove_width_mouse_action;
 procedure shove_twist_mouse_action;
 
-// copy control template data to the keep record.
-procedure fill_kd(target: TTemplate);
-
-// get control template data from a keep.
-procedure copy_keep(Source: TTemplate);
-
 // update menus after changes to the control template
 procedure update_menus;
 

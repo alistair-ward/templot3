@@ -3969,7 +3969,8 @@ uses
 
   Htmlview,
   curve,
-  curve_parameters_interface;
+  curve_parameters_interface,
+  ConvertTemplateToGlobals;
 
 const
 

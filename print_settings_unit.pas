@@ -193,8 +193,19 @@ implementation
 
 {$R *.lfm}
 
-uses control_room, pad_unit, math_unit, keep_select, help_sheet, shove_timber, wait_message,
-  shoved_timber, template_records, template, OTUndoRedoManager;
+uses
+  control_room,
+  pad_unit,
+  math_unit,
+  keep_select,
+  help_sheet,
+  shove_timber,
+  wait_message,
+  shoved_timber,
+  template_records,
+  template,
+  ConvertTemplateToGlobals,
+  OTUndoRedoManager;
 
 //______________________________________________________________________________
 

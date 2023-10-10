@@ -84,7 +84,8 @@ uses
   shoved_timber,
   curve,
   template_records,
-  template{ OT-FIRST , web_browser_unit};
+  template,
+  ConvertTemplateToGlobals{ OT-FIRST , web_browser_unit};
 
 //______________________________________________________________________________
 
