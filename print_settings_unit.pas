@@ -203,7 +203,9 @@ uses
   wait_message,
   shoved_timber,
   template_records,
-  template,
+  Template,
+  BoxDims,
+  AlignmentInfo,
   ConvertTemplateToGlobals,
   OTUndoRedoManager;
 
@@ -259,7 +261,7 @@ begin
     EXIT;
 
   for n := (keeps_list.Count - 1) downto 0 do begin
-    if keeps_list[n].template_info.keep_dims.box_dims1.fb_kludge_template_code >
+    if keeps_list[n].boxDims.flatbottomKludge >
       0 then begin
       Result := n;   // return index.
       EXIT;
@@ -280,7 +282,7 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if keeps_list[n].template_info.keep_dims.box_dims1.fb_kludge_template_code =
+    if keeps_list[n].boxDims.flatbottomKludge =
       0 then begin
       Result := n;   // return index.
       EXIT;
@@ -302,9 +304,9 @@ begin
   for n := 0 to (keeps_list.Count - 1) do begin
     if keeps_list[n].bg_copied = False then
       CONTINUE;
-    if keeps_list[n].template_info.keep_dims.box_dims1.align_info.cl_only_flag = True then
+    if keeps_list[n].boxDims.alignmentInfo.drawCentrelineOnly then
       CONTINUE;    // 212a
-    if keeps_list[n].template_info.keep_dims.box_dims1.rail_type = 2 then
+    if keeps_list[n].boxDims.railSection = rsFlatbottom then
       Result := Result + 1;             // return count.
   end;//next keep
 end;
@@ -354,11 +356,11 @@ begin
     for n := 0 to n_max do begin
       if (keeps_list[n].bg_copied = True)
         // bgnd template
-        and (keeps_list[n].template_info.keep_dims.box_dims1.align_info.cl_only_flag =
+        and (keeps_list[n].boxDims.alignmentInfo.drawCentrelineOnly =
         False)  // template has rails   212a
-        and (keeps_list[n].template_info.keep_dims.box_dims1.rail_type =
-        2)                    // FB rail
-        and (keeps_list[n].template_info.keep_dims.box_dims1.fb_kludge_template_code = 0)
+        and (keeps_list[n].boxDims.railSection =
+        rsFlatBottom)                    // FB rail
+        and (keeps_list[n].boxDims.flatbottomKludge = 0)
       // not if already a kludge template
       then begin
         // get the keep data.
@@ -456,14 +458,11 @@ begin
   n := 0;
   while n < keeps_list.Count do begin
 
-    with keeps_list[n].template_info.keep_dims.box_dims1 do begin
-
-      if fb_kludge_template_code = 0     // not a kludge template
-      then begin
-        Inc(n);
-        CONTINUE;      // leave this one.
-      end;
-    end;//with
+    if keeps_list[n].boxDims.flatbottomKludge = 0     // not a kludge template
+    then begin
+      Inc(n);
+      CONTINUE;      // leave this one.
+    end;
 
     if keeps_list[n].bg_copied = True then
       wipe_it(n);  // any data on background

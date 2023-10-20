@@ -23,6 +23,8 @@ class: TTemplate
 attributes:
   - name: name
     type: String
+  - name: topLabel
+    type: String
   - name: memo
     type: String
   - name: curve
@@ -50,6 +52,7 @@ type
   private
     //# genMemberVars
     FName: String;
+    FTopLabel: String;
     FMemo: String;
     FCurve: TOID;
     FBoxDims: TOID;
@@ -68,6 +71,7 @@ type
     function GetTurnoutInfo2: TTurnoutInfo2;
     function GetShovedTimbers: TShovedTimberOwningList;
     procedure SetName(const AValue: String);
+    procedure SetTopLabel(const AValue: String);
     procedure SetMemo(const AValue: String);
     //# endGenGetSetDeclarations
 
@@ -110,8 +114,6 @@ type
 
     this_is_tandem_first: boolean;  // 218a
 
-    template_info: Ttemplate_info;    // the template data.
-
     bgnd_keep: Tbgnd_keep;    // drawn data for a background template.
 
     constructor Create(AParent: TOTPersistent; AOID: TOID = 0); override;
@@ -125,6 +127,7 @@ type
 
     //# genProperty
     property name: String read FName write SetName;
+    property topLabel: String read FTopLabel write SetTopLabel;
     property memo: String read FMemo write SetMemo;
     property curve: TCurve read GetCurve;
     property boxDims: TBoxDims read GetBoxDims;
@@ -193,6 +196,9 @@ begin
   if AName = 'name' then
     FName := StrToString(AValue)
   else
+  if AName = 'topLabel' then
+    FTopLabel := StrToString(AValue)
+  else
   if AName = 'memo' then
     FMemo := StrToString(AValue)
   else
@@ -220,6 +226,7 @@ procedure TTemplate.RestoreAttributes(AStream : TStream);
 
   //# genRestoreVars
   FName := AStream.ReadAnsiString;
+  FTopLabel := AStream.ReadAnsiString;
   FMemo := AStream.ReadAnsiString;
   AStream.ReadBuffer(FCurve, sizeof(TOID));
   AStream.ReadBuffer(FBoxDims, sizeof(TOID));
@@ -236,6 +243,7 @@ procedure TTemplate.SaveAttributes(AStream : TStream);
 
   //# genSaveVars
   AStream.WriteAnsiString(FName);
+  AStream.WriteAnsiString(FTopLabel);
   AStream.WriteAnsiString(FMemo);
   AStream.WriteBuffer(FCurve, sizeof(TOID));
   AStream.WriteBuffer(FBoxDims, sizeof(TOID));
@@ -252,6 +260,7 @@ procedure TTemplate.SaveYamlAttributes(AEmitter : TYamlEmitter);
   
   //# genSaveYamlVars
   SaveYamlString(AEmitter, 'name', FName);
+  SaveYamlString(AEmitter, 'topLabel', FTopLabel);
   SaveYamlString(AEmitter, 'memo', FMemo);
   SaveYamlObject(AEmitter, 'curve', FCurve);
   SaveYamlObject(AEmitter, 'boxDims', FBoxDims);
@@ -267,6 +276,15 @@ begin
   if AValue <> FName then begin
     SetModified;
     FName := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetTopLabel(const AValue: String);
+begin
+  if AValue <> FTopLabel then begin
+    SetModified;
+    FTopLabel := AValue;
   end;
 end;
 

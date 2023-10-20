@@ -155,10 +155,26 @@ implementation
 
 uses
   config_unit,
-  control_room, pad_unit, help_sheet, chat_unit, colour_unit, math_unit, alert_unit,
-  bgkeeps_unit, keep_select,
+  control_room,
+  pad_unit,
+  help_sheet,
+  chat_unit,
+  colour_unit,
+  math_unit,
+  alert_unit,
+  bgkeeps_unit,
+  keep_select,
   background_shapes,
-  bgnd_unit, preview_unit, print_unit, print_settings_unit, rail_data_unit, template_records, mark_unit;
+  bgnd_unit,
+  preview_unit,
+  print_unit,
+  print_settings_unit,
+  rail_data_unit,
+  template_records,
+  mark_unit,
+  Template,
+  ProtoInfo,
+  TurnoutInfo2;
 
 var
   layer_str: array[0..17] of string;
@@ -667,6 +683,9 @@ var
 
   fixed_diamond_ends: boolean;
 
+  t: TTemplate;
+  proto: TProtoInfo;
+  ti2: TTurnoutInfo2;
 
   ////////////////////////////////////////////////////////////
 
@@ -924,30 +943,28 @@ begin
 
   for n := 0 to (keeps_list.Count - 1) do begin
 
-    with keeps_list[n] do begin   // to next template.
+    t := keeps_list[n];
 
-      if bg_copied = False then
+      if t.bg_copied = False then
         CONTINUE;              // no data, unused template.
 
-      if (dxf_form.group_option_button.Checked = True) and (group_selected = False)
+      if (dxf_form.group_option_button.Checked = True) and (t.group_selected = False)
       // ignore this one.
       then
         CONTINUE;
 
-      with template_info.keep_dims.box_dims1.proto_info do begin
+      proto := t.boxDims.protoInfo;
         // 3-D data for this template...
-        rail_foot_z := 0 - rail_height_pi * scale_pi / 12;          // rail top is z datum.
-        timb_top_z := rail_foot_z - seat_thick_pi * scale_pi / 12;
-        timb_bot_z := timb_top_z - timber_thick_pi * scale_pi / 12;
-      end;//with proto_info
+        rail_foot_z := 0 - proto.railHeight * proto.scale / 12;          // rail top is z datum.
+        timb_top_z := rail_foot_z - proto.seatThick * proto.scale / 12;
+        timb_bot_z := timb_top_z - proto.timberThickness * proto.scale / 12;
 
-      with template_info.keep_dims.turnout_info2 do
-        fixed_diamond_ends := (semi_diamond_flag = True) and (diamond_fixed_flag = True);
+      ti2 := t.TurnoutInfo2;
+        fixed_diamond_ends := (ti2.semiDiamond) and (ti2.diamondFixed);
       // need end marks on fixed diamond point rails.
 
-      now_keep := bgnd_keep;   // get the drawing data.
+      now_keep := t.bgnd_keep;   // get the drawing data.
 
-    end;//with Ttemplate
 
     with now_keep do begin
 
@@ -1101,7 +1118,7 @@ begin
           if code = eMC__5_Label       // keep name labels
           then begin
             text_str :=
-              Trim(Copy(keeps_list[n].template_info.keep_dims.box_dims1.reference_string, 1, 99));
+              Trim(Copy(keeps_list[n].name, 1, 99));
             // not the keep number.
 
             text_height := pad_form.bgnd_keeps_font_label.Font.Size * 25.4 / 72;
@@ -1110,9 +1127,9 @@ begin
             // to match screen appearance.
 
             mod_name_x :=
-              keeps_list[n].template_info.keep_dims.box_dims1.mod_text_x;
+              keeps_list[n].boxDims.labelModifierX;
             mod_name_y :=
-              keeps_list[n].template_info.keep_dims.box_dims1.mod_text_y;
+              keeps_list[n].boxDims.labelModifierY;
 
             move_to.x := move_to.x + Round(mod_name_x * 100);
             // (Templot top-left of text.)

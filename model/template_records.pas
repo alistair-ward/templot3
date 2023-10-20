@@ -45,7 +45,8 @@ uses
   mark_unit,
   rail_data_unit,
   curve,
-  curve_parameters_interface;
+  curve_parameters_interface,
+  NotchInfo;
 
 
 const
@@ -57,13 +58,6 @@ const
 
 
 type
-
-  Tnotch = record      //  a notch position.
-    notch_x: double;
-    notch_y: double;
-    notch_k: double;
-  end;
-
 
   Tsnap_peg_positions = record
     // snapping positions for F7 shift mouse action  0.79.a  27-05-06

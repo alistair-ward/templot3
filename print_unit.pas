@@ -177,22 +177,46 @@ implementation
 
 uses
   Printers,
-  config_unit, calibration_unit, preview_unit, control_room,
+  config_unit,
+  calibration_unit,
+  preview_unit,
+  control_room,
   point_ex,
-  pad_unit, alert_unit,
-  keep_select, math_unit, gauge_unit,
-  info_unit, colour_unit,
+  pad_unit,
+  alert_unit,
+  keep_select,
+  math_unit,
+  gauge_unit,
+  info_unit,
+  colour_unit,
   background_shapes,
-  bgnd_unit, bgkeeps_unit, help_sheet,
-  stay_visible_unit, panning_unit, shove_timber, grid_unit, edit_memo_unit,
-  print_settings_unit, print_now_box, { OT-FIRST dtp_settings_unit,} export_unit,
-  { OT-FIRST dtp_unit,} rail_options_unit, platform_unit, check_diffs_unit,
+  bgnd_unit,
+  bgkeeps_unit,
+  help_sheet,
+  stay_visible_unit,
+  panning_unit,
+  shove_timber,
+  grid_unit,
+  edit_memo_unit,
+  print_settings_unit,
+  print_now_box,
+  { OT-FIRST dtp_settings_unit,}
+  export_unit,
+  { OT-FIRST dtp_unit,}
+  rail_options_unit,
+  platform_unit,
+  check_diffs_unit,
   data_memo_unit,
-  trackbed_unit, make_slip_unit,
+  trackbed_unit,
+  make_slip_unit,
   curve,
   rail_data_unit,
   mark_unit,
-  template_records;
+  template_records,
+  Template,
+  BoxDims,
+  PlatformTrackbedInfo,
+  TurnoutInfo2;
 
 const
   print_help_str: string = '      Printing  Pages' +
@@ -4052,6 +4076,8 @@ var
 
   s, idnum_str, idtb_str: string;  // 208a
   num: integer;                  // 208a
+  t: TTemplate;
+  bd: TBoxDims;
 
 begin
   with Printer.Canvas do begin
@@ -4061,18 +4087,18 @@ begin
 
     for n := 0 to maxbg_index do begin
 
-      if keeps_list[n].bg_copied = False then
+      t := keeps_list[n];
+      if not t.bg_copied then
         CONTINUE;  // no data, not on background.
 
-      if (keeps_list[n].group_selected = False) and
-        (print_group_only_flag = True) then
+      if (not t.group_selected) and
+        (print_group_only_flag) then
         CONTINUE;  // not in group. 0.78.b 10-12-02.
 
-      if keeps_list[n].template_info.keep_dims.box_dims1.fb_kludge_template_code
-        > 0 then
+      if t.boxDims.flatbottomKludge > 0 then
         CONTINUE;  // 209c no marks for fb_kludge templates
 
-      now_keep := keeps_list[n].bgnd_keep;    // next background keep.
+      now_keep := t.bgnd_keep;    // next background keep.
 
       with now_keep do begin
 
@@ -4081,24 +4107,22 @@ begin
         using_mapping_colour := False;  // default init.
         mapping_colour := clBlack;      // init - keep compiler happy.
 
-        with keeps_list[n].template_info.keep_dims.box_dims1 do begin
+        bd := t.boxDims;
 
-          idnum_str := id_number_str;  // 208a
+          idnum_str := bd.idNumberStr;  // 208a
 
-          if (use_print_mapping_colour = True) and
+          if (bd.usePrintMappingColour) and
             ((mapping_colours_print = 2) or (mapping_colours_print = 3)) and
-            (black_white = False) and (grey_shade = False) then begin
-            mapping_colour := calc_intensity(print_mapping_colour);
+            (not black_white) and (not grey_shade) then begin
+            mapping_colour := calc_intensity(bd.printMappingColour);
             using_mapping_colour := True;
           end;
 
-          if (use_pad_marker_colour = True) and (mapping_colours_print =
-            4)   // use pad settings instead
-            and (black_white = False) and (grey_shade = False) then begin
-            mapping_colour := calc_intensity(pad_marker_colour);
+          if (bd.usePadMarkerColour) and (mapping_colours_print = 4)   // use pad settings instead
+            and (not black_white) and (not grey_shade) then begin
+            mapping_colour := calc_intensity(bd.padMarkerColour);
             using_mapping_colour := True;
           end;
-        end;//with
 
         tbnum_str := timber_numbers_string;      // the full string of timber numbering.
 
@@ -4626,6 +4650,11 @@ var
   this_one_trackbed_cess_ms: boolean;       // 215a
   this_one_trackbed_cess_ts: boolean;       // 215a
 
+  t: TTemplate;
+  bd: TBoxDims;
+  pti: TPlatformTrackbedInfo;
+  ti2: TTurnoutInfo2;
+
   ////////////////////////////////////////////////////////////
 
   procedure set_pen_railcolour(rail_edges: boolean);  // 0.76.a 3-11-01.
@@ -5024,21 +5053,21 @@ var
 
           // 0.93.a blank platform edges ...
 
-          with keeps_list[n].template_info.keep_dims.box_dims1.platform_trackbed_info do begin
+          pti := keeps_list[n].boxDims.platformTrackbedInfo;
 
-            if adjacent_edges_keep = True  // platforms
+            if pti.adjacentEdges  // platforms
             then begin
               // 0.93.a blank platform rear edges ...
 
               if (rail = rdAdjTrackTurnoutSideNearGaugeFace) and
-                (draw_ts_platform_keep = True) and (draw_ts_platform_rear_edge_keep = False)
+                (pti.drawTSPlatform) and (not pti.drawTSPlatformRearEdge)
               // 0.93.a TS platform start
               then
                 pbg_outline_railedge(rdAdjTrackTurnoutSideNearGaugeFace, blanking_colour, True);
               // blank rear edge
 
               if (rail = rdAdjTrackMainSideNearGaugeFace) and
-                (draw_ms_platform_keep = True) and (draw_ms_platform_rear_edge_keep = False)
+                (pti.drawMSPlatform) and (not pti.drawMSPlatformRearEdge)
               // 0.93.a TS platform start
               then
                 pbg_outline_railedge(rdAdjTrackMainSideNearGaugeFace, blanking_colour, True);
@@ -5047,33 +5076,32 @@ var
               // 0.93.a blank platform ends ...
 
               if (rail = rdAdjTrackTurnoutSideNearGaugeFace) and
-                (draw_ts_platform_keep = True) and (draw_ts_platform_start_edge_keep = False)
+                (pti.drawTSPlatform) and (pti.drawTSPlatformStartEdge)
               // 0.93.a TS platform start
               then
                 pbg_modify_rail_end(0, dots_index, edge_colour, blanking_colour);
 
               if (rail = rdAdjTrackTurnoutSideNearGaugeFace) and
-                (draw_ts_platform_keep = True) and (draw_ts_platform_end_edge_keep = False)
+                (pti.drawTSPlatform) and (not pti.drawTSPlatformEndEdge)
               // 0.93.a TS platform end
               then
                 pbg_modify_rail_end(mid_dots_index, mid_dots_index + 1,
                   edge_colour, blanking_colour);
 
               if (rail = rdAdjTrackMainSideNearGaugeFace) and
-                (draw_ms_platform_keep = True) and (draw_ms_platform_start_edge_keep = False)
+                (pti.drawMSPlatform) and (not pti.drawMSPlatformStartEdge)
               // 0.93.a MS platform start
               then
                 pbg_modify_rail_end(0, dots_index, edge_colour, blanking_colour);
 
               if (rail = rdAdjTrackMainSideNearGaugeFace) and
-                (draw_ms_platform_keep = True) and (draw_ms_platform_end_edge_keep = False)
+                (pti.drawMSPlatform) and (not pti.drawMSPlatformEndEdge)
               // 0.93.a MS platform end
               then
                 pbg_modify_rail_end(mid_dots_index, mid_dots_index + 1,
                   edge_colour, blanking_colour);
 
             end;
-          end;//with
 
           if (rail = rdKCrossingCheckMainSideGaugeFace) or
             (rail = rdKCrossingCheckTurnoutSideGaugeFace) then begin
@@ -5415,6 +5443,7 @@ var
     edge_colour, blanking_colour: integer;
 
     no_vee: boolean;
+    t: TTemplate;
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -5625,12 +5654,10 @@ var
         if output_show_points_mark = True  // mark position of points
         then begin
 
-          if (keeps_list[n].template_info.keep_dims.box_dims1.turnout_info1.plain_track_flag =
-            False)   // not for plain track
-            and (keeps_list[n].template_info.keep_dims.turnout_info2.semi_diamond_flag =
-            False)            // not for half-diamond
-            and (keeps_list[n].template_info.keep_dims.turnout_info2.gaunt_flag
-            = False)                   // not for gaunt turnout
+          t := keeps_list[n];
+          if (not t.boxDims.turnoutInfo1.plainTrack)   // not for plain track
+            and (not t.turnoutInfo2.semiDiamond)            // not for half-diamond
+            and (not t.turnoutInfo2.gaunt)                   // not for gaunt turnout
 
             and (Length(list_bgnd_rails[rdStraightTurnoutWingGaugeFace]) <>
             0)    // data for straight switch rail
@@ -5682,32 +5709,32 @@ begin          // print background templates...
 
     for n := 0 to max_list_index do begin
 
-      if keeps_list[n].bg_copied = False then
+      t := keeps_list[n];
+      if not t.bg_copied then
         CONTINUE;  // no data, not on background.
 
-      if (keeps_list[n].group_selected = False) and
-        (print_group_only_flag = True) then
+      if (not t.group_selected) and
+        (print_group_only_flag) then
         CONTINUE;  // not in group. 0.78.b 10-12-02.
 
-      if (keeps_list[n].template_info.keep_dims.box_dims1.fb_kludge_template_code > 0)  // 209c
-        and (print_settings_form.output_fb_foot_lines_checkbox.Checked = False) then
+      if (t.boxDims.flatbottomKludge > 0)  // 209c
+        and (not print_settings_form.output_fb_foot_lines_checkbox.Checked) then
         CONTINUE;                                                      // foot lines not wanted.
 
+      pti := t.boxDims.platformTrackbedInfo;
+
       this_one_platforms_trackbed :=
-        keeps_list[n].template_info.keep_dims.box_dims1.
-        platform_trackbed_info.adjacent_edges_keep;
+        pti.adjacentEdges;
       // True = platforms and trackbed edges   206b
 
       this_one_trackbed_cess_ms :=
-        keeps_list[n].template_info.keep_dims.box_dims1.
-        platform_trackbed_info.draw_ms_trackbed_cess_edge_keep;
+        pti.drawMSTrackbedCessEdge;
       // True = cess width instead of trackbed cutting line 215a
       this_one_trackbed_cess_ts :=
-        keeps_list[n].template_info.keep_dims.box_dims1.
-        platform_trackbed_info.draw_ts_trackbed_cess_edge_keep;
+        pti.drawTSTrackbedCessEdge;
       // True = cess width instead of trackbed cutting line 215a
 
-      now_keep := keeps_list[n].bgnd_keep;    // next background keep.
+      now_keep := t.bgnd_keep;    // next background keep.
 
       with now_keep do begin
 
@@ -5715,33 +5742,31 @@ begin          // print background templates...
 
         using_mapping_colour := False;  // default init.
 
-        with keeps_list[n].template_info.keep_dims do begin
-
-          if box_dims1.bgnd_code_077 <> 1 then
+        bd := t.boxDims;
+        ti2 := t.turnoutInfo2;
+          if bd.backgroundCode <> bkcBackground then
             CONTINUE;    // 0.77.b BUG???
 
-          with turnout_info2 do begin
-            fixed_diamond_ends := (semi_diamond_flag = True) and (diamond_fixed_flag = True);
+            fixed_diamond_ends := (ti2.semiDiamond) and (ti2.diamondFixed);
             // need end marks on fixed diamond point rails.
-            gaunt_template := gaunt_flag;
+            gaunt_template := ti2.gaunt;
             // 0.93.a ex 0.81
-          end;//with
 
-          if (box_dims1.use_print_mapping_colour = True) and
+          if (bd.usePrintMappingColour) and
             ((mapping_colours_print = 1) or (mapping_colours_print = 3)) and
-            (black_white = False) and (grey_shade = False) then begin
-            mapping_colour := calc_intensity(box_dims1.print_mapping_colour);
+            (not black_white) and (not grey_shade) then begin
+            mapping_colour := calc_intensity(bd.printMappingColour);
             using_mapping_colour := True;
           end;
 
-          if (box_dims1.use_pad_marker_colour = True) and
+          if (bd.usePadMarkerColour) and
             (mapping_colours_print = 4)   // use pad settings instead
-            and (black_white = False) and (grey_shade = False) then begin
-            mapping_colour := calc_intensity(box_dims1.pad_marker_colour);
+            and (not black_white) and (not grey_shade) then begin
+            mapping_colour := calc_intensity(bd.padMarkerColour);
             using_mapping_colour := True;
           end;
 
-          fb_kludge_this := box_dims1.fb_kludge_template_code;  // 0.94.a
+          fb_kludge_this := bd.flatbottomKludge;  // 0.94.a
 
           if fb_kludge_this = 0   // no track centre-lines or diagram mode for kludge templates  212a
           then begin
@@ -5749,10 +5774,9 @@ begin          // print background templates...
             if output_diagram_mode = True then
               pbg_draw_diagram_mode;  // first draw template in diagrammatic mode.
 
-            if ((print_settings_form.output_centrelines_checkbox.Checked = True) and
-              (output_diagram_mode = False) and (box_dims1.align_info.dummy_template_flag =
-              False)) or ((print_settings_form.output_bgnd_shapes_checkbox.Checked = True) and
-              (box_dims1.align_info.dummy_template_flag = True))
+            if ((print_settings_form.output_centrelines_checkbox.Checked) and
+              (not output_diagram_mode) and (not bd.alignmentInfo.dummyTemplateFlag)) or ((print_settings_form.output_bgnd_shapes_checkbox.Checked) and
+              (bd.alignmentInfo.dummyTemplateFlag))
             // 212a dummy templates not part of track plan
 
             then begin
@@ -5763,7 +5787,7 @@ begin          // print background templates...
 
               Pen.Mode := pmCopy;
 
-              if box_dims1.align_info.dummy_template_flag = True
+              if bd.alignmentInfo.dummyTemplateFlag
               // 212a   dummy template as bgnd shapes
               then begin
                 Pen.Style := psSolid;
@@ -5827,8 +5851,6 @@ begin          // print background templates...
               end;//next aq
             end;//if track-centres
           end;// if not kludge
-
-        end;//with template
 
         if print_settings_form.output_rails_checkbox.Checked = True then begin
 

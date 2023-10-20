@@ -48,7 +48,8 @@ uses
   rail_data_unit,
   mark_unit,
   template_records,
-  Template
+  Template,
+  NotchInfo
   { OT-FIRST ,}{ OT-FIRST ReadHTML,}{ OT-FIRST framview}{,
   OleCtnrs, OleCtrls, SHDocVw};
 

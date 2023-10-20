@@ -45,7 +45,7 @@ uses
 
   { OT-FIRST , WPPDFPRP,
   WPPDFR1, WPPDFR2,} Htmlview,
-  shoved_timber,
+  ShovedTimber,
   pad_unit,
   HtmlGlobals,
   box_file_unit,
@@ -720,7 +720,10 @@ uses
   curve,
   rail_data_unit,
   mark_unit,
-  ConvertTemplateToGlobals;
+  ConvertTemplateToGlobals,
+  BoxDims,
+  AlignmentInfo,
+  RailInfo;
 
 const
 
@@ -866,9 +869,6 @@ begin
       end;//for
     end;//with
 
-    template_info.keep_dims.box_dims1.pre077_bgnd_flag := False;
-    // unused template. no longer used 0.77.a but needed in file if reloaded into older version.
-    template_info.keep_shove_list := TShovedTimberList.Create;
   end;//with
 end;
 //_________________________________________________________________________________________
@@ -879,34 +879,27 @@ function wipe_it(n: integer): boolean;   // wipe template n from background.
 var
   index: integer;
   aq: ERailData;
-
+  t: TTemplate;
 begin
   Result := False;        // default init
 
   if any_bgnd = 0 then
     EXIT;  // not on background.
 
-  with keeps_list[n] do begin
+  t := keeps_list[n];
 
-    template_info.keep_dims.box_dims1.bgnd_code_077 := 0;
-    // bgnd_flag:=False;  // flag it is not now a background keep.
-    template_info.keep_dims.box_dims1.pre077_bgnd_flag := False;
-    // in case reloaded in older version than 0.77.a
+  t.boxDims.backgroundCode := bkcUnused;
 
-    if bg_copied = False then
-      EXIT;              // ??? not on background.
+  if not t.bg_copied then
+    EXIT;              // ??? not on background.
 
-    bg_copied := False;      // will no longer be on background.
+  t.bg_copied := False;      // will no longer be on background.
 
-    with bgnd_keep do begin
-      SetLength(list_bgnd_marks, 0);
+  SetLength(t.bgnd_keep.list_bgnd_marks, 0);
 
-      for aq in ERailData do begin
-        SetLength(list_bgnd_rails[aq], 0);
-      end;//for next aq
-
-    end;//with bgnd_keep data
-  end;//with template
+  for aq in ERailData do begin
+    SetLength(t.bgnd_keep.list_bgnd_rails[aq], 0);
+  end;//for next aq
 
   Result := True;
   save_done := False;
@@ -919,7 +912,8 @@ function rebuild_it(n, move_bgnd_peg_to_code, move_bgnd_peg_to_peg_rail: integer
   move_bgnd_peg: boolean): boolean;     // rebuild template n.
 
   // move_bgnd_peg_to_code:integer; move_bgnd_peg:boolean   added 205c
-
+var
+  t: TTemplate;
 begin
   Result := False;                                       // default init.
   //saveTemplate := TTemplate.Create('');
@@ -932,126 +926,103 @@ begin
 
     // first wipe the existing...
 
-    if wipe_it(n) = False then
+    if not wipe_it(n) then
       EXIT;        // not a background template.
 
-    with keeps_list[n] do begin
+    t := keeps_list[n];
 
-      if move_bgnd_peg = True     // 205c
-      then begin
-        template_info.keep_dims.box_dims1.transform_info.peg_point_code :=
-          move_bgnd_peg_to_code;
-        template_info.keep_dims.box_dims1.transform_info.peg_point_rail :=
-          move_bgnd_peg_to_peg_rail;
-        template_info.keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-        // modify Delphi float time format to integer.
-      end;
+    if move_bgnd_peg     // 205c
+    then begin
+      t.boxDims.transformInfo.pegPointCode :=
+        move_bgnd_peg_to_code;
+      t.boxDims.transformInfo.pegPointRail :=
+        move_bgnd_peg_to_peg_rail;
+      //template_info.keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
+    end;
 
-      // does he want it modified?...
+    // does he want it modified?...
 
-      if keep_form.timbering_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_timbering(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.timbering_as_control_menu_entry.Checked then begin
+      update_timbering(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.plain_track_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_lengths(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.plain_track_as_control_menu_entry.Checked then begin
+      update_lengths(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.customize_xing_as_control_menu_entry.Checked = True   // 214b
-      then begin
-        with template_info do begin
-          update_customize_xing(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.customize_xing_as_control_menu_entry.Checked   // 214b
+    then begin
+      update_customize_xing(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.trackbed_edges_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_trackbed_edges(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.trackbed_edges_as_control_menu_entry.Checked then begin
+      update_trackbed_edges(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.centre_lines_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_centre_lines(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.centre_lines_as_control_menu_entry.Checked then begin
+      update_centre_lines(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.centre_line_offset_options_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_centre_line_offset_options(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.centre_line_offset_options_as_control_menu_entry.Checked then begin
+      update_centre_line_offset_options(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.rail_section_data_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_rail_section(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.rail_section_data_as_control_menu_entry.Checked then begin
+      update_rail_section(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
-      if keep_form.radius_warning_limit_as_control_menu_entry.Checked = True then begin
-        with template_info do begin
-          update_radius_warning(keep_dims);
-          // modify the stored data, so we need a new timestamp.
-          keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer.
-        end;//with
+    if keep_form.radius_warning_limit_as_control_menu_entry.Checked then begin
+      update_radius_warning(t);
+      // modify the stored data, so we need a new timestamp.
+      //keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+      // modify Delphi float time format to integer.
 
-        save_done := False;
-      end;
+      save_done := False;
+    end;
 
 
-      copy_keep_to_background(n, True, False);   // then calc and copy again.
+    copy_keep_to_background(n, True, False);   // then calc and copy again.
 
-      if move_bgnd_peg = True then begin
-        with template_info.keep_dims.box_dims1.transform_info do begin
-          notch_info := get_peg_for_notch;   // 205c
-
-          peg_pos.x := pegx;   //  mm  peg position.
-          peg_pos.y := pegy;
-
-        end;//with
-      end;
-
-    end;//with Ttemplate
+    if move_bgnd_peg then begin
+      t.boxDims.transformInfo.notchInfo.SetNotch(get_peg_for_notch);   // 205c
+      t.boxDims.transformInfo.pegPos.set_xy(pegx, pegy);
+    end;
 
     backup_wanted := True;
     Result := True;
@@ -1156,7 +1127,7 @@ begin
 
     if not echo_cut then begin
       if (not no_delete_msg_pref) and (alerts) then begin
-        str := t.template_info.keep_dims.box_dims1.reference_string;
+        str := t.Name;
         // Delphi bug? - must be a local string, otherwise limits length of alert string.
 
         alert_box.preferences_checkbox.Checked := False;       //%%%%
@@ -1193,7 +1164,7 @@ begin
     end
     else begin
       if (not no_cut_msg_pref) and (alerts) then begin
-        str := t.template_info.keep_dims.box_dims1.reference_string;
+        str := t.Name;
         // Delphi bug? - must be a local string, otherwise limits length of alert string.
 
         alert_box.preferences_checkbox.Checked := False;       //%%%%
@@ -1202,7 +1173,7 @@ begin
         i := alert(7, '      cut  this  template ?', '|' + str +
           ' has been sent as an ECHO.' +
           ' You are now about to delete this template from your storage box' +
-          s + '||It can be only restored by selecting the DISK > FETCH ECHO menu item before another echo is sent.' + '||The remaining templates will be re-numbered.' + '||Are you sure you want to delete this template ?', '', '', '', '', 'no  -  cancel  delete    ', 'yes  -  delete  ' + t.template_info.keep_dims.box_dims1.reference_string + '      ', 0);
+          s + '||It can be only restored by selecting the DISK > FETCH ECHO menu item before another echo is sent.' + '||The remaining templates will be re-numbered.' + '||Are you sure you want to delete this template ?', '', '', '', '', 'no  -  cancel  delete    ', 'yes  -  delete  ' + t.Name + '      ', 0);
 
         //%%%%  was "today"
 
@@ -1534,6 +1505,9 @@ var
   ref_str, bg_str, group_str: string;
 
   empty_str, panel_str: string;  // 208a
+  t: TTemplate;
+  alignment: TAlignmentInfo;
+  idType: char;
 
 begin
 
@@ -1575,60 +1549,55 @@ begin
     if keeps_list.Count > 0 then begin
       if keepform_listbox.Items.Count = 0 then begin
         for n := 0 to keeps_list.Count - 1 do begin
-          with keeps_list[n].template_info.keep_dims do begin
+          t := keeps_list[n];
 
-            with box_dims1 do begin
+          if t.boxDims.backgroundCode = bkcBackground then begin
+            total_bgnd_template_length :=
+              total_bgnd_template_length + t.boxDims.turnoutInfo1.turnoutLength;
+            // 0.93.a  mm overall length.
+            //total_bgnd_timbering_length :=
+            //  total_bgnd_timbering_length + total_length_of_timbering;     // 0.96.a
 
-              if bgnd_code_077 = 1 then begin
-                total_bgnd_template_length :=
-                  total_bgnd_template_length + turnout_info1.turnout_length;
-                // 0.93.a  mm overall length.
-                total_bgnd_timbering_length :=
-                  total_bgnd_timbering_length + total_length_of_timbering;     // 0.96.a
+            if smallest_bgnd_radius > t.turnoutInfo2.smallestRadius
+            // 208a
+            then begin
+              smallest_bgnd_radius :=
+                t.turnoutInfo2.smallestRadius;
+              smallest_bgnd_radius_index := n;
+            end;
+          end;
 
-                if smallest_bgnd_radius > turnout_info2.smallest_radius_stored
-                // 208a
-                then begin
-                  smallest_bgnd_radius :=
-                    turnout_info2.smallest_radius_stored;
-                  smallest_bgnd_radius_index := n;
-                end;
-              end;
+          if t.group_selected then begin
+            total_group_template_length :=
+              total_group_template_length + t.boxDims.turnoutInfo1.turnoutLength;    // 0.93.a
+            //total_group_timbering_length :=
+            //  total_group_timbering_length + total_length_of_timbering;     // 0.96.a
 
-              if keeps_list[n].group_selected = True then begin
-                total_group_template_length :=
-                  total_group_template_length + turnout_info1.turnout_length;    // 0.93.a
-                total_group_timbering_length :=
-                  total_group_timbering_length + total_length_of_timbering;     // 0.96.a
+            if smallest_group_radius >
+              t.turnoutInfo2.smallestRadius     // 208a
+            then begin
+              smallest_group_radius :=
+                t.turnoutInfo2.smallestRadius;
+              smallest_group_radius_index := n;
+            end;
+          end;
 
-                if smallest_group_radius >
-                  turnout_info2.smallest_radius_stored     // 208a
-                then begin
-                  smallest_group_radius :=
-                    turnout_info2.smallest_radius_stored;
-                  smallest_group_radius_index := n;
-                end;
-              end;
+          name_str := Trim(Name);
 
-              name_str := Trim(reference_string);
+          if name_str <> '' then
+            k := keepform_listbox.Items.Add(name_str)     // 208a mods
+          else begin
+            empty_str := 'no-name';  // default init (should not appear)
 
-              if name_str <> '' then
-                k := keepform_listbox.Items.Add(name_str)     // 208a mods
-              else begin
-                empty_str := 'no-name';  // default init (should not appear)
+            if Copy(t.boxDims.idNumberStr, 1, 1) = 'P' then
+              empty_str := 'plain track';
+            if Copy(t.boxDims.idNumberStr, 1, 1) = 'T' then
+              empty_str := 'turnout';
+            if Copy(t.boxDims.idNumberStr, 1, 1) = 'D' then
+              empty_str := 'half-diamond';
 
-                if Copy(id_number_str, 1, 1) = 'P' then
-                  empty_str := 'plain track';
-                if Copy(id_number_str, 1, 1) = 'T' then
-                  empty_str := 'turnout';
-                if Copy(id_number_str, 1, 1) = 'D' then
-                  empty_str := 'half-diamond';
-
-                k := keepform_listbox.Items.Add(empty_str);
-              end;
-
-            end;//with
-          end;//with
+            k := keepform_listbox.Items.Add(empty_str);
+          end;
 
         end;//for
       end;
@@ -1683,29 +1652,27 @@ begin
       //end;//with
 
 
-      with keeps_list[n].template_info.keep_dims.box_dims1.align_info do begin   // 216a ...
+      alignment := keeps_list[n].boxDims.alignmentInfo;
 
-        if reminder_flag = True then begin
-          rem_memo.Color := reminder_colour;
-          rem_memo.Lines.Text := reminder_str;
+      if alignment.reminderFlag then begin
+        rem_memo.Color := alignment.reminderColour;
+        rem_memo.Lines.Text := alignment.reminderStr;
 
-          rem_label.Visible := True;
-          rem_memo.Visible := True;
-        end
-        else begin
-          rem_label.Visible := False;
-          rem_memo.Visible := False;
-        end;
-
-      end;//with
+        rem_label.Visible := True;
+        rem_memo.Visible := True;
+      end
+      else begin
+        rem_label.Visible := False;
+        rem_memo.Visible := False;
+      end;
 
 
       template_number_label.Caption := IntToStr(n + 1);
       total_label.Caption := 'of   ' + IntToStr(keeps_list.Count);
 
-      gauge_panel.Caption := keeps_list[n].template_info.keep_dims.box_dims1.top_label;
+      gauge_panel.Caption := keeps_list[n].topLabel;
 
-      id_label.Caption := keeps_list[n].template_info.keep_dims.box_dims1.id_number_str;  // 208a
+      id_label.Caption := keeps_list[n].boxDims.idNumberStr;  // 208a
 
       if remove_space_str(box_file_label.Caption) = 'boxempty' then begin
         box_file_label.Caption := '';
@@ -1713,132 +1680,135 @@ begin
       end;
 
 
-      with keeps_list[n].template_info.keep_dims.box_dims1 do begin
-        ref_str := reference_string + '  ' + id_number_str;
+      t := keeps_list[n];
+      ref_str := t.Name + '  ' + t.boxDims.idNumberStr;
 
-        // 208a mods...
+      // 208a mods...
 
-        empty_str := 'no-name';  // default init (should not appear)
+      empty_str := 'no-name';  // default init (should not appear)
 
-        if Copy(id_number_str, 1, 1) = 'P' then
+      case t.boxDims.idNumberStr[1] of
+        'P':
           empty_str := 'plain track';
-        if Copy(id_number_str, 1, 1) = 'T' then
+        'T':
           empty_str := 'turnout';
-        if Copy(id_number_str, 1, 1) = 'D' then
+        'D':
           empty_str := 'half-diamond';
-        if Copy(id_number_str, 1, 1) = 'S' then
+        'S':
           empty_str := 'switch';
-        if Copy(id_number_str, 1, 1) = 'C' then
+        'C':
           empty_str := 'custom template';
+      end;
 
-        if Copy(id_number_str, 2, 1) = 'L' then
+      case t.boxDims.idNumberStr[2] of
+        'L':
           empty_str := empty_str + '  LH';
-        if Copy(id_number_str, 2, 1) = 'R' then
+        'R':
           empty_str := empty_str + '  RH';
+      end;
 
-        if Trim(reference_string) = '' then
-          panel_str := empty_str
-        else
-          panel_str := Trim(reference_string);
+      if Trim(t.Name) = '' then
+        panel_str := empty_str
+      else
+        panel_str := Trim(t.Name);
 
-        ref_panel.Caption := ' ' + id_number_str + '   ' + Copy(panel_str, 1, 36);  // 208a
+      ref_panel.Caption := ' ' + t.boxDims.idNumberStr + '   ' + Copy(panel_str, 1, 36);  // 208a
 
-        case bgnd_code_077 of // if bgnd_flag=True
+      case t.boxDims.backgroundCode of // if bgnd_flag=True
 
-          -1: begin    // library template...
+        bkcLibrary: begin    // library template...
 
-            template_number_label.Font.Color := clGreen;
-            template_number_shape.Brush.Color := clGreen;
-            template_number_shape.Pen.Color := clGreen;
+          template_number_label.Font.Color := clGreen;
+          template_number_shape.Brush.Color := clGreen;
+          template_number_shape.Pen.Color := clGreen;
 
-            to_from_bgnd_panel.Hide;
-            select_toggle_button.Hide;
-            select_menu_entry.Enabled := False;
-            library_label.Show;
+          to_from_bgnd_panel.Hide;
+          select_toggle_button.Hide;
+          select_menu_entry.Enabled := False;
+          library_label.Show;
 
-            flag_shape.Brush.Color := clGreen;
-            bg_str := '(library)';
+          flag_shape.Brush.Color := clGreen;
+          bg_str := '(library)';
 
-            // 208a make_label.Caption:='copy to the control template';        // can't wipe if it's a library template.
-            copy_to_control_radiobutton.Checked := True;
-            // 208a can't wipe or delete if it's a library template.
+          // 208a make_label.Caption:='copy to the control template';        // can't wipe if it's a library template.
+          copy_to_control_radiobutton.Checked := True;
+          // 208a can't wipe or delete if it's a library template.
 
-            copy_to_control_radiobutton.Enabled := True;
-            wipe_to_control_radiobutton.Enabled := False;
-            delete_to_control_radiobutton.Enabled := False;
-
-
-            rebuild_button.Enabled := False;
-            rebuild_template_menu_entry.Enabled := False;
-            make_library_template_menu_entry.Enabled := False;    // already is.
-          end;
+          copy_to_control_radiobutton.Enabled := True;
+          wipe_to_control_radiobutton.Enabled := False;
+          delete_to_control_radiobutton.Enabled := False;
 
 
-          0: begin     // unused template...
-
-            template_number_label.Font.Color := clBlue;
-            template_number_shape.Brush.Color := clBlue;
-            template_number_shape.Pen.Color := clBlue;
-
-            to_from_bgnd_panel.Color := clNavy;
-            flag_shape.Brush.Color := clBlue;
-            bg_str := '(unused)';
-
-            with copy_wipe_label do begin
-              Font.Color := clWhite;
-              Caption := '  copy  to &background';
-            end;//with
-
-            to_from_bgnd_panel.Show;
-            select_toggle_button.Show;
-            select_menu_entry.Enabled := True;
-            library_label.Hide;
-
-            // 208a make_label.Caption:='copy to the control template';        // can't wipe if it's unused.
-
-            if wipe_to_control_radiobutton.Checked = True then
-              copy_to_control_radiobutton.Checked := True;  // can't wipe if it's unused.
-
-            copy_to_control_radiobutton.Enabled := True;
-            wipe_to_control_radiobutton.Enabled := False;
-            delete_to_control_radiobutton.Enabled := True;
-
-            rebuild_button.Enabled := False;
-            rebuild_template_menu_entry.Enabled := False;
-            make_library_template_menu_entry.Enabled := True;
-          end;
-
-          1: begin    // bgnd template...
-
-            template_number_label.Font.Color := bgnd_ident_color;
-            template_number_shape.Brush.Color := bgnd_ident_color;
-            template_number_shape.Pen.Color := bgnd_ident_color;
-
-            to_from_bgnd_panel.Color := bgnd_ident_color;
-            flag_shape.Brush.Color := bgnd_ident_color;
-            bg_str := '';
-
-            with copy_wipe_label do begin
-              Font.Color := clBlack;
-              Caption := ' wipe  from &background';
-            end;//with
-
-            to_from_bgnd_panel.Show;
-            select_toggle_button.Show;
-            select_menu_entry.Enabled := True;
-            library_label.Hide;
-
-            copy_to_control_radiobutton.Enabled := True;
-            wipe_to_control_radiobutton.Enabled := True;
-            delete_to_control_radiobutton.Enabled := True;
+          rebuild_button.Enabled := False;
+          rebuild_template_menu_entry.Enabled := False;
+          make_library_template_menu_entry.Enabled := False;    // already is.
+        end;
 
 
-            rebuild_button.Enabled := True;
-            rebuild_template_menu_entry.Enabled := True;
-            make_library_template_menu_entry.Enabled := False;
-          end;
-        end;//case
-      end;//with
+        bkcUnused: begin     // unused template...
+
+          template_number_label.Font.Color := clBlue;
+          template_number_shape.Brush.Color := clBlue;
+          template_number_shape.Pen.Color := clBlue;
+
+          to_from_bgnd_panel.Color := clNavy;
+          flag_shape.Brush.Color := clBlue;
+          bg_str := '(unused)';
+
+          with copy_wipe_label do begin
+            Font.Color := clWhite;
+            Caption := '  copy  to &background';
+          end;//with
+
+          to_from_bgnd_panel.Show;
+          select_toggle_button.Show;
+          select_menu_entry.Enabled := True;
+          library_label.Hide;
+
+          // 208a make_label.Caption:='copy to the control template';        // can't wipe if it's unused.
+
+          if wipe_to_control_radiobutton.Checked = True then
+            copy_to_control_radiobutton.Checked := True;  // can't wipe if it's unused.
+
+          copy_to_control_radiobutton.Enabled := True;
+          wipe_to_control_radiobutton.Enabled := False;
+          delete_to_control_radiobutton.Enabled := True;
+
+          rebuild_button.Enabled := False;
+          rebuild_template_menu_entry.Enabled := False;
+          make_library_template_menu_entry.Enabled := True;
+        end;
+
+        bkcBackground: begin    // bgnd template...
+
+          template_number_label.Font.Color := bgnd_ident_color;
+          template_number_shape.Brush.Color := bgnd_ident_color;
+          template_number_shape.Pen.Color := bgnd_ident_color;
+
+          to_from_bgnd_panel.Color := bgnd_ident_color;
+          flag_shape.Brush.Color := bgnd_ident_color;
+          bg_str := '';
+
+          with copy_wipe_label do begin
+            Font.Color := clBlack;
+            Caption := ' wipe  from &background';
+          end;//with
+
+          to_from_bgnd_panel.Show;
+          select_toggle_button.Show;
+          select_menu_entry.Enabled := True;
+          library_label.Hide;
+
+          copy_to_control_radiobutton.Enabled := True;
+          wipe_to_control_radiobutton.Enabled := True;
+          delete_to_control_radiobutton.Enabled := True;
+
+
+          rebuild_button.Enabled := True;
+          rebuild_template_menu_entry.Enabled := True;
+          make_library_template_menu_entry.Enabled := False;
+        end;
+      end;//case
 
 
       save_all_menu_entry.Enabled := True;
@@ -2212,6 +2182,7 @@ var
   marcol: integer;      // 213b  marker colour ...
   marcol_used: boolean;
   box_timber_col: integer;
+  bd: TBoxDims;
 
 
   ////////////////////////////////////////////////////////////////////////
@@ -2305,12 +2276,10 @@ begin
 
     //copy_keep(keeps_list[index]);    // get the current keep.
 
-    with keeps_list[index].template_info.keep_dims.box_dims1 do begin      // 213b
+    bd := keeps_list[index].boxDims;
 
-      marcol := pad_marker_colour;
-      marcol_used := use_pad_marker_colour;  // using it
-
-    end;//with
+    marcol := bd.padMarkerColour;
+    marcol_used := bd.usePadMarkerColour;  // using it
 
 
     //show_and_redraw(True,False);    // (on idle, no rollback).
@@ -2656,12 +2625,12 @@ begin
           else begin
             if code = eMC__1_PegCentre    // code -1, draw fixing peg...
             then begin
-              case keeps_list[index].template_info.keep_dims.box_dims1.bgnd_code_077 of
-                -1:
+              case keeps_list[index].boxDims.backgroundCode of
+                bkcLibrary:
                   Font.Color := clGreen;
-                0:
+                bkcUnused:
                   Font.Color := clBlue;
-                1:
+                bkcBackground:
                   Font.Color := bgnd_ident_color;
               end;//case
 
@@ -2719,12 +2688,12 @@ begin
               if peg_dim > Round(scale * 250 * sx) then
                 peg_dim := Round(scale * 250 * sx); // but not more than 4ft scale.
 
-              case keeps_list[index].template_info.keep_dims.box_dims1.bgnd_code_077 of
-                -1:
+              case keeps_list[index].boxDims.backgroundCode of
+                bkcLibrary:
                   Pen.Color := clGreen;
-                0:
+                bkcUnused:
                   Pen.Color := clBlue;
-                1:
+                bkcBackground:
                   Pen.Color := bgnd_ident_color;
               end;//case
 
@@ -2805,13 +2774,12 @@ begin
 
       // indicator colour
 
-      case keeps_list[index].template_info.keep_dims.box_dims1.bgnd_code_077
-        of
-        -1:
+      case keeps_list[index].boxDims.backgroundCode of
+        bkcLibrary:
           Pen.Color := clGreen;
-        0:
+        bkcUnused:
           Pen.Color := clBlue;
-        1:
+        bkcBackground:
           Pen.Color := bgnd_ident_color;
       end;//case
 
@@ -3196,7 +3164,8 @@ begin
   if (keeps_list.Count > 0) and (save_for_undo = True) then begin
     sfu_str := Config.GetFilePath(csfiSaveForUndo);
     DeleteFile(sfu_str);        // delete any previous undo file.
-    save_box(0, eSB_SaveAll, eSO_Normal, sfu_str);    // save existing contents for possible undo later.
+    save_box(0, eSB_SaveAll, eSO_Normal, sfu_str);
+    // save existing contents for possible undo later.
   end;
 
   wipe_all_background;  //bgkeeps_form.clear_button.Click;     // first clear all the background data.
@@ -3380,12 +3349,12 @@ begin
 
   for line_now := 0 to keeps_list.Count - 1 do begin
 
-    case keeps_list[line_now].template_info.keep_dims.box_dims1.bgnd_code_077 of
-      -1:
+    case keeps_list[line_now].boxDims.backgroundCode of
+      bkcLibrary:
         type_str := 'LIBRARY';
-      0:
+      bkcUnused:
         type_str := 'UNUSED';
-      1:
+      bkcBackground:
         type_str := 'ON BACKGROUND';
       else
         type_str := '';
@@ -3394,11 +3363,11 @@ begin
 
     html_str := html_str + #13 + '<TR><TD>' + IntToStr(line_now + 1) +
       '</TD>' + '<TD>' + type_str + '</TD>' + '<TD>' +
-      keeps_list[line_now].template_info.keep_dims.box_dims1.id_number_str +
+      keeps_list[line_now].boxDims.idNumberStr +
       '</TD>' // 208b
       + '<TD>' + Trim(keepform_listbox.Items.Strings[line_now]) + '</TD>';
 
-    show_str := Trim(keeps_list[line_now].template_info.keep_dims.box_dims1.top_label);
+    show_str := Trim(keeps_list[line_now].topLabel);
 
     if Pos('BH •', show_str) = 1 then begin
       html_str := html_str + '<TD>BH</TD>';
@@ -3611,7 +3580,7 @@ begin
   if (n < 0) or (n > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;  // safety.
 
-  if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 = -1 then
+  if keeps_list[n].boxDims.backgroundCode = bkcLibrary then
     EXIT;   // library template, button should be disabled???
 
   if keep_form.Active = True then
@@ -3664,6 +3633,7 @@ var
   temp_rad: double;      // 213b..
   //boundary_centre:Tpex;
   temp: double;
+  t: TTemplate;
 
   ///////////////////////////////////////////////////////////
 
@@ -3699,8 +3669,7 @@ begin
 
       if keeps_list[list_index].bg_copied = True then
         EXIT;                            // already on background.
-      if keeps_list[list_index].template_info.keep_dims.box_dims1.bgnd_code_077
-        = -1 then
+      if keeps_list[list_index].boxDims.backgroundCode = bkcLibrary then
         EXIT;  // ??? library template.
 
       try
@@ -3814,105 +3783,101 @@ begin
         end;//with new_bgk          // filled local copy.
 
 
-        with keeps_list[list_index] do begin
-          bgnd_keep := new_bgk;                                      // background data.
-          template_info.keep_dims.box_dims1.bgnd_code_077 := 1;
-          // flag it is now a background keep (for file).
-          template_info.keep_dims.box_dims1.pre077_bgnd_flag := True;
-          // in case reloaded in older version than 0.77.a
-          bg_copied := True;
-          // and has been put there.
+        t := keeps_list[list_index];
+        t.bgnd_keep := new_bgk;                                      // background data.
+        t.boxDims.backgroundCode := bkcBackground;
+        t.bg_copied := True;
+        // and has been put there.
 
-          // using the control template data, calculate the F7 snap_peg positions...    0.79.a  27-05-06
+        // using the control template data, calculate the F7 snap_peg positions...    0.79.a  27-05-06
 
-          with snap_peg_positions do begin
+        with t.snap_peg_positions do begin
 
-            ctrl_peg_now_pos := calc_snap_peg_data(peg_code);  // current peg.
-            ctrl_0_pos := calc_snap_peg_data(0);               // ctrl-0
+          ctrl_peg_now_pos := calc_snap_peg_data(peg_code);  // current peg.
+          ctrl_0_pos := calc_snap_peg_data(0);               // ctrl-0
 
-            ctrl_1_pos := calc_snap_peg_data(1);       // ctrl-1
+          ctrl_1_pos := calc_snap_peg_data(1);       // ctrl-1
 
-            ctrl_2_pos := calc_snap_peg_data(2);       // ctrl-2  // TP added 205c
+          ctrl_2_pos := calc_snap_peg_data(2);       // ctrl-2  // TP added 205c
 
-            ctrl_planing_pos := calc_snap_peg_data(100);
-            // PLANING added 205e for obtain turnout radius
-            ctrl_heel_pos := calc_snap_peg_data(104);
-            // HEEL added 205e for obtain turnout radius
+          ctrl_planing_pos := calc_snap_peg_data(100);
+          // PLANING added 205e for obtain turnout radius
+          ctrl_heel_pos := calc_snap_peg_data(104);
+          // HEEL added 205e for obtain turnout radius
 
-            ctrl_3_pos := calc_snap_peg_data(3);       // ctrl-3
+          ctrl_3_pos := calc_snap_peg_data(3);       // ctrl-3
 
-            ctrl_cesp_pos := calc_snap_peg_data(108);
-            // CESP added 205e for obtain turnout radius
+          ctrl_cesp_pos := calc_snap_peg_data(108);
+          // CESP added 205e for obtain turnout radius
 
-            ctrl_4_pos := calc_snap_peg_data(4);       // ctrl-4
-            ctrl_5_pos := calc_snap_peg_data(6);       // ctrl-5
-            ctrl_6_pos := calc_snap_peg_data(18);      // ctrl-6
-            ctrl_7_pos := calc_snap_peg_data(9);       // ctrl-7
-            ctrl_8_pos := calc_snap_peg_data(17);      // ctrl-8
-            ctrl_9_pos := calc_snap_peg_data(11);      // ctrl-9
-            ctrl_tcp_pos := calc_snap_peg_data(5);     // TCP
-            ctrl_mcp_pos := calc_snap_peg_data(8);     // MCP
-            ctrl_tolp_pos := calc_snap_peg_data(600);  // TOLP
+          ctrl_4_pos := calc_snap_peg_data(4);       // ctrl-4
+          ctrl_5_pos := calc_snap_peg_data(6);       // ctrl-5
+          ctrl_6_pos := calc_snap_peg_data(18);      // ctrl-6
+          ctrl_7_pos := calc_snap_peg_data(9);       // ctrl-7
+          ctrl_8_pos := calc_snap_peg_data(17);      // ctrl-8
+          ctrl_9_pos := calc_snap_peg_data(11);      // ctrl-9
+          ctrl_tcp_pos := calc_snap_peg_data(5);     // TCP
+          ctrl_mcp_pos := calc_snap_peg_data(8);     // MCP
+          ctrl_tolp_pos := calc_snap_peg_data(600);  // TOLP
 
-            ctrl_tminp_pos := calc_snap_peg_data(240);   // TMINP      213b
-            ctrl_texitp_pos := calc_snap_peg_data(241);  // TEXITP     213b
+          ctrl_tminp_pos := calc_snap_peg_data(240);   // TMINP      213b
+          ctrl_texitp_pos := calc_snap_peg_data(241);  // TEXITP     213b
 
-            ctrl_mminp_pos := calc_snap_peg_data(260);   // MMINP      217a
-            ctrl_mexitp_pos := calc_snap_peg_data(261);  // MEXITP     217a
+          ctrl_mminp_pos := calc_snap_peg_data(260);   // MMINP      217a
+          ctrl_mexitp_pos := calc_snap_peg_data(261);  // MEXITP     217a
 
-            ctrl_tsmidp_pos := calc_snap_peg_data(270);  // 218a
+          ctrl_tsmidp_pos := calc_snap_peg_data(270);  // 218a
 
-            ctrl_knucklebend_pos := calc_snap_peg_data(279); // 218a
+          ctrl_knucklebend_pos := calc_snap_peg_data(279); // 218a
 
-            ctrl_atimb_pos := calc_snap_peg_data(280);   // 218a
+          ctrl_atimb_pos := calc_snap_peg_data(280);   // 218a
 
-            ctrl_mid_pos := calc_snap_peg_data(19);      // mid-length  216a
+          ctrl_mid_pos := calc_snap_peg_data(19);      // mid-length  216a
 
-            ctrl_user_pos := calc_snap_peg_data(999);  // user-defined  added 205c
+          ctrl_user_pos := calc_snap_peg_data(999);  // user-defined  added 205c
 
-            with boundary_info do begin
-              // 213b  record boundary positions, radii and radial centres for extend to boundary function ...
+          with t.boundary_info do begin
+            // 213b  record boundary positions, radii and radial centres for extend to boundary function ...
 
-              loc_0 := ctrl_0_pos;        // CTRL-0
-              loc_6 := ctrl_6_pos;        // CTRL-6
-              loc_9 := ctrl_9_pos;        // CTRL-9
-              loc_240 := ctrl_tminp_pos;  // TMINP
-              loc_241 := ctrl_texitp_pos; // TEXITP
-              loc_260 := ctrl_mminp_pos;  // MMINP
-              loc_261 := ctrl_mexitp_pos; // MEXITP
+            loc_0 := ctrl_0_pos;        // CTRL-0
+            loc_6 := ctrl_6_pos;        // CTRL-6
+            loc_9 := ctrl_9_pos;        // CTRL-9
+            loc_240 := ctrl_tminp_pos;  // TMINP
+            loc_241 := ctrl_texitp_pos; // TEXITP
+            loc_260 := ctrl_mminp_pos;  // MMINP
+            loc_261 := ctrl_mexitp_pos; // MEXITP
 
 
-              loc_600 := ctrl_tolp_pos;   // TOLP
+            loc_600 := ctrl_tolp_pos;   // TOLP
 
-              temp := SQR(loc_9.notch_x - loc_0.notch_x) + SQR(loc_9.notch_y - loc_0.notch_y);
-              if temp > minfp then
-                boundary_diag := SQRT(temp)
-              else
-                boundary_diag := 0;
+            temp := SQR(loc_9.notch_x - loc_0.notch_x) + SQR(loc_9.notch_y - loc_0.notch_y);
+            if temp > minfp then
+              boundary_diag := SQRT(temp)
+            else
+              boundary_diag := 0;
 
-            end;//with boundary
+          end;//with boundary
 
-          end;//with snaps
+        end;//with snaps
 
-          bgnd_half_diamond := half_diamond;
-          // used for peg snapping checks. (also in the template_info for file).  0.79.a  27-05-06
-          bgnd_plain_track := plain_track;     // ditto
-          bgnd_retpar := (retpar_i = 1);         // ditto parallel crossing.
-          bgnd_peg_on_zero := (peg_code = 0);    // current peg on ctrl-0.
+        t.bgnd_half_diamond := half_diamond;
+        // used for peg snapping checks. (also in the template_info for file).  0.79.a  27-05-06
+        t.bgnd_plain_track := plain_track;     // ditto
+        t.bgnd_retpar := (retpar_i = 1);         // ditto parallel crossing.
+        t.bgnd_peg_on_zero := (peg_code = 0);    // current peg on ctrl-0.
 
-          // added 205e ...
+        // added 205e ...
 
-          bgnd_xing_type := xing_type_i;
-          bgnd_spiral := controlTemplate.curve.isSpiral;
-          bgnd_turnout_radius := radius_for_obtain;
+        t.bgnd_xing_type := xing_type_i;
+        t.bgnd_spiral := controlTemplate.curve.isSpiral;
+        t.bgnd_turnout_radius := radius_for_obtain;
 
-          bgnd_blanked := (startx > 0);        // 215a
-          bgnd_no_xing := (turnoutx < fpx);    // 215a
+        t.bgnd_blanked := (startx > 0);        // 215a
+        t.bgnd_no_xing := (turnoutx < fpx);    // 215a
 
-          this_is_tandem_first := False;     // 218a
-          bgnd_gaunt := gaunt;               // 218a
+        t.this_is_tandem_first := False;     // 218a
+        t.bgnd_gaunt := gaunt;               // 218a
 
-        end;//with Ttemplate
 
       finally
       end;//try
@@ -3936,8 +3901,7 @@ begin
       // (no need to change the memo or ref_label - won't have changed)
 
       keeps_list[list_index].Name := si;
-      keeps_list[list_index].template_info.
-        keep_dims.box_dims1.top_label := Copy(info_form.gauge_label.Caption, 1, 99);
+      keeps_list[list_index].topLabel := Copy(info_form.gauge_label.Caption, 1, 99);
       // (in case change of hand on mirror-rebuild.)
     end;
 
@@ -4079,9 +4043,9 @@ begin
   if (n < 0) or (n > (keeps_list.Count - 1)) then
     EXIT;  // how did this happen ?
 
-  keep_name_str := keeps_list[n].template_info.keep_dims.box_dims1.reference_string;
+  keep_name_str := keeps_list[n].Name;
 
-  idnum_str := keeps_list[n].template_info.keep_dims.box_dims1.id_number_str;
+  idnum_str := keeps_list[n].boxDims.idNumberStr;
   // 208a ID number
 
 
@@ -4103,7 +4067,7 @@ begin
 
         keep_name_str := s;
 
-        keeps_list[n].template_info.keep_dims.box_dims1.reference_string :=
+        keeps_list[n].Name :=
           keep_name_str;
         save_done := False;
         backup_wanted := True;
@@ -4314,8 +4278,7 @@ begin
   else begin      // 0.93.a copy the control template if there is one, otherwise mint as before
 
     n := keeps_list.Count - 1;
-    if keeps_list[n].template_info.keep_dims.box_dims1.this_was_control_template
-      = True then begin
+    if keeps_list[n].boxDims.thisWasControlTemplate then begin
       //ShowMessage('debug 1  '+IntToStr(loaded_version));
 
       list_position := n;
@@ -4554,14 +4517,13 @@ begin
   while n < keeps_list.Count do begin        // repeat search for all starting points.
     // n.b. Count decreases on any deletes.
 
-    ident := keeps_list[n].template_info.keep_dims.box_dims1.now_time;
+    ident := keeps_list[n].boxDims.uniqueId;
     // current search ident.
 
     i := n + 1;    // start searching at next line.
 
     while i < keeps_list.Count do begin
-      if keeps_list[i].template_info.keep_dims.box_dims1.now_time =
-        ident    // found a duplicate
+      if keeps_list[i].boxDims.uniqueId = ident    // found a duplicate
       then begin
 
         keeps_list.Delete(i);        // delete it. i now points to next line so no need to inc.
@@ -4720,7 +4682,7 @@ begin
   n := 0;
   while n < keeps_list.Count do begin
 
-    if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 <> 0
+    if keeps_list[n].boxDims.backgroundCode <> bkcUnused
     // background or library template.
     then begin
       Inc(n);
@@ -4790,7 +4752,7 @@ begin
   n := 0;
   while n < keeps_list.Count do begin
 
-    if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 <> -1
+    if keeps_list[n].boxDims.backgroundCode <> bkcLibrary
     // not a library template.
     then begin
       Inc(n);
@@ -4829,7 +4791,7 @@ procedure Tkeep_form.delete_t55_templates_menu_entryClick(Sender: TObject);
 
 var
   i, n, keep_count, t55: integer;
-
+  bd: TBoxDims;
 begin
   if keeps_list.Count < 1 then
     EXIT;
@@ -4853,17 +4815,16 @@ begin
   n := 0;
   while n < keeps_list.Count do begin
 
-    with keeps_list[n].template_info.keep_dims.box_dims1 do begin
+    bd := keeps_list[n].boxDims;
 
-      if not ((proto_info.scale_pi = 5.5) and (proto_info.gauge_pi = 25.4) and
-        (proto_info.fw_pi = 1.0) and (this_was_control_template =
-        False)  // and not the control template
+    if not ((bd.protoInfo.scale = 5.5) and (bd.protoInfo.gauge = 25.4) and
+      (bd.protoInfo.flangeway = 1.0) and
+      (not bd.thisWasControlTemplate)  // and not the control template
 
-        ) then begin
-        Inc(n);
-        CONTINUE;      // leave this one.
-      end;
-    end;//with
+      ) then begin
+      Inc(n);
+      CONTINUE;      // leave this one.
+    end;
 
     if keeps_list[n].bg_copied = True then
       wipe_it(n);  // any data on background
@@ -5002,6 +4963,7 @@ function search_for_template(start_n: integer; str: string): integer;    // 0.93
 var
   n: integer;
   s: string;
+  t: TTemplate;
 
 begin
   Result := -1; // init
@@ -5011,8 +4973,8 @@ begin
 
   for n := start_n to keeps_list.Count - 1 do begin
 
-    with keeps_list[n].template_info.keep_dims.box_dims1 do
-      s := reference_string + ' ' + id_number_str;
+    t := keeps_list[n];
+    s := t.Name + ' ' + t.boxDims.idNumberStr;
 
     if Pos(LowerCase(str), LowerCase(s)) = 0 then
       CONTINUE;
@@ -5109,6 +5071,7 @@ procedure Tkeep_form.find_and_group_menu_entryClick(Sender: TObject);
 var
   n: integer;
   s: string;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then begin
@@ -5143,8 +5106,8 @@ begin
 
   for n := 0 to keeps_list.Count - 1 do begin
 
-    with keeps_list[n].template_info.keep_dims.box_dims1 do
-      s := reference_string + ' ' + id_number_str;
+    t := keeps_list[n];
+    s := t.Name + ' ' + t.boxDims.idNumberStr;
 
     keeps_list[n].group_selected :=
       Pos(LowerCase(search_str), LowerCase(s)) <> 0;
@@ -5194,6 +5157,7 @@ var
   n, i: integer;
   aq: ERailData;
   saveCurrent: TTemplate;
+  t: TTemplate;
 
 begin
 
@@ -5209,93 +5173,89 @@ begin
 
     for n := 0 to (keeps_list.Count - 1) do begin
 
-      with keeps_list[n] do begin
+      t := keeps_list[n];
+      if t.boxDims.backgroundCode <> bkcBackground then
+        CONTINUE;  // not a background template.
 
-        if template_info.keep_dims.box_dims1.bgnd_code_077 <> 1 then
-          CONTINUE;  // not a background template.
+      if t.bg_copied = True     // first scrub existing data...
+      then begin
+        with t.bgnd_keep do begin
+          SetLength(list_bgnd_marks, 0);
+          for aq in ERailData do begin
+            SetLength(list_bgnd_rails[aq], 0);
+          end;//for next aq
 
-        if bg_copied = True     // first scrub existing data...
-        then begin
-          with bgnd_keep do begin
-            SetLength(list_bgnd_marks, 0);
-            for aq in ERailData do begin
-              SetLength(list_bgnd_rails[aq], 0);
-            end;//for next aq
+        end;//with bgnd_keep
 
-          end;//with bgnd_keep
+        t.bg_copied := False;
+      end;
 
-          bg_copied := False;
-        end;
+      // !!! version 0.23 19-OCT-99. Update keep timestamp so can append existing file after shift keeps, mirror keeps, etc...
 
-        // !!! version 0.23 19-OCT-99. Update keep timestamp so can append existing file after shift keeps, mirror keeps, etc...
+      // does he want it modified?...
 
-        // does he want it modified?...
+      if (use_modify_options) and (keep_form.timbering_as_control_menu_entry.Checked) then begin
+        update_timbering(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and (keep_form.timbering_as_control_menu_entry.Checked =
-          True) then begin
-          update_timbering(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and (keep_form.plain_track_as_control_menu_entry.Checked) then begin
+        update_lengths(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and (keep_form.plain_track_as_control_menu_entry.Checked =
-          True) then begin
-          update_lengths(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.customize_xing_as_control_menu_entry.Checked)   // 214b
+      then begin
+        update_customize_xing(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.customize_xing_as_control_menu_entry.Checked = True)   // 214b
-        then begin
-          update_customize_xing(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.trackbed_edges_as_control_menu_entry.Checked) then begin
+        update_trackbed_edges(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.trackbed_edges_as_control_menu_entry.Checked = True) then begin
-          update_trackbed_edges(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.centre_lines_as_control_menu_entry.Checked) then begin
+        update_centre_lines(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.centre_lines_as_control_menu_entry.Checked = True) then begin
-          update_centre_lines(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.centre_line_offset_options_as_control_menu_entry.Checked)  // 214a
+      then begin
+        update_centre_line_offset_options(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.centre_line_offset_options_as_control_menu_entry.Checked = True)  // 214a
-        then begin
-          update_centre_line_offset_options(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.rail_section_data_as_control_menu_entry.Checked) then begin
+        update_rail_section(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.rail_section_data_as_control_menu_entry.Checked = True) then begin
-          update_rail_section(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
-
-        if (use_modify_options = True) and
-          (keep_form.radius_warning_limit_as_control_menu_entry.Checked = True)  // 206e
-        then begin
-          update_radius_warning(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.radius_warning_limit_as_control_menu_entry.Checked)  // 206e
+      then begin
+        update_radius_warning(t);
+        t.new_stamp_wanted := True;
+      end;
 
 
-        if new_stamp_wanted = True
-        // True=has been modified/shifted/rotated/mirrored, so needs a new timestamp on rebuilding.
-        then begin
-          template_info.keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer (will probably use the random figure - calls in quick succession).
-          new_stamp_wanted := False;                                   // done it.
-          save_done := False;
-          // need a fresh save.   !!! version 0.23 19-10-99.
-        end;
+      if t.new_stamp_wanted
+      // True=has been modified/shifted/rotated/mirrored, so needs a new timestamp on rebuilding.
+      then begin
+        //template_info.keep_dims.box_dims1.now_time := time_now_modified(Random($7FFFFFFF));
+        // modify Delphi float time format to integer (will probably use the random figure - calls in quick succession).
+        t.new_stamp_wanted := False;                                   // done it.
+        save_done := False;
+        // need a fresh save.   !!! version 0.23 19-10-99.
+      end;
 
-        list_position := n;                          // now put this keep back on the background.
-        copy_keep_to_background(n, True, False);
-      end;//with
+      list_position := n;                          // now put this keep back on the background.
+      copy_keep_to_background(n, True, False);
     end;//for next n
 
   finally
@@ -5614,12 +5574,12 @@ begin
 
   for n := 0 to keeps_list.Count - 1 do begin
 
-    case keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 of
-      -1:
+    case keeps_list[n].boxDims.backgroundCode of
+      bkcLibrary:
         type_str := 'LIBRARY';
-      0:
+      bkcUnused:
         type_str := 'UNUSED';
-      1:
+      bkcBackground:
         type_str := 'ON BACKGROUND';
       else
         type_str := '';
@@ -5627,11 +5587,11 @@ begin
 
     html_str := html_str + '<TR STYLE="font-weight:bold;">' + '<TD>' +
       IntToStr(n + 1) + '</TD>' + '<TD>' + type_str + '</TD>' + '<TD>' +
-      keeps_list[n].template_info.keep_dims.box_dims1.id_number_str +
+      keeps_list[n].boxDims.idNumberStr +
       '</TD>' // 208b
       + '<TD>' + Trim(keep_form.keepform_listbox.Items.Strings[n]) + '</TD>';
 
-    show_str := Trim(keeps_list[n].template_info.keep_dims.box_dims1.top_label);
+    show_str := Trim(keeps_list[n].topLabel);
 
     if Pos('BH •', show_str) = 1 then begin
       html_str := html_str + '<TD>BH</TD>';
@@ -5835,8 +5795,7 @@ begin
       Application.ProcessMessages;
 
     for n := 0 to (keeps_list.Count - 1) do begin
-      if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 =
-        0 then begin
+      if keeps_list[n].boxDims.backgroundCode = bkcUnused then begin
         list_position := n;                       // put this unused keep on background.
         copy_keep_to_background(n, True, False);
         // (updates the info in case unused have previously been modified on mirror-group etc.)
@@ -5886,6 +5845,7 @@ procedure toggle_unused_bgnd(group: boolean);
 // swap all or group of unused keeps to background and vice versa.
 var
   n: integer;
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
@@ -5897,28 +5857,26 @@ begin
   try
     for n := 0 to (keeps_list.Count - 1) do begin
 
-      with keeps_list[n] do begin
+      t := keeps_list[n];
+      if (group) and (not t.group_selected) then
+        CONTINUE;
 
-        if (group = True) and (group_selected = False) then
-          CONTINUE;
+      if t.bg_copied       // wipe it...
+      then begin
 
-        if bg_copied = True       // wipe it...
+        if not wipe_it(n)      // wipe background data.
         then begin
-
-          if wipe_it(n) = False      // wipe background data.
-          then begin
-            alert(5, '    program  error',
-              '||Sorry, there is a program error.' +
-              '||The background will be cleared and rebuilt.',
-              '', '', '', '', '', 'O K', 0);
-            rebuild_background(False, True);
-          end;
-        end
-        else begin                                          // copy it...
-          if template_info.keep_dims.box_dims1.bgnd_code_077 <> -1 then
-            copy_keep_to_background(n, True, False);
+          alert(5, '    program  error',
+            '||Sorry, there is a program error.' +
+            '||The background will be cleared and rebuilt.',
+            '', '', '', '', '', 'O K', 0);
+          rebuild_background(False, True);
         end;
-      end;//with
+      end
+      else begin                                          // copy it...
+        if t.boxDims.backgroundCode <> bkcLibrary then
+          copy_keep_to_background(n, True, False);
+      end;
     end;//next n
 
   finally
@@ -6018,9 +5976,8 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if (keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 = 0) and
-      (keeps_list[n].template_info.keep_dims.box_dims1.this_was_control_template
-      = False)   // added 208d for file viewer
+    if (keeps_list[n].boxDims.backgroundCode = bkcUnused) and
+      (not keeps_list[n].boxDims.thisWasControlTemplate)   // added 208d for file viewer
     then
       Result := Result + 1;   // return count.
   end;//next keep
@@ -6038,7 +5995,7 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 = -1 then
+    if keeps_list[n].boxDims.backgroundCode = bkcLibrary then
       Result := Result + 1;   // return count.
   end;//next template
 end;
@@ -6050,7 +6007,7 @@ function any_t55: integer;      // any T-55 templates?  return count.
 
 var
   n: integer;
-
+  bd: TBoxDims;
 begin
   Result := 0;                        // init default.
   if keeps_list.Count < 1 then
@@ -6058,16 +6015,14 @@ begin
 
   for n := 0 to (keeps_list.Count - 1) do begin
 
-    with keeps_list[n].template_info.keep_dims.box_dims1 do begin
+    bd := keeps_list[n].boxDims;
 
-      if (proto_info.scale_pi = 5.5) and (proto_info.gauge_pi = 25.4) and
-        (proto_info.fw_pi = 1.0) and (this_was_control_template = False)
-      // and not the control template
+    if (bd.protoInfo.scale = 5.5) and (bd.protoInfo.gauge = 25.4) and
+      (bd.protoInfo.flangeway = 1.0) and (not bd.thisWasControlTemplate)
+    // and not the control template
 
-      then
-        Result := Result + 1;       // return count.
-
-    end;//with
+    then
+      Result := Result + 1;       // return count.
 
   end;//next
 end;
@@ -6084,7 +6039,7 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 <> -1 then
+    if keeps_list[n].boxDims.backgroundCode <> bkcLibrary then
       Result := Result + 1;   // return count.
   end;//next template
 end;
@@ -6101,8 +6056,7 @@ begin
     EXIT;
 
   for n := (keeps_list.Count - 1) downto 0 do begin
-    if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 <>
-      -1 then begin
+    if keeps_list[n].boxDims.backgroundCode <> bkcLibrary then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6121,8 +6075,7 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 =
-      -1 then begin
+    if keeps_list[n].boxDims.backgroundCode = bkcLibrary then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6141,7 +6094,7 @@ begin
     EXIT;
 
   for n := (keeps_list.Count - 1) downto 0 do begin
-    if keeps_list[n].group_selected = True then begin
+    if keeps_list[n].group_selected then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6161,7 +6114,7 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if keeps_list[n].group_selected = False then begin
+    if not keeps_list[n].group_selected then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6180,7 +6133,7 @@ begin
     EXIT;
 
   for n := 0 to (keeps_list.Count - 1) do begin
-    if keeps_list[n].group_selected = True then begin
+    if keeps_list[n].group_selected then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6200,7 +6153,7 @@ begin
     EXIT;
 
   for n := (keeps_list.Count - 1) downto 0 do begin
-    if keeps_list[n].group_selected = False then begin
+    if not keeps_list[n].group_selected then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6220,7 +6173,7 @@ begin
     EXIT;
 
   for n := (keeps_list.Count - 1) downto 0 do begin
-    if keeps_list[n].bg_copied = True then begin
+    if keeps_list[n].bg_copied then begin
       Result := n;   // return index.
       EXIT;
     end;
@@ -6306,6 +6259,7 @@ var
   n: integer;
   mpsx, mpsy: integer;
   sp: TPoint;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -6334,24 +6288,23 @@ begin
         else
           slider_shape.Hide;
 
-        with keeps_list[n].template_info.keep_dims.box_dims1 do begin
+        t := keeps_list[n];
 
-          case bgnd_code_077 of
-            -1:
-              Font.Color := clGreen;
-            0:
-              Font.Color := clBlue;
-            1:
-              Font.Color := bgnd_ident_color;
-          end;//case
+        case t.boxDims.backgroundCode of
+          bkcLibrary:
+            Font.Color := clGreen;
+          bkcUnused:
+            Font.Color := clBlue;
+          bkcBackground:
+            Font.Color := bgnd_ident_color;
+        end;//case
 
-          Caption := IntToStr(n + 1);
+        Caption := IntToStr(n + 1);
 
-          slider_ref_label.Caption := Trim(reference_string);
-          slider_number_label.Caption := IntToStr(n + 1);
+        slider_ref_label.Caption := Trim(t.Name);
+        slider_number_label.Caption := IntToStr(n + 1);
 
-          this_is_panel.Visible := False;
-        end;//with
+        this_is_panel.Visible := False;
       end;
     end;//with
 
@@ -6365,6 +6318,7 @@ procedure Tkeep_form.slider_panelMouseMove(Sender: TObject; Shift: TShiftState; 
 var
   mps: TPoint;
   n, slider_left: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -6394,22 +6348,21 @@ begin
         else
           slider_shape.Hide;
 
-        with keeps_list[n].template_info.keep_dims.box_dims1 do begin
+        t := keeps_list[n];
 
-          case bgnd_code_077 of
-            -1:
-              Font.Color := clGreen;
-            0:
-              Font.Color := clBlue;
-            1:
-              Font.Color := bgnd_ident_color;
-          end;//case
+        case t.boxDims.backgroundCode of
+          bkcLibrary:
+            Font.Color := clGreen;
+          bkcUnused:
+            Font.Color := clBlue;
+          bkcBackground:
+            Font.Color := bgnd_ident_color;
+        end;//case
 
-          Caption := IntToStr(n + 1);
+        Caption := IntToStr(n + 1);
 
-          slider_ref_label.Caption := Trim(reference_string);
-          slider_number_label.Caption := IntToStr(n + 1);
-        end;//with
+        slider_ref_label.Caption := Trim(t.Name);
+        slider_number_label.Caption := IntToStr(n + 1);
       end;
     end;//with
   end;
@@ -6533,7 +6486,7 @@ begin
     EXIT;
 
   new_str := edit_memo_str(keeps_list[list_position].Memo,
-    keeps_list[list_position].template_info.keep_dims.box_dims1.reference_string);
+    keeps_list[list_position].Name);
 
   keeps_list[list_position].Memo := new_str;
 
@@ -6710,7 +6663,7 @@ var
   tw1, tw2: integer;
   text_colour, used_colour: integer;
   gsel: boolean;
-  bg_flag: integer;
+  bg_flag: TBackgroundCode;
   idnum_str: string;      // 208a
   font_name_str: string;  // 208a
 
@@ -6721,23 +6674,22 @@ var
 
   rem_flag: boolean;    // 216a..
   rem_col: integer;
+  t: TTemplate;
 
 begin
   if (Index < 0) or (Index > (keeps_list.Count - 1)) then
     EXIT;  // ???
 
-  with keeps_list[Index] do begin
-    idnum_str := template_info.keep_dims.box_dims1.id_number_str;   // 208a
-    bg_flag := template_info.keep_dims.box_dims1.bgnd_code_077;
-    gsel := group_selected;
+  t := keeps_list[Index];
+  idnum_str := t.boxDims.idNumberStr;   // 208a
+  bg_flag := t.boxDims.backgroundCode;
+  gsel := t.group_selected;
 
-    marcol := template_info.keep_dims.box_dims1.pad_marker_colour;           // 213b..
-    marcol_used := template_info.keep_dims.box_dims1.use_pad_marker_colour;  // using it
+  marcol := t.boxDims.padMarkerColour;           // 213b..
+  marcol_used := t.boxDims.usePadMarkerColour;  // using it
 
-    rem_flag := template_info.keep_dims.box_dims1.align_info.reminder_flag;    // 216a..
-    rem_col := template_info.keep_dims.box_dims1.align_info.reminder_colour;
-
-  end;//with
+  rem_flag := t.boxDims.alignmentInfo.reminderFlag;    // 216a..
+  rem_col := t.boxDims.alignmentInfo.reminderColour;
 
   with keepform_listbox do begin
     with Canvas do begin
@@ -6755,11 +6707,11 @@ begin
         Brush.Color := clBlack;
 
         case bg_flag of
-          -1:
+          bkcLibrary:
             used_colour := clLime;
-          0:
+          bkcUnused:
             used_colour := clAqua;
-          1:
+          bkcBackground:
             used_colour := $000077FF;
           //clRed;   //clFuchsia;       // show brighter against black..
         end;//case
@@ -6770,11 +6722,11 @@ begin
         Brush.Color := keepform_listbox.Color;
 
         case bg_flag of
-          -1:
+          bkcLibrary:
             used_colour := clGreen;
-          0:
+          bkcUnused:
             used_colour := clBlue;
-          1:
+          bkcBackground:
             used_colour := bgnd_ident_color;
         end;//case
 
@@ -6784,11 +6736,11 @@ begin
         Brush.Color := clBlack;
 
         case bg_flag of
-          -1:
+          bkcLibrary:
             used_colour := clLime;
-          0:
+          bkcUnused:
             used_colour := clAqua;
-          1:
+          bkcBackground:
             used_colour := $000077FF;
           //clRed;   //clFuchsia;       // show brighter against black..
         end;//case
@@ -6799,11 +6751,11 @@ begin
         Brush.Color := keepform_listbox.Color;
 
         case bg_flag of
-          -1:
+          bkcLibrary:
             used_colour := clGreen;
-          0:
+          bkcUnused:
             used_colour := clBlue;
-          1:
+          bkcBackground:
             used_colour := bgnd_ident_color;
         end;//case
 
@@ -6815,9 +6767,9 @@ begin
       Font.Color := used_colour;
 
       case bg_flag of     // show the markers
-        -1:
+        bkcLibrary:
           TextOut(Rect.Left + 2, Rect.Top, '    •');
-        1:
+        bkcBackground:
           TextOut(Rect.Left + 2, Rect.Top, '>');
       end;//case
 
@@ -6839,7 +6791,7 @@ begin
 
       Font.Color := text_colour;         // 208a
 
-      if gsel = True          // add the group selected marker...
+      if gsel          // add the group selected marker...
       then begin
         Brush.Color := used_colour;
         Pen.Color := used_colour;
@@ -6847,7 +6799,7 @@ begin
           tw1 + (Itemheight div 2), Rect.Top + (ItemHeight * 3 div 4));
         // square bullet indicates group member.
 
-        if (odSelected in State) = True then
+        if (odSelected in State) then
           Brush.Color := clBlack                 // restore brush and pen for focusing..
         else
           Brush.Color := keepform_listbox.Color;
@@ -6858,7 +6810,7 @@ begin
       marcol_rect_right := TextWidth('000000') + 7;
 
 
-      if marcol_used = True          // add the marker-colour marker...
+      if marcol_used          // add the marker-colour marker...
       then begin
         Brush.Color := marcol;
         Pen.Color := keepform_listbox.Color;
@@ -6867,13 +6819,13 @@ begin
         Rectangle(Rect.Right - marcol_rect_left, Rect.Top + (ItemHeight div 4),
           Rect.Right - marcol_rect_right, Rect.Top + (ItemHeight * 3 div 4));
 
-        if (odSelected in State) = True then
+        if (odSelected in State) then
           Brush.Color := clBlack                 // restore brush and pen for focusing..
         else
           Brush.Color := keepform_listbox.Color;
       end;
 
-      if rem_flag = True          // finally add the reminder marker...
+      if rem_flag          // finally add the reminder marker...
       then begin
         Brush.Color := rem_col;
         Pen.Color := clBlack;
@@ -6881,7 +6833,7 @@ begin
         Ellipse(Rect.Right - marcol_rect_left - ItemHeight - 4, Rect.Top + 1,
           Rect.Right - marcol_rect_left - 6, Rect.Top + ItemHeight - 1);
 
-        if (odSelected in State) = True then
+        if (odSelected in State) then
           Brush.Color := clBlack                 // restore brush and pen for focusing..
         else
           Brush.Color := keepform_listbox.Color;
@@ -6933,17 +6885,18 @@ begin
     end;
 
     append := False;
-    if load_storage_box(eLB_Normal, pb_str, append, hl) = True then begin
+    if load_storage_box(eLB_Normal, pb_str, append, hl) then begin
       if keeps_list.Count > 0 then begin
-        with keeps_list[0].template_info.keep_dims.box_dims1 do begin
-          // read only from first keep.
-          if version_as_loaded > 62 then
-            save_done := box_save_done      // mods 23-6-00 for version 0.63
-          else
-            save_done := False;
-        end;//with
+        //with keeps_list[0].template_info.keep_dims.box_dims1 do begin
+        //  // read only from first keep.
+        //  if version_as_loaded > 62 then
+        //    save_done := box_save_done      // mods 23-6-00 for version 0.63
+        //  else
+        //    save_done := False;
+        //end;//with
+        save_done := False;
         //if (append=False) and (hl>-1) and (hl<keeps_list.Count) then mint_final(hl);    // if something loaded mint from highest bgnd if he so wants.
-        if append = True then
+        if append then
           EXIT;
         if (loaded_version < 93) and (hl > -1) and (hl < keeps_list.Count) then
           mint_final_or_copy_control(hl);
@@ -6987,15 +6940,16 @@ begin
     append := False;
     if load_storage_box(eLB_Normal, pbo_str, append, hl) = True then begin
       if keeps_list.Count > 0 then begin
-        with keeps_list[0].template_info.keep_dims.box_dims1 do begin
-          // read only from first keep.
-          if version_as_loaded > 62 then
-            save_done := box_save_done      // mods 23-6-00 for version 0.63
-          else
-            save_done := False;
-        end;//with
+        //with keeps_list[0].template_info.keep_dims.box_dims1 do begin
+        //  // read only from first keep.
+        //  if version_as_loaded > 62 then
+        //    save_done := box_save_done      // mods 23-6-00 for version 0.63
+        //  else
+        //    save_done := False;
+        //end;//with
+        save_done := False;
         //if (append=False) and (hl>-1) and (hl<keeps_list.Count) then mint_final(hl);    // if something loaded mint from highest bgnd if he so wants.
-        if append = True then
+        if append then
           EXIT;
         if (loaded_version < 93) and (hl > -1) and (hl < keeps_list.Count) then
           mint_final_or_copy_control(hl);
@@ -7010,14 +6964,15 @@ end;
 //___________________________________________________________________________________________
 
 procedure Tkeep_form.select_menu_entryClick(Sender: TObject);
+var
+  t: TTemplate;
 
 begin
-  with keeps_list[list_position] do begin
-    if template_info.keep_dims.box_dims1.bgnd_code_077 <> -1 then
-      group_selected := not group_selected
-    else
-      group_selected := False;                // library template, menu should be disabled???
-  end;//with
+  t := keeps_list[list_position];
+  if t.boxDims.backgroundCode <> bkcLibrary then
+    t.group_selected := not t.group_selected
+  else
+    t.group_selected := False;                // library template, menu should be disabled???
 
   if (any_selected < 1) and (group_notch_linked = True) then
     unlink_group;
@@ -7030,14 +6985,15 @@ procedure Tkeep_form.select_all_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do
-      group_selected := (template_info.keep_dims.box_dims1.bgnd_code_077 <> -1);
+    t := keeps_list[n];
+    t.group_selected := (t.boxDims.backgroundCode <> bkcLibrary);
     // select if not a library template.
   end;
 
@@ -7049,17 +7005,18 @@ procedure Tkeep_form.select_all_bgnd_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do
-      group_selected := (template_info.keep_dims.box_dims1.bgnd_code_077 = 1);
+    t := keeps_list[n];
+    t.group_selected := (t.boxDims.backgroundCode = bkcBackground);
   end;//next n
 
-  if (any_selected < 1) and (group_notch_linked = True) then
+  if (any_selected < 1) and (group_notch_linked) then
     unlink_group;
 
   current_state(-1);
@@ -7070,17 +7027,18 @@ procedure Tkeep_form.select_all_unused_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do
-      group_selected := (template_info.keep_dims.box_dims1.bgnd_code_077 = 0);
+    t := keeps_list[n];
+    t.group_selected := (t.boxDims.backgroundCode = bkcUnused);
   end;//next n
 
-  if (any_selected < 1) and (group_notch_linked = True) then
+  if (any_selected < 1) and (group_notch_linked) then
     unlink_group;
 
   current_state(-1);
@@ -7098,18 +7056,18 @@ procedure Tkeep_form.invert_selections_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if template_info.keep_dims.box_dims1.bgnd_code_077 <> -1 then
-        group_selected := not group_selected
-      else
-        group_selected := False;                       // library template???
-    end;//with
+    t := keeps_list[n];
+    if t.boxDims.backgroundCode <> bkcLibrary then
+      t.group_selected := not t.group_selected
+    else
+      t.group_selected := False;                       // library template???
   end;//for
 
   unlink_group;
@@ -7162,6 +7120,7 @@ procedure Tkeep_form.copy_group_menu_entryClick(Sender: TObject);   // copy grou
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -7174,16 +7133,14 @@ begin
   end;
 
   for n := 0 to keeps_list.Count - 1 do begin
+    t := keeps_list[n];
 
-    with keeps_list[n] do begin
+    // selected and not currently on background...?
 
-      // selected and not currently on background...?
+    if (t.group_selected) and (not t.bg_copied) and
+      (t.boxDims.backgroundCode <> bkcLibrary) then
+      copy_keep_to_background(n, True, False);  // copy there.
 
-      if (group_selected = True) and (bg_copied = False) and
-        (template_info.keep_dims.box_dims1.bgnd_code_077 <> -1) then
-        copy_keep_to_background(n, True, False);  // copy there.
-
-    end;//with
   end;//next n
   current_state(-1);
 
@@ -7213,6 +7170,7 @@ procedure rebuild_group(use_modify_options, egg_timer: boolean);
 
 var
   n: integer;
+  t: TTemplate;
 begin
   if any_selected = 0 then
     EXIT;
@@ -7225,97 +7183,94 @@ begin
     //  so that plain track or approach and exit tracks can be drawn.
 
     for n := 0 to (keeps_list.Count - 1) do begin
+      t := keeps_list[n];
 
-      with keeps_list[n] do begin
+      if (not t.group_selected) or (not t.bg_copied) then
+        CONTINUE;     // not selected or on background.
 
-        if (group_selected = False) or (bg_copied = False) then
-          CONTINUE;     // not selected or on background.
+      if not wipe_it(n)      // first wipe the background.
+      then begin
+        alert(5, '    program  error',
+          '||Sorry, there is a program error.' +
+          '||The background will be cleared and rebuilt.',
+          '', '', '', '', '', 'O K', 0);
+        rebuild_background(False, True);
 
-        if wipe_it(n) = False      // first wipe the background.
-        then begin
-          alert(5, '    program  error',
-            '||Sorry, there is a program error.' +
-            '||The background will be cleared and rebuilt.',
-            '', '', '', '', '', 'O K', 0);
-          rebuild_background(False, True);
+        save_done := False;
+        backup_wanted := True;
+        EXIT;
+      end;
 
-          save_done := False;
-          backup_wanted := True;
-          EXIT;
-        end;
+      t.bg_copied := False;                      // flag not yet on background.
 
-        bg_copied := False;                      // flag not yet on background.
+      // does he want it modified?...
 
-        // does he want it modified?...
+      if (use_modify_options) and (keep_form.timbering_as_control_menu_entry.Checked) then begin
+        update_timbering(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and (keep_form.timbering_as_control_menu_entry.Checked =
-          True) then begin
-          update_timbering(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.plain_track_as_control_menu_entry.Checked)      // 214c
+      then begin
+        update_lengths(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.plain_track_as_control_menu_entry.Checked = True)      // 214c
-        then begin
-          update_lengths(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.customize_xing_as_control_menu_entry.Checked)   // 214b
+      then begin
+        update_customize_xing(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.customize_xing_as_control_menu_entry.Checked = True)   // 214b
-        then begin
-          update_customize_xing(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.trackbed_edges_as_control_menu_entry.Checked) then begin
+        update_trackbed_edges(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.trackbed_edges_as_control_menu_entry.Checked = True) then begin
-          update_trackbed_edges(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.centre_lines_as_control_menu_entry.Checked) then begin
+        update_centre_lines(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.centre_lines_as_control_menu_entry.Checked = True) then begin
-          update_centre_lines(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.centre_line_offset_options_as_control_menu_entry.Checked)  // 214a
+      then begin
+        update_centre_line_offset_options(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.centre_line_offset_options_as_control_menu_entry.Checked = True)  // 214a
-        then begin
-          update_centre_line_offset_options(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.rail_section_data_as_control_menu_entry.Checked) then begin
+        update_rail_section(t);
+        t.new_stamp_wanted := True;
+      end;
 
-        if (use_modify_options = True) and
-          (keep_form.rail_section_data_as_control_menu_entry.Checked = True) then begin
-          update_rail_section(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
-
-        if (use_modify_options = True) and
-          (keep_form.radius_warning_limit_as_control_menu_entry.Checked = True)  // 206e
-        then begin
-          update_radius_warning(template_info.keep_dims);
-          new_stamp_wanted := True;
-        end;
+      if (use_modify_options) and
+        (keep_form.radius_warning_limit_as_control_menu_entry.Checked)  // 206e
+      then begin
+        update_radius_warning(t);
+        t.new_stamp_wanted := True;
+      end;
 
 
-        if new_stamp_wanted = True
-        // True=has been modified/shifted/rotated/mirrored, so needs a new timestamp on rebuilding.
-        then begin
-          template_info.keep_dims.box_dims1.now_time :=
-            time_now_modified(Random($7FFFFFFF));
-          // modify Delphi float time format to integer (will probably use the random figure - calls in quick succession).
-          new_stamp_wanted := False;                                   // done it.
-          save_done := False;
-          // need a fresh save.   !!! version 0.23 19-10-99.
-        end;
+      if t.new_stamp_wanted
+      // True=has been modified/shifted/rotated/mirrored, so needs a new timestamp on rebuilding.
+      then begin
+        //tinfo.keep_dims.box_dims1.now_time :=
+        //  time_now_modified(Random($7FFFFFFF));
+        // modify Delphi float time format to integer (will probably use the random figure - calls in quick succession).
+        t.new_stamp_wanted := False;                                   // done it.
+        save_done := False;
+        // need a fresh save.   !!! version 0.23 19-10-99.
+      end;
 
-        list_position := n;                      // put this keep on background.
-        copy_keep_to_background(n, True, False);
+      list_position := n;                      // put this keep on background.
+      copy_keep_to_background(n, True, False);
 
-      end;//with template
     end;//next n
   finally
     backup_wanted := True;
@@ -7442,10 +7397,11 @@ procedure normalize_templates;        // update box contents to latest file form
 
 var
   n, Count: integer;
-  bgnd: integer;
+  bgnd: TBackgroundCode;
   save_bgnd_option: boolean;
 
   save_label_x, save_label_y: double;   // 0.82.d
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -7474,23 +7430,20 @@ begin
     n := 0;
 
     while n < Count do begin
+      t := keeps_list[0];  // always top of list
+      bgnd := t.boxDims.backgroundCode;
+      // remember if it's on bgnd.
 
-      with keeps_list[0].template_info.keep_dims.box_dims1 do begin    // always top of list
-        bgnd := bgnd_code_077;
-        // remember if it's on bgnd.
+      // 0.82.d  save label position...
 
-        // 0.82.d  save label position...
-
-        save_label_x := mod_text_x;
-        save_label_y := mod_text_y;
-
-      end;//with
+      save_label_x := t.boxDims.labelModifierX;
+      save_label_y := t.boxDims.labelModifierY;
 
       list_position := 0;
       copy_keep_to_current(False, False, False, False);   // copy to pad.
       delete_keep(False, False);                        // and delete from box.
 
-      store_unused((bgnd = -1), False);     // (does a recalc) put back in.
+      store_unused((bgnd = bkcLibrary), False);     // (does a recalc) put back in.
 
       if Count <> keeps_list.Count then begin
         alert(5, '    normalizing  error',
@@ -7502,17 +7455,14 @@ begin
         EXIT;
       end;
 
-      with keeps_list[Count - 1].template_info.keep_dims.box_dims1 do begin
-        // always bottom of list
+      t := keeps_list[Count - 1];   // always bottom of list
 
-        // 0.82.d  restore label position...
+      // 0.82.d  restore label position...
 
-        mod_text_x := save_label_x;
-        mod_text_y := save_label_y;
+      t.boxDims.labelModifierX := save_label_x;
+      t.boxDims.labelModifierY := save_label_y;
 
-      end;//with
-
-      if bgnd = 1 then
+      if bgnd = bkcBackground then
         copy_or_wipe_background;    // and on background.
 
       Inc(n);
@@ -7620,8 +7570,7 @@ begin
   if (keeps_list.Count < 1) or (list_position < 0) or (list_position > (keeps_list.Count - 1)) then
     EXIT;
 
-  if keeps_list[list_position].template_info.keep_dims.box_dims1.bgnd_code_077
-    <> 1 then
+  if keeps_list[list_position].boxDims.backgroundCode <> bkcBackground then
     EXIT;
 
   Screen.Cursor := crHourGlass;     // might take a while.
@@ -7650,18 +7599,19 @@ end;
 //__________________________________________________________________________________________
 
 procedure Tkeep_form.make_library_template_menu_entryClick(Sender: TObject);
+var
+  bd: TBoxDims;
 
 begin
   if (keeps_list.Count < 1) or (list_position < 0) or (list_position > (keeps_list.Count - 1)) then
     EXIT;
 
-  with keeps_list[list_position].template_info.keep_dims.box_dims1 do begin
+  bd := keeps_list[list_position].boxDims;
 
-    if bgnd_code_077 <> 0 then
-      EXIT                // already library or on bgnd???  menu should be disabled.
-    else
-      bgnd_code_077 := -1;  // library template.
-  end;//with
+  if bd.backgroundCode <> bkcUnused then
+    EXIT                // already library or on bgnd???  menu should be disabled.
+  else
+    bd.backgroundCode := bkcLibrary;  // library template.
   current_state(-1);
 end;
 //______________________________________________________________________________________
@@ -8043,7 +7993,7 @@ begin
   if (n < 0) or (n >= keeps_list.Count) then
     EXIT;
 
-  tagged_str := Trim(keeps_list[n].template_info.keep_dims.box_dims1.reference_string);
+  tagged_str := Trim(keeps_list[n].name);
 
   repeat
     i := Pos('[', tagged_str);
@@ -8129,6 +8079,7 @@ procedure create_group_from_tag(tag_str: string; no_adding_alert: boolean);   //
 var
   i, n: integer;
   add_to_existing_group: boolean;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -8154,17 +8105,17 @@ begin
       add_to_existing_group := False;
   end;
 
-  if add_to_existing_group = False then
+  if not add_to_existing_group then
     unlink_group;
 
   for n := 0 to keeps_list.Count - 1 do begin
 
-    if (add_to_existing_group = True) and
-      (keeps_list[n].group_selected = True) then
+    if (add_to_existing_group) and
+      (keeps_list[n].group_selected) then
       CONTINUE;
 
-    with keeps_list[n] do
-      group_selected := (Pos(tag_str, template_info.keep_dims.box_dims1.reference_string) <> 0);
+    t := keeps_list[n];
+    t.group_selected := (Pos(tag_str, t.name) <> 0);
 
   end;//next template
 end;
@@ -8183,7 +8134,7 @@ begin
 
   for n := 0 to keeps_list.Count - 1 do begin
 
-    id := keeps_list[n].template_info.keep_dims.box_dims1.id_number;
+    id := keeps_list[n].boxDims.idNumber;
 
     if Result < id then
       Result := id;
@@ -8194,8 +8145,9 @@ begin
 
   if keep_form.undo_delete_menu_entry.Enabled = True    // 208b
   then begin
-    if Assigned(deletedKeep) and (Result < deletedKeep.template_info.keep_dims.box_dims1.id_number) then
-      Result := deletedKeep.template_info.keep_dims.box_dims1.id_number;
+    if Assigned(deletedKeep) and (Result <
+      deletedKeep.boxDims.idNumber) then
+      Result := deletedKeep.boxDims.idNumber;
   end;
 end;
 //______________________________________________________________________________
@@ -8212,28 +8164,28 @@ var
   LeftS: string;
   RightS: string;
 begin
-  LeftS := LowerCase(Left.template_info.keep_dims.box_dims1.reference_string);
-  RightS := LowerCase(Right.template_info.keep_dims.box_dims1.reference_string);
+  LeftS := LowerCase(Left.name);
+  RightS := LowerCase(Right.name);
 
   Result := TComparer<string>.Default.Compare(LeftS, RightS);
 end;
 
 function CompareTemplateByIDNumber(constref Left, Right: TTemplate): Integer;
 begin
-  Result := TComparer<integer>.Default.Compare(Left.template_info.keep_dims.box_dims1.id_number,
-    Right.template_info.keep_dims.box_dims1.id_number);
+  Result := TComparer<integer>.Default.Compare(Left.boxDims.idNumber,
+    Right.boxDims.idNumber);
 end;
 
 function CompareTemplateByTemplateType(constref Left, Right: TTemplate): Integer;
 begin
-  Result := TComparer<string>.Default.Compare(Left.template_info.keep_dims.box_dims1.id_number_str,
-    Right.template_info.keep_dims.box_dims1.id_number_str);
+  Result := TComparer<string>.Default.Compare(Left.boxDims.idNumberStr,
+    Right.boxDims.idNumberStr);
 end;
 
 function CompareTemplateByInfo(constref Left, Right: TTemplate): Integer;
 begin
-  Result := TComparer<string>.Default.Compare(Left.template_info.keep_dims.box_dims1.top_label,
-    Right.template_info.keep_dims.box_dims1.top_label);
+  Result := TComparer<string>.Default.Compare(Left.topLabel,
+    Right.topLabel);
 end;
 
 procedure sort_box(code: integer);
@@ -8306,35 +8258,35 @@ function any_stored_rails_omitted(n: integer): boolean;     // 208a
 
 var
   pt_all, turnout_all, hd_all: boolean;
+  t: TTemplate;
+  ri: TRailInfo;
 
 begin
   Result := False;  // init
 
-  with keeps_list[n].template_info.keep_dims do begin
+  t := keeps_list[n];
 
-    with box_dims1.rail_info do begin
 
-      pt_all := turnout_road_stock_rail_sw and main_road_stock_rail_sw;
+  ri := t.boxDims.railInfo;
+      pt_all := ri.turnoutRoadStockRail and ri.mainRoadStockRail;
 
-      turnout_all := pt_all and turnout_road_check_rail_sw and
-        turnout_road_crossing_rail_sw and crossing_vee_sw and main_road_check_rail_sw and
-        main_road_crossing_rail_sw;
+      turnout_all := pt_all and ri.turnoutRoadCheckRail and
+        ri.turnoutRoadCrossingRail and ri.crossingVee and ri.mainRoadCheckRail and
+        ri.mainRoadCrossingRail;
 
-      hd_all := turnout_all and k_diagonal_side_check_rail_sw and k_main_side_check_rail_sw;
+      hd_all := turnout_all and ri.kDiagonalSideCheckRail and ri.kMainSideCheckRail;
 
-    end;//with
 
-    if box_dims1.turnout_info1.plain_track_flag = True   // plain track template
+    if t.boxDims.turnoutInfo1.plainTrack   // plain track template
     then
       Result := not pt_all
     else
-    if turnout_info2.semi_diamond_flag = True    // half-diamond template
+    if t.turnoutInfo2.semiDiamond    // half-diamond template
     then
       Result := not hd_all
     else
       Result := not turnout_all;             // turnout template
 
-  end;//with
 end;
 //______________________________________________________________________________
 
@@ -8342,37 +8294,35 @@ function any_deleted_keep_rails_omitted: boolean;     // 208b
 
 var
   pt_all, turnout_all, hd_all: boolean;
+  ri: TRailInfo;
 
 begin
   Result := False;  // init
   if not Assigned(deletedKeep) then
     Exit;
 
-  with deletedKeep.template_info.keep_dims do begin
 
-    with box_dims1.rail_info do begin
 
-      pt_all := turnout_road_stock_rail_sw and main_road_stock_rail_sw;
+  ri := deletedKeep.boxDims.railInfo;
+      pt_all := ri.turnoutRoadStockRail and ri.mainRoadStockRail;
 
-      turnout_all := pt_all and turnout_road_check_rail_sw and
-        turnout_road_crossing_rail_sw and crossing_vee_sw and main_road_check_rail_sw and
-        main_road_crossing_rail_sw;
+      turnout_all := pt_all and ri.turnoutRoadCheckRail and
+        ri.turnoutRoadCrossingRail and ri.crossingVee and ri.mainRoadCheckRail and
+        ri.mainRoadCrossingRail;
 
-      hd_all := turnout_all and k_diagonal_side_check_rail_sw and k_main_side_check_rail_sw;
+      hd_all := turnout_all and ri.kDiagonalSideCheckRail and ri.kMainSideCheckRail;
 
-    end;//with
 
-    if box_dims1.turnout_info1.plain_track_flag = True   // plain track template
+    if deletedKeep.boxDims.turnoutInfo1.plainTrack   // plain track template
     then
       Result := not pt_all
     else
-    if turnout_info2.semi_diamond_flag = True    // half-diamond template
+    if deletedKeep.turnoutInfo2.semiDiamond    // half-diamond template
     then
       Result := not hd_all
     else
       Result := not turnout_all;             // turnout template
 
-  end;//with
 end;
 //______________________________________________________________________________
 
@@ -8381,6 +8331,7 @@ procedure Tkeep_form.reset_all_id_numbers_menu_entryClick(Sender: TObject);  // 
 var
   n: integer;
   any_reset: boolean;
+  t: TTemplate;
 
 begin
   any_reset := False;  // init
@@ -8391,45 +8342,42 @@ begin
 
     for n := 0 to (keeps_list.Count - 1) do begin
 
-      with keeps_list[n].template_info.keep_dims do begin
+      t := keeps_list[n];
 
-        box_dims1.id_number := n + 1;
+        t.boxDims.idNumber := n + 1;
 
 
-        box_dims1.id_number_str :=
-          create_id_number_str(box_dims1.id_number, box_dims1.turnout_info1.hand,
-          turnout_info2.start_draw_x, box_dims1.turnout_info1.turnout_length,
-          turnout_info2.ipx_stored, turnout_info2.fpx_stored,
-          box_dims1.turnout_info1.plain_track_flag,
-          turnout_info2.semi_diamond_flag, any_stored_rails_omitted(n));
+        t.boxDims.idNumberStr :=
+          create_id_number_str(t.boxDims.idNumber, t.boxDims.turnoutInfo1.hand,
+          t.turnoutInfo2.startDrawX, t.boxDims.turnoutInfo1.turnoutLength,
+          t.turnoutInfo2.ipx, t.turnoutInfo2.fpx,
+          t.boxDims.turnoutInfo1.plainTrack,
+          t.turnoutInfo2.semiDiamond, any_stored_rails_omitted(n));
 
-      end;//with
 
     end;//next
 
   end;
 
-  if keep_form.undo_delete_menu_entry.Enabled = True
+  if keep_form.undo_delete_menu_entry.Enabled
   // 208b   reset deleted keep, if any, to next ID number
   then begin
 
     any_reset := True;
 
-    with deletedKeep.template_info.keep_dims do begin
 
-      box_dims1.id_number := keeps_list.Count + 1;   // next ID
+      deletedKeep.boxDims.idNumber := keeps_list.Count + 1;   // next ID
 
-      box_dims1.id_number_str :=
-        create_id_number_str(box_dims1.id_number, box_dims1.turnout_info1.hand,
-        turnout_info2.start_draw_x, box_dims1.turnout_info1.turnout_length,
-        turnout_info2.ipx_stored, turnout_info2.fpx_stored,
-        box_dims1.turnout_info1.plain_track_flag, turnout_info2.semi_diamond_flag,
+      deletedKeep.boxDims.idNumberStr :=
+        create_id_number_str(deletedKeep.boxDims.idNumber, deletedKeep.boxDims.turnoutInfo1.hand,
+        deletedKeep.turnoutInfo2.startDrawX, deletedKeep.boxDims.turnoutInfo1.turnoutLength,
+        deletedKeep.turnoutInfo2.ipx, deletedKeep.turnoutInfo2.fpx,
+        deletedKeep.boxDims.turnoutInfo1.plainTrack, deletedKeep.turnoutInfo2.semiDiamond,
         any_deleted_keep_rails_omitted);
 
-    end;//with
   end;
 
-  if any_reset = True then begin
+  if any_reset then begin
     save_done := False;
     backup_wanted := True;
   end;
@@ -8462,7 +8410,7 @@ begin
 
   for n := 0 to keeps_list.Count - 1 do begin
 
-    name_str := Trim(LowerCase(keeps_list[n].template_info.keep_dims.box_dims1.reference_string));
+    name_str := Trim(LowerCase(keeps_list[n].name));
 
     while Pos(']', name_str) > 0 do
       Delete(name_str, 1, 1);    // remove any tags
@@ -8557,12 +8505,12 @@ begin
     EXIT;
 
   edit_reminder_menu_entry.Enabled :=
-    keeps_list[list_position].template_info.keep_dims.box_dims1.align_info.reminder_flag;
+    keeps_list[list_position].boxDims.alignmentInfo.reminderFlag;
   remove_reminder_menu_entry.Enabled :=
-    keeps_list[list_position].template_info.keep_dims.box_dims1.align_info.reminder_flag;
+    keeps_list[list_position].boxDims.alignmentInfo.reminderFlag;
 
   add_reminder_menu_entry.Enabled :=
-    not keeps_list[list_position].template_info.keep_dims.box_dims1.align_info.reminder_flag;
+    not keeps_list[list_position].boxDims.alignmentInfo.reminderFlag;
 
 end;
 //______________________________________________________________________________
@@ -8601,8 +8549,8 @@ end;
 
 procedure Tkeep_form.import_t2box_menu_entryClick(Sender: TObject);
 var
-    last_bgnd_loaded: integer;
-    append: boolean = false;
+  last_bgnd_loaded: integer;
+  append: boolean = False;
 
 begin
   {xxx import_t2box('');    // in t2box_unit}
@@ -8612,8 +8560,8 @@ begin
     var append: boolean;
     var last_bgnd_loaded_index: integer);}
   import_t2box(True,
-        '',
-    false,
+    '',
+    False,
     append,
     last_bgnd_loaded);
 end;

@@ -27,6 +27,14 @@ attributes:
 
 type
 
+  // old Tnotch record, moved here temporarily...
+  Tnotch = record      //  a notch position.
+    notch_x: double;
+    notch_y: double;
+    notch_k: double;
+  end;
+
+
   TNotchInfo = class(TOTPersistent)
   private
     //# genMemberVars
@@ -55,6 +63,8 @@ type
 
     procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
     procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+
+    procedure SetNotch(const ANotch: Tnotch);
 
     //# genProperty
     property x: Double read FX write SetX;
@@ -181,6 +191,13 @@ begin
 end;
 
 //# endGenGetSetMethods
+
+procedure TNotchInfo.SetNotch(const ANotch: Tnotch);
+begin
+  x := ANotch.notch_x;
+  y := ANotch.notch_y;
+  k := ANotch.notch_k;
+end;
 
 initialization
   TNotchInfo.RegisterClass;

@@ -38,7 +38,7 @@ uses
 
 (x - in TTemplate) reference_string: string[100];  // template name.
 
-(x - don't care) this_was_control_template: boolean;
+(/) this_was_control_template: boolean;
 // 0.93.a // alignment_byte_2:byte;   // D5 0.81 12-06-05
 
 (/) rail_info: Trail_info;  // 23-5-01.
@@ -170,9 +170,11 @@ attributes:
 - name: uniqueId
   type: Integer
   access: [get]
-- name: keepTimestamp
+- name: timestamp
   type: TDateTime
   access: [get]
+- name: thisWasControlTemplate
+  type: Boolean
 - name: railInfo
   type: TRailInfo
   owns: create
@@ -265,7 +267,8 @@ type
   private
     //# genMemberVars
     FUniqueId: Integer;
-    FKeepTimestamp: TDateTime;
+    FTimestamp: TDateTime;
+    FThisWasControlTemplate: Boolean;
     FRailInfo: TOID;
     FGaugeIndex: Integer;
     FGaugeExact: Boolean;
@@ -311,6 +314,7 @@ type
     function GetAlignmentInfo: TAlignmentInfo;
     function GetCheckDiffs: TCheckDiffs;
     function GetTurnoutInfo1: TTurnoutInfo1;
+    procedure SetThisWasControlTemplate(const AValue: Boolean);
     procedure SetGaugeIndex(const AValue: Integer);
     procedure SetGaugeExact(const AValue: Boolean);
     procedure SetGaugeCustom(const AValue: Boolean);
@@ -349,7 +353,8 @@ type
 
     //# genProperty
     property uniqueId: Integer read FUniqueId;
-    property keepTimestamp: TDateTime read FKeepTimestamp;
+    property timestamp: TDateTime read FTimestamp;
+    property thisWasControlTemplate: Boolean read FThisWasControlTemplate write SetThisWasControlTemplate;
     property railInfo: TRailInfo read GetRailInfo;
 
     // current index into the gauge list.
@@ -518,8 +523,11 @@ begin
   if AName = 'uniqueId' then
     FUniqueId := StrToInteger(AValue)
   else
-  if AName = 'keepTimestamp' then
-    FKeepTimestamp := StrToTDateTime(AValue)
+  if AName = 'timestamp' then
+    FTimestamp := StrToTDateTime(AValue)
+  else
+  if AName = 'thisWasControlTemplate' then
+    FThisWasControlTemplate := StrToBoolean(AValue)
   else
   if AName = 'railInfo' then
     RestoreYamlObjectOwn(FRailInfo, StrToInteger(AValue), ALoader)
@@ -623,7 +631,8 @@ begin
 
   //# genRestoreVars
   AStream.ReadBuffer(FUniqueId, sizeof(Integer));
-  AStream.ReadBuffer(FKeepTimestamp, sizeof(TDateTime));
+  AStream.ReadBuffer(FTimestamp, sizeof(TDateTime));
+  AStream.ReadBuffer(FThisWasControlTemplate, sizeof(Boolean));
   AStream.ReadBuffer(FRailInfo, sizeof(TOID));
   AStream.ReadBuffer(FGaugeIndex, sizeof(Integer));
   AStream.ReadBuffer(FGaugeExact, sizeof(Boolean));
@@ -665,7 +674,8 @@ begin
 
   //# genSaveVars
   AStream.WriteBuffer(FUniqueId, sizeof(Integer));
-  AStream.WriteBuffer(FKeepTimestamp, sizeof(TDateTime));
+  AStream.WriteBuffer(FTimestamp, sizeof(TDateTime));
+  AStream.WriteBuffer(FThisWasControlTemplate, sizeof(Boolean));
   AStream.WriteBuffer(FRailInfo, sizeof(TOID));
   AStream.WriteBuffer(FGaugeIndex, sizeof(Integer));
   AStream.WriteBuffer(FGaugeExact, sizeof(Boolean));
@@ -707,7 +717,8 @@ begin
 
   //# genSaveYamlVars
   SaveYamlInteger(AEmitter, 'uniqueId', FUniqueId);
-  SaveYamlTDateTime(AEmitter, 'keepTimestamp', FKeepTimestamp);
+  SaveYamlTDateTime(AEmitter, 'timestamp', FTimestamp);
+  SaveYamlBoolean(AEmitter, 'thisWasControlTemplate', FThisWasControlTemplate);
   SaveYamlObject(AEmitter, 'railInfo', FRailInfo);
   SaveYamlInteger(AEmitter, 'gaugeIndex', FGaugeIndex);
   SaveYamlBoolean(AEmitter, 'gaugeExact', FGaugeExact);
@@ -742,6 +753,15 @@ begin
 end;
 
 //# genGetSetMethods
+// GENERATED METHOD - DO NOT EDIT
+procedure TBoxDims.SetThisWasControlTemplate(const AValue: Boolean);
+begin
+  if AValue <> FThisWasControlTemplate then begin
+    SetModified;
+    FThisWasControlTemplate := AValue;
+  end;
+end;
+
 // GENERATED METHOD - DO NOT EDIT
 function TBoxDims.GetRailInfo: TRailInfo;
 begin

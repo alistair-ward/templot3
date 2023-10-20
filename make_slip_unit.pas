@@ -85,7 +85,8 @@ uses
   curve,
   template_records,
   template,
-  ConvertTemplateToGlobals{ OT-FIRST , web_browser_unit};
+  ConvertTemplateToGlobals,
+  NotchInfo{ OT-FIRST , web_browser_unit};
 
 //______________________________________________________________________________
 
@@ -184,7 +185,7 @@ var
         else
           str := ' slip switch';
 
-        keeps_list[z].template_info.keep_dims.box_dims1.reference_string := id_str + ' ' + str;
+        keeps_list[z].name := id_str + ' ' + str;
       end;//next
     end;
   end;

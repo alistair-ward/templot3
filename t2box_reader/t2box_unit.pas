@@ -2771,12 +2771,20 @@ begin
   ti.turnoutRoadIsMinimum := turnout_info1.turnout_road_is_minimum;
 end;
 
+function ConvertBox2DateTime(keepDate, keepTime: String): TDateTime;
+begin
+
+end;
+
 procedure ConvertBox2ToBoxDims1(const boxDims1: TBox2Dims1; template: TTemplate);
 var
   bd: TBoxDims;
 begin
   bd := template.boxDims;
-  //bd.keepTimestamp :=
+
+  //bd.keepTimestamp := ConvertBox2DateTime(boxDims1.keep_date, boxDims1.keep_time);
+
+  bd.thisWasControlTemplate:=boxDims1.this_was_control_template;
   bd.gaugeIndex := boxDims1.gauge_index;
   bd.gaugeExact := boxDims1.gauge_exact;
   bd.gaugeCustom := boxDims1.gauge_custom;
@@ -3023,7 +3031,6 @@ function ConvertBox2ToTemplate(box2Template: TBox2Template): TTemplate;
 begin
   Result := TTemplate.Create(nil);
   try
-    Assert(sizeof(Result.template_info.keep_dims) = sizeof(box2Template.keepDims));
     Result.Name := box2Template.Name;
     Result.memo := box2Template.memo;
 
@@ -3145,6 +3152,7 @@ var
   projectTitle: string;
   gridInfo: TGridInfo;
   newProject: TProject;
+  t: TTemplate;
 
 begin
 
@@ -3327,9 +3335,9 @@ begin
         i := 0;
 
         for n := i to (keeps_list.Count - 1) do begin
-          if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 =
-            1 then begin
-            if update_background_menu_entry.Checked = True then begin
+          t := keeps_list[n];
+          if t.boxDims.backgroundCode = bkcBackground then begin
+            if update_background_menu_entry.Checked then begin
               last_bgnd_loaded_index := n;
               // update index to highest loaded bgnd (for minting).
               list_position := n;
@@ -3338,11 +3346,7 @@ begin
               // don't update info, reloading=True.
             end
             else begin
-              with keeps_list[n].template_info.keep_dims.box_dims1 do begin
-                bgnd_code_077 := 0;          // make it unused instead.
-                pre077_bgnd_flag := False;
-                // in case reloaded in older version than 0.77.a
-              end;//with
+                t.boxDims.backgroundCode  := bkcUnused;          // make it unused instead.
             end;
           end;
         end;//for

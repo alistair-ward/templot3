@@ -70,7 +70,9 @@ implementation
 {$R *.lfm}
 
 uses
-  pad_unit, switch_select, template_records;
+  pad_unit,
+  switch_select,
+  Template;
 
 var
   template_showing: boolean = False;
@@ -134,6 +136,7 @@ procedure Tdata_child_form.set_content(list_position: Integer);
 
 var
   info_str, memo_text_str: string;
+  t: TTemplate;
 
 begin
   if (keeps_list.Count < 1) or (list_position < 0) or
@@ -154,15 +157,15 @@ begin
   begin
     memo_text_str := keeps_list[list_position].Memo;
 
-    with keeps_list[list_position].template_info.keep_dims.box_dims1 do begin
-      info_str := '    ' + IntToStr(list_position + 1) + '  ' + reference_string + '   ' +
-        id_number_str + '||  ' + top_label +
-        '||--------------------------------------------------------------' +
-        '||      Information  about  this  template :' + '||( all dimensions in millimetres )'
-        + '||' + keeps_list[list_position].Name +
-        '||--------------------------------------------------------------' +
-        '||      Your  memo  notes  for  this  template :' + '||' + memo_text_str;
-    end;//with
+    t := keeps_list[list_position];
+    info_str := '    ' + IntToStr(list_position + 1) + '  ' + t.name + '   ' +
+      t.boxDims.idNumberStr + '||  ' + t.topLabel +
+      '||--------------------------------------------------------------' +
+      '||      Information  about  this  template :' + '||( all dimensions in millimetres )' +
+      '||' + keeps_list[list_position].Name +
+      '||--------------------------------------------------------------' +
+      '||      Your  memo  notes  for  this  template :' +
+      '||' + t.memo;
 
     data_memo.Text := insert_crlf_str(info_str);  //  replace embedded | chars with a CR
 
