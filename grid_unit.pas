@@ -204,17 +204,38 @@ function get_show_margins_info(calc_for_none: boolean): boolean;  // 0.93.a
 implementation
 
 uses
-  LCLType, LCLIntf,
-  point_ex, control_room, pad_unit,
+  LCLType,
+  LCLIntf,
+  point_ex,
+  control_room,
+  pad_unit,
   background_shapes,
   dummy_vehicle,
-  bgnd_unit, bgkeeps_unit, math_unit, Math, preview_unit,
-  colour_unit, help_sheet, shove_timber, keep_select, print_settings_unit,
-  { OT-FIRST dtp_unit, dtp_settings_unit,} export_unit, { OT-FIRST pdf_unit,} entry_sheet,
+  bgnd_unit,
+  bgkeeps_unit,
+  math_unit,
+  Math,
+  preview_unit,
+  colour_unit,
+  help_sheet,
+  shove_timber,
+  keep_select,
+  print_settings_unit,
+  { OT-FIRST dtp_unit, dtp_settings_unit,}
+  export_unit,
+  { OT-FIRST pdf_unit,}
+  entry_sheet,
   alert_unit,
   action_unit,
   rail_data_unit,
-  template_records, mark_unit{ OT-FIRST , file_viewer};
+  Template,
+  template_records,
+  AlignmentInfo,
+  BoxDims,
+  TurnoutInfo2,
+  PlatformTrackbedInfo,
+  mark_unit
+  { OT-FIRST , file_viewer};
 
 {$R *.lfm}
 //_________________________________________________________________________________________
@@ -1428,6 +1449,8 @@ var
   memo_count: integer;
 
   midx, midy: double;
+  t: TTemplate;
+  alignment: TAlignmentInfo;
 
 begin
   memo_count := 0;                      // init
@@ -1448,97 +1471,95 @@ begin
 
     for n := 0 to (keeps_list.Count - 1) do begin
 
-      with keeps_list[n] do begin
+      t := keeps_list[n];
 
-        if bg_copied = False then
-          CONTINUE;  // not a background template.
+      if not t.bg_copied then
+        CONTINUE;  // not a background template.
 
-        if (group_selected = True) and (hide_group_templates_menu_entry.Checked = True) then
-          CONTINUE;
+      if (t.group_selected) and (hide_group_templates_menu_entry.Checked) then
+        CONTINUE;
 
-        with template_info.keep_dims.box_dims1.align_info do begin
+      alignment := t.boxDims.alignmentInfo;
 
-          if (reminder_str = '') or (reminder_flag = False) then
-            CONTINUE;
+      if (alignment.reminderStr = '') or (not alignment.reminderFlag) then
+        CONTINUE;
 
-          //  first get position of template mid-point on pad...
+      //  first get position of template mid-point on pad...
 
-          midx := snap_peg_positions.ctrl_mid_pos.notch_x;
-          midy := snap_peg_positions.ctrl_mid_pos.notch_y;
+      midx := t.snap_peg_positions.ctrl_mid_pos.notch_x;
+      midy := t.snap_peg_positions.ctrl_mid_pos.notch_y;
 
-          move_to.X := Round(Round(midx * 100) * sx + ex - gx);
-          move_to.Y := Round(Round(midy * 100) * sy + by - gy);
+      move_to.X := Round(Round(midx * 100) * sx + ex - gx);
+      move_to.Y := Round(Round(midy * 100) * sy + by - gy);
 
-          //  draw coloured blob on template...
+      //  draw coloured blob on template...
 
-          if check_limit(True, True, move_to) = True then begin
-            with canv do begin
-              Pen.Mode := pmCopy;
-              Pen.Style := psSolid;
-              Pen.Color := reminder_colour;
-              Pen.Width := 1;
-              Brush.Style := bsSolid;
-              Brush.Color := reminder_colour;
+      if check_limit(True, True, move_to) = True then begin
+        with canv do begin
+          Pen.Mode := pmCopy;
+          Pen.Style := psSolid;
+          Pen.Color := alignment.reminderColour;
+          Pen.Width := 1;
+          Brush.Style := bsSolid;
+          Brush.Color := alignment.reminderColour;
 
-              Ellipse(move_to.X - 8, move_to.Y - 8, move_to.X + 8, move_to.Y + 8);
-              // 8 dots radius arbitrary
+          Ellipse(move_to.X - 8, move_to.Y - 8, move_to.X + 8, move_to.Y + 8);
+          // 8 dots radius arbitrary
 
-              Pen.Color := clBlack;           // restore..
-              Brush.Color := paper_colour;
-            end;//with
-          end;
+          Pen.Color := clBlack;           // restore..
+          Brush.Color := paper_colour;
+        end;//with
+      end;
 
-          Inc(memo_count);
+      Inc(memo_count);
 
-          if memo_count > 5 then
-            CONTINUE;
+      if memo_count > 5 then
+        CONTINUE;
 
-          //  if one of first 5 reminders, also add callout ...
+      //  if one of first 5 reminders, also add callout ...
 
-          case memo_count of
+      case memo_count of
 
-            1:
-              reminder_memo := reminder_memo1;
-            2:
-              reminder_memo := reminder_memo2;
-            3:
-              reminder_memo := reminder_memo3;
-            4:
-              reminder_memo := reminder_memo4;
-            else
-              reminder_memo := reminder_memo5;
+        1:
+          reminder_memo := reminder_memo1;
+        2:
+          reminder_memo := reminder_memo2;
+        3:
+          reminder_memo := reminder_memo3;
+        4:
+          reminder_memo := reminder_memo4;
+        else
+          reminder_memo := reminder_memo5;
 
-          end;//case
+      end;//case
 
-          reminder_memo.Tag := n;
-          reminder_memo.Color := reminder_colour;
-          reminder_memo.Lines.Text := reminder_str;
-          reminder_memo.Hint := reminder_str + '  -  click to zoom template  -  right-click for options ';
+      reminder_memo.Tag := n;
+      reminder_memo.Color := alignment.reminderColour;
+      reminder_memo.Lines.Text := alignment.reminderStr;
+      reminder_memo.Hint := alignment.reminderStr +
+        '  -  click to zoom template  -  right-click for options ';
 
-          reminder_memo.Visible := True;
+      reminder_memo.Visible := True;
 
-          // draw call-out line ...
+      // draw call-out line ...
 
-          line_to.X := reminder_memo.Left + 2; //+memo.Width DIV 2;
-          line_to.Y := reminder_memo.Top + reminder_memo.Height div 2;
+      line_to.X := reminder_memo.Left + 2; //+memo.Width DIV 2;
+      line_to.Y := reminder_memo.Top + reminder_memo.Height div 2;
 
-          if check_limits(move_to, line_to) = True then begin
-            with canv do begin
-              Pen.Mode := pmCopy;
-              Pen.Style := psSolid;
-              Pen.Width := 3;
-              Pen.Color := reminder_colour;
+      if check_limits(move_to, line_to) then begin
+        with canv do begin
+          Pen.Mode := pmCopy;
+          Pen.Style := psSolid;
+          Pen.Width := 3;
+          Pen.Color := alignment.reminderColour;
 
-              MoveTo(move_to.X, move_to.Y);
-              LineTo(line_to.X, line_to.Y);
+          MoveTo(move_to.X, move_to.Y);
+          LineTo(line_to.X, line_to.Y);
 
-              Pen.Width := 1;         // restore..
-              Pen.Color := clBlack;
-            end;//with
-          end;
-
-        end;//with align_info
-      end;//with template
+          Pen.Width := 1;         // restore..
+          Pen.Color := clBlack;
+        end;//with
+      end;
 
     end;//next template
 
@@ -1788,6 +1809,11 @@ var
 
   last_bgnd_index: integer;  // 219a
 
+  t: TTemplate;
+  bd: TBoxDims;
+  ti2: TTurnoutInfo2;
+  pti: TPlatformTrackbedInfo;
+
 
   //////////////////////////////////////////////////////////
 
@@ -1854,14 +1880,14 @@ var
   ////////////////////////////////////////////////////////////
 
 begin
-  if (keeps_list.Count < 1) or (pad_form.show_bgnd_keeps_menu_entry.Checked = False) then
+  if (keeps_list.Count < 1) or (not pad_form.show_bgnd_keeps_menu_entry.Checked) then
     EXIT;
 
   last_bgnd_index := highest_bgnd_template;  // get last bgnd template in list  219a
 
   // 218d set limit rectangle ...
 
-  if (pad_form.show_bgnd_keeps_in_rect_menu_entry.Checked = True)
+  if (pad_form.show_bgnd_keeps_in_rect_menu_entry.Checked)
     { OT-FIRST and (file_viewer_form.Showing=False)} and (output_rectangle_width > 0) and
     (output_rectangle_height > 0) then begin
     draw_export_rectangle_flag := True;
@@ -1905,265 +1931,344 @@ begin
       if (highlight_index <> -1) and (bgk <> highlight_index) then
         CONTINUE;  // don't need to draw any others if one is for highlighting.
 
-      with keeps_list[bgk] do begin
+      t := keeps_list[bgk];
 
-        if bgnd_is_in_rect = False then
-          CONTINUE;     // 218d no part of template in screen area
+      if not t.bgnd_is_in_rect then
+        CONTINUE;     // 218d no part of template in screen area
 
-        if bg_copied = False then
-          CONTINUE;  // not a background template.
+      if not t.bg_copied then
+        CONTINUE;  // not a background template.
 
-        if (group_selected = True) and (pad_form.hide_group_templates_menu_entry.Checked =
-          True) then
-          CONTINUE;  // 209c
+      if (t.group_selected) and (pad_form.hide_group_templates_menu_entry.Checked) then
+        CONTINUE;  // 209c
 
-        keep_selected := group_selected;
+      keep_selected := t.group_selected;
 
-        // first run through all the marks (mod 0.76.a 24-10-01)...
+      // first run through all the marks (mod 0.76.a 24-10-01)...
 
-        try
-          now_keep := bgnd_keep;   // next background keep.
+      try
+        now_keep := t.bgnd_keep;   // next background keep.
 
-          with now_keep do begin
+        with now_keep do begin
 
-            tbnum_str := timber_numbers_string;      // the full string of timber numbering.
+          tbnum_str := timber_numbers_string;      // the full string of timber numbering.
 
 
-            if (keep_selected = True) and (group_code = -1) then
-              CONTINUE;    // group templates not wanted.
-            if (keep_selected = False) and (group_code = 1) then
-              CONTINUE;    // only group templates wanted.
+          if (keep_selected) and (group_code = -1) then
+            CONTINUE;    // group templates not wanted.
+          if (not keep_selected) and (group_code = 1) then
+            CONTINUE;    // only group templates wanted.
 
-            // marker_colours_pad: 0=normal, 1=rails only, 2=timbers only, 3=rails and timber outlines, 4:=use the print mapping colour instead.
+          // marker_colours_pad: 0=normal, 1=rails only, 2=timbers only, 3=rails and timber outlines, 4:=use the print mapping colour instead.
 
-            using_marker_colour := False;  // default init.
+          using_marker_colour := False;  // default init.
 
-            with template_info.keep_dims.box_dims1 do begin
+          bd := t.boxDims;
 
-              case marker_colours_pad of
+          case marker_colours_pad of
 
-                2, 3:
-                  if use_pad_marker_colour = True then begin
-                    marker_colour := pad_marker_colour;
-                    using_marker_colour := True;
-                  end;
+            2, 3:
+              if bd.usePadMarkerColour then begin
+                marker_colour := bd.padMarkerColour;
+                using_marker_colour := True;
+              end;
 
-                4:
-                  if use_print_mapping_colour = True then begin
-                    marker_colour := print_mapping_colour;
-                    using_marker_colour := True;
-                  end;
-              end;//case
+            4:
+              if bd.usePrintMappingColour then begin
+                marker_colour := bd.printMappingColour;
+                using_marker_colour := True;
+              end;
+          end;//case
 
-            end;//with
+          // first draw bgnd marks and timbers ...
 
-            // first draw bgnd marks and timbers ...
+          array_max := High(list_bgnd_marks);
 
-            array_max := High(list_bgnd_marks);
+          for i := 0 to array_max do begin
 
-            for i := 0 to array_max do begin
+            try
 
-              try
+              code := list_bgnd_marks[i].code;   // check this mark wanted.
 
-                code := list_bgnd_marks[i].code;   // check this mark wanted.
+              with bgkeeps_form do begin
 
-                with bgkeeps_form do begin
+                case code of
+                  eMC__5_Label:
+                    Pen.Color := clBlack;    // label position - colour ignored.
 
-                  case code of
-                    eMC__5_Label:
-                      Pen.Color := clBlack;    // label position - colour ignored.
+                  eMC__4_TimberSelector,
+                  eMC_0_Ignore,
+                  eMC_501_MSWorkingEnd..eMC_508_DSWingRail,
+                  eMC_600_LongMark..eMC_605_SWitchLabelEnd,
+                  eMC_700_XingLongMark..eMC_703_XingLabelEnd:
+                    CONTINUE;
+                  // ignore timber selector mark, blank lines. // 0.94.a ignore check-rail labels
+                  // 206b  600..605, 700..703 ignore long marks and switch/xing labels on trackpad
 
-                    eMC__4_TimberSelector,
-                    eMC_0_Ignore,
-                    eMC_501_MSWorkingEnd..eMC_508_DSWingRail,
-                    eMC_600_LongMark..eMC_605_SWitchLabelEnd,
-                    eMC_700_XingLongMark..eMC_703_XingLabelEnd:
-                      CONTINUE;
-                    // ignore timber selector mark, blank lines. // 0.94.a ignore check-rail labels
-                    // 206b  600..605, 700..703 ignore long marks and switch/xing labels on trackpad
-
-                    eMC__3_CurvingRadiusCentre_2,
-                    eMC__2_CurvingRadiusCentre_1:
-                      if marks_checkbox.Checked = True then begin
-                        if using_marker_colour = False then
-                          Pen.Color := bgkeep_mark_colour  // curving rad centres.
-                        else
-                          Pen.Color := marker_colour;
-                      end
+                  eMC__3_CurvingRadiusCentre_2,
+                  eMC__2_CurvingRadiusCentre_1:
+                    if marks_checkbox.Checked = True then begin
+                      if using_marker_colour = False then
+                        Pen.Color := bgkeep_mark_colour  // curving rad centres.
                       else
-                        CONTINUE;
-                    eMC__1_PegCentre,
-                    eMC_8_PegArm_1,
-                    eMC_9_PegArm_2:
-                      if peg_checkbox.Checked = True then
-                        Pen.Color := bgkeep_peg_colour     // fixing peg, peg arms.
-                      else
-                        CONTINUE;
-
-                    eMC_1_GuideMark,
-                    eMC_2_RadialEnd,
-                    eMC_7_TransitionAndSlewing,
-                    eMC_10_PlainTrackStart:
-                      if marks_checkbox.Checked = True then begin
-                        if using_marker_colour = False then
-                          Pen.Color :=
-                            bgkeep_mark_colour     // guide marks, radial ends, transition ends.
-                        else
-                          Pen.Color := marker_colour;
-                      end
-                      else
-                        CONTINUE;
-
-                    eMC_3_TimberOutline,
-                    eMC_33_SelectedTimberOutline,
-                    eMC_93_ShovedTimberOutline:
-                      if timber_outlines_checkbox.Checked = True then begin
-                        if using_marker_colour = False then
-                          Pen.Color := bgkeep_timber_colour  // timber outlines.
-                        else
-                          Pen.Color := marker_colour;
-                      end
-                      else
-                        CONTINUE;
-
-                    eMC_4_TimberCL,
-                    eMC_14_TimberCLMidline,
-                    eMC_44_ShovingTimberCL,
-                    eMC_54_ShovingTimberCLMidline:
-                      if timber_centres_checkbox.Checked = True then begin
-                        if using_marker_colour = False then
-                          Pen.Color := bgkeep_timber_colour  // timber centre-lines only on pad.
-                        else
-                          Pen.Color := marker_colour;
-                      end
-                      else
-                        CONTINUE;
-
-                    eMC_5_TimberReducedEnd,
-                    eMC_55_ReducedEnd,
-                    eMC_95_ReducedEndInfill:
-                      if reduced_ends_checkbox.Checked = True  // timber reduced ends.
-                      then begin
-                        if using_marker_colour = False then
-                          Pen.Color := bgkeep_timber_colour
-                        else
-                          Pen.Color := marker_colour;
-                      end
-                      else
-                        CONTINUE;
-
-
-                    eMC_6_RailJoint:
-                      if joints_checkbox.Checked = True then begin
-                        if using_marker_colour = False then
-                          Pen.Color := bgkeep_mark_colour    // rail joints.
-                        else
-                          Pen.Color := marker_colour;
-                      end
-                      else
-                        CONTINUE;
-
-                    eMC_99_TimberNumber:
-                      if timber_numbering_checkbox.Checked = False then
-                        CONTINUE;  // text.
-
-                    eMC_203_TimberInfill,
-                    eMC_233_ShovedTimberInfill,
-                    eMC_293_ShovedTimberInfill:
-                      if (timber_infill_checkbox.Checked = True) and
-                        ((screenx < 200 * scale) or (bgpad_timb_infill_style > 2))
-                      // infill on pad if solid/blank fill or large enough to see hatching.
-                      then
-                        Pen.Color :=
-                          paper_colour
-                      //use paper colour to avoid line thickening caused by rounding, when the outline overwrites.
-                      //was bgkeep_timber_colour  // timber infill.
-                      else
-                        CONTINUE;
-
+                        Pen.Color := marker_colour;
+                    end
                     else
-                      Pen.Color := clBlack;
-                  end;//case
-                end;//with
+                      CONTINUE;
+                  eMC__1_PegCentre,
+                  eMC_8_PegArm_1,
+                  eMC_9_PegArm_2:
+                    if peg_checkbox.Checked = True then
+                      Pen.Color := bgkeep_peg_colour     // fixing peg, peg arms.
+                    else
+                      CONTINUE;
+
+                  eMC_1_GuideMark,
+                  eMC_2_RadialEnd,
+                  eMC_7_TransitionAndSlewing,
+                  eMC_10_PlainTrackStart:
+                    if marks_checkbox.Checked = True then begin
+                      if using_marker_colour = False then
+                        Pen.Color :=
+                          bgkeep_mark_colour     // guide marks, radial ends, transition ends.
+                      else
+                        Pen.Color := marker_colour;
+                    end
+                    else
+                      CONTINUE;
+
+                  eMC_3_TimberOutline,
+                  eMC_33_SelectedTimberOutline,
+                  eMC_93_ShovedTimberOutline:
+                    if timber_outlines_checkbox.Checked = True then begin
+                      if using_marker_colour = False then
+                        Pen.Color := bgkeep_timber_colour  // timber outlines.
+                      else
+                        Pen.Color := marker_colour;
+                    end
+                    else
+                      CONTINUE;
+
+                  eMC_4_TimberCL,
+                  eMC_14_TimberCLMidline,
+                  eMC_44_ShovingTimberCL,
+                  eMC_54_ShovingTimberCLMidline:
+                    if timber_centres_checkbox.Checked = True then begin
+                      if using_marker_colour = False then
+                        Pen.Color := bgkeep_timber_colour  // timber centre-lines only on pad.
+                      else
+                        Pen.Color := marker_colour;
+                    end
+                    else
+                      CONTINUE;
+
+                  eMC_5_TimberReducedEnd,
+                  eMC_55_ReducedEnd,
+                  eMC_95_ReducedEndInfill:
+                    if reduced_ends_checkbox.Checked = True  // timber reduced ends.
+                    then begin
+                      if using_marker_colour = False then
+                        Pen.Color := bgkeep_timber_colour
+                      else
+                        Pen.Color := marker_colour;
+                    end
+                    else
+                      CONTINUE;
 
 
-                p1 := list_bgnd_marks[i].p1;    // x1,y1 in  1/100ths mm
+                  eMC_6_RailJoint:
+                    if joints_checkbox.Checked = True then begin
+                      if using_marker_colour = False then
+                        Pen.Color := bgkeep_mark_colour    // rail joints.
+                      else
+                        Pen.Color := marker_colour;
+                    end
+                    else
+                      CONTINUE;
 
-                check_int1x := limits(h_minint, h_maxint, p1.X * sx + ex - gx, dummy_i);
-                // h_min, h_max 31 bit to give room for some arithmetic on the data (shift keeps, etc.)
-                check_int1y := limits(h_minint, h_maxint, p1.Y * sy + by - gy, dummy_i);
+                  eMC_99_TimberNumber:
+                    if timber_numbering_checkbox.Checked = False then
+                      CONTINUE;  // text.
 
-                if code = eMC_99_TimberNumber    // code=99, timber numbering.
-                then begin
-                  move_to.X := Round(check_int1x);
-                  move_to.Y := Round(check_int1y);
+                  eMC_203_TimberInfill,
+                  eMC_233_ShovedTimberInfill,
+                  eMC_293_ShovedTimberInfill:
+                    if (timber_infill_checkbox.Checked = True) and
+                      ((screenx < 200 * scale) or (bgpad_timb_infill_style > 2))
+                    // infill on pad if solid/blank fill or large enough to see hatching.
+                    then
+                      Pen.Color :=
+                        paper_colour
+                    //use paper colour to avoid line thickening caused by rounding, when the outline overwrites.
+                    //was bgkeep_timber_colour  // timber infill.
+                    else
+                      CONTINUE;
 
-                  numb_str := extract_tbnumber_str(tbnum_str);
-                  // get next timber numbering string from the acummulated string.
-                  if numb_str = '' then
-                    CONTINUE;                // no string available??
+                  else
+                    Pen.Color := clBlack;
+                end;//case
+              end;//with
 
-                  if check_limit(True, True, move_to) = True then begin
-                    Font.Assign(pad_form.pad_timber_font_label.Font);
-                    Brush.Color := paper_colour;
-                    Brush.Style := bsSolid;
 
-                    TextOut(move_to.X - (TextWidth(numb_str) div 2), move_to.Y -
-                      (TextHeight(numb_str) div 2), numb_str);
-                    Font.Assign(pad_form.Font);
-                  end;
-                  CONTINUE;
+              p1 := list_bgnd_marks[i].p1;    // x1,y1 in  1/100ths mm
+
+              check_int1x := limits(h_minint, h_maxint, p1.X * sx + ex - gx, dummy_i);
+              // h_min, h_max 31 bit to give room for some arithmetic on the data (shift keeps, etc.)
+              check_int1y := limits(h_minint, h_maxint, p1.Y * sy + by - gy, dummy_i);
+
+              if code = eMC_99_TimberNumber    // code=99, timber numbering.
+              then begin
+                move_to.X := Round(check_int1x);
+                move_to.Y := Round(check_int1y);
+
+                numb_str := extract_tbnumber_str(tbnum_str);
+                // get next timber numbering string from the acummulated string.
+                if numb_str = '' then
+                  CONTINUE;                // no string available??
+
+                if check_limit(True, True, move_to) = True then begin
+                  Font.Assign(pad_form.pad_timber_font_label.Font);
+                  Brush.Color := paper_colour;
+                  Brush.Style := bsSolid;
+
+                  TextOut(move_to.X - (TextWidth(numb_str) div 2), move_to.Y -
+                    (TextHeight(numb_str) div 2), numb_str);
+                  Font.Assign(pad_form.Font);
+                end;
+                CONTINUE;
+              end;
+
+              p2 := list_bgnd_marks[i].p2;    // x2,y2 in  1/100ths mm
+
+              check_int2x := limits(h_minint, h_maxint, p2.X * sx + ex - gx, dummy_i);
+              check_int2y := limits(h_minint, h_maxint, p2.Y * sy + by - gy, dummy_i);
+
+              if ((code = eMC_203_TimberInfill)
+                or (code = eMC_233_ShovedTimberInfill)
+                or (code = eMC_293_ShovedTimberInfill))
+                and (i < array_max)    // timber infill
+              then begin
+                p3 := list_bgnd_marks[i + 1].p1;  // x3,y3 in  1/100ths mm
+                p4 := list_bgnd_marks[i + 1].p2;  // x4,y4 in  1/100ths mm
+
+                check_int3x := limits(h_minint, h_maxint, p3.X * sx + ex - gx, dummy_i);
+                check_int3y := limits(h_minint, h_maxint, p3.Y * sy + by - gy, dummy_i);
+
+                check_int4x := limits(h_minint, h_maxint, p4.X * sx + ex - gx, dummy_i);
+                check_int4y := limits(h_minint, h_maxint, p4.Y * sy + by - gy, dummy_i);
+              end
+              else begin       // keep compiler happy...
+                p3.X := 0;
+                p3.Y := 0;
+
+                p4.X := 0;
+                p4.Y := 0;
+
+                check_int3x := 0;
+                check_int3y := 0;
+
+                check_int4x := 0;
+                check_int4y := 0;
+              end;
+
+              if (keep_selected) and (pad_form.show_group_menu_entry.Checked) then
+                Pen.Color := selection_colour; // draw selected group in this colour.
+
+              if (bgk = highlight_index) and (highlight_on) then
+                Pen.Color := highlight_colour;    // this one to be highlighted.
+
+              if code > eMC_0_Ignore then begin
+                move_to.X := Round(check_int1x);
+                move_to.Y := Round(check_int1y);
+                line_to.X := Round(check_int2x);
+                line_to.Y := Round(check_int2y);
+
+                infill3.X := Round(check_int3x);
+                infill3.Y := Round(check_int3y);
+                infill4.X := Round(check_int4x);
+                infill4.Y := Round(check_int4y);
+
+                if shift_keeps_mod = 1 then begin
+                  shift_keep_moveto(bgk, canv);
+                  // mouse action shift keeps, sets pen colour if selected.
+                  shift_keep_lineto(bgk);
                 end;
 
-                p2 := list_bgnd_marks[i].p2;    // x2,y2 in  1/100ths mm
+                if twist_keeps_mod = 1 then begin
+                  twist_keep_moveto(bgk, canv);  // mouse action twist keeps.
+                  twist_keep_lineto(bgk);
+                end;
 
-                check_int2x := limits(h_minint, h_maxint, p2.X * sx + ex - gx, dummy_i);
-                check_int2y := limits(h_minint, h_maxint, p2.Y * sy + by - gy, dummy_i);
-
-                if ((code = eMC_203_TimberInfill)
+                if (code = eMC_203_TimberInfill)
                   or (code = eMC_233_ShovedTimberInfill)
-                  or (code = eMC_293_ShovedTimberInfill))
-                  and (i < array_max)    // timber infill
+                  or (code = eMC_293_ShovedTimberInfill)   // timber infill...
                 then begin
-                  p3 := list_bgnd_marks[i + 1].p1;  // x3,y3 in  1/100ths mm
-                  p4 := list_bgnd_marks[i + 1].p2;  // x4,y4 in  1/100ths mm
+                  infill_points[0] := move_to;
+                  infill_points[1] := line_to;
+                  infill_points[2] := infill3;
+                  infill_points[3] := infill4;
 
-                  check_int3x := limits(h_minint, h_maxint, p3.X * sx + ex - gx, dummy_i);
-                  check_int3y := limits(h_minint, h_maxint, p3.Y * sy + by - gy, dummy_i);
+                  if (check_limits(infill_points[0], infill_points[1]) = True) and
+                    (check_limits(infill_points[2], infill_points[3]) = True) then begin
+                    Pen.Color := paper_colour;
+                    Brush.Color := bgkeep_timberfill_colour;
 
-                  check_int4x := limits(h_minint, h_maxint, p4.X * sx + ex - gx, dummy_i);
-                  check_int4y := limits(h_minint, h_maxint, p4.Y * sy + by - gy, dummy_i);
+                    case bgpad_timb_infill_style of
+                      0:
+                        CONTINUE;
+                      1:
+                        Brush.Style := bsBDiagonal;
+                      // hatched. Backward diagonal for background templates.
+                      2:
+                        Brush.Style := bsDiagCross;
+                      3:
+                        Brush.Style := bsSolid;
+                      4: begin
+                        // blank.
+                        Brush.Style := bsSolid;
+                        Brush.Color := paper_colour;
+                        // overide.
+                      end;
+                      else
+                        CONTINUE;
+                    end;//case
+
+                    Polygon(infill_points);
+                  end;
                 end
-                else begin       // keep compiler happy...
-                  p3.X := 0;
-                  p3.Y := 0;
+                else begin
+                  if (bgk = last_bgnd_index) and (Pen.Color =
+                    bgkeep_timber_colour) and
+                    (bgkeeps_form.bold_timber_outlines_checkbox.Checked = True)
+                  // 219a
+                  then
+                    Pen.Width := 3
+                  else
+                    Pen.Width := 1;
 
-                  p4.X := 0;
-                  p4.Y := 0;
-
-                  check_int3x := 0;
-                  check_int3y := 0;
-
-                  check_int4x := 0;
-                  check_int4y := 0;
+                  if check_limits(move_to, line_to) = True then begin
+                    MoveTo(move_to.X, move_to.Y);
+                    LineTo(line_to.X, line_to.Y);
+                  end;
                 end;
+              end
+              else begin
+                Pen.Width := 1;  // 219a
 
-                if (keep_selected = True) and (pad_form.show_group_menu_entry.Checked = True) then
-                  Pen.Color := selection_colour; // draw selected group in this colour.
+                if code = eMC__1_PegCentre         // code -1, draw bgnd fixing peg...
+                then begin
+                  peg_dim := 10;
+                  // 0.91.b was Screen.Width div 100; // 100 arbitrary.
+                  if peg_dim > Round(scale * fx) then
+                    peg_dim := Round(scale * fx); // but not more than 2ft scale.
 
-                if (bgk = highlight_index) and (highlight_on = True) then
-                  Pen.Color := highlight_colour;    // this one to be highlighted.
+                  bg_pegx := Round(check_int1x);
+                  bg_pegy := Round(check_int1y);
 
-                if code > eMC_0_Ignore then begin
-                  move_to.X := Round(check_int1x);
-                  move_to.Y := Round(check_int1y);
-                  line_to.X := Round(check_int2x);
-                  line_to.Y := Round(check_int2y);
-
-                  infill3.X := Round(check_int3x);
-                  infill3.Y := Round(check_int3y);
-                  infill4.X := Round(check_int4x);
-                  infill4.Y := Round(check_int4y);
+                  move_to.X := bg_pegx - peg_dim;
+                  move_to.Y := bg_pegy - peg_dim;
+                  line_to.X := bg_pegx + peg_dim;
+                  line_to.Y := bg_pegy + peg_dim;
 
                   if shift_keeps_mod = 1 then begin
                     shift_keep_moveto(bgk, canv);
@@ -2172,244 +2277,158 @@ begin
                   end;
 
                   if twist_keeps_mod = 1 then begin
-                    twist_keep_moveto(bgk, canv);  // mouse action twist keeps.
+                    twist_keep_moveto(bgk, canv);
+                    // mouse action twist keeps.
                     twist_keep_lineto(bgk);
                   end;
 
-                  if (code = eMC_203_TimberInfill)
-                    or (code = eMC_233_ShovedTimberInfill)
-                    or (code = eMC_293_ShovedTimberInfill)   // timber infill...
-                  then begin
-                    infill_points[0] := move_to;
-                    infill_points[1] := line_to;
-                    infill_points[2] := infill3;
-                    infill_points[3] := infill4;
+                  if check_limits(move_to, line_to) = True then
+                    arc_ellipse(canv, move_to.X, move_to.Y, line_to.X, line_to.Y);
 
-                    if (check_limits(infill_points[0], infill_points[1]) = True) and
-                      (check_limits(infill_points[2], infill_points[3]) = True) then begin
-                      Pen.Color := paper_colour;
-                      Brush.Color := bgkeep_timberfill_colour;
+                  move_to.X := bg_pegx - peg_dim * 2;
+                  move_to.Y := bg_pegy;
+                  line_to.X := bg_pegx + peg_dim * 2;
+                  line_to.Y := bg_pegy;
 
-                      case bgpad_timb_infill_style of
-                        0:
-                          CONTINUE;
-                        1:
-                          Brush.Style := bsBDiagonal;
-                        // hatched. Backward diagonal for background templates.
-                        2:
-                          Brush.Style := bsDiagCross;
-                        3:
-                          Brush.Style := bsSolid;
-                        4: begin
-                          // blank.
-                          Brush.Style := bsSolid;
-                          Brush.Color := paper_colour;
-                          // overide.
-                        end;
-                        else
-                          CONTINUE;
-                      end;//case
+                  if shift_keeps_mod = 1 then begin
+                    shift_keep_moveto(bgk, canv);
+                    // mouse action shift keeps, sets pen colour if selected.
+                    shift_keep_lineto(bgk);
+                  end;
 
-                      Polygon(infill_points);
-                    end;
+                  if twist_keeps_mod = 1 then begin
+                    twist_keep_moveto(bgk, canv);
+                    // mouse action twist keeps.
+                    twist_keep_lineto(bgk);
+                  end;
+
+                  if check_limits(move_to, line_to) = True then begin
+                    MoveTo(move_to.X, move_to.Y);
+                    LineTo(line_to.X, line_to.Y);
+                  end;
+
+                  move_to.X := bg_pegx;
+                  move_to.Y := bg_pegy - peg_dim * 2;
+                  line_to.X := bg_pegx;
+                  line_to.Y := bg_pegy + peg_dim * 2;
+
+                  if shift_keeps_mod = 1 then begin
+                    shift_keep_moveto(bgk, canv);
+                    // mouse action shift keeps, sets pen colour if selected.
+                    shift_keep_lineto(bgk);
+                  end;
+
+                  if twist_keeps_mod = 1 then begin
+                    twist_keep_moveto(bgk, canv);
+                    // mouse action twist keeps.
+                    twist_keep_lineto(bgk);
+                  end;
+
+                  if check_limits(move_to, line_to) = True then begin
+                    MoveTo(move_to.X, move_to.Y);
+                    LineTo(line_to.X, line_to.Y);
+                  end;
+                end;
+
+                if (code = eMC__2_CurvingRadiusCentre_1)
+                  or (code = eMC__3_CurvingRadiusCentre_2) // draw bgnd curving rad centres...
+                then begin
+                  radcen_dim := 4;
+                  // 0.91.b was Screen.Width div 250; // 250 arbitrary.  (smaller than for the current).
+                  if radcen_dim > Round(scale * 3 * fx) then
+                    radcen_dim := Round(scale * 3 * fx); // but not more than 3ft scale.
+
+                  radcenx := Round(check_int1x);
+                  radceny := Round(check_int1y);
+
+                  move_to.X := radcenx - radcen_dim * 2;
+                  move_to.Y := radceny;
+                  line_to.X := radcenx + radcen_dim * 2;
+                  line_to.Y := radceny;
+
+                  if shift_keeps_mod = 1 then begin
+                    shift_keep_moveto(bgk, canv);
+                    // mouse action shift keeps, sets pen colour if selected.
+                    shift_keep_lineto(bgk);
+                  end;
+
+                  if twist_keeps_mod = 1 then begin
+                    twist_keep_moveto(bgk, canv);
+                    // mouse action twist keeps.
+                    twist_keep_lineto(bgk);
+                  end;
+
+                  if check_limits(move_to, line_to) = True then begin
+                    MoveTo(move_to.X, move_to.Y);
+                    LineTo(line_to.X, line_to.Y);
+                  end;
+
+                  move_to.X := radcenx;
+                  move_to.Y := radceny - radcen_dim * 2;
+                  line_to.X := radcenx;
+                  line_to.Y := radceny + radcen_dim * 2;
+
+                  if shift_keeps_mod = 1 then begin
+                    shift_keep_moveto(bgk, canv);
+                    // mouse action shift keeps, sets pen colour if selected.
+                    shift_keep_lineto(bgk);
+                  end;
+
+                  if twist_keeps_mod = 1 then begin
+                    twist_keep_moveto(bgk, canv);
+                    // mouse action twist keeps.
+                    twist_keep_lineto(bgk);
+                  end;
+
+                  if check_limits(move_to, line_to) = True then begin
+                    MoveTo(move_to.X, move_to.Y);
+                    LineTo(line_to.X, line_to.Y);
+                  end;
+                end;
+
+                if code = eMC__5_Label        // save the label position - actual draw later.
+                then begin
+                  move_to.X := Round(check_int1x);
+                  move_to.Y := Round(check_int1y);
+
+                  if shift_keeps_mod = 1 then
+                    shift_keep_moveto(bgk, canv);
+                  // mouse action shift keeps, sets pen colour if selected.
+
+                  if twist_keeps_mod = 1 then
+                    twist_keep_moveto(bgk, canv);  // mouse action twist keeps.
+
+                  mod_name_x := bd.labelModifierX;
+                  mod_name_y := bd.labelModifierY;
+
+                  move_to.X := move_to.X + Round(mod_name_x * fx);
+                  move_to.Y := move_to.Y + Round(mod_name_y * fy);
+
+                  if check_limit(True, True, move_to) = True then begin
+                    text_begin_X := move_to.X;
+                    // save position for the name label.
+                    text_begin_Y := move_to.Y;
                   end
                   else begin
-                    if (bgk = last_bgnd_index) and (Pen.Color =
-                      bgkeep_timber_colour) and
-                      (bgkeeps_form.bold_timber_outlines_checkbox.Checked = True)
-                    // 219a
-                    then
-                      Pen.Width := 3
-                    else
-                      Pen.Width := 1;
-
-                    if check_limits(move_to, line_to) = True then begin
-                      MoveTo(move_to.X, move_to.Y);
-                      LineTo(line_to.X, line_to.Y);
-                    end;
+                    text_begin_X := min_draw_int;
+                    text_begin_Y := min_draw_int;
                   end;
-                end
-                else begin
-                  Pen.Width := 1;  // 219a
+                end;//code -5
+              end;//code <0
 
-                  if code = eMC__1_PegCentre         // code -1, draw bgnd fixing peg...
-                  then begin
-                    peg_dim := 10;
-                    // 0.91.b was Screen.Width div 100; // 100 arbitrary.
-                    if peg_dim > Round(scale * fx) then
-                      peg_dim := Round(scale * fx); // but not more than 2ft scale.
+            except
+              CONTINUE;      // ignore this mark if calc exception.
+            end;// try
 
-                    bg_pegx := Round(check_int1x);
-                    bg_pegy := Round(check_int1y);
+          end;//next i background mark
 
-                    move_to.X := bg_pegx - peg_dim;
-                    move_to.Y := bg_pegy - peg_dim;
-                    line_to.X := bg_pegx + peg_dim;
-                    line_to.Y := bg_pegy + peg_dim;
+        end;//with now_keep data.
 
-                    if shift_keeps_mod = 1 then begin
-                      shift_keep_moveto(bgk, canv);
-                      // mouse action shift keeps, sets pen colour if selected.
-                      shift_keep_lineto(bgk);
-                    end;
+        t.bgnd_keep := now_keep;   // save the label location.
 
-                    if twist_keeps_mod = 1 then begin
-                      twist_keep_moveto(bgk, canv);
-                      // mouse action twist keeps.
-                      twist_keep_lineto(bgk);
-                    end;
-
-                    if check_limits(move_to, line_to) = True then
-                      arc_ellipse(canv, move_to.X, move_to.Y, line_to.X, line_to.Y);
-
-                    move_to.X := bg_pegx - peg_dim * 2;
-                    move_to.Y := bg_pegy;
-                    line_to.X := bg_pegx + peg_dim * 2;
-                    line_to.Y := bg_pegy;
-
-                    if shift_keeps_mod = 1 then begin
-                      shift_keep_moveto(bgk, canv);
-                      // mouse action shift keeps, sets pen colour if selected.
-                      shift_keep_lineto(bgk);
-                    end;
-
-                    if twist_keeps_mod = 1 then begin
-                      twist_keep_moveto(bgk, canv);
-                      // mouse action twist keeps.
-                      twist_keep_lineto(bgk);
-                    end;
-
-                    if check_limits(move_to, line_to) = True then begin
-                      MoveTo(move_to.X, move_to.Y);
-                      LineTo(line_to.X, line_to.Y);
-                    end;
-
-                    move_to.X := bg_pegx;
-                    move_to.Y := bg_pegy - peg_dim * 2;
-                    line_to.X := bg_pegx;
-                    line_to.Y := bg_pegy + peg_dim * 2;
-
-                    if shift_keeps_mod = 1 then begin
-                      shift_keep_moveto(bgk, canv);
-                      // mouse action shift keeps, sets pen colour if selected.
-                      shift_keep_lineto(bgk);
-                    end;
-
-                    if twist_keeps_mod = 1 then begin
-                      twist_keep_moveto(bgk, canv);
-                      // mouse action twist keeps.
-                      twist_keep_lineto(bgk);
-                    end;
-
-                    if check_limits(move_to, line_to) = True then begin
-                      MoveTo(move_to.X, move_to.Y);
-                      LineTo(line_to.X, line_to.Y);
-                    end;
-                  end;
-
-                  if (code = eMC__2_CurvingRadiusCentre_1)
-                    or (code = eMC__3_CurvingRadiusCentre_2) // draw bgnd curving rad centres...
-                  then begin
-                    radcen_dim := 4;
-                    // 0.91.b was Screen.Width div 250; // 250 arbitrary.  (smaller than for the current).
-                    if radcen_dim > Round(scale * 3 * fx) then
-                      radcen_dim := Round(scale * 3 * fx); // but not more than 3ft scale.
-
-                    radcenx := Round(check_int1x);
-                    radceny := Round(check_int1y);
-
-                    move_to.X := radcenx - radcen_dim * 2;
-                    move_to.Y := radceny;
-                    line_to.X := radcenx + radcen_dim * 2;
-                    line_to.Y := radceny;
-
-                    if shift_keeps_mod = 1 then begin
-                      shift_keep_moveto(bgk, canv);
-                      // mouse action shift keeps, sets pen colour if selected.
-                      shift_keep_lineto(bgk);
-                    end;
-
-                    if twist_keeps_mod = 1 then begin
-                      twist_keep_moveto(bgk, canv);
-                      // mouse action twist keeps.
-                      twist_keep_lineto(bgk);
-                    end;
-
-                    if check_limits(move_to, line_to) = True then begin
-                      MoveTo(move_to.X, move_to.Y);
-                      LineTo(line_to.X, line_to.Y);
-                    end;
-
-                    move_to.X := radcenx;
-                    move_to.Y := radceny - radcen_dim * 2;
-                    line_to.X := radcenx;
-                    line_to.Y := radceny + radcen_dim * 2;
-
-                    if shift_keeps_mod = 1 then begin
-                      shift_keep_moveto(bgk, canv);
-                      // mouse action shift keeps, sets pen colour if selected.
-                      shift_keep_lineto(bgk);
-                    end;
-
-                    if twist_keeps_mod = 1 then begin
-                      twist_keep_moveto(bgk, canv);
-                      // mouse action twist keeps.
-                      twist_keep_lineto(bgk);
-                    end;
-
-                    if check_limits(move_to, line_to) = True then begin
-                      MoveTo(move_to.X, move_to.Y);
-                      LineTo(line_to.X, line_to.Y);
-                    end;
-                  end;
-
-                  if code = eMC__5_Label        // save the label position - actual draw later.
-                  then begin
-                    move_to.X := Round(check_int1x);
-                    move_to.Y := Round(check_int1y);
-
-                    if shift_keeps_mod = 1 then
-                      shift_keep_moveto(bgk, canv);
-                    // mouse action shift keeps, sets pen colour if selected.
-
-                    if twist_keeps_mod = 1 then
-                      twist_keep_moveto(bgk, canv);  // mouse action twist keeps.
-
-                    with template_info.keep_dims.box_dims1 do begin
-                      mod_name_x := mod_text_x;
-                      mod_name_y := mod_text_y;
-                      //name_string:=Trim(reference_string);       // name part of label into now_keep.
-                    end;//with
-
-                    move_to.X := move_to.X + Round(mod_name_x * fx);
-                    move_to.Y := move_to.Y + Round(mod_name_y * fy);
-
-                    if check_limit(True, True, move_to) = True then begin
-                      text_begin_X := move_to.X;
-                      // save position for the name label.
-                      text_begin_Y := move_to.Y;
-                    end
-                    else begin
-                      text_begin_X := min_draw_int;
-                      text_begin_Y := min_draw_int;
-                    end;
-                  end;//code -5
-                end;//code <0
-
-              except
-                CONTINUE;      // ignore this mark if calc exception.
-              end;// try
-
-            end;//next i background mark
-
-          end;//with now_keep data.
-
-          bgnd_keep := now_keep;   // save the label location.
-
-        except
-          CONTINUE;      // ignore this keep if calc exception.
-        end;// try
-      end;//with template.
+      except
+        CONTINUE;      // ignore this keep if calc exception.
+      end;// try
     end;//next bgk template.
 
     // now draw all the rails... (mod 0.76.a 24-10-01).
@@ -2419,293 +2438,281 @@ begin
       if (highlight_index <> -1) and (bgk <> highlight_index) then
         CONTINUE;  // don't need to draw any others if one is for highlighting.
 
-      with keeps_list[bgk] do begin
+      t := keeps_list[bgk];
 
-        if bgnd_is_in_rect = False then
-          CONTINUE;     // 218d no part of template in screen area
+      if not t.bgnd_is_in_rect then
+        CONTINUE;     // 218d no part of template in screen area
 
-        if bg_copied = False then
-          CONTINUE;  // not a background template.
+      if not t.bg_copied then
+        CONTINUE;  // not a background template.
 
-        if (group_selected = True) and (pad_form.hide_group_templates_menu_entry.Checked =
-          True) then
-          CONTINUE;  // 209c
+      if (t.group_selected) and (pad_form.hide_group_templates_menu_entry.Checked) then
+        CONTINUE;  // 209c
 
-        keep_selected := group_selected;
+      keep_selected := t.group_selected;
 
-        try
+      try
 
-          now_keep := bgnd_keep;
+        now_keep := t.bgnd_keep;
 
-          with now_keep do begin
+        with now_keep do begin
 
-            if (keep_selected = True) and (group_code = -1) then
-              CONTINUE;    // group templates not wanted.
-            if (keep_selected = False) and (group_code = 1) then
-              CONTINUE;    // only group templates wanted.
+          if (keep_selected) and (group_code = -1) then
+            CONTINUE;    // group templates not wanted.
+          if (not keep_selected) and (group_code = 1) then
+            CONTINUE;    // only group templates wanted.
 
-            // marker_colours_pad: 0=normal, 1=rails only, 2=timbers only, 3=rails and timber outlines, 4:=use the print mapping colour instead.
+          // marker_colours_pad: 0=normal, 1=rails only, 2=timbers only, 3=rails and timber outlines, 4:=use the print mapping colour instead.
 
-            using_marker_colour := False;  // default init.
+          using_marker_colour := False;  // default init.
 
-            with template_info.keep_dims.box_dims1 do begin
+          bd := t.boxDims;
 
-              case marker_colours_pad of
+          case marker_colours_pad of
 
-                1, 3:
-                  if use_pad_marker_colour = True then begin
-                    marker_colour := pad_marker_colour;
-                    using_marker_colour := True;
-                  end;
-
-                4:
-                  if use_print_mapping_colour = True then begin
-                    marker_colour := print_mapping_colour;
-                    using_marker_colour := True;
-                  end;
-              end;//case
-
-            end;//with
-
-            with template_info.keep_dims.turnout_info2 do
-              fixed_diamond_ends := (semi_diamond_flag = True) and (diamond_fixed_flag = True);
-            // need end marks on fixed diamond point rails.
-
-            //  first draw bgnd centre-lines...
-
-            if bgkeeps_form.centres_checkbox.Checked = True then begin
-              if (using_marker_colour = False) or (marker_colours_pad < 3) then begin
-                // 212a  dummy template = centre-lines as background shapes...
-
-                if template_info.keep_dims.box_dims1.align_info.dummy_template_flag
-                  = True then
-                  Pen.Color := shapes_colour
-                else
-                  Pen.Color := bgkeep_mark_colour;
-              end
-              else
-                Pen.Color := marker_colour;
-
-              if (keep_selected = True) and (pad_form.show_group_menu_entry.Checked = True)
-              // he's clicking selections.
-              then
-                Pen.Color := selection_colour;
-              // draw selected keeps in this colour.
-
-              if (bgk = highlight_index) and (highlight_on = True) then
-                Pen.Color := highlight_colour;               // this one to be highlighted.
-
-              // 212a ...
-
-              if template_info.keep_dims.box_dims1.align_info.dummy_template_flag =
-                True then begin
-                Pen.Width := 1;
-                if bgnd_form.pad_shapes_linewidth_2_radiobutton.Checked = True then
-                  Pen.Width := 2;
-                if bgnd_form.pad_shapes_linewidth_3_radiobutton.Checked = True then
-                  Pen.Width := 3;
+            1, 3:
+              if bd.usePadMarkerColour then begin
+                marker_colour := bd.padMarkerColour;
+                using_marker_colour := True;
               end;
 
-              for aq := rdMainRoadCentreLine to rdTurnoutRoadCentreLine do
-                draw_bgnd_rail(True);
+            4:
+              if bd.usePrintMappingColour then begin
+                marker_colour := bd.printMappingColour;
+                using_marker_colour := True;
+              end;
+          end;//case
 
-              Pen.Width := 1;  // reset if necessary  212a
+          ti2 := t.turnoutInfo2;
+          fixed_diamond_ends := (ti2.semiDiamond) and (ti2.diamondFixed);
+          // need end marks on fixed diamond point rails.
 
-            end;
+          //  first draw bgnd centre-lines...
 
-            // and rails...
+          if bgkeeps_form.centres_checkbox.Checked then begin
+            if (not using_marker_colour) or (marker_colours_pad < 3) then begin
+              // 212a  dummy template = centre-lines as background shapes...
 
-            if using_marker_colour = False then
-              Pen.Color := bgkeep_rail_colour
+              if bd.alignmentInfo.dummyTemplateFlag then
+                Pen.Color := shapes_colour
+              else
+                Pen.Color := bgkeep_mark_colour;
+            end
             else
               Pen.Color := marker_colour;
 
-            if (keep_selected = True) and (pad_form.show_group_menu_entry.Checked = True)
-            //and  (click_bgnd_select=True)  // he's clicking selections.
+            if (keep_selected) and (pad_form.show_group_menu_entry.Checked)
+            // he's clicking selections.
             then
               Pen.Color := selection_colour;
             // draw selected keeps in this colour.
 
             if (bgk = highlight_index) and (highlight_on = True) then
-              Pen.Color := highlight_colour;  // this one to be highlighted.
+              Pen.Color := highlight_colour;               // this one to be highlighted.
 
-            // new code 0.93.a ...
+            // 212a ...
 
-            with template_info.keep_dims.box_dims1 do begin
+            if bd.alignmentInfo.dummyTemplateFlag then begin
+              Pen.Width := 1;
+              if bgnd_form.pad_shapes_linewidth_2_radiobutton.Checked = True then
+                Pen.Width := 2;
+              if bgnd_form.pad_shapes_linewidth_3_radiobutton.Checked = True then
+                Pen.Width := 3;
+            end;
 
-              if bgkeeps_form.gauge_faces_checkbox.Checked = True then begin
-                for aq := rdStraightStockGaugeFace to rdTurnoutSideCheckGaugeFace do begin
-                  // main rails gauge faces
-                  if (turnout_info1.plain_track_flag = False) or
-                    (aq = rdStraightStockGaugeFace) or (aq = rdCurvedStockGaugeFace)
-                  // stock rails only, if plain track
-                  then
-                    draw_bgnd_rail(True);
-                end;//next aq
+            for aq := rdMainRoadCentreLine to rdTurnoutRoadCentreLine do
+              draw_bgnd_rail(True);
 
-                if fixed_diamond_ends = True then begin
-                  for aq in [rdKCrossingCheckMainSideGaugeFace,
-                      rdKCrossingCheckTurnoutSideGaugeFace] do begin
-                    draw_bgnd_rail(True);
-                  end;
-                end;
-              end;//gauge faces
+            Pen.Width := 1;  // reset if necessary  212a
 
-              if bgkeeps_form.outer_edges_checkbox.Checked = True then begin
-                for aq := rdStraightStockOuterFace to rdTurnoutSideCheckOuterFace do
-                begin                     // main rails outer edges
-                  if (turnout_info1.plain_track_flag = False) or
-                    (aq = rdStraightStockOuterFace) or (aq = rdCurvedStockOuterFace) then
-                    draw_bgnd_rail(True);
-                end;//next aq
+          end;
 
-                if fixed_diamond_ends = True then begin
-                  for aq in [rdKCrossingCheckMainSideOuterEdge,
-                      rdKCrossingCheckTurnoutSideOuterEdge] do begin
-                    draw_bgnd_rail(True);
-                  end;
-                end;
-              end;//outer edges
+          // and rails...
 
-              // next, draw in the rail ends...
+          if not using_marker_colour then
+            Pen.Color := bgkeep_rail_colour
+          else
+            Pen.Color := marker_colour;
 
-              if (bgkeeps_form.gauge_faces_checkbox.Checked = True) and
-                (bgkeeps_form.outer_edges_checkbox.Checked = True) then begin
-                mark_end(bgk, canv, rdStraightTurnoutWingGaugeFace, 1,
-                  rdStraightTurnoutWingOuterFace, 1, True);    // main rail wing rail finish.
-                mark_end(bgk, canv, rdCurvedTurnoutWingGaugeFace, 1,
-                  rdCurvedTurnoutWingOuterFace, 1, True);   // turnout rail wing rail finish.
+          if (keep_selected) and (pad_form.show_group_menu_entry.Checked)
+          //and  (click_bgnd_select=True)  // he's clicking selections.
+          then
+            Pen.Color := selection_colour;
+          // draw selected keeps in this colour.
 
-                mark_end(bgk, canv, rdMainSideCheckGaugeFace, 0,
-                  rdMainSideCheckOuterFace, 0, True);   // main side check rail start.
-                mark_end(bgk, canv, rdMainSideCheckGaugeFace, 1,
-                  rdMainSideCheckOuterFace, 1, True);   // main side check rail finish.
+          if (bgk = highlight_index) and (highlight_on) then
+            Pen.Color := highlight_colour;  // this one to be highlighted.
 
-                mark_end(bgk, canv, rdTurnoutSideCheckGaugeFace, 0,
-                  rdTurnoutSideCheckOuterFace, 0, True);   // turnout side check rail start.
-                mark_end(bgk, canv, rdTurnoutSideCheckGaugeFace, 1,
-                  rdTurnoutSideCheckOuterFace, 1, True);   // turnout side check rail finish.
+          // new code 0.93.a ...
 
-                mark_end(bgk, canv, rdVeePointGaugeFace, 0, rdVeeSpliceGaugeFace, 0, True);
-                // blunt nose.
-
-                if fixed_diamond_ends = True then begin
-                  mark_end(bgk, canv, rdStraightTurnoutWingGaugeFace, 0,
-                    rdStraightTurnoutWingOuterFace, 0, True);
-                  // planed faced of point rails for a fixed-diamond.
-                  mark_end(bgk, canv, rdCurvedTurnoutWingGaugeFace, 0,
-                    rdCurvedTurnoutWingOuterFace, 0, True);
-
-                  mark_end(bgk, canv, rdKCrossingCheckMainSideGaugeFace, 1,
-                    rdKCrossingCheckMainSideOuterEdge, 1, True);
-                  // MS K-crossing check rails.
-                  mark_end(bgk, canv, rdKCrossingCheckTurnoutSideGaugeFace,
-                    1, rdKCrossingCheckTurnoutSideOuterEdge, 1, True);
-                  // DS K-crossing check rails.
-                end;
-
-              end;//if rail ends
-
-
-              with platform_trackbed_info do begin
-
-                if (adjacent_edges_keep = False) and
-                  (bgkeeps_form.gauge_faces_checkbox.Checked = True) then begin
-                  for aq in rdAdjacentTracksGaugeFaces do begin
-                    draw_bgnd_rail(True);
-                  end;
-                end;
-
-                if (adjacent_edges_keep = False) and
-                  (bgkeeps_form.outer_edges_checkbox.Checked = True) then begin
-                  for aq in rdAdjacentTracksOuterFaces do begin
-                    draw_bgnd_rail(True);
-                  end;
-                end;
-
-                if (adjacent_edges_keep = True) and
-                  (bgkeeps_form.platforms_checkbox.Checked = True)
-                // 0.93.a platform edges
-                then begin
-
-                  Brush.Color := paper_colour;  // gaps in dotted lines.
-                  Brush.Style := bsSolid;
-                  TextOut(0, 0, '');            // needed for dotted lines - Delphi bug?
-
-                  if (using_marker_colour = False) or (marker_colours_pad < 3)
-                  then
-                    Pen.Color := bgkeep_platform_colour                // 0.93.a
-                  else
-                    Pen.Color := marker_colour;
-
-                  if (keep_selected = True) and (pad_form.show_group_menu_entry.Checked = True)
-                  //and  (click_bgnd_select=True)  // he's clicking selections.
-                  then
-                    Pen.Color := selection_colour;
-                  // draw selected keeps in this colour.
-
-                  if (bgk = highlight_index) and (highlight_on = True) then
-                    Pen.Color := highlight_colour;               // this one to be highlighted.
-
-                  aq := rdAdjTrackTurnoutSideNearGaugeFace;             // TS platform rear edge
-                  draw_bgnd_rail(draw_ts_platform_rear_edge_keep);
-                  // draw solid or dotted
-
-                  aq := rdAdjTrackTurnoutSideNearOuterFace;             // TS platform front edge
+            if bgkeeps_form.gauge_faces_checkbox.Checked = True then begin
+              for aq := rdStraightStockGaugeFace to rdTurnoutSideCheckGaugeFace do begin
+                // main rails gauge faces
+                if (not bd.turnoutInfo1.plainTrack) or
+                  (aq = rdStraightStockGaugeFace) or (aq = rdCurvedStockGaugeFace)
+                // stock rails only, if plain track
+                then
                   draw_bgnd_rail(True);
+              end;//next aq
 
-                  aq := rdAdjTrackMainSideNearGaugeFace;             // MS platform rear edge
-                  draw_bgnd_rail(draw_ms_platform_rear_edge_keep);
-
-                  aq := rdAdjTrackMainSideNearOuterFace;             // MS platform front edge
+              if fixed_diamond_ends then begin
+                for aq in [rdKCrossingCheckMainSideGaugeFace,
+                    rdKCrossingCheckTurnoutSideGaugeFace] do begin
                   draw_bgnd_rail(True);
-                end;
-
-                if (adjacent_edges_keep = True) and
-                  (bgkeeps_form.trackbed_edges_checkbox.Checked = True)   // trackbed edges
-                then begin
-                  aq := rdAdjTrackTurnoutSideFarGaugeFace;
-                  draw_bgnd_rail(False);  // dotted lines on screen
-                  aq := rdAdjTrackTurnoutSideFarOuterFace;
-                  draw_bgnd_rail(False);
-                  aq := rdAdjTrackMainSideFarGaugeFace;
-                  draw_bgnd_rail(False);
-                  aq := rdAdjTrackMainSideFarOuterFace;
-                  draw_bgnd_rail(False);
-                end;
-
-              end;//with platform_trackbed_info
-            end;//with box_dims1
-
-            with template_info.keep_dims.box_dims1.platform_trackbed_info do begin    // 0.93.a ...
-
-              if (bgkeeps_form.platforms_checkbox.Checked = True) and
-                (adjacent_edges_keep = True)  // platforms wanted?
-              then begin
-                // 0.93.a draw platform ends ...
-
-                if draw_ts_platform_keep = True then begin
-                  mark_end(bgk, canv, rdAdjTrackTurnoutSideNearGaugeFace,
-                    0, rdAdjTrackTurnoutSideNearOuterFace, 0, draw_ts_platform_start_edge_keep);
-                  mark_end(bgk, canv, rdAdjTrackTurnoutSideNearGaugeFace,
-                    1, rdAdjTrackTurnoutSideNearOuterFace, 1, draw_ts_platform_end_edge_keep);
-                end;
-
-                if draw_ms_platform_keep = True then begin
-                  mark_end(bgk, canv, rdAdjTrackMainSideNearGaugeFace, 0,
-                    rdAdjTrackMainSideNearOuterFace, 0, draw_ms_platform_start_edge_keep);
-                  mark_end(bgk, canv, rdAdjTrackMainSideNearGaugeFace, 1,
-                    rdAdjTrackMainSideNearOuterFace, 1, draw_ms_platform_end_edge_keep);
                 end;
               end;
-            end;//with
+            end;//gauge faces
 
-          end;//with  now_keep
+            if bgkeeps_form.outer_edges_checkbox.Checked then begin
+              for aq := rdStraightStockOuterFace to rdTurnoutSideCheckOuterFace do
+              begin                     // main rails outer edges
+                if (not bd.turnoutInfo1.plainTrack) or
+                  (aq = rdStraightStockOuterFace) or (aq = rdCurvedStockOuterFace) then
+                  draw_bgnd_rail(True);
+              end;//next aq
 
-        except
-          CONTINUE;      // ignore this keep if calc exception (zoom in on v. large radius?).
-        end;// try
-      end;//with template.
+              if fixed_diamond_ends then begin
+                for aq in [rdKCrossingCheckMainSideOuterEdge,
+                    rdKCrossingCheckTurnoutSideOuterEdge] do begin
+                  draw_bgnd_rail(True);
+                end;
+              end;
+            end;//outer edges
+
+            // next, draw in the rail ends...
+
+            if (bgkeeps_form.gauge_faces_checkbox.Checked) and
+              (bgkeeps_form.outer_edges_checkbox.Checked) then begin
+              mark_end(bgk, canv, rdStraightTurnoutWingGaugeFace, 1,
+                rdStraightTurnoutWingOuterFace, 1, True);    // main rail wing rail finish.
+              mark_end(bgk, canv, rdCurvedTurnoutWingGaugeFace, 1,
+                rdCurvedTurnoutWingOuterFace, 1, True);   // turnout rail wing rail finish.
+
+              mark_end(bgk, canv, rdMainSideCheckGaugeFace, 0,
+                rdMainSideCheckOuterFace, 0, True);   // main side check rail start.
+              mark_end(bgk, canv, rdMainSideCheckGaugeFace, 1,
+                rdMainSideCheckOuterFace, 1, True);   // main side check rail finish.
+
+              mark_end(bgk, canv, rdTurnoutSideCheckGaugeFace, 0,
+                rdTurnoutSideCheckOuterFace, 0, True);   // turnout side check rail start.
+              mark_end(bgk, canv, rdTurnoutSideCheckGaugeFace, 1,
+                rdTurnoutSideCheckOuterFace, 1, True);   // turnout side check rail finish.
+
+              mark_end(bgk, canv, rdVeePointGaugeFace, 0, rdVeeSpliceGaugeFace, 0, True);
+              // blunt nose.
+
+              if fixed_diamond_ends then begin
+                mark_end(bgk, canv, rdStraightTurnoutWingGaugeFace, 0,
+                  rdStraightTurnoutWingOuterFace, 0, True);
+                // planed faced of point rails for a fixed-diamond.
+                mark_end(bgk, canv, rdCurvedTurnoutWingGaugeFace, 0,
+                  rdCurvedTurnoutWingOuterFace, 0, True);
+
+                mark_end(bgk, canv, rdKCrossingCheckMainSideGaugeFace, 1,
+                  rdKCrossingCheckMainSideOuterEdge, 1, True);
+                // MS K-crossing check rails.
+                mark_end(bgk, canv, rdKCrossingCheckTurnoutSideGaugeFace,
+                  1, rdKCrossingCheckTurnoutSideOuterEdge, 1, True);
+                // DS K-crossing check rails.
+              end;
+
+            end;//if rail ends
+
+
+            pti := bd.platformTrackbedInfo;
+
+              if (not pti.adjacentEdges) and
+                (bgkeeps_form.gauge_faces_checkbox.Checked) then begin
+                for aq in rdAdjacentTracksGaugeFaces do begin
+                  draw_bgnd_rail(True);
+                end;
+              end;
+
+              if (not pti.adjacentEdges) and
+                (bgkeeps_form.outer_edges_checkbox.Checked) then begin
+                for aq in rdAdjacentTracksOuterFaces do begin
+                  draw_bgnd_rail(True);
+                end;
+              end;
+
+              if (pti.adjacentEdges) and
+                (bgkeeps_form.platforms_checkbox.Checked)
+              // 0.93.a platform edges
+              then begin
+
+                Brush.Color := paper_colour;  // gaps in dotted lines.
+                Brush.Style := bsSolid;
+                TextOut(0, 0, '');            // needed for dotted lines - Delphi bug?
+
+                if (using_marker_colour = False) or (marker_colours_pad < 3)
+                then
+                  Pen.Color := bgkeep_platform_colour                // 0.93.a
+                else
+                  Pen.Color := marker_colour;
+
+                if (keep_selected = True) and (pad_form.show_group_menu_entry.Checked = True)
+                //and  (click_bgnd_select=True)  // he's clicking selections.
+                then
+                  Pen.Color := selection_colour;
+                // draw selected keeps in this colour.
+
+                if (bgk = highlight_index) and (highlight_on = True) then
+                  Pen.Color := highlight_colour;               // this one to be highlighted.
+
+                aq := rdAdjTrackTurnoutSideNearGaugeFace;             // TS platform rear edge
+                draw_bgnd_rail(pti.drawTSPlatformRearEdge);
+                // draw solid or dotted
+
+                aq := rdAdjTrackTurnoutSideNearOuterFace;             // TS platform front edge
+                draw_bgnd_rail(True);
+
+                aq := rdAdjTrackMainSideNearGaugeFace;             // MS platform rear edge
+                draw_bgnd_rail(pti.drawMSPlatformRearEdge);
+
+                aq := rdAdjTrackMainSideNearOuterFace;             // MS platform front edge
+                draw_bgnd_rail(True);
+              end;
+
+              if (pti.adjacentEdges) and
+                (bgkeeps_form.trackbed_edges_checkbox.Checked)   // trackbed edges
+              then begin
+                aq := rdAdjTrackTurnoutSideFarGaugeFace;
+                draw_bgnd_rail(False);  // dotted lines on screen
+                aq := rdAdjTrackTurnoutSideFarOuterFace;
+                draw_bgnd_rail(False);
+                aq := rdAdjTrackMainSideFarGaugeFace;
+                draw_bgnd_rail(False);
+                aq := rdAdjTrackMainSideFarOuterFace;
+                draw_bgnd_rail(False);
+              end;
+
+
+
+            if (bgkeeps_form.platforms_checkbox.Checked) and
+              (pti.adjacentEdges)  // platforms wanted?
+            then begin
+              // 0.93.a draw platform ends ...
+
+              if pti.drawTSPlatform then begin
+                mark_end(bgk, canv, rdAdjTrackTurnoutSideNearGaugeFace,
+                  0, rdAdjTrackTurnoutSideNearOuterFace, 0, pti.drawTSPlatformStartEdge);
+                mark_end(bgk, canv, rdAdjTrackTurnoutSideNearGaugeFace,
+                  1, rdAdjTrackTurnoutSideNearOuterFace, 1, pti.drawTSPlatformEndEdge);
+              end;
+
+              if pti.drawMSPlatform then begin
+                mark_end(bgk, canv, rdAdjTrackMainSideNearGaugeFace, 0,
+                  rdAdjTrackMainSideNearOuterFace, 0, pti.drawMSPlatformStartEdge);
+                mark_end(bgk, canv, rdAdjTrackMainSideNearGaugeFace, 1,
+                  rdAdjTrackMainSideNearOuterFace, 1, pti.drawMSPlatformEndEdge);
+              end;
+            end;
+
+        end;//with  now_keep
+
+      except
+        CONTINUE;      // ignore this keep if calc exception (zoom in on v. large radius?).
+      end;// try
     end;//next bgk template.
 
     // finally, add the number and name labels for all the bgnd templates...
@@ -2723,23 +2730,22 @@ begin
       if (highlight_index <> -1) and (bgk <> highlight_index) then
         CONTINUE;  // don't need to draw any others if one is for highlighting.
 
-      with keeps_list[bgk] do begin
+      t := keeps_list[bgk];
 
-        if bgnd_is_in_rect = False then
+        if not t.bgnd_is_in_rect then
           CONTINUE;     // 218d no part of template in screen area
 
-        if bg_copied = False then
+        if not t.bg_copied then
           CONTINUE;  // not a background template.
 
-        if (group_selected = True) and (pad_form.hide_group_templates_menu_entry.Checked =
-          True) then
+        if (t.group_selected) and (pad_form.hide_group_templates_menu_entry.Checked) then
           CONTINUE;  // 209c
 
-        keep_selected := group_selected;
+        keep_selected := t.group_selected;
 
         try
 
-          now_keep := bgnd_keep;
+          now_keep := t.bgnd_keep;
 
           with now_keep do begin
 
@@ -2771,52 +2777,51 @@ begin
             end;
 
 
-            the_name_str := Trim(template_info.keep_dims.box_dims1.reference_string);
+            the_name_str := Trim(t.name);
             // 208a
 
             if (the_name_str <> '') and (id_yes = True) then
               the_name_str := the_name_str + '-';      // 208a
 
             full_label_string := ' ' + IntToStr(bgk + 1) + ': ' + the_name_str +
-              template_info.keep_dims.box_dims1.id_number_str + ' ';    // 208a ID added
+              t.boxDims.idNumberStr + ' ';    // 208a ID added
 
             requested_label_string := '';
 
-            if (number_yes = True) and (name_yes = True) and (id_yes = True) then
+            if (number_yes) and (name_yes) and (id_yes) then
               requested_label_string := full_label_string
             else begin
-              if id_yes = True then begin
-                if (number_yes = True) and (name_yes = False) then
+              if id_yes then begin
+                if (number_yes) and (not name_yes) then
                   requested_label_string :=
                     ' ' + IntToStr(bgk + 1) + ': ' +
-                    template_info.keep_dims.box_dims1.id_number_str
+                    t.boxDims.idNumberStr
                     + ' ';
                 // 208a ID added
-                if (number_yes = False) and (name_yes = True) then
+                if (not number_yes) and (name_yes) then
                   requested_label_string :=
-                    ' ' + the_name_str + template_info.keep_dims.box_dims1.id_number_str + ' ';
+                    ' ' + the_name_str + t.boxDims.idNumberStr + ' ';
                 // 208a ID added
-                if (number_yes = False) and (name_yes = False) then
+                if (not number_yes) and (not name_yes) then
                   requested_label_string :=
-                    ' ' + template_info.keep_dims.box_dims1.id_number_str + ' ';
+                    ' ' + t.boxDims.idNumberStr + ' ';
                 // 208a ID added
               end
               else begin
-                if (number_yes = True) and (name_yes = False) then
+                if (number_yes) and (not name_yes) then
                   requested_label_string := ' ' + IntToStr(bgk + 1) + ' ';
                 // 208a ID added
-                if (number_yes = False) and (name_yes = True) then
+                if (not number_yes) and (name_yes) then
                   requested_label_string := ' ' + the_name_str + ' ';
                 // 208a ID added
-                if (number_yes = False) and (name_yes = False) then
+                if (not number_yes) and (not name_yes) then
                   requested_label_string := '';
                 // 208a ID added
-                if (number_yes = True) and (name_yes = True) then
+                if (number_yes) and (name_yes) then
                   requested_label_string := ' ' + IntToStr(bgk + 1) + ': ' + the_name_str + ' ';
                 // 208a ID added
               end;
             end;
-
 
             max_label_height := Round(ABS(20 * scale * fx));
             // arbitrary - scale labels to 20ft high max.
@@ -2871,12 +2876,11 @@ begin
             end;//if big enough to see.
           end;//with now_keep
 
-          bgnd_keep := now_keep;   // save the label extent.
+          t.bgnd_keep := now_keep;   // save the label extent.
 
         except
           CONTINUE;      // ignore this name if calc exception.
         end;//try
-      end;//with template.
     end;//for next bgk template
 
   end;//with canvas

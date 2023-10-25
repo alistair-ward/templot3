@@ -202,14 +202,29 @@ implementation
 
 {$R *.lfm}
 
-uses Printers, control_room, grid_unit, alert_unit, math_unit, calibration_unit,
+uses
+  Printers,
+  control_room,
+  grid_unit,
+  alert_unit,
+  math_unit,
+  calibration_unit,
   pad_unit,
   bgkeeps_unit,
   background_shapes,
-  bgnd_unit, print_unit, info_unit, help_sheet,
-  print_settings_unit, pdf_unit, { OT-FIRST dtp_unit, dtp_settings_unit,} export_unit,
+  bgnd_unit,
+  print_unit,
+  info_unit,
+  help_sheet,
+  print_settings_unit,
+  pdf_unit,
+  { OT-FIRST dtp_unit, dtp_settings_unit,}
+  export_unit,
   rail_data_unit,
-  template_records;
+  template_records,
+  Template,
+  BoxDims,
+  PlatformTrackbedInfo;
 
 var
   pvsx: double = 1;
@@ -1178,6 +1193,10 @@ var
 
   pt: TPoint;
 
+  t: TTemplate;
+  bd: TBoxDims;
+  pti: TPlatformTrackbedInfo;
+
   ////////////////////////////////////////////////////////////////////////
 
   procedure mark_end(aq1: ERailData; aq1end: integer; aq2: ERailData;
@@ -1570,18 +1589,19 @@ begin
 
         for bgk := 0 to (keeps_list.Count - 1) do begin  // next background keep.
 
-          if keeps_list[bgk].bg_copied = False then
+          t := keeps_list[bgk];
+
+          if not t.bg_copied then
             CONTINUE;  // no data, not on background.
 
-          if (keeps_list[bgk].group_selected = False) and
-            (print_group_only_flag = True) then
+          if (not t.group_selected) and
+            (print_group_only_flag) then
             CONTINUE;  // not in group. 0.78.b 10-12-02.
 
-          now_keep := keeps_list[bgk].bgnd_keep;
+          now_keep := t.bgnd_keep;
 
-          with keeps_list[bgk].template_info.keep_dims.box_dims1 do begin
-
-            with platform_trackbed_info do begin
+          bd := t.boxDims;
+          pti := bd.platformTrackbedInfo;
 
               with now_keep do begin
 
@@ -1602,7 +1622,7 @@ begin
 
                   Pen.Style := psSolid;               // init
 
-                  if adjacent_edges_keep = True  // platforms and trackbed edges
+                  if pti.adjacentEdges  // platforms and trackbed edges
                   then begin
                     if (aq in [rdAdjTrackTurnoutSideFarGaugeFace,
                       rdAdjTrackTurnoutSideFarOuterFace, rdAdjTrackMainSideFarGaugeFace,
@@ -1610,21 +1630,21 @@ begin
                       Pen.Style := psDot;  // trackbed edges
 
                     if (aq = rdAdjTrackTurnoutSideNearGaugeFace) and
-                      (draw_ts_platform_rear_edge_keep = False) then
+                      (not pti.drawTSPlatformRearEdge) then
                       Pen.Style := psDot;  // draw solid or dotted
                     if (aq = rdAdjTrackMainSideNearGaugeFace) and
-                      (draw_ms_platform_rear_edge_keep = False) then
+                      (not pti.drawMSPlatformRearEdge) then
                       Pen.Style := psDot;
                   end;
 
-                  if (align_info.cl_only_flag = False) and (something_drawn = True) and
+                  if (not bd.alignmentInfo.drawCentrelineOnly) and (something_drawn) and
                     ((aq = rdMainRoadCentreLine) or (aq = rdTurnoutRoadCentreLine)) then
                     CONTINUE;
                   // don't draw centre-lines unless there is nothing else. (cl-only templates).
 
                   if (aq = rdMainRoadCentreLine) or (aq = rdTurnoutRoadCentreLine)   // 212a
                   then begin
-                    if align_info.dummy_template_flag = True then
+                    if bd.alignmentInfo.dummyTemplateFlag then
                       Pen.Color := shapes_colour  // 212a
                     else
                       Pen.Color := guide_colour;  // centre-lines
@@ -1672,8 +1692,6 @@ begin
                 end;//for next aq
 
               end;//with now_keep
-            end;//with trackbed info
-          end;//with template info
 
         end;//for next bgnd_keep
       end;//if bgnd keeps

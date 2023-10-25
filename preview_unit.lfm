@@ -8,7 +8,6 @@ object preview_form: Tpreview_form
   ClientHeight = 82
   ClientWidth = 504
   Color = clWhite
-  DesignTimePPI = 120
   Font.Color = clBlack
   Font.Height = -20
   Font.Name = 'Arial'
@@ -17,7 +16,7 @@ object preview_form: Tpreview_form
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   Position = poScreenCenter
-  LCLVersion = '1.8.4.0'
+  LCLVersion = '2.2.2.0'
   Scaled = False
   object Label1: TLabel
     Left = 4

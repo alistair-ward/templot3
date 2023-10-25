@@ -9,14 +9,13 @@ object grid_form: Tgrid_form
   ClientHeight = 312
   ClientWidth = 692
   Color = 15852503
-  DesignTimePPI = 120
   Font.Color = clBlack
   Font.Height = -13
   Font.Name = 'Arial'
   Font.Style = [fsBold]
   OnCreate = FormCreate
   OnShow = FormShow
-  LCLVersion = '2.0.4.0'
+  LCLVersion = '2.2.2.0'
   Scaled = False
   object help_shape: TShape
     Left = 628
@@ -236,6 +235,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 7
@@ -456,6 +456,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 12
@@ -541,6 +542,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 10
@@ -591,9 +593,9 @@ object grid_form: Tgrid_form
     TabOrder = 2
     object show_rings_radio_button: TRadioButton
       Left = 6
-      Height = 23
+      Height = 20
       Top = 8
-      Width = 57
+      Width = 53
       Caption = 'show'
       Checked = True
       OnClick = show_rings_radio_buttonClick
@@ -602,9 +604,9 @@ object grid_form: Tgrid_form
     end
     object hide_rings_radio_button: TRadioButton
       Left = 72
-      Height = 23
+      Height = 20
       Top = 8
-      Width = 52
+      Width = 48
       Caption = 'hid&e'
       OnClick = hide_rings_radio_buttonClick
       TabOrder = 1
@@ -623,6 +625,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 11
@@ -644,18 +647,18 @@ object grid_form: Tgrid_form
     end
     object show_dummy_vehicles_radio_button: TRadioButton
       Left = 8
-      Height = 23
+      Height = 20
       Top = 10
-      Width = 57
+      Width = 53
       Caption = 'show'
       OnClick = show_dummy_vehicles_radio_buttonClick
       TabOrder = 0
     end
     object hide_dummy_vehicles_radio_button: TRadioButton
       Left = 8
-      Height = 23
+      Height = 20
       Top = 34
-      Width = 52
+      Width = 48
       Caption = 'h&ide'
       Checked = True
       OnClick = hide_dummy_vehicles_radio_buttonClick
@@ -678,9 +681,9 @@ object grid_form: Tgrid_form
       TabOrder = 3
       object main_road_dummy_vehicle_radio_button: TRadioButton
         Left = 10
-        Height = 23
+        Height = 20
         Top = 2
-        Width = 109
+        Width = 105
         Caption = 'on mai&n road'
         Checked = True
         Font.Color = clMaroon
@@ -694,9 +697,9 @@ object grid_form: Tgrid_form
       end
       object turnout_road_dummy_vehicle_radio_button: TRadioButton
         Left = 135
-        Height = 23
+        Height = 20
         Top = 2
-        Width = 122
+        Width = 118
         Caption = 'on &turnout road'
         Font.Color = clMaroon
         Font.Height = -13
@@ -718,10 +721,10 @@ object grid_form: Tgrid_form
     end
     object attach_ring_checkbox: TCheckBox
       Left = 78
-      Height = 23
+      Height = 20
       Hint = 'attach the spacing-ring to the dummy vehicle'
       Top = 40
-      Width = 145
+      Width = 141
       Caption = 'attach spacing-ring'
       Font.Color = clMaroon
       Font.Height = -13
@@ -771,9 +774,9 @@ object grid_form: Tgrid_form
     end
     object blank_ends_checkbox: TCheckBox
       Left = 250
-      Height = 23
+      Height = 20
       Top = 40
-      Width = 223
+      Width = 219
       Caption = 'blank off invalid envelope ends'
       Checked = True
       State = cbChecked

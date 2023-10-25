@@ -165,11 +165,25 @@ implementation
 {$R *.lfm}
 
 uses
-  Printers, Clipbrd, control_room, pad_unit, entry_sheet, help_sheet, chat_unit,
-  math_unit, alert_unit,
-  colour_unit, keep_select, info_unit, print_unit, shove_timber, print_settings_unit,
-  shoved_timber,
-  template_records;
+  Printers,
+  Clipbrd,
+  control_room,
+  pad_unit,
+  entry_sheet,
+  help_sheet,
+  chat_unit,
+  math_unit,
+  alert_unit,
+  colour_unit,
+  keep_select,
+  info_unit,
+  print_unit,
+  shove_timber,
+  print_settings_unit,
+  ShovedTimber,
+  template_records,
+  Template,
+  BoxDims;
 
 const
 
@@ -220,7 +234,7 @@ procedure group_scale_change;        // change a selected group to a new scale/g
 
 var
   n, Count: integer;
-  bgnd: integer;
+  bgnd: TBackgroundCode;
   save_bgnd_option: boolean;
   mod_ratio: double;
   save_name: string;
@@ -272,12 +286,12 @@ begin
 
     while n < Count do begin
 
-      if keeps_list[n].group_selected = False then begin
+      if not keeps_list[n].group_selected then begin
         Inc(n);
         CONTINUE;     // don't change this one.
       end;
 
-      bgnd := keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077;
+      bgnd := keeps_list[n].boxDims.backgroundCode;
       // remember if it's on bgnd.
 
       list_position := n;
@@ -297,7 +311,7 @@ begin
 
       store_unused(False, False);    // (does a recalc) put back in.
 
-      if bgnd = 1 then
+      if bgnd = bkcBackground then
         keep_form.copy_or_wipe_background_button.Click;    // and on background.
 
       Inc(n);
