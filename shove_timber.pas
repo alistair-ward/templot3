@@ -39,7 +39,7 @@ interface
 uses
   LCLType, LCLIntf, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, ExtCtrls, ComCtrls, Buttons,
-  shoved_timber;
+  ShovedTimber;
 
 type
   Tshove_timber_form = class(TForm)
@@ -164,7 +164,7 @@ var
 
 procedure shove_buttons(able: boolean; index: integer);    // enable/disable timber shove buttons.
 
-procedure copy_shove_list(delete_list: boolean; var from_list, to_list: TShovedTimberList);
+procedure copy_shove_list(delete_list: boolean; var from_list, to_list: TShovedTimberOwningList);
 
 procedure shove_xtb_panel_click;
 procedure shove_throw_panel_click;
@@ -1189,10 +1189,10 @@ begin
 end;
 //____________________________________________________________________________________________
 
-procedure copy_shove_list(delete_list: boolean; var from_list, to_list: TShovedTimberList);
+procedure copy_shove_list(delete_list: boolean; var from_list, to_list: TShovedTimberOwningList);
 begin
   if to_list = nil then
-    to_list := TShovedTimberList.Create;    // first create or clear the destination...
+    to_list := TShovedTimberOwningList.Create(nil);    // first create or clear the destination...
 
   to_list.CopyFrom(from_list);
 

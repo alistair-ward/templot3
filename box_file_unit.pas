@@ -138,8 +138,9 @@ uses
   keep_select,
   math_unit,
   pad_unit,
-  shoved_timber,
-  wait_message;
+  shovedTimber,
+  wait_message,
+  BoxDims;
 
 
 //________________________________________________________________________________________
@@ -155,7 +156,7 @@ end;
 
 function save_box(this_one: integer; which_ones: ESaveBox; save_option: ESaveOption;
   save_str: string): boolean;
-
+{
 var
   box_str, backup_del_str: string;
 
@@ -187,8 +188,7 @@ var
     n := 0;
     while n < keeps_list.Count do begin
 
-      if keeps_list[n].template_info.keep_dims.box_dims1.this_was_control_template =
-        False  // normal template
+      if not keeps_list[n].boxDims.thisWasControlTemplate  // normal template
       then begin
         Inc(n);
         CONTINUE;
@@ -203,8 +203,9 @@ var
     backup_wanted := save_backw;   // restore backup flag
   end;
   /////////////////////////////////////////////////////////////
-
+}
 begin
+{
   Result := False;      // init default.
 
   delete_any_control_templates;  // 0.93.a we may want to add a new one..
@@ -214,7 +215,7 @@ begin
   // put it in the box to save file, then delete it after saving...
 
   if (which_ones = eSB_SaveAll) and (turnoutx > 0) and
-    ({check_if_abandoned=-1}abandon_calcs = False)
+    ({check_if_abandoned=-1..) abandon_calcs = False)
   // check not zero-length
   then begin
     save_bw := backup_wanted;     // don't let this action change backup flag (list.OnChange)
@@ -415,7 +416,7 @@ begin
       try
         for i := 0 to keeps_list.Count - 1 do begin
           // 0.94.a  fb_kludge templates are created on output/printing, and destroyed afterwards. Don't save any remaining..
-          if keeps_list[i].template_info.keep_dims.box_dims1.fb_kludge_template_code <> 0 then
+          if keeps_list[i].boxDims.flatbottomKludge <> 0 then
             CONTINUE;  // 0.94.a don't save kludge templates, if any found (error in print?)
 
           case which_ones of
@@ -423,16 +424,16 @@ begin
               if i <> this_one then
                 CONTINUE;
             eSB_SaveBackground:
-              if keeps_list[i].template_info.keep_dims.box_dims1.bgnd_code_077 <> 1 then
+              if keeps_list[i].boxDims.backgroundCode <> bkcBackground then
                 CONTINUE;  // bgnd only, ignore unused and library.
             eSB_SaveUnused:
-              if keeps_list[i].template_info.keep_dims.box_dims1.bgnd_code_077 <> 0 then
+              if keeps_list[i].boxDims.backgroundCode <> bkcUnused then
                 CONTINUE;  // unused only, ignore others.
             eSB_SaveGroup:
               if not keeps_list[i].group_selected then
                 CONTINUE;  // group only, ignore unselected.
             eSB_SaveLibrary:
-              if keeps_list[i].template_info.keep_dims.box_dims1.bgnd_code_077 <> -1 then
+              if keeps_list[i].boxDims.backgroundCode <> bkcLibrary then
                 CONTINUE;  // library only, ignore others.
           end;//case
 
@@ -445,7 +446,7 @@ begin
             box_project_title_str, gridInfo);
           *)
         except
-          on {ExSaveBox} Exception do begin
+          on (*ExSaveBox*) Exception do begin
             if save_option = eSO_Normal then
               file_error(box_str);
             Result := False;
@@ -491,6 +492,7 @@ begin
     delete_any_control_templates;
 
   end;//try
+}
 end;
 //______________________________________________________________________________________
 
@@ -504,7 +506,7 @@ function load_storage_box(load_options: ELoadBox; file_str: string;
   // return True any templates loaded/added.
   // also return any change to append.
   // also return last_bgnd_loaded_index, highest bgnd template loaded (for minting).
-
+{
 const
   ask_restore_str: string = '      `0Restore On Startup`9' +
     '||Your work in progress can be restored from your previous working session with Templot0.'
@@ -533,9 +535,9 @@ var
   waitMessage: IAutoWaitMessage;
 
   ///////////////////////////////////////////////////////////////
-
+}
 begin
-
+{
   Result := False;               // init.
   last_bgnd_loaded_index := -1;  // init.
 
@@ -731,7 +733,7 @@ begin
         //LoadBox3(box_str, project_title, grid_info, loaded_templates);
 
       except
-        on {ExLoadBox} Exception do begin
+        on (*ExLoadBox*) Exception do begin
           if load_options <> eLB_Backup then
             file_error(box_str);
           Exit;
@@ -911,6 +913,7 @@ begin
   finally
     loading_in_progress := False;  // 208c allow backups only after dialogs
   end;//try
+}
 end;
 
 //___________________________________________________________________________________________

@@ -235,6 +235,7 @@ uses
   template_records,
   OTPersistent,
   SwitchInfo,
+  BoxDims,
   otYaml,
   otYamlEmitter,
   otYamlParser,
@@ -494,7 +495,7 @@ begin
 
   listed_str := switch_selector_listbox.Items[switch_index];
 
-  if ((Pos('REA', listed_str) > 0) or (Pos('GWR', listed_str) > 0)) and (rail_section = 2) then
+  if ((Pos('REA', listed_str) > 0) or (Pos('GWR', listed_str) > 0)) and (rail_section = rsFlatbottom) then
   begin
     i := alert(4, 'php/702    bullhead  switch  selected',
       'green_panel_begintree.gif  The switch which you have selected:||`0'
@@ -515,7 +516,7 @@ begin
   end;
 
   if ((Pos('FB-109', listed_str) > 0) or (Pos('BS-110A', listed_str) > 0) or
-    (Pos('BS-113A', listed_str) > 0)) and (rail_section = 1) then begin
+    (Pos('BS-113A', listed_str) > 0)) and (rail_section = rsBullhead) then begin
     i := alert(4, 'php/702    flat-bottom  switch  selected',
       'green_panel_begintree.gif  The switch which you have selected:||`0'
       + Trim(listed_str) +
@@ -1428,9 +1429,9 @@ var
 begin
   Result := False;      // default init.
   try
-    if get_switch_data(sw_group, sw_size, csi_switch_info) = False then
+    if not get_switch_data(sw_group, sw_size, csi_switch_info) then
       EXIT;    // get data to csi_switch_info.
-    if set_csi_from_switch_info(csi_switch_info) = False then
+    if not set_csi_from_switch_info(csi_switch_info) then
       EXIT;            // and make it current in csi.
     Result := True;
   except

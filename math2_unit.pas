@@ -37,10 +37,22 @@ unit math2_unit;
 interface
 
 uses
-  Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, ExtCtrls, ComCtrls, MaskEdit, FileCtrl, Math,
+  Messages,
+  SysUtils,
+  Classes,
+  Graphics,
+  Controls,
+  Forms,
+  Dialogs,
+  StdCtrls,
+  ExtCtrls,
+  ComCtrls,
+  MaskEdit,
+  FileCtrl,
+  Math,
   pad_unit,
-  template_records;      //  need Tpex declaration in this part for parameters to routines.
+  template_records,
+  NotchInfo;      //  need Tpex declaration in this part for parameters to routines.
 
 function do_notch_on_intersection(making_diamond, move_notch: boolean;
   rail_offset_control, rail_offset_bgnd: integer; top_str, next_str: string): boolean;

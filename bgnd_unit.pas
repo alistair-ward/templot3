@@ -5413,8 +5413,7 @@ begin
   if n <> 0 then
     EXIT;
   if getdims('rotate  background  shape', '', bgnd_form, n, od) = True then begin
-    rotshap_k := od[0] * Pi / 180;
-    normalize_angle(rotshap_k);
+    rotshap_k := normalize_angle(od[0] * Pi / 180);
   end
   else
     EXIT;
@@ -5685,8 +5684,7 @@ begin
     EXIT;
   if getdims('rotate  all  background  shapes  around  ' + cen_str, '', bgnd_form, n, od) = True then
   begin
-    rotshap_k := od[0] * Pi / 180;
-    normalize_angle(rotshap_k);
+    rotshap_k := normalize_angle(od[0] * Pi / 180);
   end
   else
     EXIT;
@@ -6994,8 +6992,7 @@ begin
   if n <> 0 then
     EXIT;
   if getdims('twist  bitmap  image', twist_help_str, bgnd_form, n, od) = True then begin
-    twist_angle := 0 - (od[0] * Pi / 180);
-    normalize_angle(twist_angle);
+    twist_angle := normalize_angle(0 - (od[0] * Pi / 180));
 
     n := bgnd_form.bgnd_shapes_listbox.ItemIndex;
 

@@ -13119,8 +13119,7 @@ procedure Tpad_form.rotate_current_180_menu_entryClick(Sender: TObject);
 begin
   rotate_turnout(Pi,True);     // rotate turnout 180 degrees anti-clockwise around peg.
 
-  saved_pegging_rot:=saved_pegging_rot+Pi;  // for shifting keeps onto notch.
-  normalize_angle(saved_pegging_rot);
+  saved_pegging_rot:=normalize_angle(saved_pegging_rot+Pi);  // for shifting keeps onto notch.
 end;
 //______________________________________________________________________________________
 
@@ -14660,8 +14659,7 @@ begin
             with new_notch_data do begin
               notch_x:=od[0];
               notch_y:=od[1];
-              notch_k:=od[2]*Pi/180;
-              normalize_angle(notch_k);
+              notch_k:=normalize_angle(od[2]*Pi/180);
             end;//with
             new_notch(new_notch_data,True);      // new data, and link group if wanted.
           end;
@@ -15254,8 +15252,7 @@ begin
   if n<>0 then EXIT;
   if getdims('rotate  selected  group  around  notch','',pad_form,n,od)=True
      then begin
-            kform_keeps:=0-od[0]*Pi/180;   // change of sign needed because of ??
-            normalize_angle(kform_keeps);
+            kform_keeps:=normalize_angle(0-od[0]*Pi/180);   // change of sign needed because of ??
             cancel_adjusts(False);                                //  does the rebuild.
           end;
 

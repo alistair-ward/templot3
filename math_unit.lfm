@@ -19,7 +19,7 @@ object math_form: Tmath_form
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '2.2.2.0'
   Scaled = False
   object datestamp_label: TLabel
     Left = 0
@@ -83,7 +83,7 @@ object math_form: Tmath_form
     end
     object math_editbox: TEdit
       Left = 2
-      Height = 29
+      Height = 27
       Top = 398
       Width = 429
       AutoSelect = False

@@ -88,6 +88,7 @@ type
     //# endGenMemberVars
 
     FCurveCalculator: TCurveCalculator;
+    FDistanceToEndOfTransition: Double;
 
   protected
     procedure Calculate; override;
@@ -127,6 +128,8 @@ type
     function StrToESlewMode(AValue: String): ESlewMode;
     procedure SaveYamlESlewMode(AEmitter: TYamlEmitter; const AName: String; AValue: ESlewMode);
 
+    function GetDistanceToEndOfTransition: Double;
+
   protected
     property curveCalculator: TCurveCalculator read FCurveCalculator;
 
@@ -157,6 +160,8 @@ type
     property slewMode: ESlewMode read FSlewMode write SetSlewMode;
     property slewFactor: Double read FSlewFactor write SetSlewFactor;
     //# endGenProperty
+
+    property distanceToEndOfTransition: Double read GetDistanceToEndOfTransition;
   end;
 
   TCurveOwningList = class(TOTOwningList<TCurve>);
@@ -201,6 +206,11 @@ begin
   if FIsSlewing then begin
     FCurveCalculator := TSlewCalculator.Create(self, FCurveCalculator);
   end;
+
+  if FIsSpiral then
+     FDistanceToEndOfTransition := FDistanceToTransition + FTransitionLength
+  else
+     FDistanceToEndOfTransition := NaN;
 end;
 
 procedure TCurve.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
@@ -505,6 +515,13 @@ begin
     radius := NaN;
   end;
 
+end;
+
+function TCurve.GetDistanceToEndOfTransition: Double;
+begin
+  CheckCalculated;
+
+  Result := FDistanceToEndOfTransition;
 end;
 
 initialization

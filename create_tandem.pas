@@ -88,7 +88,7 @@ uses
   point_ex, pad_unit, math_unit, math2_unit, keep_select, alert_unit, info_unit,
   control_room, shove_timber,
   switch_select, { OT-FIRST web_browser_unit,} wait_message, help_sheet,
-  shoved_timber, template_records;
+  shoved_timber, template_records, NotchInfo;
 
 var
   trad_1st: double;
@@ -182,7 +182,7 @@ var
         else
           str := 'turnout';
 
-        keeps_list[z].template_info.keep_dims.box_dims1.reference_string := id_str + '  ' + str;
+        keeps_list[z].name := id_str + '  ' + str;
       end;//next
     end;
   end;
@@ -650,18 +650,17 @@ begin
       with temp_notch_v do begin
         notch_x := qx1;
         notch_y := qy1;
-        notch_k := k1_r1 - Pi / 2;
+        notch_k := normalize_angle(k1_r1 - Pi / 2);
       end;//with
     end
     else begin
       with temp_notch_v do begin
         notch_x := qx2;
         notch_y := qy2;
-        notch_k := k2_r1 - Pi / 2;
+        notch_k := normalize_angle(k2_r1 - Pi / 2);
       end;//with
     end;
 
-    normalize_angle(temp_notch_v.notch_k);
     new_notch(temp_notch_v, False);             // put the notch there, and don't link group
 
     // repeat with outer edge of rails, to get required location of end of vee splice,  rail-width j ...
@@ -1068,7 +1067,7 @@ var
         else
           str := 'turnout';
 
-        keeps_list[z].template_info.keep_dims.box_dims1.reference_string := id_str + '  ' + str;
+        keeps_list[z].name := id_str + '  ' + str;
       end;//next
     end;
   end;
@@ -1754,11 +1753,10 @@ begin
     a2 := SQRT(SQR(p3_1.x - qx2) + SQR(p3_1.y - qy2));
 
     if a1 < a2 then
-      temp_notch_v.notch_k := k1_r1 - Pi / 2
+      temp_notch_v.notch_k := normalize_angle(k1_r1 - Pi / 2)
     else
-      temp_notch_v.notch_k := k2_r1 - Pi / 2;
+      temp_notch_v.notch_k := normalize_angle(k2_r1 - Pi / 2);
 
-    normalize_angle(temp_notch_v.notch_k);
     new_notch(temp_notch_v, False);             // put the notch there, and don't link group
 
 

@@ -59,8 +59,8 @@ type
 
   protected
     procedure Calculate; override;
-    procedure RestoreAttributes(AStream : TStream); override;
-    procedure SaveAttributes(AStream : TStream); override;
+    procedure RestoreAttributes(AStream: TStream); override;
+    procedure SaveAttributes(AStream: TStream); override;
 
     //# genGetSetDeclarations
     procedure SetTimberString(const AValue: String);
@@ -80,18 +80,19 @@ type
     //# genPublicDeclarations
     //# endGenPublicDeclarations
 
-    procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
-    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+    procedure RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+      ALoader: TOTPersistentLoader); override;
+    procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property timberString: String read FTimberString write SetTimberString;
-    property shoveCode: TShoveCode read FShoveCode write SetShoveCode;
-    property xtbModifier: Double read FXtbModifier write SetXtbModifier;
-    property angleModifier: Double read FAngleModifier write SetAngleModifier;
-    property offsetModifier: Double read FOffsetModifier write SetOffsetModifier;
-    property lengthModifier: Double read FLengthModifier write SetLengthModifier;
-    property widthModifier: Double read FWidthModifier write SetWidthModifier;
-    property crabModifier: Double read FCrabModifier write SetCrabModifier;
+    property timberString: String Read FTimberString Write SetTimberString;
+    property shoveCode: TShoveCode Read FShoveCode Write SetShoveCode;
+    property xtbModifier: Double Read FXtbModifier Write SetXtbModifier;
+    property angleModifier: Double Read FAngleModifier Write SetAngleModifier;
+    property offsetModifier: Double Read FOffsetModifier Write SetOffsetModifier;
+    property lengthModifier: Double Read FLengthModifier Write SetLengthModifier;
+    property widthModifier: Double Read FWidthModifier Write SetWidthModifier;
+    property crabModifier: Double Read FCrabModifier Write SetCrabModifier;
     //# endGenProperty
 
     function StrToTShoveCode(AValue: String): TShoveCode;
@@ -108,9 +109,15 @@ type
     procedure AdjustCrab(adjustment: double);
     procedure Rescale(scaleRatio: double);
     function CanRestore: boolean;
+
+    class function CreateFrom(AParent: TOTPersistent; AFrom: TShovedTimber): TShovedTimber;
   end;
 
-  TShovedTimberOwningList = class(TOTOwningList<TShovedTimber>);
+  TShovedTimberOwningList = class(TOTOwningList<TShovedTimber>)
+  public
+    procedure CopyFrom(AFrom: TShovedTimberOwningList);
+  end;
+
   TShovedTimberReferenceList = class(TOTReferenceList<TShovedTimber>);
 
 
@@ -121,7 +128,7 @@ uses
   typinfo;
 
 var
-  log : ILogger;
+  log: ILogger;
 
 
 { TShovedTimber }
@@ -145,7 +152,8 @@ begin
   // Add your calculation code here, and cache the results...
 end;
 
-procedure TShovedTimber.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
+procedure TShovedTimber.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+  ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
   if AName = 'timberString' then
@@ -172,14 +180,14 @@ begin
   if AName = 'crabModifier' then
     FCrabModifier := StrToDouble(AValue)
   else
-  //# endGenRestoreYamlVars
+    //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
 
-procedure TShovedTimber.RestoreAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TShovedTimber.RestoreAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genRestoreVars
@@ -192,12 +200,12 @@ procedure TShovedTimber.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FWidthModifier, sizeof(Double));
   AStream.ReadBuffer(FCrabModifier, sizeof(Double));
   //# endGenRestoreVars
-  end;
+end;
 
-procedure TShovedTimber.SaveAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TShovedTimber.SaveAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genSaveVars
@@ -210,14 +218,14 @@ procedure TShovedTimber.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FWidthModifier, sizeof(Double));
   AStream.WriteBuffer(FCrabModifier, sizeof(Double));
   //# endGenSaveVars
-  end;
-  
-procedure TShovedTimber.SaveYamlAttributes(AEmitter : TYamlEmitter);
-  var
-    i: Integer;
-  begin
+end;
+
+procedure TShovedTimber.SaveYamlAttributes(AEmitter: TYamlEmitter);
+var
+  i: Integer;
+begin
   inherited;
-  
+
   //# genSaveYamlVars
   SaveYamlString(AEmitter, 'timberString', FTimberString);
   SaveYamlTShoveCode(AEmitter, 'shoveCode', FShoveCode);
@@ -228,7 +236,7 @@ procedure TShovedTimber.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlDouble(AEmitter, 'widthModifier', FWidthModifier);
   SaveYamlDouble(AEmitter, 'crabModifier', FCrabModifier);
   //# endGenSaveYamlVars
-  end;
+end;
 
 //# genGetSetMethods
 // GENERATED METHOD - DO NOT EDIT
@@ -316,9 +324,10 @@ begin
   Result := TShoveCode(GetEnumValue(TypeInfo(TShoveCode), AValue));
 end;
 
-procedure TShovedTimber.SaveYamlTShoveCode(AEmitter: TYamlEmitter; const AName: String; AValue: TShoveCode);
+procedure TShovedTimber.SaveYamlTShoveCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TShoveCode);
 begin
-  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TShoveCode), ord(AValue)));
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TShoveCode), Ord(AValue)));
 end;
 
 
@@ -408,6 +417,37 @@ begin
 
     ) and (FShoveCode = svcShove));
 end;
+
+class function TShovedTimber.CreateFrom(AParent: TOTPersistent; AFrom: TShovedTimber): TShovedTimber;
+
+begin
+  Result := TShovedTimber.Create(AParent);
+  Result.timberString := AFrom.timberString;
+  Result.shoveCode := AFrom.shoveCode;
+  Result.xtbModifier := AFrom.xtbModifier;
+  Result.angleModifier := AFrom.angleModifier;
+  Result.offsetModifier := AFrom.offsetModifier;
+  Result.lengthModifier := AFrom.lengthModifier;
+  Result.widthModifier := AFrom.widthModifier;
+  Result.crabModifier := AFrom.crabModifier;
+end;
+
+procedure TShovedTimberOwningList.CopyFrom(AFrom: TShovedTimberOwningList);
+var
+  f: TShovedTimber;
+  t: TShovedTimber;
+begin
+  Clear;
+
+  if not Assigned(AFrom) then
+    EXIT;  // return empty list.
+
+  for f in AFrom do begin
+    t := TShovedTimber.CreateFrom(nil, f);
+    Add(t);
+  end;//next
+end;
+
 
 
 initialization

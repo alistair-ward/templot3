@@ -36,6 +36,24 @@ type
     procedure SaveAttributes(AStream: TStream); override;
 
   public
+    type
+
+      { TEnumerator }
+
+      TEnumerator = class
+      private
+        FList: TOTPersistentList<T>;
+        FIndex: SizeInt;
+
+        function GetCurrent: T;
+      public
+        constructor Create(AList: TOTPersistentList<T>);
+        function MoveNext: Boolean;
+        property Current: T read GetCurrent;
+      end;
+    function GetEnumerator: TEnumerator;
+
+  public
     constructor Create(AParent: TOTPersistent; AOID: TOID); override;
     destructor Destroy; override;
 
@@ -73,6 +91,25 @@ implementation
 
 uses
   OTUndoRedoManager;
+
+{ TOTPersistentList.TEnumerator }
+
+function TOTPersistentList<T>.TEnumerator.GetCurrent: T;
+begin
+  Result := FList[FIndex];
+end;
+
+constructor TOTPersistentList<T>.TEnumerator.Create(AList: TOTPersistentList<T>);
+begin
+  FList := AList;
+  FIndex := -1;
+end;
+
+function TOTPersistentList<T>.TEnumerator.MoveNext: Boolean;
+begin
+  Inc(FIndex);
+  Result := (FList.Count <> 0) and (FIndex < FList.Count)
+end;
 
 { TOIDList }
 
@@ -118,6 +155,11 @@ begin
   end;
   FList.Free;
   inherited Destroy;
+end;
+
+function TOTPersistentList<T>.GetEnumerator: TEnumerator;
+begin
+  Result := TEnumerator.Create(self);
 end;
 
 function TOTPersistentList<T>.Add(AValue: T): Integer;

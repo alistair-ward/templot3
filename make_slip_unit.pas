@@ -869,9 +869,7 @@ begin
 
     slip_angle := 2 * ARCSIN(slip_offset / 2 / turnoutx);   // between now and chord
 
-    slip_turn := ABS(2 * slip_angle);   // angle turned along slip road
-
-    normalize_angle(slip_turn);
+    slip_turn := normalize_angle(ABS(2 * slip_angle));   // angle turned along slip road
 
     try
       slip_rad := ABS(turnoutx / 2 / SIN(slip_angle));

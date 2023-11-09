@@ -43,13 +43,14 @@ uses
   Menus, StdCtrls, ExtCtrls, ComCtrls, Buttons,
   ExtDlgs, ImgList, PrintersDlgs,
   point_ex,
-  shoved_timber,
+  ShovedTimber,
   dummy_vehicle,
   rail_data_unit,
   mark_unit,
   template_records,
   Template,
-  NotchInfo
+  NotchInfo,
+  BoxDims
   { OT-FIRST ,}{ OT-FIRST ReadHTML,}{ OT-FIRST framview}{,
   OleCtnrs, OleCtrls, SHDocVw};
 
@@ -3490,9 +3491,9 @@ var
   timber_thick: double = 5.0;    // 5 inches full-size timber thickness.
 
 
-  rail_section: integer = 1;
+  rail_section: TRailSection = rsBullhead;
   // 0=no rails, 1=head only(bullhead), 2=head+foot(flatbottom), 3=rail top-centreline only, 4=rail centreline on timber only.
-  vertical_rails: boolean = True;  // False = inclined rails.
+  vertical_rails: TRailsInclined = riVertical;  // False = inclined rails.
 
   fb_kludge: integer = 0;     // 0.94.a kludged foot-lines ..  0=normal, 1=inner foot, 2=outer foot
 
@@ -4778,7 +4779,7 @@ begin
 
     if (delete_to_current_msg_pref = False) and (bgnd_clicked_in_quick_mode = False) and
       (no_alert = False) then begin
-      str := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.reference_string;
+      str := keeps_list[clicked_keep_index].name;
       // Delphi bug? - must be a local string, otherwise limits length of alert string.
 
       alert_box.preferences_checkbox.Checked := False;       //%%%%
@@ -11926,8 +11927,7 @@ procedure Tpad_form.rotate_current_180_menu_entryClick(Sender: TObject);
 begin
   rotate_turnout(Pi, True);     // rotate turnout 180 degrees anti-clockwise around peg.
 
-  saved_pegging_rot := saved_pegging_rot + Pi;  // for shifting keeps onto notch.
-  normalize_angle(saved_pegging_rot);
+  saved_pegging_rot := normalize_angle(saved_pegging_rot + Pi);  // for shifting keeps onto notch.
 end;
 //______________________________________________________________________________________
 
@@ -12842,14 +12842,14 @@ begin
     if keeps_list[n].group_selected = False then
       CONTINUE;
 
-    name_str := keeps_list[n].template_info.keep_dims.box_dims1.reference_string;
+    name_str := keeps_list[n].name;
 
     name_str := StringReplace(name_str, tag2_str, '', [rfReplaceAll, rfIgnoreCase]);
 
     name_str := StringReplace(name_str, tag1_str, '', [rfReplaceAll, rfIgnoreCase]);
     // in case the tailing space was missing
 
-    keeps_list[n].template_info.keep_dims.box_dims1.reference_string :=
+    keeps_list[n].name :=
       name_str;
 
   end;//next
@@ -13398,8 +13398,7 @@ begin
     with new_notch_data do begin
       notch_x := od[0];
       notch_y := od[1];
-      notch_k := od[2] * Pi / 180;
-      normalize_angle(notch_k);
+      notch_k := normalize_angle(od[2] * Pi / 180);
     end;//with
     new_notch(new_notch_data, True);      // new data, and link group if wanted.
   end;
@@ -14002,8 +14001,7 @@ begin
   if n <> 0 then
     EXIT;
   if getdims('rotate  selected  group  around  notch', '', pad_form, n, od) = True then begin
-    kform_keeps := 0 - od[0] * Pi / 180;   // change of sign needed because of ??
-    normalize_angle(kform_keeps);
+    kform_keeps := normalize_angle(0 - od[0] * Pi / 180);   // change of sign needed because of ??
     cancel_adjusts(False);                                //  does the rebuild.
   end;
 

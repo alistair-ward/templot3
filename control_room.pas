@@ -41,7 +41,7 @@ interface
 uses
   Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, Buttons, Menus, ExtCtrls, ComCtrls, FileCtrl, { OT-FIRST, Psock, NMHttp}
-  shoved_timber,
+  ShovedTimber,
   template_records,
   Template;
 
@@ -450,7 +450,7 @@ var
   tag_list: TStringList;                  // 206b
 
   printer_list: TStringList;
-  current_shove_list: TShovedTimberList;
+  current_shove_list: TShovedTimberOwningList;
   info_text_list: TStringList;            // 0.78.a    15-11-02.
 
   custom_colour_list: TStringList;        // 0.91
@@ -3753,7 +3753,7 @@ begin
 
   tag_list := TStringList.Create;                  // 206b
 
-  current_shove_list := TShovedTimberList.Create;
+  current_shove_list := TShovedTimberOwningList.Create(nil);
 
   custom_colour_list := TStringList.Create;        // 0.91
 
