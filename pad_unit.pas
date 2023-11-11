@@ -3972,7 +3972,10 @@ uses
   Htmlview,
   curve,
   curve_parameters_interface,
-  ConvertTemplateToGlobals;
+  ConvertTemplateToGlobals,
+  TurnoutInfo2,
+  RailInfo,
+  AlignmentInfo;
 
 const
 
@@ -4242,7 +4245,8 @@ begin
     mouse_str := 'F6  curving';
 
   if controlTemplate.curve.isSpiral then
-    trail_str := captext(controlTemplate.curve.transitionStartRadius) + ' mm  /  ' + captext(controlTemplate.curve.transitionEndRadius) + ' mm'
+    trail_str := captext(controlTemplate.curve.transitionStartRadius) +
+      ' mm  /  ' + captext(controlTemplate.curve.transitionEndRadius) + ' mm'
   else
     trail_str := captext(nomrad) + ' mm';
 
@@ -4271,7 +4275,8 @@ begin
   cancel_adjusts(True);
 
   if controlTemplate.curve.isSpiral then
-    trail_str := captext(controlTemplate.curve.transitionStartRadius) + ' mm  /  ' + captext(controlTemplate.curve.transitionEndRadius) + ' mm'
+    trail_str := captext(controlTemplate.curve.transitionStartRadius) +
+      ' mm  /  ' + captext(controlTemplate.curve.transitionEndRadius) + ' mm'
   else
     trail_str := captext(nomrad) + ' mm';
 
@@ -4779,7 +4784,7 @@ begin
 
     if (delete_to_current_msg_pref = False) and (bgnd_clicked_in_quick_mode = False) and
       (no_alert = False) then begin
-      str := keeps_list[clicked_keep_index].name;
+      str := keeps_list[clicked_keep_index].Name;
       // Delphi bug? - must be a local string, otherwise limits length of alert string.
 
       alert_box.preferences_checkbox.Checked := False;       //%%%%
@@ -7471,11 +7476,14 @@ begin
           controlTemplate.curve.transitionStartRadius, False, False, True, False);
         // neg ok, preset OK, 0 not allowed, don't terminate on zero.
         n := putdim(transgo_help_str, 1, '2nd  ( final )  radius  at  the  track  centre-line',
-          controlTemplate.curve.transitionEndRadius, False, False, True, False);   // neg ok, preset OK, 0 not allowed.
+          controlTemplate.curve.transitionEndRadius, False, False, True, False);
+        // neg ok, preset OK, 0 not allowed.
         n := putdim(transgo_help_str, 1, 'length  along  1st  ( initial )  radius',
-          controlTemplate.curve.distanceToTransition, False, False, False, False);         // neg ok, preset OK, 0 OK.
+          controlTemplate.curve.distanceToTransition, False, False, False, False);
+        // neg ok, preset OK, 0 OK.
         n := putdim(transgo_help_str, 1, 'length  along  transition  zone',
-          controlTemplate.curve.transitionLength, True, False, False, False);    // no neg, preset OK, 0 OK.
+          controlTemplate.curve.transitionLength, True, False, False, False);
+        // no neg, preset OK, 0 OK.
         if n <> 3 then
           EXIT;
         if getdims('transition  curve  settings', transition_help_str +
@@ -7644,12 +7652,14 @@ begin
           controlTemplate.curve.slewLength := 600;          // ???  600 mm otherwise.
       end;
       smTanH:
-        controlTemplate.curve.slewLength := ABS(controlTemplate.curve.slewAmount) * 10;                      // arbitrary.
+        controlTemplate.curve.slewLength := ABS(controlTemplate.curve.slewAmount) * 10;
+      // arbitrary.
     end;//case
   end;
 
   if controlTemplate.curve.slewLength < ABS(controlTemplate.curve.slewAmount) then
-    controlTemplate.curve.slewLength := ABS(controlTemplate.curve.slewAmount);   // arbitrary minimum. (can't go neg).
+    controlTemplate.curve.slewLength := ABS(controlTemplate.curve.slewAmount);
+  // arbitrary minimum. (can't go neg).
   if controlTemplate.curve.slewLength < 1 then
     controlTemplate.curve.slewLength := 1;                   // 1 mm safety minimum (div by zero).
 
@@ -8234,9 +8244,12 @@ begin
 
     if peg_code <> 0 then begin
       if controlTemplate.curve.isSpiral then
-        controlTemplate.curve.distanceToTransition := controlTemplate.curve.distanceToTransition + xorg - old_xorg;           //  os transition start changes with xorg ditto.
+        controlTemplate.curve.distanceToTransition :=
+          controlTemplate.curve.distanceToTransition + xorg - old_xorg;
+      //  os transition start changes with xorg ditto.
       if controlTemplate.curve.isSlewing then
-        controlTemplate.curve.distanceToStartOfSlew := controlTemplate.curve.distanceToStartOfSlew + xorg - old_xorg;  //  slewing ditto
+        controlTemplate.curve.distanceToStartOfSlew :=
+          controlTemplate.curve.distanceToStartOfSlew + xorg - old_xorg;  //  slewing ditto
     end;
 
     pegx := pegx - old_xorg + xorg;         // update the peg if free...
@@ -9027,7 +9040,9 @@ begin
   swap_transition_rads_menu_entry.Enabled := controlTemplate.curve.isSpiral;
   zero_trans_zone_menu_entry.Enabled := controlTemplate.curve.isSpiral;
   normalize_transition_menu_entry.Enabled :=
-    (controlTemplate.curve.isSpiral) and ((controlTemplate.curve.distanceToTransition < 0) or ((controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength) > turnoutx));
+    (controlTemplate.curve.isSpiral) and ((controlTemplate.curve.distanceToTransition < 0) or
+    ((controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength) >
+    turnoutx));
 end;
 //________________________________________________________________________________________
 
@@ -11681,7 +11696,8 @@ begin
   action_panel_hint('adjust transition length instead'); // 205c
 
   mouse_action_selected('SHIFT+CTRL-F3   adjust  transition  start  ' + mode_str +
-    ' ...', 'SHIFT+CTRL-F3  transition  start  ' + mode_str, captext(controlTemplate.curve.distanceToTransition) + ' mm');
+    ' ...', 'SHIFT+CTRL-F3  transition  start  ' + mode_str,
+    captext(controlTemplate.curve.distanceToTransition) + ' mm');
   trans_start_mod := 1;
 end;
 //_____________________________________________________________________________________
@@ -11702,7 +11718,8 @@ begin
   action_panel_hint('adjust transition start instead'); // 205c
 
   mouse_action_selected('SHIFT+CTRL-F4   adjust  transition  length  ' +
-    mode_str + ' ...', 'SHIFT+CTRL-F4  transition  length  ' + mode_str, captext(controlTemplate.curve.transitionLength) + ' mm');
+    mode_str + ' ...', 'SHIFT+CTRL-F4  transition  length  ' + mode_str,
+    captext(controlTemplate.curve.transitionLength) + ' mm');
   trans_length_mod := 1;
 end;
 //_____________________________________________________________________________________
@@ -12842,14 +12859,14 @@ begin
     if keeps_list[n].group_selected = False then
       CONTINUE;
 
-    name_str := keeps_list[n].name;
+    name_str := keeps_list[n].Name;
 
     name_str := StringReplace(name_str, tag2_str, '', [rfReplaceAll, rfIgnoreCase]);
 
     name_str := StringReplace(name_str, tag1_str, '', [rfReplaceAll, rfIgnoreCase]);
     // in case the tailing space was missing
 
-    keeps_list[n].name :=
+    keeps_list[n].Name :=
       name_str;
 
   end;//next
@@ -14012,7 +14029,8 @@ end;
 procedure Tpad_form.shift_rotate_current_menu_entryClick(Sender: TObject);
 
 begin
-  shift_radial_centre_menu_entry.Enabled := ((ABS(nomrad) < max_rad_test) or (controlTemplate.curve.isSpiral));
+  shift_radial_centre_menu_entry.Enabled :=
+    ((ABS(nomrad) < max_rad_test) or (controlTemplate.curve.isSpiral));
   // only for curved template.
   shift_radial_centre_to_notch_menu_entry.Enabled :=
     ((ABS(nomrad) < max_rad_test) or (controlTemplate.curve.isSpiral));
@@ -14854,8 +14872,8 @@ begin
 
   link_wanted := False;  // init.
 
-  if keeps_list[clicked_keep_index].group_selected = True then begin
-    if group_notch_linked = False then begin
+  if keeps_list[clicked_keep_index].group_selected then begin
+    if not group_notch_linked then begin
       repeat
         i := alert(4, '    link  group  to  notch ?',
           'Do you want to link the selected group of template(s) to subsequent moves of the pegging notch?',
@@ -14887,12 +14905,11 @@ begin
   end;//group_selected
 
 
-  new_notch(keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.
-    transform_info.notch_info, True);
+  new_notch(keeps_list[clicked_keep_index].boxDims.transformInfo.notchInfo.ToNotch(), True);
 
   // now switch on group linking if wanted...
 
-  if link_wanted = True then begin
+  if link_wanted then begin
     group_notch_linked := True;
     pad_form.group_linked_warning_panel.Show;
     pad_form.unlink_group_from_notch_menu_entry.Enabled := True;
@@ -15049,13 +15066,15 @@ begin
     gocalc(0, 0);
     fill_kd(newTemplate);         // save this for snaking onto (not normalized transition).
 
-    if (controlTemplate.curve.isSpiral) and (pad_form.make_tools_normalize_transitions_menu_entry.Checked = True)
+    if (controlTemplate.curve.isSpiral) and
+      (pad_form.make_tools_normalize_transitions_menu_entry.Checked = True)
     then begin
       gocalc(0, 0);                 // peg calcs.
       normalize_transition;        // ignore result.
     end;
 
-    if (controlTemplate.curve.isSlewing) and (controlTemplate.curve.distanceToStartOfSlew > turnoutx) then begin
+    if (controlTemplate.curve.isSlewing) and (controlTemplate.curve.distanceToStartOfSlew >
+      turnoutx) then begin
       gocalc(0, 0);                                 // peg calcs.
       pad_form.disable_slewing_menu_entry.Click;   // new template in unslewed section.
     end;
@@ -15083,16 +15102,18 @@ begin
 
     gocalc(0, 0);       // peg calcs.
 
-    snake_onto_this_peg(newTemplate.template_info.keep_dims, False, False);
+    snake_onto_this_peg(newTemplate, False, False);
     // align over it and snake onto peg (facing-trailing).
 
-    if (controlTemplate.curve.isSpiral) and (pad_form.make_tools_normalize_transitions_menu_entry.Checked = True)
+    if (controlTemplate.curve.isSpiral) and
+      (pad_form.make_tools_normalize_transitions_menu_entry.Checked = True)
     then begin
       gocalc(0, 0);                 // peg calcs.
       normalize_transition;        // ignore result.
     end;
 
-    if (controlTemplate.curve.isSlewing) and (controlTemplate.curve.distanceToStartOfSlew > turnoutx) then begin
+    if (controlTemplate.curve.isSlewing) and (controlTemplate.curve.distanceToStartOfSlew >
+      turnoutx) then begin
       gocalc(0, 0);                                 // peg calcs.
       pad_form.disable_slewing_menu_entry.Click;   // new template in unslewed section.
     end;
@@ -15159,7 +15180,8 @@ begin
     peg_on_joint_end_menu_entry.Click;    // peg at new CTRL-1.
     gocalc(0, 0);                          // do peg calcs.
 
-    if (controlTemplate.curve.isSpiral) and (make_tools_normalize_transitions_menu_entry.Checked = True) then begin
+    if (controlTemplate.curve.isSpiral) and (make_tools_normalize_transitions_menu_entry.Checked =
+      True) then begin
       gocalc(0, 0);                 // peg calcs.
       normalize_transition;        // ignore result.
     end;
@@ -15186,12 +15208,14 @@ begin
     peg_on_joint_end_menu_entry.Click; // put peg at CTRL-1 rail joint.
     gocalc(0, 0);                       // peg calcs.
 
-    if (controlTemplate.curve.isSpiral) and (make_tools_normalize_transitions_menu_entry.Checked = True) then begin
+    if (controlTemplate.curve.isSpiral) and (make_tools_normalize_transitions_menu_entry.Checked =
+      True) then begin
       gocalc(0, 0);                 // peg calcs.
       normalize_transition;        // ignore result.
     end;
 
-    if (controlTemplate.curve.isSlewing) and (controlTemplate.curve.distanceToStartOfSlew > turnoutx) then begin
+    if (controlTemplate.curve.isSlewing) and (controlTemplate.curve.distanceToStartOfSlew >
+      turnoutx) then begin
       gocalc(0, 0);                        // peg calcs.
       disable_slewing_menu_entry.Click;   // new template in unslewed section.
     end;
@@ -16273,6 +16297,7 @@ procedure Tpad_form.invert_selections_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if any_bgnd = 0 then begin
@@ -16284,12 +16309,11 @@ begin
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if template_info.keep_dims.box_dims1.bgnd_code_077 <> -1 then
-        group_selected := not group_selected
-      else
-        group_selected := False;                       // library template???
-    end;//with
+    t := keeps_list[n];
+    if t.boxDims.backgroundCode <> bkcLibrary then
+      t.group_selected := not t.group_selected
+    else
+      t.group_selected := False;                       // library template???
   end;//for
 
   cancel_adjusts(False);
@@ -16583,9 +16607,12 @@ begin
     pegx := pegx - approach_last_xtb;
     //  pegx changes with xorg unless peg is reset on rail-end.
     if controlTemplate.curve.isSpiral then
-      controlTemplate.curve.distanceToTransition := controlTemplate.curve.distanceToTransition - approach_last_xtb;            //  os transition start changes with xorg ditto.
+      controlTemplate.curve.distanceToTransition :=
+        controlTemplate.curve.distanceToTransition - approach_last_xtb;
+    //  os transition start changes with xorg ditto.
     if controlTemplate.curve.isSlewing then
-      controlTemplate.curve.distanceToStartOfSlew := controlTemplate.curve.distanceToStartOfSlew - approach_last_xtb;   //  ditto slewing.
+      controlTemplate.curve.distanceToStartOfSlew :=
+        controlTemplate.curve.distanceToStartOfSlew - approach_last_xtb;   //  ditto slewing.
     peg_curve;                                               // keep turnout on the peg.
   end;
 
@@ -16892,7 +16919,7 @@ begin
       if keeps_list[n].group_selected = False then
         CONTINUE;    // not in group.
 
-      if keeps_list[n].template_info.keep_dims.box_dims1.bgnd_code_077 <> 1 then
+      if keeps_list[n].boxDims.backgroundCode <> bkcBackground then
         CONTINUE;  // 208d bug-fix   not unused or library template
 
       keeps_list[n].group_selected := False;
@@ -17242,7 +17269,8 @@ end;
 procedure Tpad_form.move_trans_end_to_peg_menu_entryClick(Sender: TObject);
 
 begin
-  set_trans_position_from_ctrl_0(pegx - controlTemplate.curve.transitionLength, controlTemplate.curve.transitionLength);
+  set_trans_position_from_ctrl_0(pegx - controlTemplate.curve.transitionLength,
+    controlTemplate.curve.transitionLength);
 end;
 //______________________________________________________________________________________
 
@@ -17256,7 +17284,8 @@ end;
 procedure Tpad_form.move_trans_end_to_template_menu_entryClick(Sender: TObject);
 
 begin
-  set_trans_position_from_ctrl_0(turnoutx - controlTemplate.curve.transitionLength, controlTemplate.curve.transitionLength);
+  set_trans_position_from_ctrl_0(turnoutx - controlTemplate.curve.transitionLength,
+    controlTemplate.curve.transitionLength);
 end;
 //_______________________________________________________________________________________
 
@@ -17266,7 +17295,8 @@ var
   new_len: double;
 
 begin
-  new_len := controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength - pegx;
+  new_len := controlTemplate.curve.distanceToTransition +
+    controlTemplate.curve.transitionLength - pegx;
   set_trans_position_from_ctrl_0(pegx, new_len);
 end;
 //_______________________________________________________________________________________
@@ -17314,7 +17344,8 @@ end;
 procedure Tpad_form.match_trans_zone_to_slew_menu_entryClick(Sender: TObject);
 
 begin
-  set_trans_position_from_ctrl_0(controlTemplate.curve.distanceToStartOfSlew, controlTemplate.curve.slewLength);
+  set_trans_position_from_ctrl_0(controlTemplate.curve.distanceToStartOfSlew,
+    controlTemplate.curve.slewLength);
 end;
 //_________________________________________________________________________________________
 
@@ -17322,10 +17353,16 @@ procedure Tpad_form.change_transition_zone_menu_entryClick(Sender: TObject);
 
 // enable only if template end will be beyond or equal to the start...
 begin
-  start_trans_from_peg_menu_entry.Enabled := ((controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength) >= (pegx - minfp));
-  end_trans_at_peg_menu_entry.Enabled := (pegx >= (controlTemplate.curve.distanceToTransition - minfp));
-  match_trans_start_to_template_menu_entry.Enabled := ((controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength) >= (0 - minfp));
-  match_trans_end_to_template_menu_entry.Enabled := (turnoutx >= (controlTemplate.curve.distanceToTransition - minfp));
+  start_trans_from_peg_menu_entry.Enabled :=
+    ((controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength) >=
+    (pegx - minfp));
+  end_trans_at_peg_menu_entry.Enabled :=
+    (pegx >= (controlTemplate.curve.distanceToTransition - minfp));
+  match_trans_start_to_template_menu_entry.Enabled :=
+    ((controlTemplate.curve.distanceToTransition + controlTemplate.curve.transitionLength) >=
+    (0 - minfp));
+  match_trans_end_to_template_menu_entry.Enabled :=
+    (turnoutx >= (controlTemplate.curve.distanceToTransition - minfp));
 
   match_trans_zone_to_slew_menu_entry.Enabled := controlTemplate.curve.isSlewing;
 end;
@@ -17349,7 +17386,8 @@ end;
 procedure Tpad_form.move_slew_end_to_peg_menu_entryClick(Sender: TObject);
 
 begin
-  set_slew_position_from_ctrl_0(pegx - controlTemplate.curve.slewLength, controlTemplate.curve.slewLength);
+  set_slew_position_from_ctrl_0(pegx - controlTemplate.curve.slewLength,
+    controlTemplate.curve.slewLength);
 end;
 //______________________________________________________________________________________
 
@@ -17363,14 +17401,16 @@ end;
 procedure Tpad_form.move_slew_end_to_template_menu_entryClick(Sender: TObject);
 
 begin
-  set_slew_position_from_ctrl_0(turnoutx - controlTemplate.curve.slewLength, controlTemplate.curve.slewLength);
+  set_slew_position_from_ctrl_0(turnoutx - controlTemplate.curve.slewLength,
+    controlTemplate.curve.slewLength);
 end;
 //_______________________________________________________________________________________
 
 procedure Tpad_form.move_slew_centre_to_template_menu_entryClick(Sender: TObject);
 
 begin
-  set_slew_position_from_ctrl_0((turnoutx - controlTemplate.curve.slewLength) / 2, controlTemplate.curve.slewLength);
+  set_slew_position_from_ctrl_0((turnoutx - controlTemplate.curve.slewLength) /
+    2, controlTemplate.curve.slewLength);
 end;
 //__________________________________________________________________________________________
 
@@ -17428,7 +17468,8 @@ end;
 procedure Tpad_form.match_slew_zone_to_trans_menu_entryClick(Sender: TObject);
 
 begin
-  set_slew_position_from_ctrl_0(controlTemplate.curve.distanceToTransition, controlTemplate.curve.transitionLength);
+  set_slew_position_from_ctrl_0(controlTemplate.curve.distanceToTransition,
+    controlTemplate.curve.transitionLength);
 end;
 //_________________________________________________________________________________________
 
@@ -17436,10 +17477,16 @@ procedure Tpad_form.change_slewing_zone_menu_entryClick(Sender: TObject);
 
 // enable only if zone end will be beyond or equal to the start...
 begin
-  start_slew_from_peg_menu_entry.Enabled := ((controlTemplate.curve.distanceToStartOfSlew + controlTemplate.curve.slewLength) >= (pegx - minfp));
-  end_slew_at_peg_menu_entry.Enabled := (pegx >= (controlTemplate.curve.distanceToStartOfSlew - minfp));
-  match_slew_start_to_template_menu_entry.Enabled := ((controlTemplate.curve.distanceToStartOfSlew + controlTemplate.curve.slewLength) >= (0 - minfp));
-  match_slew_end_to_template_menu_entry.Enabled := (turnoutx >= (controlTemplate.curve.distanceToStartOfSlew - minfp));
+  start_slew_from_peg_menu_entry.Enabled :=
+    ((controlTemplate.curve.distanceToStartOfSlew + controlTemplate.curve.slewLength) >=
+    (pegx - minfp));
+  end_slew_at_peg_menu_entry.Enabled :=
+    (pegx >= (controlTemplate.curve.distanceToStartOfSlew - minfp));
+  match_slew_start_to_template_menu_entry.Enabled :=
+    ((controlTemplate.curve.distanceToStartOfSlew + controlTemplate.curve.slewLength) >=
+    (0 - minfp));
+  match_slew_end_to_template_menu_entry.Enabled :=
+    (turnoutx >= (controlTemplate.curve.distanceToStartOfSlew - minfp));
 
   match_slew_zone_to_trans_menu_entry.Enabled := controlTemplate.curve.isSpiral;
 end;
@@ -17455,8 +17502,10 @@ begin
   docurving(True, True, pegx, pegy, now_peg_x, now_peg_y, now_peg_k, dummy);
   // save current peg data for peg_curve calcs.
 
-  clrad2 := controlTemplate.curve.transitionStartRadius{+ycurv};         // new centre-line 1st radius.
-  clrad1 := controlTemplate.curve.transitionEndRadius{+ycurv};         // new centre-line 2nd radius.
+  clrad2 := controlTemplate.curve.transitionStartRadius{+ycurv};
+  // new centre-line 1st radius.
+  clrad1 := controlTemplate.curve.transitionEndRadius{+ycurv};
+  // new centre-line 2nd radius.
 
   controlTemplate.curve.transitionEndRadius := clrad2{-ycurv};
   controlTemplate.curve.transitionStartRadius := clrad1{-ycurv};
@@ -17685,6 +17734,7 @@ var
   mousedown_p, label_p: TPoint;
   menu_caption_str: string;
   fb_str: string;   // 0.95.a
+  t: TTemplate;
 
 begin
   if Button = mbRight         // right-click, show the popup again.
@@ -17710,33 +17760,28 @@ begin
       if (clicked_keep_index > -1) and (clicked_keep_index < keeps_list.Count) and
         (keeps_list.Count > 0) then begin
 
-        with keeps_list[clicked_keep_index] do begin
-          if (template_info.keep_dims.box_dims1.mod_text_x = 0) and
-            (template_info.keep_dims.box_dims1.mod_text_y = 0) then
-            pad_form.restore_label_popup_entry.Enabled := False
-          else
-            pad_form.restore_label_popup_entry.Enabled := True;
+        t := keeps_list[clicked_keep_index];
+        if (t.boxDims.labelModifierX = 0) and
+          (t.boxDims.labelModifierY = 0) then
+          pad_form.restore_label_popup_entry.Enabled := False
+        else
+          pad_form.restore_label_popup_entry.Enabled := True;
 
-          pad_form.select_bg_popup_entry.Checked := group_selected;
-          menu_caption_str := UpperCase(Trim(bgnd_keep.full_label_string));
-        end;//with
+        pad_form.select_bg_popup_entry.Checked := t.group_selected;
+        menu_caption_str := UpperCase(Trim(t.bgnd_keep.full_label_string));
 
         if Length(menu_caption_str) > 20 then
           menu_caption_str := Copy(menu_caption_str, 1, 18) + '...';  // 20 arbitrary.
 
-        with keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1 do begin
+        pad_form.align_current_popup_entry.Enabled :=
+          (ABS(t.boxDims.protoInfo.gauge - g) < minfp);
+        // 205d disabled for mixed-gauge templates
 
-          pad_form.align_current_popup_entry.Enabled :=
-            (ABS(proto_info.gauge_pi - g) < minfp);  // 205d disabled for mixed-gauge templates
-
-          if rail_type = 2   // 0.95.a FB rail
-          then
-            fb_str := 'FB •  '
-          else
-            fb_str := 'BH •  ';
-
-        end;//with
-
+        if t.boxDims.railSection = rsFlatbottom   // 0.95.a FB rail
+        then
+          fb_str := 'FB •  '
+        else
+          fb_str := 'BH •  ';
 
         pad_form.top_name_info_popup_entry.Caption :=
           'I    ' + fb_str + menu_caption_str;  // 0.95.a
@@ -17862,16 +17907,17 @@ end;
 //______________________________________________________________________________________
 
 procedure Tpad_form.restore_label_popup_entryClick(Sender: TObject);
+var
+  bd: TBoxDims;
 
 begin
   if (any_bgnd = 0) or (clicked_keep_index < 0) or (clicked_keep_index > (keeps_list.Count - 1)) or
     (keeps_list.Count < 1) then
     EXIT;
 
-  with keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1 do begin
-    mod_text_x := 0;
-    mod_text_y := 0;
-  end;//with
+  bd := keeps_list[clicked_keep_index].boxDims;
+  bd.labelModifierX := 0;
+  bd.labelModifierY := 0;
 
   save_done := False;         // moved the label position.
   backup_wanted := True;
@@ -17884,15 +17930,16 @@ end;
 procedure Tpad_form.bat_name_label_popup_entryClick(Sender: TObject);   // 0.82.a
 
 // 0.82.a bat label sideways.
+var
+  bd: TBoxDims;
 
 begin
   if (any_bgnd = 0) or (clicked_keep_index < 0) or (clicked_keep_index > (keeps_list.Count - 1)) or
     (keeps_list.Count < 1) then
     EXIT;
 
-  with keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1 do begin
-    mod_text_y := mod_text_y + scale * 10;   // bat label sideways by 10ft arbitrary.
-  end;//with
+  bd := keeps_list[clicked_keep_index].boxDims;
+  bd.labelModifierY := bd.labelModifierY + scale * 10;   // bat label sideways by 10ft arbitrary.
 
   save_done := False;         // moved the label position.
   backup_wanted := True;
@@ -17920,6 +17967,8 @@ var
   this_X, this_Y: integer;
   mod_X, mod_Y: integer;
   in_a_row: boolean;
+  t: TTemplate;
+  bd: TBoxDims;
 
 begin
   try
@@ -17969,65 +18018,60 @@ begin
       v_space := v_space + 8;
     end;
 
-    with keeps_list[clicked_keep_index] do begin
+    t := keeps_list[clicked_keep_index];
 
-      top_X := bgnd_keep.text_begin_X;   // screen pixels, top label position and height.
-      top_Y := bgnd_keep.text_begin_Y;
+    top_X := t.bgnd_keep.text_begin_X;   // screen pixels, top label position and height.
+    top_Y := t.bgnd_keep.text_begin_Y;
 
-      X_width := bgnd_keep.text_end_X - bgnd_keep.text_begin_X;
-      // in screen pixels -- for first only (row).
-      Y_height := bgnd_keep.text_end_Y - bgnd_keep.text_begin_Y;
-      // in screen pixels -- same for all (column).
+    X_width := t.bgnd_keep.text_end_X - t.bgnd_keep.text_begin_X;
+    // in screen pixels -- for first only (row).
+    Y_height := t.bgnd_keep.text_end_Y - t.bgnd_keep.text_begin_Y;
+    // in screen pixels -- same for all (column).
 
-      next_left := top_X; // init..
-      next_top := top_Y;
+    next_left := top_X; // init..
+    next_top := top_Y;
 
-      if group_selected = True   // will be moving this one
-      then begin
-        if in_a_row = True then
-          next_left := next_left - X_width - h_space   // so overwrite first in row
-        else
-          next_top := next_top - Y_height - v_space;   // or overwrite first in column.
-      end;
-    end;//with
+    if t.group_selected   // will be moving this one
+    then begin
+      if in_a_row then
+        next_left := next_left - X_width - h_space   // so overwrite first in row
+      else
+        next_top := next_top - Y_height - v_space;   // or overwrite first in column.
+    end;
 
     for n := 0 to (keeps_list.Count - 1) do begin
 
-      with keeps_list[n] do begin
+      t := keeps_list[n];
 
-        if group_selected = False then
-          CONTINUE;     // not in group.
+      if not t.group_selected then
+        CONTINUE;     // not in group.
 
-        if bg_copied = False then
-          CONTINUE;          // not on background.
+      if not t.bg_copied then
+        CONTINUE;          // not on background.
 
-        this_X := bgnd_keep.text_begin_X;   // screen pixels, this label position and height.
-        this_Y := bgnd_keep.text_begin_Y;
+      this_X := t.bgnd_keep.text_begin_X;   // screen pixels, this label position and height.
+      this_Y := t.bgnd_keep.text_begin_Y;
 
-        if in_a_row = True then begin                                   // row
-          next_left := next_left + X_width + h_space; // add spacing.
-          mod_X := next_left - this_X;
-          // pixel moves needed -- all in row, make Y constant.
-          mod_Y := top_Y - this_Y;
-        end
-        else begin                                   // column
-          next_top := next_top + Y_height + v_space;  // add spacing.
-          mod_X := top_X - this_X;
-          // pixel moves needed -- all in column, make X constant.
-          mod_Y := next_top - this_Y;
-        end;
+      if in_a_row then begin                                   // row
+        next_left := next_left + X_width + h_space; // add spacing.
+        mod_X := next_left - this_X;
+        // pixel moves needed -- all in row, make Y constant.
+        mod_Y := top_Y - this_Y;
+      end
+      else begin                                   // column
+        next_top := next_top + Y_height + v_space;  // add spacing.
+        mod_X := top_X - this_X;
+        // pixel moves needed -- all in column, make X constant.
+        mod_Y := next_top - this_Y;
+      end;
 
-        with template_info.keep_dims.box_dims1 do begin
+      bd := t.boxDims;
+      bd.labelModifierX := bd.labelModifierX + mod_X * ffx;  // modify the template mm data..
+      bd.labelModifierY := bd.labelModifierY + mod_Y * ffy;
 
-          mod_text_x := mod_text_x + mod_X * ffx;  // modify the template mm data..
-          mod_text_y := mod_text_y + mod_Y * ffy;
 
-        end;//with
-
-        X_width := bgnd_keep.text_end_X - bgnd_keep.text_begin_X;
-        // screen pixels -- update width for next.
-
-      end;//with
+      X_width := t.bgnd_keep.text_end_X - t.bgnd_keep.text_begin_X;
+      // screen pixels -- update width for next.
 
     end;//next template
 
@@ -18046,47 +18090,44 @@ procedure Tpad_form.make_label_shape_popup_entryClick(Sender: TObject);
 var                               // convert the keep name label to a background shape.
   new_shape: Tbgnd_shape;
   n: integer;
+  t: TTemplate;
 
 begin
   if (any_bgnd = 0) or (clicked_keep_index < 0) or (clicked_keep_index >
     (keeps_list.Count - 1)) then
     EXIT;
 
-  with keeps_list[clicked_keep_index] do begin
+  t := keeps_list[clicked_keep_index];
 
-    if bg_copied = False then
-      EXIT;  // ??? not on background.
+  if not t.bg_copied then
+    EXIT;  // ??? not on background.
 
-    with bgnd_keep do begin
+  with new_shape do begin
 
-      with new_shape do begin
+    shape_name := t.Name;
+    // don't include the keep number (it might change).
 
-        shape_name := template_info.keep_dims.box_dims1.reference_string;
-        // don't include the keep number (it might change).
+    // 208d mod to include ID..
 
-        // 208d mod to include ID..
+    if Trim(shape_name) = '' then
+      shape_name := t.boxDims.idNumberStr
+    else
+      shape_name := shape_name + ' - ' + t.boxDims.idNumberStr;
+    // 208d
 
-        if Trim(shape_name) = '' then
-          shape_name := template_info.keep_dims.box_dims1.id_number_str
-        else
-          shape_name := shape_name + ' - ' + template_info.keep_dims.box_dims1.id_number_str;
-        // 208d
+    hide_bits := 0;    // 214a  normal visibility
+    option_bits := 0;  // byte;
 
-        hide_bits := 0;    // 214a  normal visibility
-        option_bits := 0;  // byte;
+    shape_code := 3;      // 0=line, 1=rectangle, 2=circle, 3=label.
+    shape_style := 0;
 
-        shape_code := 3;      // 0=line, 1=rectangle, 2=circle, 3=label.
-        shape_style := 0;
+    p1.x := mouse_x(t.bgnd_keep.text_begin_X);                   // in mm..
+    p1.y := mouse_y(t.bgnd_keep.text_begin_X, t.bgnd_keep.text_begin_Y);
 
-        p1.x := mouse_x(text_begin_X);                   // in mm..
-        p1.y := mouse_y(text_begin_X, text_begin_Y);
+    p2.x := 0;
+    p2.y := 0;
 
-        p2.x := 0;
-        p2.y := 0;
-
-      end;//with new_shape
-    end;//with bgnd_keep data.
-  end;//with template.
+  end;//with new_shape
 
   with bgnd_form.bgnd_shapes_listbox do begin
     n := Items.AddObject(new_shape.shape_name, Tbgshape.Create);
@@ -18108,19 +18149,17 @@ procedure Tpad_form.rename_popup_entryClick(Sender: TObject);   // mods 208a
 
 var
   keep_name_str, idnum_str, s: string;
-
+  t: TTemplate;
 begin
 
   if (any_bgnd = 0) or (clicked_keep_index < 0) or (clicked_keep_index > (keeps_list.Count - 1)) or
     (keeps_list.Count < 1) then
     EXIT;
 
-  with keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1 do begin
+  t := keeps_list[clicked_keep_index];
 
-    keep_name_str := reference_string;
-    idnum_str := id_number_str; // 208a ID number
-
-  end;//with
+  keep_name_str := t.Name;
+  idnum_str := t.boxDims.idNumberStr; // 208a ID number
 
   with math_form do begin
     Caption := '   name  or  rename  this  template ...';
@@ -18139,10 +18178,7 @@ begin
       then begin
         keep_name_str := s;
 
-        keeps_list[clicked_keep_index].template_info.keep_dims.
-          box_dims1.reference_string
-        :=
-          keep_name_str;
+        t.Name := keep_name_str;
         save_done := False;
         backup_wanted := True;
       end;
@@ -18498,6 +18534,8 @@ end;
 //______________________________________________________________________________
 
 procedure Tpad_form.dxf_export_options_menu_entryClick(Sender: TObject);    // 219a
+var
+  ti2: TTurnoutInfo2;
 
 begin
   if (clicked_keep_index < 0) or (clicked_keep_index > (keeps_list.Count - 1)) or
@@ -18506,19 +18544,17 @@ begin
 
   // 219a include connectors for XTrackCAD in export DXF -- file only, not loaded to the control  ...
 
-  with keeps_list[clicked_keep_index].template_info.keep_dims.turnout_info2 do begin
+  ti2 := keeps_list[clicked_keep_index].turnoutInfo2;
 
-    xtc_form.zero_checkbox.Checked := dxf_connector_0;    // CTRL-0
-    xtc_form.texit_checkbox.Checked := dxf_connector_t;   // TEXITP
-    xtc_form.length_checkbox.Checked := dxf_connector_9;  // CTRL-9
+  xtc_form.zero_checkbox.Checked := ti2.dxfConnector0;    // CTRL-0
+  xtc_form.texit_checkbox.Checked := ti2.dxfConnectorT;   // TEXITP
+  xtc_form.length_checkbox.Checked := ti2.dxfConnector9;  // CTRL-9
 
-    do_show_modal(xtc_form);
+  do_show_modal(xtc_form);
 
-    dxf_connector_0 := xtc_form.zero_checkbox.Checked;    // CTRL-0
-    dxf_connector_t := xtc_form.texit_checkbox.Checked;   // TEXITP
-    dxf_connector_9 := xtc_form.length_checkbox.Checked;  // CTRL-9
-
-  end;//with
+  ti2.dxfConnector0 := xtc_form.zero_checkbox.Checked;    // CTRL-0
+  ti2.dxfConnectorT := xtc_form.texit_checkbox.Checked;   // TEXITP
+  ti2.dxfConnector9 := xtc_form.length_checkbox.Checked;  // CTRL-9
 
   clicked_keep_index := -1;                        // so can popup again.
 end;
@@ -19947,7 +19983,7 @@ begin
 
   until i = 6;
 
-  rail_section := 2;
+  rail_section := rsFlatbottom;
 
   railedges(gauge_faces, outer_edges, centre_lines);
   redraw(True);
@@ -19957,7 +19993,7 @@ end;
 procedure Tpad_form.bullhead_rails_menu_entryClick(Sender: TObject);
 
 begin
-  rail_section := 1;
+  rail_section := rsBullhead;
 
   railedges(gauge_faces, outer_edges, centre_lines);
   redraw(True);
@@ -19967,7 +20003,7 @@ end;
 procedure Tpad_form.no_rails_menu_entryClick(Sender: TObject);
 
 begin
-  rail_section := 0;
+  rail_section := rsNoRails;
 
   railedges(gauge_faces, outer_edges, centre_lines);
   redraw(True);
@@ -19977,7 +20013,7 @@ end;
 procedure Tpad_form.vertical_rails_menu_entryClick(Sender: TObject);
 
 begin
-  vertical_rails := True;
+  vertical_rails := riVertical;
   redraw(True);
 end;
 //_________________________________
@@ -19988,7 +20024,7 @@ var
   i: integer;
 
 begin
-  if rail_section = 1 then begin
+  if rail_section = rsBullhead then begin
     repeat
       i := alert(3, '    inclined  rails  -  bullhead',
         'Select the REAL > RAILS > HEAD AND FOOT menu option if you want the template to include the outer foot line of inclined bullhead rails.', '', '', '', '?  help', 'cancel  inclined  rails', 'OK  -  continue', 4);
@@ -20003,7 +20039,7 @@ begin
     until i <> 4;
   end;
 
-  vertical_rails := False;
+  vertical_rails := riInclined;
   redraw(True);
 end;
 //________________________________________________________________________________________
@@ -20012,23 +20048,23 @@ procedure Tpad_form.rails_menu_entryClick(Sender: TObject);
 
 begin
   case rail_section of
-    0:
+    rsNoRails:
       no_rails_menu_entry.Checked := True;         // radio item.
-    1:
+    rsBullhead:
       bullhead_rails_menu_entry.Checked := True;   // radio item.
-    2:
+    rsFlatbottom:
       flatbottom_rails_menu_entry.Checked := True; // radio item.
   end;//case
 
-  if vertical_rails = True then
+  if vertical_rails = riVertical then
     vertical_rails_menu_entry.Checked := True    // radio item.
   else
     inclined_rails_menu_entry.Checked := True;   // radio item.
 
   case flare_type of
-    0:
+    feBent:
       bent_flares_menu_entry.Checked := True;       // radio item.
-    1:
+    feMachined:
       machined_flares_menu_entry.Checked := True;   // radio item.
   end;//case
 
@@ -20122,7 +20158,7 @@ end;
 procedure Tpad_form.bent_flares_menu_entryClick(Sender: TObject);
 
 begin
-  flare_type := 0;
+  flare_type := feBent;
   redraw(True);
 end;
 //__________________________________________________________________________________________
@@ -20139,7 +20175,7 @@ begin
     get_cpi;
   end;
 
-  flare_type := 1;
+  flare_type := feMachined;
   redraw(True);
 end;
 //__________________________________________________________________________________________
@@ -20190,6 +20226,7 @@ procedure Tpad_form.select_group_by_marker_colour_menu_entryClick(Sender: TObjec
 
 var
   n, col: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -20201,13 +20238,12 @@ begin
     cur_padmark_col);
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if template_info.keep_dims.box_dims1.bgnd_code_077 = -1 then
-        group_selected := False   // library template???
-      else
-        group_selected := ((template_info.keep_dims.box_dims1.pad_marker_colour = col) and
-          (template_info.keep_dims.box_dims1.use_pad_marker_colour = True));
-    end;//with
+    t := keeps_list[n];
+    if t.boxDims.backgroundCode = bkcLibrary then
+      t.group_selected := False   // library template???
+    else
+      t.group_selected := ((t.boxDims.padMarkerColour = col) and
+        (t.boxDims.usePadMarkerColour));
   end;//for
 
   if any_selected < 1 then
@@ -20225,7 +20261,7 @@ procedure Tpad_form.group_select_all_plain_track_menu_entryClick(Sender: TObject
 // 0.82.d  for use with trackbed edges (rebuild group).
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;   // ??? menu should be disabled
@@ -20233,13 +20269,12 @@ begin
   unlink_group;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if template_info.keep_dims.box_dims1.bgnd_code_077 <> 1   // not on background
-      then
-        group_selected := False
-      else
-        group_selected := template_info.keep_dims.box_dims1.turnout_info1.plain_track_flag;
-    end;//with
+    t := keeps_list[n];
+    if t.boxDims.backgroundCode <> bkcBackground   // not on background
+    then
+      t.group_selected := False
+    else
+      t.group_selected := t.boxDims.turnoutInfo1.plainTrack;
   end;//for
 
   if any_selected < 1 then
@@ -20409,8 +20444,7 @@ begin
 
   list_position := clicked_keep_index;
 
-  keeps_list[list_position].template_info.keep_dims.box_dims1.
-    use_pad_marker_colour := False;
+  keeps_list[list_position].boxDims.usePadMarkerColour := False;
 
   clicked_keep_index := -1;    // so can popup again.
   redraw_pad(True, False);    // to hide the highlighting.
@@ -20426,8 +20460,7 @@ begin
 
   list_position := clicked_keep_index;
 
-  keeps_list[list_position].template_info.keep_dims.box_dims1.
-    use_pad_marker_colour := True;
+  keeps_list[list_position].boxDims.usePadMarkerColour := True;
 
   clicked_keep_index := -1;    // so can popup again.
   redraw_pad(True, False);    // to hide the highlighting.
@@ -20438,6 +20471,7 @@ procedure Tpad_form.set_marker_colour_popup_entryClick(Sender: TObject);
 
 var
   col: integer;
+  t: TTemplate;
 
 begin
   if (keeps_list.Count < 1) or (clicked_keep_index < 0) or
@@ -20446,15 +20480,14 @@ begin
 
   list_position := clicked_keep_index;
 
-  col := keeps_list[list_position].template_info.keep_dims.box_dims1.pad_marker_colour;
+  t := keeps_list[list_position];
+  col := t.boxDims.padMarkerColour;
 
   cur_padmark_col := get_colour(
     'choose  a  marker  colour  for  this  background  template  on  the  trackpad', col);
 
-  with keeps_list[list_position].template_info.keep_dims.box_dims1 do begin
-    pad_marker_colour := cur_padmark_col;
-    use_pad_marker_colour := True;         // assume he wants to use it.
-  end;//with
+  t.boxDims.padMarkerColour := cur_padmark_col;
+  t.boxDims.usePadMarkerColour := True;         // assume he wants to use it.
 
   clicked_keep_index := -1;    // so can popup again.
   redraw_pad(True, False);    // to hide the highlighting.
@@ -20470,8 +20503,7 @@ begin
 
   list_position := clicked_keep_index;
 
-  keeps_list[list_position].template_info.keep_dims.box_dims1.
-    use_print_mapping_colour := False;
+  keeps_list[list_position].boxDims.usePrintMappingColour := False;
 
   clicked_keep_index := -1;    // so can popup again.
   redraw_pad(True, False);    // to hide the highlighting.
@@ -20487,8 +20519,7 @@ begin
 
   list_position := clicked_keep_index;
 
-  keeps_list[list_position].template_info.keep_dims.box_dims1.
-    use_print_mapping_colour := True;
+  keeps_list[list_position].boxDims.usePrintMappingColour := True;
 
   clicked_keep_index := -1;    // so can popup again.
   redraw_pad(True, False);    // to hide the highlighting.
@@ -20499,6 +20530,7 @@ procedure Tpad_form.set_print_marker_colour_popup_entryClick(Sender: TObject);
 
 var
   col: integer;
+  t: TTemplate;
 
 begin
   if (keeps_list.Count < 1) or (clicked_keep_index < 0) or
@@ -20507,15 +20539,14 @@ begin
 
   list_position := clicked_keep_index;
 
-  col := keeps_list[list_position].template_info.keep_dims.box_dims1.print_mapping_colour;
+  t := keeps_list[list_position];
+  col := t.boxDims.printMappingColour;
 
   cur_prmap_col := get_colour(
     'choose  a  mapping  colour  for  this  background  template  when  printed', col);
 
-  with keeps_list[list_position].template_info.keep_dims.box_dims1 do begin
-    print_mapping_colour := cur_prmap_col;
-    use_print_mapping_colour := True;         // assume he wants to use it.
-  end;//with
+  t.boxDims.printMappingColour := cur_prmap_col;
+  t.boxDims.usePrintMappingColour := True;         // assume he wants to use it.
 
   clicked_keep_index := -1;    // so can popup again.
   redraw_pad(True, False);    // to hide the highlighting.
@@ -20536,18 +20567,18 @@ procedure Tpad_form.show_group_normal_colours_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
 
-      template_info.keep_dims.box_dims1.use_pad_marker_colour := False;
-    end;//with
+    t.boxDims.usePadMarkerColour := False;
   end;//for
 end;
 //_________________________________________________________________________________________
@@ -20556,18 +20587,17 @@ procedure Tpad_form.show_group_marker_colours_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
 
-      template_info.keep_dims.box_dims1.use_pad_marker_colour := True;
-    end;//with
+    t.boxDims.usePadMarkerColour := True;
   end;//for
 
   warn_group_colour;
@@ -20578,7 +20608,7 @@ procedure Tpad_form.group_marker_colour_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
@@ -20588,13 +20618,12 @@ begin
     cur_padmark_col);
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
-      template_info.keep_dims.box_dims1.pad_marker_colour := cur_padmark_col;
-      template_info.keep_dims.box_dims1.use_pad_marker_colour := True;
-      // assume he wants to use it.
-    end;//with
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
+    t.boxDims.padMarkerColour := cur_padmark_col;
+    t.boxDims.usePadMarkerColour := True;
+    // assume he wants to use it.
   end;//for
   warn_group_colour;
 end;
@@ -20611,18 +20640,17 @@ procedure Tpad_form.print_group_normal_colours_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
 
-      template_info.keep_dims.box_dims1.use_print_mapping_colour := False;
-    end;//with
+    t.boxDims.usePrintMappingColour := False;
   end;//for
 
 end;
@@ -20632,18 +20660,17 @@ procedure Tpad_form.print_group_mapping_colours_menu_entryClick(Sender: TObject)
 
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
 
-      template_info.keep_dims.box_dims1.use_print_mapping_colour := True;
-    end;//with
+    t.boxDims.usePrintMappingColour := True;
   end;//for
 end;
 //_________________________________________________________________________________
@@ -20652,7 +20679,7 @@ procedure Tpad_form.group_mapping_colour_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
@@ -20662,13 +20689,12 @@ begin
     cur_prmap_col);
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
-      template_info.keep_dims.box_dims1.print_mapping_colour := cur_prmap_col;    // set colour.
-      template_info.keep_dims.box_dims1.use_print_mapping_colour := True;
-      // assume he wants to use it.
-    end;//with
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
+    t.boxDims.printMappingColour := cur_prmap_col;    // set colour.
+    t.boxDims.usePrintMappingColour := True;
+    // assume he wants to use it.
   end;//for
 end;
 //____________________________________________________________________________________
@@ -22120,8 +22146,7 @@ begin
 
   list_position := clicked_keep_index;
 
-  keeps_list[list_position].template_info.keep_dims.box_dims1.disable_f7_snap :=
-    False;
+  keeps_list[list_position].boxDims.disableF7Snap := False;
 
   save_done := False;         // file change.
   backup_wanted := True;
@@ -22140,8 +22165,7 @@ begin
 
   list_position := clicked_keep_index;
 
-  keeps_list[list_position].template_info.keep_dims.box_dims1.disable_f7_snap :=
-    True;
+  keeps_list[list_position].boxDims.disableF7Snap := True;
 
   save_done := False;         // file change.
   backup_wanted := True;
@@ -22156,7 +22180,7 @@ procedure Tpad_form.make_slip_road_menu_itemClick(Sender: TObject);
 // 0.82.a
 
 begin
-  if plain_track = True then begin
+  if plain_track then begin
     alert(6, '    make  slip  road  -  plain  track',
       'The control template is plain track.' +
       '||It is not meaningful to make a slip road from a plain track template. The control template must be a turnout.'
@@ -22165,7 +22189,7 @@ begin
     EXIT;
   end;
 
-  if half_diamond = True then begin
+  if half_diamond then begin
     alert(6, '    make  slip  road  -  half-diamond',
       'The control template is a half-diamond.' +
       '||It is not meaningful to make a slip road from a half-diamond template. The control template must be a turnout.'
@@ -22174,7 +22198,7 @@ begin
     EXIT;
   end;
 
-  if check_control_template_is_valid('slip  road') = False then
+  if not check_control_template_is_valid('slip  road') then
     EXIT;  // 0.93.a  zero length
 
   do_rollback := False;  // while pegging.
@@ -22205,7 +22229,7 @@ begin
   gocalc(0, 0);
 
   store_and_background(False, False);   // keep it and copy to background.
-  if keep_added = False then
+  if not keep_added then
     EXIT;       // he cancelled.
 
   do_rollback := False;
@@ -22728,21 +22752,18 @@ procedure Tpad_form.restore_group_labels_menu_entryClick(Sender: TObject);
 
 var
   n: integer;
-
+  t: TTemplate;
 begin
   if keeps_list.Count < 1 then
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if group_selected = False then
-        CONTINUE;
+    t := keeps_list[n];
+    if not t.group_selected then
+      CONTINUE;
 
-      with template_info.keep_dims.box_dims1 do begin
-        mod_text_x := 0;
-        mod_text_y := 0;
-      end;//with
-    end;//with
+    t.boxDims.labelModifierX := 0;
+    t.boxDims.labelModifierY := 0;
   end;//for
 
   save_done := False;         // moved the label position.
@@ -23531,9 +23552,11 @@ begin
     turnoutx := turnoutx - xorg;
     // increase overall length to keep V-crossing and exit track.
     if controlTemplate.curve.isSpiral then
-      controlTemplate.curve.distanceToTransition := controlTemplate.curve.distanceToTransition - xorg;
+      controlTemplate.curve.distanceToTransition :=
+        controlTemplate.curve.distanceToTransition - xorg;
     if controlTemplate.curve.isSlewing then
-      controlTemplate.curve.distanceToStartOfSlew := controlTemplate.curve.distanceToStartOfSlew - xorg;
+      controlTemplate.curve.distanceToStartOfSlew :=
+        controlTemplate.curve.distanceToStartOfSlew - xorg;
     xorg := 0;
   end;
 
@@ -23650,7 +23673,8 @@ begin
     turnoutx := turnoutx - xorg;
     // increase overall length to keep V-crossing and exit track.
     if controlTemplate.curve.isSlewing then
-      controlTemplate.curve.distanceToStartOfSlew := controlTemplate.curve.distanceToStartOfSlew - xorg;
+      controlTemplate.curve.distanceToStartOfSlew :=
+        controlTemplate.curve.distanceToStartOfSlew - xorg;
     xorg := 0;
   end;
 
@@ -24902,9 +24926,11 @@ begin
     turnoutx := turnoutx - xorg;
     // increase overall length to keep V-crossing and exit track.
     if controlTemplate.curve.isSpiral then
-      controlTemplate.curve.distanceToTransition := controlTemplate.curve.distanceToTransition - xorg;
+      controlTemplate.curve.distanceToTransition :=
+        controlTemplate.curve.distanceToTransition - xorg;
     if controlTemplate.curve.isSlewing then
-      controlTemplate.curve.distanceToStartOfSlew := controlTemplate.curve.distanceToStartOfSlew - xorg;
+      controlTemplate.curve.distanceToStartOfSlew :=
+        controlTemplate.curve.distanceToStartOfSlew - xorg;
     xorg := 0;
   end;
 
@@ -25198,6 +25224,7 @@ procedure Tpad_form.add_group_tag_menu_entryClick(Sender: TObject);
 var
   prefix_str, name_str: string;
   n: integer;
+  t: TTemplate;
 
 begin
   if keeps_list.Count < 1 then
@@ -25235,26 +25262,25 @@ begin
     EXIT;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
+    t := keeps_list[n];
 
-      if group_selected = False then
-        CONTINUE;
+    if not t.group_selected then
+      CONTINUE;
 
-      name_str := template_info.keep_dims.box_dims1.reference_string;
+    name_str := t.Name;
 
-      name_str := '[' + prefix_str + '] ' + name_str;
+    name_str := '[' + prefix_str + '] ' + name_str;
 
-      repeat
-        Application.ProcessMessages;
-        name_str := StringReplace(name_str, '[[', '[', [rfReplaceAll, rfIgnoreCase]);
-        // in case he added [
-        name_str := StringReplace(name_str, ']]', ']', [rfReplaceAll, rfIgnoreCase]);
-        // in case he added ]
-      until ((Pos('[[', name_str) = 0) and (Pos(']]', name_str) = 0));
+    repeat
+      Application.ProcessMessages;
+      name_str := StringReplace(name_str, '[[', '[', [rfReplaceAll, rfIgnoreCase]);
+      // in case he added [
+      name_str := StringReplace(name_str, ']]', ']', [rfReplaceAll, rfIgnoreCase]);
+      // in case he added ]
+    until ((Pos('[[', name_str) = 0) and (Pos(']]', name_str) = 0));
 
-      template_info.keep_dims.box_dims1.reference_string := name_str;
+    t.Name := name_str;
 
-    end;//with
   end;//for
 
   do_rollback := False;
@@ -25278,6 +25304,7 @@ var
   bg_rp: boolean;
 
   old_peg_code: integer;
+  t: TTemplate;
 
 begin
 
@@ -25287,50 +25314,47 @@ begin
 
   list_position := clicked_keep_index;
 
-  with keeps_list[clicked_keep_index] do begin
-    obtain_turnout_radius_popup_entry.Enabled := not (bgnd_plain_track or bgnd_spiral);
+  t := keeps_list[clicked_keep_index];
+  obtain_turnout_radius_popup_entry.Enabled := not (t.bgnd_plain_track or t.bgnd_spiral);
 
-    if bgnd_half_diamond = True then
-      obtain_turnout_radius_popup_entry.Caption :=
-        'C   &curve  the  control  to  this  diagonal-road  radius'
-    else
-      obtain_turnout_radius_popup_entry.Caption :=
-        'C   &curve  the  control  to  this  turnout-road  radius';
-  end;//with
+  if t.bgnd_half_diamond then
+    obtain_turnout_radius_popup_entry.Caption :=
+      'C   &curve  the  control  to  this  diagonal-road  radius'
+  else
+    obtain_turnout_radius_popup_entry.Caption :=
+      'C   &curve  the  control  to  this  turnout-road  radius';
 
-  if keeps_list[list_position].template_info.keep_dims.box_dims1.use_pad_marker_colour = True then
+  if keeps_list[list_position].boxDims.usePadMarkerColour then
     marker_colour_popup_entry.Checked := True
   else
     normal_colours_popup_entry.Checked := True;   // radio items.
 
-  if keeps_list[list_position].template_info.keep_dims.box_dims1.use_print_mapping_colour =
+  if keeps_list[list_position].boxDims.usePrintMappingColour =
     True then
     print_mapping_colour_popup_entry.Checked := True
   else
     normal_print_colours_popup_entry.Checked := True;   // radio items.
 
 
-  if keeps_list[list_position].template_info.keep_dims.box_dims1.disable_f7_snap
-    = True then
+  if keeps_list[list_position].boxDims.disableF7Snap then
     disable_f7_snap_popup_entry.Checked := True
   else
     enable_f7_snap_popup_entry.Checked := True;   // radio items.
 
   edit_reminder_popup_entry.Enabled :=
-    keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.align_info.reminder_flag;
+    keeps_list[clicked_keep_index].boxDims.alignmentInfo.reminderFlag;
   remove_reminder_popup_entry.Enabled :=
-    keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.align_info.reminder_flag;
+    keeps_list[clicked_keep_index].boxDims.alignmentInfo.reminderFlag;
 
   add_reminder_popup_entry.Enabled :=
-    not keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.align_info.reminder_flag;
+    not keeps_list[clicked_keep_index].boxDims.alignmentInfo.reminderFlag;
 
   bg_pt := keeps_list[clicked_keep_index].bgnd_plain_track;
   bg_hd := keeps_list[clicked_keep_index].bgnd_half_diamond;
 
   bg_regular := (keeps_list[clicked_keep_index].bgnd_xing_type = 0);
 
-  old_peg_code := keeps_list[clicked_keep_index].template_info.keep_dims.
-    box_dims1.transform_info.peg_point_code;
+  old_peg_code := keeps_list[clicked_keep_index].boxDims.transformInfo.pegPointCode;
 
   if bg_pt = True then
     move_to_ctrl1_popup_entry.Caption := '1   to  CTRL-&1   rail  joint'
@@ -25408,7 +25432,7 @@ begin
   meet_at_tolp_popup_entry.Enabled := (not bg_pt) and bg_rp;
 
 
-  name_str := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.reference_string;
+  name_str := keeps_list[clicked_keep_index].Name;
 
   // build list of existing tags in menu...  206b
 
@@ -25506,7 +25530,7 @@ begin
   // see if showing in marker colour..
 
   group_all_with_same_marker_colour_popup_entry.Enabled :=
-    keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.use_pad_marker_colour;
+    keeps_list[clicked_keep_index].boxDims.usePadMarkerColour;
 
   group_all_with_same_colour_popup_entry.Enabled :=
     group_all_with_same_marker_colour_popup_entry.Enabled;
@@ -25532,8 +25556,7 @@ begin
     (keeps_list.Count < 1) then
     EXIT;
 
-  with keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1 do
-    reference_string := tag_str + reference_string;
+  keeps_list[clicked_keep_index].Name := tag_str + keeps_list[clicked_keep_index].Name;
 
   save_done := False;
 
@@ -25555,7 +25578,7 @@ var
   name_str: string;
 
 begin
-  name_str := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.reference_string;
+  name_str := keeps_list[clicked_keep_index].Name;
 
   if help(0, str1 + name_str + str2, 'add  a  new  prefix  tag ...') = 1 then
     add_prefix_tag_popup_entry.Click;
@@ -25584,15 +25607,14 @@ begin
 
   tag2_str := tag1_str + ' ';       // include trailing space
 
-  name_str := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.reference_string;
+  name_str := keeps_list[clicked_keep_index].Name;
 
   name_str := StringReplace(name_str, tag2_str, '', [rfReplaceAll, rfIgnoreCase]);
 
   name_str := StringReplace(name_str, tag1_str, '', [rfReplaceAll, rfIgnoreCase]);
   // in case the tailing space was missing
 
-  keeps_list[clicked_keep_index].template_info.keep_dims.
-    box_dims1.reference_string := name_str;
+  keeps_list[clicked_keep_index].Name := name_str;
 
   save_done := False;
   clicked_keep_index := -1;    // so can popup again.
@@ -25614,7 +25636,7 @@ var
   name_str: string;
 
 begin
-  name_str := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.reference_string;
+  name_str := keeps_list[clicked_keep_index].Name;
 
   if help(0, str1 + name_str + str2, 'rename  this  template ...') = 1 then
     rename_popup_entry.Click;
@@ -25658,7 +25680,7 @@ begin
   if prefix_str = '' then
     EXIT;
 
-  name_str := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.reference_string;
+  name_str := keeps_list[clicked_keep_index].Name;
 
   name_str := '[' + prefix_str + '] ' + name_str;
 
@@ -25670,8 +25692,7 @@ begin
     // in case he added ]
   until ((Pos('[[', name_str) = 0) and (Pos(']]', name_str) = 0));
 
-  keeps_list[clicked_keep_index].template_info.keep_dims.
-    box_dims1.reference_string := name_str;
+  keeps_list[clicked_keep_index].Name := name_str;
 
   save_done := False;
 
@@ -25723,22 +25744,21 @@ procedure Tpad_form.group_all_with_same_marker_colour_popup_entryClick(Sender: T
 
 var
   n, col: integer;
-
+  t: TTemplate;
 begin
   if (any_bgnd = 0) or (clicked_keep_index < 0) or (clicked_keep_index > (keeps_list.Count - 1)) or
     (keeps_list.Count < 1) then
     EXIT;
 
-  col := keeps_list[clicked_keep_index].template_info.keep_dims.box_dims1.pad_marker_colour;
+  col := keeps_list[clicked_keep_index].boxDims.padMarkerColour;
 
   for n := 0 to keeps_list.Count - 1 do begin
-    with keeps_list[n] do begin
-      if template_info.keep_dims.box_dims1.bgnd_code_077 = -1 then
-        group_selected := False   // library template???
-      else
-        group_selected := ((template_info.keep_dims.box_dims1.pad_marker_colour = col) and
-          (template_info.keep_dims.box_dims1.use_pad_marker_colour = True));
-    end;//with
+    t := keeps_list[n];
+    if t.boxDims.backgroundCode = bkcLibrary then
+      t.group_selected := False   // library template???
+    else
+      t.group_selected := ((t.boxDims.padMarkerColour = col) and
+        t.boxDims.usePadMarkerColour);
   end;//for
 
   if any_selected < 2 then
@@ -26610,11 +26630,11 @@ procedure Tpad_form.knuckle_bend_menu_entryClick(Sender: TObject);
 
 begin
   case knuckle_code of
-    -1:
+    kcSharp:
       sharp_knuckle_menu_entry.Checked := True;    // radio item
-    0:
+    kcNormal:
       normal_knuckle_menu_entry.Checked := True;   // radio item
-    1:
+    kcCustom:
       custom_knuckle_menu_entry.Checked := True;   // radio item
   end;//case
 end;
@@ -26623,7 +26643,7 @@ end;
 procedure Tpad_form.sharp_knuckle_menu_entryClick(Sender: TObject);
 
 begin
-  knuckle_code := -1;      // 214a  0=normal, -1=sharp, 1=use custom knuckle radius
+  knuckle_code := kcSharp;      // 214a  0=normal, -1=sharp, 1=use custom knuckle radius
   redraw(True);
 end;
 //______________________
@@ -26631,7 +26651,7 @@ end;
 procedure Tpad_form.normal_knuckle_menu_entryClick(Sender: TObject);
 
 begin
-  knuckle_code := 0;      // 214a  0=normal, -1=sharp, 1=use custom knuckle radius
+  knuckle_code := kcNormal;      // 214a  0=normal, -1=sharp, 1=use custom knuckle radius
   redraw(True);
 end;
 //______________________
@@ -26639,7 +26659,7 @@ end;
 procedure Tpad_form.custom_knuckle_menu_entryClick(Sender: TObject);
 
 begin
-  knuckle_code := 1;      // 214a  0=normal, -1=sharp, 1=use custom knuckle radius
+  knuckle_code := kcCustom;      // 214a  0=normal, -1=sharp, 1=use custom knuckle radius
   redraw(True);
 end;
 //______________________________________________________________________________
@@ -26671,7 +26691,7 @@ begin
     EXIT;
   if getdims('custom  knuckle  bend  radius', '', pad_form, n, od) = True then begin
     knuckle_radius := od[0];
-    knuckle_code := 1;         // use it
+    knuckle_code := kcCustom;         // use it
   end;
 
   redraw(True);
@@ -27112,6 +27132,8 @@ end;
 //______________________________________________________________________________
 
 procedure add_reminder_click(index: integer);     // 216a
+var
+  al: TAlignmentInfo;
 
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
@@ -27127,12 +27149,10 @@ begin
     do_show_modal(math_form);    // 212a
 
     if ModalResult = mrOk then begin
-      with keeps_list[index].template_info.keep_dims.box_dims1.align_info do begin
+      al := keeps_list[index].boxDims.alignmentInfo;
 
-        reminder_str := Trim(math_editbox.Text);
-        reminder_flag := (Trim(math_editbox.Text) <> '');
-
-      end;//with
+      al.reminderStr := Trim(math_editbox.Text);
+      al.reminderFlag := (Trim(math_editbox.Text) <> '');
 
       save_done := False;
       backup_wanted := True;
@@ -27155,12 +27175,13 @@ end;
 //______________________________________________________________________________
 
 procedure edit_reminder_click(index: integer);   // 216a
-
+var
+  al: TAlignmentInfo;
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;
 
-  if keeps_list[index].template_info.keep_dims.box_dims1.align_info.reminder_flag = False then
+  if not keeps_list[index].boxDims.alignmentInfo.reminderFlag then
     EXIT;
 
   with math_form do begin
@@ -27170,18 +27191,15 @@ begin
       '||If you leave the reminder message blank, the reminder will be removed.' +
       '||Reminder messages are limited to 200 characters maximum.');
 
-    math_editbox.Text := keeps_list[index].template_info.keep_dims.box_dims1.
-      align_info.reminder_str;
+    math_editbox.Text := keeps_list[index].boxDims.alignmentInfo.reminderStr;
 
     do_show_modal(math_form);    // 212a
 
     if ModalResult = mrOk then begin
-      with keeps_list[index].template_info.keep_dims.box_dims1.align_info do begin
+      al := keeps_list[index].boxDims.alignmentInfo;
 
-
-        reminder_str := Trim(math_editbox.Text);
-        reminder_flag := (Trim(math_editbox.Text) <> '');
-      end;//with
+      al.reminderStr := Trim(math_editbox.Text);
+      al.reminderFlag := (Trim(math_editbox.Text) <> '');
 
       save_done := False;
       backup_wanted := True;
@@ -27204,17 +27222,17 @@ end;
 //______________________________________________________________________________
 
 procedure remove_reminder_click(index: integer);  // 216a
+var
+  al: TAlignmentInfo;
 
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;
 
-  with keeps_list[index].template_info.keep_dims.box_dims1.align_info do begin
+  al := keeps_list[index].boxDims.alignmentInfo;
 
-    reminder_str := '';
-    reminder_flag := False;
-
-  end;//with
+  al.reminderStr := '';
+  al.reminderFlag := False;
 
   save_done := False;
   backup_wanted := True;
@@ -27232,19 +27250,18 @@ end;
 //______________________________________________________________________________
 
 procedure reminder_colour_click(index: integer);  // 216a
-
+var
+  al: TAlignmentInfo;
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;
 
-  with keeps_list[index].template_info.keep_dims.box_dims1.align_info do begin
+  al := keeps_list[index].boxDims.alignmentInfo;
 
-    if reminder_flag = False then
+    if not al.reminderFlag then
       EXIT; // ???  no reminder here
 
-    reminder_colour := get_colour('choose  a  colour  for  this  reminder', reminder_colour);
-
-  end;//with
+    al.reminderColour := get_colour('choose  a  colour  for  this  reminder', al.reminderColour);
 
   save_done := False;
   backup_wanted := True;

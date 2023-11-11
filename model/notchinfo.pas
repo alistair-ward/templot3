@@ -45,8 +45,8 @@ type
 
   protected
     procedure Calculate; override;
-    procedure RestoreAttributes(AStream : TStream); override;
-    procedure SaveAttributes(AStream : TStream); override;
+    procedure RestoreAttributes(AStream: TStream); override;
+    procedure SaveAttributes(AStream: TStream); override;
 
     //# genGetSetDeclarations
     procedure SetX(const AValue: Double);
@@ -61,15 +61,17 @@ type
     //# genPublicDeclarations
     //# endGenPublicDeclarations
 
-    procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
-    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+    procedure RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+      ALoader: TOTPersistentLoader); override;
+    procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     procedure SetNotch(const ANotch: Tnotch);
+    function ToNotch: Tnotch;
 
     //# genProperty
-    property x: Double read FX write SetX;
-    property y: Double read FY write SetY;
-    property k: Double read FK write SetK;
+    property x: Double Read FX Write SetX;
+    property y: Double Read FY Write SetY;
+    property k: Double Read FK Write SetK;
     //# endGenProperty
   end;
 
@@ -83,7 +85,7 @@ uses
   TLoggerUnit;
 
 var
-  log : ILogger;
+  log: ILogger;
 
 
 { TNotchInfo }
@@ -107,7 +109,8 @@ begin
   // Add your calculation code here, and cache the results...
 end;
 
-procedure TNotchInfo.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
+procedure TNotchInfo.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+  ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
   if AName = 'x' then
@@ -119,14 +122,14 @@ begin
   if AName = 'k' then
     FK := StrToDouble(AValue)
   else
-  //# endGenRestoreYamlVars
+    //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
 
-procedure TNotchInfo.RestoreAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TNotchInfo.RestoreAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genRestoreVars
@@ -134,12 +137,12 @@ procedure TNotchInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FY, sizeof(Double));
   AStream.ReadBuffer(FK, sizeof(Double));
   //# endGenRestoreVars
-  end;
+end;
 
-procedure TNotchInfo.SaveAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TNotchInfo.SaveAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genSaveVars
@@ -147,20 +150,20 @@ procedure TNotchInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FY, sizeof(Double));
   AStream.WriteBuffer(FK, sizeof(Double));
   //# endGenSaveVars
-  end;
-  
-procedure TNotchInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
-  var
-    i: Integer;
-  begin
+end;
+
+procedure TNotchInfo.SaveYamlAttributes(AEmitter: TYamlEmitter);
+var
+  i: Integer;
+begin
   inherited;
-  
+
   //# genSaveYamlVars
   SaveYamlDouble(AEmitter, 'x', FX);
   SaveYamlDouble(AEmitter, 'y', FY);
   SaveYamlDouble(AEmitter, 'k', FK);
   //# endGenSaveYamlVars
-  end;
+end;
 
 //# genGetSetMethods
 // GENERATED METHOD - DO NOT EDIT
@@ -197,6 +200,13 @@ begin
   x := ANotch.notch_x;
   y := ANotch.notch_y;
   k := ANotch.notch_k;
+end;
+
+function TNotchInfo.ToNotch: Tnotch;
+begin
+  Result.notch_x := x;
+  Result.notch_y := y;
+  Result.notch_k := k;
 end;
 
 initialization
