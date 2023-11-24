@@ -145,6 +145,8 @@ type
 
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
 
+    procedure CopyFrom(ASource: TCurve);
+
 
     //# genProperty
     property fixedRadius: Double read FFixedRadius write SetFixedRadius;
@@ -171,6 +173,7 @@ type
 implementation
 
 uses
+  OTUndoRedoManager,
   TLoggerUnit,
   typinfo,
   Math,
@@ -522,6 +525,36 @@ begin
   CheckCalculated;
 
   Result := FDistanceToEndOfTransition;
+end;
+
+procedure TCurve.CopyFrom(ASource: TCurve);
+var
+  hasActiveMark: Boolean;
+begin
+  hasActiveMark := UndoRedoManager.hasActiveMark;
+  if not hasActiveMark then begin
+    UndoRedoManager.SetMark('');
+  end;
+
+  SetModified;
+
+  fixedRadius := ASource.fixedRadius;
+  transitionStartRadius := ASource.transitionStartRadius;
+  transitionEndRadius := ASource.transitionEndRadius;
+  distanceToTransition := ASource.distanceToTransition;
+  transitionLength := ASource.transitionLength;
+  isSpiral := ASource.isSpiral;
+  isSlewing := ASource.isSlewing;
+  distanceToStartOfSlew := ASource.distanceToStartOfSlew;
+  slewLength := ASource.slewLength;
+  slewAmount := ASource.slewAmount;
+  slewMode := ASource.slewMode;
+  slewFactor := ASource.slewFactor;
+
+  if not hasActiveMark then begin
+    UndoRedoManager.Commit;
+  end;
+
 end;
 
 initialization

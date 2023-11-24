@@ -83,7 +83,7 @@ type
 
     procedure test_slew_creation;
 
-    //procedure test_CopyFrom;
+    procedure test_CopyFrom;
   end;
 
 implementation
@@ -473,7 +473,7 @@ begin
 
   Check(curve.curveCalculator is TSlewCalculator, 'curveCalculator not expected class');
 end;
-{
+
 procedure TTestCurve.test_CopyFrom;
 var
   curve2: TCurve;
@@ -497,7 +497,7 @@ begin
   curve.slewFactor := 1.5;
   curve.slewMode := smTanH;
 
-  curve2 := TCurve.Create;
+  curve2 := TCurve.Create(nil);
   try
     curve2.CopyFrom(curve);
 
@@ -518,7 +518,7 @@ begin
     curve2.Free;
   end;
 end;
-}
+
 initialization
   RegisterTest(TTestCurve);
 
