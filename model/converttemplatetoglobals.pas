@@ -31,6 +31,7 @@ implementation
 
 uses
   Graphics,
+  plain_track_unit,
   ShovedTimber,
   control_room,
   info_unit,
@@ -49,7 +50,9 @@ uses
   AlignmentInfo,
   TurnoutInfo1,
   TurnoutInfo2,
-  PlainTrackInfo;
+  PlainTrackInfo,
+  SwitchInfo,
+  CrossingInfo;
 
 
 procedure CopyToTCheckEndDiff(cd: TCheckEndDiff; const from: Tcheck_end_diff);
@@ -79,7 +82,7 @@ end;
 procedure fill_kd(target: TTemplate);
 
 var
-  n: integer;
+  i: integer;
   rand_label_factor: double;
 
   bd: TBoxDims;
@@ -92,6 +95,8 @@ var
   ti1: TTurnoutInfo1;
   ti2: TTurnoutInfo2;
   pt: TPlainTrackInfo;
+  swi: TSwitchInfo;
+  xi: TCrossingInfo;
 
 begin
   target.Name := Copy(current_name_str, 1, 99);
@@ -414,168 +419,206 @@ begin
 
   ti2 := target.turnoutInfo2;
 
-    ti2.equalizingFixed := equalizing_fixed;  // equalizing style 1-4-00
-    ti2.noTimbering := no_timbering;          // 7-9-00
+  ti2.equalizingFixed := equalizing_fixed;  // equalizing style 1-4-00
+  ti2.noTimbering := no_timbering;          // 7-9-00
 
-    ti2.chairing := exp_chairing;       // 214a
+  ti2.chairing := exp_chairing;       // 214a
 
-    ti2.angledOn := square_on_angled;         // 29-7-01.
-    ti2.bonusTimberCount := bontimb;              // 0.76.a  23-10-01.
+  ti2.angledOn := square_on_angled;         // 29-7-01.
+  ti2.bonusTimberCount := bontimb;              // 0.76.a  23-10-01.
 
-    ti2.diamondAutoCode := auto_diamond;                  // 0.77.a 27-8-02...
-    ti2.timberLengthInc := timbinc;                       // 0.78.a 1-11-02.
-    ti2.diamondProtoTimbering := hd_proto_timbering;
+  ti2.diamondAutoCode := auto_diamond;                  // 0.77.a 27-8-02...
+  ti2.timberLengthInc := timbinc;                       // 0.78.a 1-11-02.
+  ti2.diamondProtoTimbering := hd_proto_timbering;
 
-    ti2.diamondSwitchTimbering := hd_switch_timbering;  // 213a
+  ti2.diamondSwitchTimbering := hd_switch_timbering;  // 213a
 
-    ti2.semiDiamond := half_diamond;
-    ti2.diamondFixed := fixed_diamond;   // N.B. fixed diamond will be reset in calc_switch.
+  ti2.semiDiamond := half_diamond;
+  ti2.diamondFixed := fixed_diamond;   // N.B. fixed diamond will be reset in calc_switch.
 
-    ti2.turnoutRoadEndX := turnout_road_endx;   // 209a
+  ti2.turnoutRoadEndX := turnout_road_endx;   // 209a
 
-    if plain_track then                       // 208c (max 6 chars) ...
-      ti2.templateType := '??pt'
-    else
-    if half_diamond = True then
-      ti2.templateType := '??hd'
-    else
-      ti2.templateType := '??to';
+  if plain_track then                       // 208c (max 6 chars) ...
+    ti2.templateType := '??pt'
+  else
+  if half_diamond = True then
+    ti2.templateType := '??hd'
+  else
+    ti2.templateType := '??to';
 
-    ti2.gaunt := gaunt;                      // 0.93.a ex 081
-    ti2.gauntOffsetInches := gaunt_offset_in;   // 0.93.a ex 081
+  ti2.gaunt := gaunt;                      // 0.93.a ex 081
+  ti2.gauntOffsetInches := gaunt_offset_in;   // 0.93.a ex 081
 
-    ti2.startDrawX := startx;
-    //  turnout startx  3-11-99.
+  ti2.startDrawX := startx;
+  //  turnout startx  3-11-99.
 
-    ti2.smallestRadius := smallest_radius;
-    // 208a needed for box data -- not loaded to the control
+  ti2.smallestRadius := smallest_radius;
+  // 208a needed for box data -- not loaded to the control
 
-    ti2.dpx := dpx;    // 208a needed for ID number creation -- not loaded to the control
-    ti2.ipx := ipx;    // 208a needed for ID number creation -- not loaded to the control
-    ti2.fpx := fpx;    // 208a needed for ID number creation -- not loaded to the control
+  ti2.dpx := dpx;    // 208a needed for ID number creation -- not loaded to the control
+  ti2.ipx := ipx;    // 208a needed for ID number creation -- not loaded to the control
+  ti2.fpx := fpx;    // 208a needed for ID number creation -- not loaded to the control
 
-    pt := ti2.plainTrackInfo;
+  pt := ti2.plainTrackInfo;
 
-      if pt_i > 4 then
-        pt.customPlainTrack := True       // list index for custom plain track.
-      else
-        pt.customPlainTrack := False;
+  if pt_i > 4 then
+    pt.customPlainTrack := True       // list index for custom plain track.
+  else
+    pt.customPlainTrack := False;
 
-      pt.listIndex := pt_i;
-      pt.railLength := railen[pt_i];
-      // rail length in inches (only used for custom lengths).
-      pt.sleepersPerLength := sleeper_count[pt_i];
-      // number of sleepers per length.
-      for n := 0 to psleep_c do
-        pt.sleeperCentres[n] := psleep[pt_i, n];   // spacings (only used for custom spacings).
+  pt.listIndex := pt_i;
+  pt.railLength := railen[pt_i];
+  // rail length in inches (only used for custom lengths).
+  pt.sleepersPerLength := sleeper_count[pt_i];
+  // number of sleepers per length.
+  for i := 0 to psleep_c do
+    pt.sleeperCentres[i] := psleep[pt_i, i];   // spacings (only used for custom spacings).
 
-      pt.plainTrackSpacingName := Copy(
-        plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i], 1, 198);
-      // get name from the list.
+  pt.plainTrackSpacingName := Copy(
+    plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i], 1, 198);
+  // get name from the list.
 
-      pt.userPegX := udpegx;    // user-defined peg data (here to use former spare floats in file)
-      pt.userPegY := udpegy;
-      pt.userPegK := udpegangle;
-      pt.userPegDataValid := udpeg_valid;
-      pt.userPegRail := udpeg_rail;
+  pt.userPegX := udpegx;    // user-defined peg data (here to use former spare floats in file)
+  pt.userPegY := udpegy;
+  pt.userPegK := udpegangle;
+  pt.userPegDataValid := udpeg_valid;
+  pt.userPegRail := udpeg_rail;
 
-      pt.railJointsCode := rjcode;   // 0=normal, 1=staggered, -1=none (cwr).
+  pt.railJointsCode := rjcode;   // 0=normal, 1=staggered, -1=none (cwr).
 
-      pt.plainTrackTimberRollingPercent := tb_roll_percent;
+  pt.plainTrackTimberRollingPercent := tb_roll_percent;
 
-      pt.gauntSleeperModInches := gaunt_sleeper_mod_in;   // 0.93.a ex 0.81
-
-
-    // switch stuff ..
-
-    switch_info := csi;  // current switch.
-
-    // crossing stuff...
-
-    with crossing_info do begin
-
-      if retpar_i = 1 then
-        pattern := 2
-      else
-        pattern := xing_type_i;  // 0=straight, 1=curviform, 2=parallel, -1=generic.
-
-      sl_mode := entry_straight_code;   // 0=auto_fit, 1=use fixed_sl, -1=short
-      retcent_mode := xing_ret_i;
-      // 0=return centres as adjacent track, 1=use custom centres.
-      k3n_unit_angle := k3n;         // k3n angle in units.
-      hdkn_unit_angle := hdkn;        // K-crossing angle in units. 0.93.a
-      fixed_st := fixed_sl;    // length of knuckle straight. mm.
-
-      hd_timbers_code := hd_timbers;       // extending of timbers for slip road.
-      hd_vchecks_code := hd_vcheck_rails;
-      // shortening code for half-diamond v-crossing check rails.
-
-      k_check_length_1 := kck1_long;   // length of size 1 k-crossing check rail (inches).
-      k_check_length_2 := kck2_long;   // length of size 2 k-crossing check rail (inches).
-
-      k_check_flare := k_flare_len;  // length of flare on k-crossing check rails. inches F-S
-
-      curviform_timbering_keep := curviform_timbering;   // 215a
-
-      // 0.75.a  9-10-01...
-
-      blunt_nose_width := bn_wide;         // full-size inches.
-      blunt_nose_to_timb := bn_to_a;       // full-size inches - to A timber centre.
-
-      vee_timber_spacing := veetimb_sp;
-      // full-size inches - timber spacing for vee point rail part of crossing (on from "A").
-      wing_timber_spacing := wingtimb_sp;
-      // full-size inches - timber spacing for wing rail front part of crossing (up to "A").
-
-      vee_joint_half_spacing := mvj_sp;
-      // full-size inches - rail overlap at vee point rail joint.
-      wing_joint_spacing := wingj_sp;      // full-size inches - timber spacing at wing rail joint.
-
-      // number of timbers spanned by vee rail incl. "A" timber...
-
-      vee_joint_space_co1 := vee_spco1;
-      vee_joint_space_co2 := vee_spco2;
-      vee_joint_space_co3 := vee_spco3;
-      vee_joint_space_co4 := vee_spco4;
-      vee_joint_space_co5 := vee_spco5;
-      vee_joint_space_co6 := vee_spco6;
-
-      // number of timbers spanned by wing rail front excl. "A" timber...
-
-      wing_joint_space_co1 := wing_spco1;
-      wing_joint_space_co2 := wing_spco2;
-      wing_joint_space_co3 := wing_spco3;
-      wing_joint_space_co4 := wing_spco4;
-      wing_joint_space_co5 := wing_spco5;
-      wing_joint_space_co6 := wing_spco6;
-
-      // 0.95.a  K-crossing wing rails ...
-
-      k_custom_wing_long_keep := k_custom_wing_long;
-      // 0.95.a inches full-size k-crossing wing rails
-      k_custom_point_long_keep := k_custom_point_long;
-      // 0.95.a inches full-size k-crossing point rails   NYI
-
-      use_k_custom_wing_rails_keep := use_k_custom_wing_rails;    // 0.95.a
-      use_k_custom_point_rails_keep := use_k_custom_point_rails;  // 0.95.a  NYI
-
-      main_road_endx_infile := main_road_endx;   // 217a
-      main_road_code := main_road_i;             // 217a
-
-      tandem_timber_code := tandem_timb;         // 218a
-
-    end;//with crossing_info
-
-    omit_switch_front_joints := omit_swfj_marks;  // 0.79.a  25-02-03
-    omit_switch_rail_joints := omit_swrj_marks;
-    omit_stock_rail_joints := omit_skj_marks;
-    omit_wing_rail_joints := omit_wj_marks;
-    omit_vee_rail_joints := omit_vj_marks;
-    omit_k_crossing_stock_rail_joints := omit_kx_marks;
+  pt.gauntSleeperModInches := gaunt_sleeper_mod_in;   // 0.93.a ex 0.81
 
 
-  copy_shove_list(False, current_shove_list, target.template_info.keep_shove_list);
+  // switch stuff ..
+
+  swi := ti2.switchInfo;
+
+  swi.switchPattern := csi.sw_pattern;
+  swi.planingLength := csi.planing;
+  swi.planingAngle := csi.planing_angle;
+  swi.switchRadius := csi.switch_radius_inchormax;
+  swi.switchRailLength := csi.switch_rail;
+  swi.stockRailLength := csi.stock_rail;
+  swi.heelLead := csi.heel_lead_inches;
+  swi.heelOffset := csi.heel_offset_inches;
+  swi.switchFront := csi.switch_front_inches;
+  swi.planingRadius := csi.planing_radius;
+  swi.sleeperJ1 := csi.sleeper_j1;
+  swi.sleeperJ2 := csi.sleeper_j2;
+
+  swi.ClearTimberCentres;
+  for i := 0 to swtimbco_c do begin
+    if (csi.timber_centres[i] = 0) then
+      break;
+    swi.AddTimberCentres(csi.timber_centres[i]);
+  end;
+
+  swi.groupCode := csi.group_code;
+  swi.sizeCode := csi.size_code;
+  swi.joggleDepth := csi.joggle_depth;
+  swi.joggleLength := csi.joggle_length;
+  swi.groupCount := csi.group_count;
+  swi.joggledStockRail := csi.joggled_stock_rail;
+  swi.validData := csi.valid_data;
+  swi.frontTimbered := csi.front_timbered;
+  swi.numBridgeChairsMainRail := csi.num_bridge_chairs_main_rail;
+  swi.numBridgeChairsTurnoutRail := csi.num_bridge_chairs_turnout_rail;
+  swi.fbTipOffset := csi.fb_tip_offset;
+  swi.sleeperJ3 := csi.sleeper_j3;
+  swi.sleeperJ4 := csi.sleeper_j4;
+  swi.sleeperJ5 := csi.sleeper_j5;
+  swi.numSlideChairs := csi.num_slide_chairs;
+  swi.numBlockSlideChairs := csi.num_block_slide_chairs;
+  swi.numBlockHeelChairs := csi.num_block_heel_chairs;
+
+  // crossing stuff...
+
+  xi := ti2.crossingInfo;
+
+  if retpar_i = 1 then
+    xi.pattern := 2
+  else
+    xi.pattern := xing_type_i;  // 0=straight, 1=curviform, 2=parallel, -1=generic.
+
+  xi.slMode := entry_straight_code;   // 0=auto_fit, 1=use fixed_sl, -1=short
+  xi.returnCentresMode := xing_ret_i;
+  // 0=return centres as adjacent track, 1=use custom centres.
+  xi.k3nUnitAngle := k3n;         // k3n angle in units.
+  xi.hdkn := hdkn;        // K-crossing angle in units. 0.93.a
+  xi.fixedSt := fixed_sl;    // length of knuckle straight. mm.
+
+  xi.hdTimbersCode := hd_timbers;       // extending of timbers for slip road.
+  xi.hdVchecksCode := hd_vcheck_rails;
+  // shortening code for half-diamond v-crossing check rails.
+
+  xi.kCheckLength1 := kck1_long;   // length of size 1 k-crossing check rail (inches).
+  xi.kCheckLength2 := kck2_long;   // length of size 2 k-crossing check rail (inches).
+
+  xi.kCheckFlare := k_flare_len;  // length of flare on k-crossing check rails. inches F-S
+
+  xi.curviformTimbering := curviform_timbering;   // 215a
+
+  // 0.75.a  9-10-01...
+
+  xi.bluntNoseWidth := bn_wide;         // full-size inches.
+  xi.bluntNoseToTimber := bn_to_a;       // full-size inches - to A timber centre.
+
+  xi.veeTimberSpacing := veetimb_sp;
+  // full-size inches - timber spacing for vee point rail part of crossing (on from "A").
+  xi.wingTimberSpacing := wingtimb_sp;
+  // full-size inches - timber spacing for wing rail front part of crossing (up to "A").
+
+  xi.veeJointHalfSpacing := mvj_sp;
+  // full-size inches - rail overlap at vee point rail joint.
+  xi.wingJointSpacing := wingj_sp;
+  // full-size inches - timber spacing at wing rail joint.
+
+  // number of timbers spanned by vee rail incl. "A" timber...
+
+  xi.veeJointSpaceCo1 := vee_spco1;
+  xi.veeJointSpaceCo2 := vee_spco2;
+  xi.veeJointSpaceCo3 := vee_spco3;
+  xi.veeJointSpaceCo4 := vee_spco4;
+  xi.veeJointSpaceCo5 := vee_spco5;
+  xi.veeJointSpaceCo6 := vee_spco6;
+
+  // number of timbers spanned by wing rail front excl. "A" timber...
+
+  xi.wingJointSpaceCo1 := wing_spco1;
+  xi.wingJointSpaceCo2 := wing_spco2;
+  xi.wingJointSpaceCo3 := wing_spco3;
+  xi.wingJointSpaceCo4 := wing_spco4;
+  xi.wingJointSpaceCo5 := wing_spco5;
+  xi.wingJointSpaceCo6 := wing_spco6;
+
+  // 0.95.a  K-crossing wing rails ...
+
+  xi.kCustomWingLong := k_custom_wing_long;
+  // 0.95.a inches full-size k-crossing wing rails
+  xi.kCustomPointLong := k_custom_point_long;
+  // 0.95.a inches full-size k-crossing point rails   NYI
+
+  xi.useKCustomWingRails := use_k_custom_wing_rails;    // 0.95.a
+  xi.useKCustomPointRails := use_k_custom_point_rails;  // 0.95.a  NYI
+
+  xi.mainRoadEndX := main_road_endx;   // 217a
+  xi.mainRoadCode := main_road_i;             // 217a
+
+  xi.tandemTimberCode := tandem_timb;         // 218a
+
+
+  ti2.omitSwitchFrontJoints := omit_swfj_marks;  // 0.79.a  25-02-03
+  ti2.omitSwitchRailJoints := omit_swrj_marks;
+  ti2.omitStockRailJoints := omit_skj_marks;
+  ti2.omitWingRailJoints := omit_wj_marks;
+  ti2.omitVeeRailJoints := omit_vj_marks;
+  ti2.omitKCrossingStockRailJoints := omit_kx_marks;
+
+
   // copy all the current shoved timber data to the keep.
+  target.shovedTimbers.CopyFrom(current_shove_list);
 end;
 
 procedure copy_keep(Source: TTemplate);
