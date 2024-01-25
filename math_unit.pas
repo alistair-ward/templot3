@@ -23344,11 +23344,11 @@ begin
     endmarks_yn[aq, 1] := False;
   end;
 
-  if {(railend_marks=False) or} (plain_track = True) and (draw_ts_platform = False) and
-    (draw_ms_platform = False) then
+  if (plain_track) and (not draw_ts_platform) and
+    (not draw_ms_platform) then
     EXIT;
 
-  if plain_track = True then begin
+  if plain_track then begin
     aq_begin := rdAdjTrackTurnoutSideNearGaugeFace;   // platform ends
     aq_end := rdAdjTrackMainSideFarOuterFace;
   end
@@ -23359,8 +23359,8 @@ begin
 
   for aq := aq_begin to aq_end do begin
 
-    if cl_only = True     // platforms /trackbed only
-    then begin
+    if cl_only then begin
+      // platforms /trackbed only
       if not (aq in rdAdjacentTracks) then
         CONTINUE;
     end;
@@ -35156,8 +35156,8 @@ begin
 
   //if check_t_55_ok=False then EXIT;   // check he wants it if T-55.
 
-  if click = True then begin
-    if check_control_template_is_valid('store') = False then
+  if click then begin
+    if not check_control_template_is_valid('store') then
       EXIT;  // 0.93.a  zero length
   end
   else begin
@@ -35172,24 +35172,24 @@ begin
 
   // 0.93.a   ...
 
-  if (click = True) and (classic_templot = True) and
-    (keep_form.briefly_hide_on_store_menu_entry.Checked = True)
+  if (click) and (classic_templot) and
+    (keep_form.briefly_hide_on_store_menu_entry.Checked)
   // 205e now radio item.  205c
   then begin
     do_hide_current;
     hidden_on_store := 8;         // 205c count down in timer to show it again.
   end;
 
-  if (click = True) and (classic_templot = True) and
-    (keep_form.hide_on_store_menu_entry.Checked = True)
+  if (click) and (classic_templot) and
+    (keep_form.hide_on_store_menu_entry.Checked)
   // 205e radio item
   then begin
     do_hide_current;
     hidden_on_store := 0;   // cancel any countdown in progress
   end;
 
-  if (click = True) and (classic_templot = True) and (hide_current_flag = False) and
-    (keep_form.reveal_on_store_menu_entry.Checked = True)  // 206a radio item
+  if (click) and (classic_templot) and (not hide_current_flag) and
+    (keep_form.reveal_on_store_menu_entry.Checked)  // 206a radio item
   then begin
     stored_xshift := xshift;
     stored_yshift := yshift;
@@ -35205,8 +35205,8 @@ begin
 
   end;
 
-  if (click = True) and (classic_templot = True) and
-    (keep_form.alert_on_store_menu_entry.Checked = True)
+  if (click) and (classic_templot) and
+    (keep_form.alert_on_store_menu_entry.Checked)
   // 206c radio item
   then begin
 
@@ -35233,7 +35233,7 @@ begin
 
   end;
 
-  if (zero_it = True) and (classic_templot = False)  // Quick mode
+  if (zero_it) and (not classic_templot)  // Quick mode
   then begin
     pad_form.snap_to_zero_menu_entry.Click;
     // 0.93.a invalidate after storing.

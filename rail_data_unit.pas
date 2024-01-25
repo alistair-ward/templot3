@@ -39,9 +39,6 @@ interface
 uses
   Classes, SysUtils, point_ex;
 
-const
-  aq_max_c = 48;                     // currently 49 rail-lines 0-48
-
 type
   ERailData = (
     rdStraightStockGaugeFace, // 0

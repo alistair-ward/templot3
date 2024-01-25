@@ -2988,7 +2988,6 @@ var
   newTemplate: TTemplate;
 
 begin
-(*
   if (keep_form.Active) and (not control_template_on_save) then begin
     // the box was opened unchanged.
     if not valid_calcs then begin
@@ -3035,77 +3034,64 @@ begin
     end;
   end;
 
-  newTemplate := TTemplate.Create('');
+  n := keeps_list.Count;  // for error message if Add fails
   try
-    fill_kd(newTemplate);               // fill the keep record with the control template data.
+    n := keeps_list.Add(TTemplate.Create(nil));
+  except
+    if not control_template_on_save           // 0.93.a
+    then
+      alert(1, '      memory  problem',
+        '|Unable to add this template to your storage box because of memory constraints.'
+        +
+        '||(There are  ' + IntToStr(n) + '  templates in your box already.)'
+        // n+1-1 because not added.
+        + '||Save the contents of your storage box to a file, then clear the contents to make space for more.'
+        + '||Alternatively, delete one or more unwanted existing templates from the box.'
+        + '||Then try again.',
+        '', '', '', '', '', 'continue', 0);
+    EXIT;
+  end;
 
-    n := keeps_list.Count;           // for error message if AddObject fails.
 
-    //with info_form do begin
-    si := '';
-    if info_text_list{info_memo.Lines}.Count < 1 then
-      si := '    blank|'     // ???
-    else begin
-      for i := 0 to (info_text_list{info_memo.Lines}.Count - 1) do
-        si := si + info_text_list{info_memo.Lines}.Strings[i] + '|';
-      // info text goes in keeps_list.
-      si := si + 'total timbering length on this template = ' + round_str(
-        total_template_timber_length, 2);  //0.97.a
-    end;
+  newTemplate := keeps_list[n];
+  fill_kd(newTemplate);               // fill the keep record with the control template data.
 
-    try
-      // create and append a new line in keeps list.
-      n := keeps_list.Add(TTemplate.Create(si));
-    except
-      if control_template_on_save = False           // 0.93.a
-      then
-        alert(1, '      memory  problem',
-          '|Unable to add this template to your storage box because of memory constraints.'
-          +
-          '||(There are  ' + IntToStr(n) + '  templates in your box already.)'
-          // n+1-1 because not added.
-          + '||Save the contents of your storage box to a file, then clear the contents to make space for more.'
-          + '||Alternatively, delete one or more unwanted existing templates from the box.'
-          + '||Then try again.',
-          '', '', '', '', '', 'continue', 0);
-      EXIT;
-    end;//try
-    init_ttemplate(n);           // init flags for new keep.
+  //with info_form do begin
+  si := '';
+  if info_text_list{info_memo.Lines}.Count < 1 then
+    si := '    blank|'     // ???
+  else begin
+    for i := 0 to (info_text_list{info_memo.Lines}.Count - 1) do
+      si := si + info_text_list{info_memo.Lines}.Strings[i] + '|';
+    // info text goes in keeps_list.
+    si := si + 'total timbering length on this template = ' + round_str(
+      total_template_timber_length, 2);  //0.97.a
+  end;
 
-    if library_template = True then
-      newTemplate.template_info.keep_dims.box_dims1.bgnd_code_077 := -1   // make it a library template.
-    else
-      newTemplate.template_info.keep_dims.box_dims1.bgnd_code_077 := 0;   // unused, not yet on background.
-    newTemplate.template_info.keep_dims.box_dims1.pre077_bgnd_flag := False;
-    // in case reloaded in older version than 0.77.a
+  if library_template then
+    newTemplate.boxDims.backgroundCode := bkcLibrary   // make it a library template.
+  else
+    newTemplate.boxDims.backgroundCode := bkcUnused;   // unused, not yet on background.
 
-    newTemplate.template_info.keep_dims.box_dims1.this_was_control_template := control_template_on_save;  // 0.93.a
+  newTemplate.boxDims.thisWasControlTemplate := control_template_on_save;  // 0.93.a
 
-    if control_template_on_save then begin
-      with newTemplate.template_info.keep_dims.turnout_info2 do
-        template_type_str := template_type_str + 'c';  // max 6 chars
-    end;
+  if control_template_on_save then begin
+    newTemplate.turnoutInfo2.templateType := newTemplate.turnoutInfo2.templateType + 'c';// max 6 chars
+  end;
 
-    keeps_list[n].CopyFrom(newTemplate);
+  if not control_template_on_save then begin
 
-    if not control_template_on_save then begin
+    save_done := False;     // need a fresh save.
+    backup_wanted := True;  // update the backup.
 
-      save_done := False;     // need a fresh save.
-      backup_wanted := True;  // update the backup.
+    if keep_form.list_panel.Showing then
+      keep_form.show_list_button.Click;          // update the list.
 
-      if keep_form.list_panel.Showing then
-        keep_form.show_list_button.Click;          // update the list.
+    current_state(0);  // add to listbox and set new current.
 
-      current_state(0);  // add to listbox and set new current.
-
-      if (keep_form.Active) and (not keep_form.list_panel.Visible) then
-        keep_draw(n);    // draw the control template in the keeps box.
-    end;
-
-  finally
-    newTemplate.Free;
-  end;//try
-*)
+    if (keep_form.Active) and (not keep_form.list_panel.Visible) then
+      keep_draw(n);    // draw the control template in the keeps box.
+  end;
 end;
 //____________________________________________________________________________________________
 
@@ -3583,13 +3569,13 @@ begin
   if keeps_list[n].boxDims.backgroundCode = bkcLibrary then
     EXIT;   // library template, button should be disabled???
 
-  if keep_form.Active = True then
+  if keep_form.Active then
     keep_form.Cursor := crHourGlass;        // might take a while.
 
   try
-    if keeps_list[n].bg_copied = True       // wipe it...
+    if keeps_list[n].bg_copied       // wipe it...
     then begin
-      if wipe_it(n) = False      // wipe background
+      if not wipe_it(n)      // wipe background
       then begin
         alert(5, '    program  error',
           '||Sorry, there is a program error.' +
@@ -3667,7 +3653,7 @@ begin
       if (list_index < 0) or (list_index > (keeps_list.Count - 1)) then
         EXIT;  // how did this happen ?
 
-      if keeps_list[list_index].bg_copied = True then
+      if keeps_list[list_index].bg_copied then
         EXIT;                            // already on background.
       if keeps_list[list_index].boxDims.backgroundCode = bkcLibrary then
         EXIT;  // ??? library template.
@@ -3883,7 +3869,7 @@ begin
       end;//try
     end;//with keep_form
 
-    if update_info = True then begin
+    if update_info then begin
       si := '';
       //with info_form do begin
       if info_text_list{info_memo.Lines}.Count > 0 then begin
@@ -3906,11 +3892,11 @@ begin
     end;
 
   end;// if count>0
-  if reloading = False then
+  if not reloading then
     save_done := False;   // need a re-save on changed box data.
   backup_wanted := True;
 
-  if reloading = False then
+  if not reloading then
     redraw_pad(True, False);
 end;
 //________________________________________________________________________________________

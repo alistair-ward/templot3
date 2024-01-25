@@ -1620,7 +1620,7 @@ var
   title_str: string;
 
 begin
-  if open_button_clicked = True then
+  if open_button_clicked then
     EXIT;  // 205d
 
   open_button_clicked := True;
@@ -1718,7 +1718,7 @@ begin
 
     // load prefs for startup dialogs only (other prefs loaded later, in case defaults reset on startup).
 
-    if user_prefs_in_use = True                // GO button clicked with prefs
+    if user_prefs_in_use                // GO button clicked with prefs
     then
       load_prefs('', True, False, True);  // get file, don't show changes, startup msg prefs only
 
@@ -1740,7 +1740,7 @@ begin
 
     check_colours;     //  get hi_color (more than 8-bit) True or False for screen colours.
 
-    if hi_color = False                   //  8-bit (or lower)
+    if not hi_color                   //  8-bit (or lower)
     then begin                       //  set the form colours for lo-colour...
 
       chat_form.Color := clBtnFace;
@@ -1788,15 +1788,15 @@ begin
 
     end;
 
-    if initdone_flag = False then
+    if not initdone_flag then
       templot_init;       //  only initialise once.
 
     //and start up on the pad...
 
-    if (Screen.MonitorCount > 1) and (multi_monitors_msg_pref = False)     //%%%%
+    if (Screen.MonitorCount > 1) and (not multi_monitors_msg_pref)     //%%%%
     then begin
       alert_box.preferences_checkbox.Checked := False;       //%%%%
-      if user_prefs_in_use = True then
+      if user_prefs_in_use then
         alert_box.preferences_checkbox.Show;
 
       if alert(7, '   Templot0   -   Multiple  Monitors',
