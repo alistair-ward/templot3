@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="72">
+    <Units Count="91">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -335,6 +335,100 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ShovedTimber"/>
       </Unit71>
+      <Unit72>
+        <Filename Value="model\boxdims.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="BoxDims"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="model\alignmentinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="AlignmentInfo"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="model\checkdiffs.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CheckDiffs"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="model\checkenddiff.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CheckEndDiff"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="model\crossinginfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CrossingInfo"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="model\hdkcheckrailinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HdkCheckRailInfo"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="model\notchinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="NotchInfo"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="model\plaintrackinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PlainTrackInfo"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="model\platformtrackbedinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="PlatformTrackbedInfo"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="model\project.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Project"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="model\protoinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtoInfo"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="model\railinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="RailInfo"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="model\switchinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SwitchInfo"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="model\template.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Template"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="model\transforminfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TransformInfo"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="model\turnoutinfo1.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TurnoutInfo1"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="model\turnoutinfo2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TurnoutInfo2"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="model\veecheckrailinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="VeeCheckRailInfo"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="test\template_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit90>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
