@@ -1245,6 +1245,18 @@ type
 
 //______________________________________________________________________________
 
+function ConvertBox2Hand(hand: Integer): TTurnoutHand;
+begin
+  case hand of
+    1: Result := thLeft;
+    0: Result := thY;
+    -1: Result := thRight;
+  else
+    raise Exception.Create('Unexpected hand value');
+  end;
+end;
+
+
 function version_mismatch(var okd: TBox2KeepDims): boolean;
   // check loaded template matches current program version.
 
@@ -1915,7 +1927,7 @@ begin
 
           id_number := highest_id_number + 1;                                  // 208a
           id_number_str :=
-            create_id_number_str(id_number, turnout_info1.hand,
+            create_id_number_str(id_number, ConvertBox2Hand(turnout_info1.hand),
             old_keep_dims2.turnout_info2.start_draw_x, turnout_info1.turnout_length,
             old_keep_dims2.turnout_info2.ipx_stored,   // 0
             old_keep_dims2.turnout_info2.fpx_stored,   // 0
@@ -2757,7 +2769,7 @@ begin
   ti.rolledInSleepered := turnout_info1.rolled_in_sleepered_flag;
   ti.frontTimbers := turnout_info1.front_timbers_flag;
   ti.approachRailsOnly := turnout_info1.approach_rails_only_flag;
-  ti.hand := turnout_info1.hand;
+  ti.hand := ConvertBox2Hand(turnout_info1.hand);
   ti.timbering := turnout_info1.timbering_flag;
   ti.switchTimbers := turnout_info1.switch_timbers_flag;
   ti.closureTimbers := turnout_info1.closure_timbers_flag;

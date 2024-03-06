@@ -19,7 +19,7 @@ object math_form: Tmath_form
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '3.0.0.3'
   Scaled = False
   object datestamp_label: TLabel
     Left = 0
@@ -64,6 +64,7 @@ object math_form: Tmath_form
     Font.Height = -17
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 0
     object big_label: TLabel
@@ -88,8 +89,8 @@ object math_form: Tmath_form
       Width = 429
       AutoSelect = False
       Color = clWhite
-      OnKeyPress = math_editboxKeyPress
       TabOrder = 0
+      OnKeyPress = math_editboxKeyPress
     end
     object ok_button: TButton
       Left = 438
@@ -120,6 +121,7 @@ object math_form: Tmath_form
     Font.Height = -17
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 1
@@ -142,6 +144,7 @@ object math_form: Tmath_form
       Width = 15
       ClientHeight = 16
       ClientWidth = 15
+      ParentBackground = False
       TabOrder = 1
       OnClick = colour_panelClick
       object colour_patch: TImage
@@ -208,11 +211,11 @@ object math_form: Tmath_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = font_buttonClick
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 2
+    OnClick = font_buttonClick
   end
   object cancel_button: TButton
     Left = 476

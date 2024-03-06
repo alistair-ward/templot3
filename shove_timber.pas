@@ -178,7 +178,8 @@ implementation
 
 uses
   control_room, pad_unit, colour_unit, {grid_unit,} alert_unit, help_sheet, math_unit,
-  enter_timber, {bgkeeps_unit,} entry_sheet, mark_unit;
+  enter_timber, {bgkeeps_unit,} entry_sheet, mark_unit,
+  TurnoutInfo1;
 
 {$R *.lfm}
 //_______________________________________________________________________________________________
@@ -474,7 +475,7 @@ begin
   n := find_shove(current_shove_str, True);
   if n >= 0                           // valid slot.
   then begin
-    current_shove_list[n].AdjustAngle(DegreesToRadians(-hand_i)); // clockwise 1 degree.
+    current_shove_list[n].AdjustAngle(DegreesToRadians(-TurnoutHandMultiplier(hand_i))); // clockwise 1 degree.
     shove_buttons(True, n);
     show_and_redraw(True, True);
   end;
@@ -490,7 +491,7 @@ begin
   n := find_shove(current_shove_str, True);
   if n >= 0                           // valid slot.
   then begin
-    current_shove_list[n].AdjustAngle(DegreesToRadians(hand_i)); // anti-clockwise 1 degree.
+    current_shove_list[n].AdjustAngle(DegreesToRadians(TurnoutHandMultiplier(hand_i))); // anti-clockwise 1 degree.
     shove_buttons(True, n);
     show_and_redraw(True, True);
   end;
@@ -726,7 +727,7 @@ begin
     putdim(help_str, 1, 'shove  timber  along  by', shove.xtbModifier,
       False, True, False, False); // neg ok, no preset, 0 ok, don't terminate on zero.
     putdim(help_str, 3, 'twist  timber  by', shove.angleModifier *
-      180 / Pi * hand_i, False, True, False, False);
+      180 / Pi * TurnoutHandMultiplier(hand_i), False, True, False, False);
     // neg ok, no preset, 0 ok, don't terminate on zero.
     putdim(help_str, 1, 'crab  timber  sideways  by', shove.crabModifier,
       False, True, False, False); // neg ok, no preset, 0 ok, don't terminate on zero.
@@ -743,7 +744,7 @@ begin
 
     if getdims('shoving  timber  ' + current_shove_str, '', pad_form, i, od) then begin
       shove.xtbModifier := od[0];
-      shove.angleModifier := od[1] * Pi / 180 * hand_i;
+      shove.angleModifier := od[1] * Pi / 180 * TurnoutHandMultiplier(hand_i);
       shove.crabModifier := od[2];
       shove.offsetModifier := od[3];
       shove.lengthModifier := od[4];
@@ -1123,7 +1124,7 @@ begin
 
     if getdims('timber  ' + current_shove_str + '  twist  angle', '', pad_form, i, od) = True
     then begin
-      shove.AdjustAngle(DegreesToRadians((od[0] - shovetimb_keq * 180 / Pi) * hand_i));
+      shove.AdjustAngle(DegreesToRadians((od[0] - shovetimb_keq * 180 / Pi) * TurnoutHandMultiplier(hand_i)));
       // modify shove data.
       shove_buttons(True, n);
       show_and_redraw(True, True);

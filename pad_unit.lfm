@@ -7,7 +7,7 @@ object pad_form: Tpad_form
   VertScrollBar.Tracking = True
   AllowDropFiles = True
   Caption = '          trackpad'
-  ClientHeight = 728
+  ClientHeight = 748
   ClientWidth = 1268
   Color = clSilver
   Font.Color = clNavy
@@ -33,7 +33,7 @@ object pad_form: Tpad_form
   OnPaint = FormPaint
   OnResize = FormResize
   ShowHint = True
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '3.0.0.3'
   Scaled = False
   object pad_timber_font_label: TLabel
     Left = 156
@@ -74,7 +74,7 @@ object pad_form: Tpad_form
   object time_now_panel: TPanel
     Left = 1138
     Height = 29
-    Top = 696
+    Top = 716
     Width = 88
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
@@ -84,6 +84,7 @@ object pad_form: Tpad_form
     Font.Height = -18
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 12
@@ -105,6 +106,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsItalic]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 7
@@ -163,6 +165,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 3
@@ -187,9 +190,9 @@ object pad_form: Tpad_form
       Top = 1
       Width = 56
       Caption = '?  &help'
-      OnClick = program_buttonClick
       TabOrder = 0
       Visible = False
+      OnClick = program_buttonClick
     end
   end
   object slewing_panel: TPanel
@@ -204,6 +207,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 6
@@ -221,6 +225,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 4
@@ -238,6 +243,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 5
@@ -256,6 +262,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     ParentShowHint = False
@@ -285,6 +292,7 @@ object pad_form: Tpad_form
     Font.Height = -15
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 8
@@ -303,6 +311,7 @@ object pad_form: Tpad_form
     Font.Height = -12
     Font.Name = 'Verdana'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 2
     object cancel_adjusts_toolbutton: TSpeedButton
@@ -1004,6 +1013,7 @@ object pad_form: Tpad_form
       BorderStyle = bsSingle
       ClientHeight = 18
       ClientWidth = 15
+      ParentBackground = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
@@ -1071,11 +1081,11 @@ object pad_form: Tpad_form
       Font.Height = -13
       Font.Name = 'Arial'
       Font.Style = [fsBold]
-      OnClick = sketchboard_buttonClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
+      OnClick = sketchboard_buttonClick
     end
     object new_template_button: TButton
       Left = 296
@@ -1084,10 +1094,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 46
       Caption = 'NEW'
-      OnClick = quick_set_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
+      OnClick = quick_set_menu_entryClick
     end
     object split_approach_button: TButton
       Left = 400
@@ -1096,10 +1106,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 110
       Caption = 'split  approach'
-      OnClick = make_separate_approach_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
+      OnClick = make_separate_approach_menu_entryClick
     end
     object split_exit_button: TButton
       Left = 513
@@ -1108,10 +1118,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 76
       Caption = 'split  exit'
-      OnClick = make_separate_exit_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
+      OnClick = make_separate_exit_menu_entryClick
     end
     object branch_track_button: TButton
       Left = 691
@@ -1120,10 +1130,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 100
       Caption = 'branch track'
-      OnClick = make_branch_track_menu_itemClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
+      OnClick = make_branch_track_menu_itemClick
     end
     object crossover_button: TButton
       Left = 794
@@ -1132,10 +1142,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 78
       Caption = 'crossover'
-      OnClick = make_simple_crossover_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
+      OnClick = make_simple_crossover_menu_entryClick
     end
     object return_curve_button: TButton
       Left = 592
@@ -1144,10 +1154,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 96
       Caption = 'return curve'
-      OnClick = make_return_curve_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
+      OnClick = make_return_curve_menu_entryClick
     end
     object double_track_buttom: TButton
       Left = 875
@@ -1156,10 +1166,10 @@ object pad_form: Tpad_form
       Top = 3
       Width = 120
       Caption = 'double-track TS'
-      OnClick = make_double_track_ts_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 8
+      OnClick = make_double_track_ts_menu_entryClick
     end
   end
   object reminder_memo1: TMemo
@@ -1178,7 +1188,6 @@ object pad_form: Tpad_form
     Lines.Strings = (
       'reminder 1'
     )
-    OnClick = reminder_memo1Click
     ParentFont = False
     PopupMenu = reminder_popup_menu
     ParentShowHint = False
@@ -1186,6 +1195,7 @@ object pad_form: Tpad_form
     ShowHint = True
     TabOrder = 13
     Visible = False
+    OnClick = reminder_memo1Click
   end
   object reminder_memo2: TMemo
     Cursor = crArrow
@@ -1203,7 +1213,6 @@ object pad_form: Tpad_form
     Lines.Strings = (
       'reminder 2'
     )
-    OnClick = reminder_memo2Click
     ParentFont = False
     PopupMenu = reminder_popup_menu
     ParentShowHint = False
@@ -1211,6 +1220,7 @@ object pad_form: Tpad_form
     ShowHint = True
     TabOrder = 14
     Visible = False
+    OnClick = reminder_memo2Click
   end
   object reminder_memo3: TMemo
     Cursor = crArrow
@@ -1228,7 +1238,6 @@ object pad_form: Tpad_form
     Lines.Strings = (
       'reminder 3'
     )
-    OnClick = reminder_memo3Click
     ParentFont = False
     PopupMenu = reminder_popup_menu
     ParentShowHint = False
@@ -1236,6 +1245,7 @@ object pad_form: Tpad_form
     ShowHint = True
     TabOrder = 15
     Visible = False
+    OnClick = reminder_memo3Click
   end
   object reminder_memo4: TMemo
     Cursor = crArrow
@@ -1253,7 +1263,6 @@ object pad_form: Tpad_form
     Lines.Strings = (
       'reminder 4'
     )
-    OnClick = reminder_memo4Click
     ParentFont = False
     PopupMenu = reminder_popup_menu
     ParentShowHint = False
@@ -1261,6 +1270,7 @@ object pad_form: Tpad_form
     ShowHint = True
     TabOrder = 16
     Visible = False
+    OnClick = reminder_memo4Click
   end
   object reminder_memo5: TMemo
     Cursor = crArrow
@@ -1278,7 +1288,6 @@ object pad_form: Tpad_form
     Lines.Strings = (
       'reminder 5'
     )
-    OnClick = reminder_memo5Click
     ParentFont = False
     PopupMenu = reminder_popup_menu
     ParentShowHint = False
@@ -1286,12 +1295,13 @@ object pad_form: Tpad_form
     ShowHint = True
     TabOrder = 17
     Visible = False
+    OnClick = reminder_memo5Click
   end
   object scaling_trackbar: TTrackBar
     Left = 1244
     Height = 160
     Hint = ' change program size to suit your screen '
-    Top = 568
+    Top = 588
     Width = 24
     Max = 7
     Min = 1
@@ -1311,7 +1321,7 @@ object pad_form: Tpad_form
     Left = 1244
     Height = 20
     Hint = 'whats this?'
-    Top = 548
+    Top = 568
     Width = 24
     Alignment = taCenter
     Anchors = [akRight, akBottom]
@@ -1320,9 +1330,9 @@ object pad_form: Tpad_form
     Font.Height = -18
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = scaling_help_staticClick
     ParentFont = False
     TabOrder = 11
+    OnClick = scaling_help_staticClick
   end
   object second_toolbar_panel: TPanel
     Left = 0
@@ -1337,6 +1347,7 @@ object pad_form: Tpad_form
     Font.Height = -12
     Font.Name = 'Verdana'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 18
     object peg_indicator_panel: TPanel
@@ -1352,6 +1363,7 @@ object pad_form: Tpad_form
       Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
+      ParentBackground = False
       ParentColor = False
       ParentFont = False
       ParentShowHint = False
@@ -1366,10 +1378,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 133
       Caption = 'SHIFT && JOIN  F7'
-      OnClick = shift_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 9
+      OnClick = shift_menu_entryClick
     end
     object f6_button: TButton
       Left = 513
@@ -1378,10 +1390,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 83
       Caption = 'CURVE  F6'
-      OnClick = adjust_curving_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 8
+      OnClick = adjust_curving_menu_entryClick
     end
     object f5_button: TButton
       Left = 439
@@ -1390,10 +1402,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 71
       Caption = 'SIZE  F5'
-      OnClick = adjust_turnout_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
+      OnClick = adjust_turnout_menu_entryClick
     end
     object f4_button: TButton
       Left = 342
@@ -1402,10 +1414,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 94
       Caption = 'LENGTH  F4'
-      OnClick = adjust_length_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 6
+      OnClick = adjust_length_menu_entryClick
     end
     object facing_trailing_button: TButton
       Left = 129
@@ -1414,10 +1426,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 45
       Caption = 'F|T'
-      OnClick = swap_current_ends_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 3
+      OnClick = swap_current_ends_menu_entryClick
     end
     object invert_handing_button: TButton
       Left = 81
@@ -1426,10 +1438,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 45
       Caption = 'L|R'
-      OnClick = invert_handing_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
+      OnClick = invert_handing_menu_entryClick
     end
     object ctrlf9_button: TButton
       Left = 831
@@ -1438,10 +1450,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 119
       Caption = 'ROAM  CTRL-F9'
-      OnClick = adjust_roam_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 11
+      OnClick = adjust_roam_menu_entryClick
     end
     object xing_indicator_panel: TPanel
       Left = 41
@@ -1456,6 +1468,7 @@ object pad_form: Tpad_form
       Font.Height = -17
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
+      ParentBackground = False
       ParentColor = False
       ParentFont = False
       ParentShowHint = False
@@ -1471,10 +1484,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 45
       Caption = 'T|P'
-      OnClick = plain_track_turnout_buttonClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
+      OnClick = plain_track_turnout_buttonClick
     end
     object f8_button: TButton
       Left = 735
@@ -1483,10 +1496,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 93
       Caption = 'ROTATE  F8'
-      OnClick = rotate_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 10
+      OnClick = rotate_menu_entryClick
     end
     object ctrlf5_button: TButton
       Left = 953
@@ -1495,10 +1508,10 @@ object pad_form: Tpad_form
       Top = 0
       Width = 121
       Caption = 'ORBIT  CTRL-F5'
-      OnClick = orbit_rad_centre_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 12
+      OnClick = orbit_rad_centre_menu_entryClick
     end
     object f3_button: TButton
       Left = 225
@@ -1507,16 +1520,16 @@ object pad_form: Tpad_form
       Top = 0
       Width = 114
       Caption = 'APPROACH  F3'
-      OnClick = adjust_turnout_approach_menu_entryClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 5
+      OnClick = adjust_turnout_approach_menu_entryClick
     end
   end
   object scaling_labels_panel: TPanel
     Left = 1072
     Height = 160
-    Top = 568
+    Top = 588
     Width = 172
     Anchors = [akRight, akBottom]
     BevelOuter = bvNone
@@ -1527,6 +1540,7 @@ object pad_form: Tpad_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     ParentShowHint = False
@@ -1661,9 +1675,9 @@ object pad_form: Tpad_form
       Font.Height = -16
       Font.Name = 'Arial'
       Font.Style = [fsBold]
-      OnClick = scaling_change_buttonClick
       ParentFont = False
       TabOrder = 0
+      OnClick = scaling_change_buttonClick
     end
   end
   object pad_menu_bar: TMainMenu

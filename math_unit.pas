@@ -65,7 +65,8 @@ uses
   curve_parameters_interface,
   RailInfo,
   NotchInfo,
-  SwitchInfo;
+  SwitchInfo,
+  TurnoutInfo1;
 
 type
   Tmath_form = class(TForm)
@@ -993,7 +994,7 @@ procedure fix_radius(rad: double; click: boolean);     // set up fixed-radius cu
 function clrad_at_x(x: double): double;      // return the track centre-line radius at this xs.
 
 procedure transition_clicked(trans_code: integer);
-procedure make_transition_click(trans_hand: integer);
+procedure make_transition_click(trans_hand: TTurnoutHand);
 
 function set_black_and_white: boolean;
 
@@ -1248,7 +1249,7 @@ function get_current_diffed_dims: string;
 
 procedure action_panel_hint(hint_str: string);   // 205c  set hollow-triangle mouse action hint
 
-function create_id_number_str(idnum, hand: integer; startx, turnoutx, ipx, fpx: double;
+function create_id_number_str(idnum:Integer; hand: TTurnoutHand; startx, turnoutx, ipx, fpx: double;
   plain_track, half_diamond, any_omitted: boolean): string;    // 208a
 
 function get_store_beginner_help: string;  // 208a
@@ -1350,7 +1351,6 @@ uses
   CrossingInfo,
   ProtoInfo,
   PlainTrackInfo,
-  TurnoutInfo1,
   TurnoutInfo2;
 
 const
@@ -2577,7 +2577,7 @@ begin
 
   half_diamond := False;                              // 0.77.a 19-8-02  normal switch calcs.
 
-  hand_i := 1;                                        //  default left-hand turnout.
+  hand_i := thLeft;                                   //  default left-hand turnout.
   gauge_i := gauge_index;
   //  default index (= 61 for T-55 gauge 26-1-99).
   gauge_str := gauge[gauge_i].name_str_glist;         //  current gauge name.
@@ -5197,11 +5197,11 @@ begin
         temp_str := temp_str + 'plain track   ';
 
       case hand_i of
-        0:
+        thY:
           temp_str := temp_str + 'Y ';
-        1:
+        thLeft:
           temp_str := temp_str + 'LH ';
-        -1:
+        thRight:
           temp_str := temp_str + 'RH ';
         else
           run_error(82);
@@ -5212,11 +5212,11 @@ begin
     end;//with info_form
 
     case hand_i of
-      0:
+      thY:
         hand_str := 'unhanded';
-      1:
+      thLeft:
         hand_str := 'left-hand';
-      -1:
+      thRight:
         hand_str := 'right-hand';
       else
         run_error(82);
@@ -5266,11 +5266,11 @@ begin
       Add('------------');
 
       case hand_i of
-        0:
+        thY:
           temp_str := 'Y ';
-        1:
+        thLeft:
           temp_str := 'LH ';
-        -1:
+        thRight:
           temp_str := 'RH ';
         else
           run_error(36);
@@ -5310,11 +5310,11 @@ begin
             temp_str := temp_str + ', gaunt offset = ' + round_str(gaunt_offset_in * inscale, 2);
 
           case hand_i of
-            0:
+            thY:
               Add(current_switch_name + ' split-symmetrical switch ' + temp_str);
-            1:
+            thLeft:
               Add(current_switch_name + ' left-hand switch ' + temp_str);
-            -1:
+            thRight:
               Add(current_switch_name + ' right-hand switch ' + temp_str);
             else
               run_error(36);
@@ -6202,20 +6202,20 @@ begin
       Add('template location on trackpad :');
       Add('');
       Add('rotation :  X = ' + round_str(xform, 2) + '   Y = ' + round_str(
-        yform * hand_i + y_datum, 2) + '   K = ' + round_str(kform * hand_i * 180 / Pi, 2) +
-        ' degrees' + k_ram_str(kform * hand_i));
-      Add('   shift :  X = ' + round_str(xshift, 2) + '   Y = ' + round_str(yshift * hand_i, 2));
+        yform * TurnoutHandMultiplier(hand_i) + y_datum, 2) + '   K = ' + round_str(kform * TurnoutHandMultiplier(hand_i) * 180 / Pi, 2) +
+        ' degrees' + k_ram_str(kform * TurnoutHandMultiplier(hand_i)));
+      Add('   shift :  X = ' + round_str(xshift, 2) + '   Y = ' + round_str(yshift * TurnoutHandMultiplier(hand_i), 2));
       Add('rail-end :  X = ' + round_str(datumx_on_pad, 2) + '   Y = ' +
-        round_str(datumy_on_pad * hand_i + y_datum, 2));
+        round_str(datumy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum, 2));
 
       Add('');
       Add('peg from origin :  X = ' + round_str(pegx_on_pad, 2) + '   Y = ' +
-        round_str(pegy_on_pad * hand_i + y_datum, 2) + '   K = ' +
-        round_str(arm_angle * hand_i * 180 / Pi, 2) + ' degrees' + k_ram_str(arm_angle * hand_i));
+        round_str(pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum, 2) + '   K = ' +
+        round_str(arm_angle * TurnoutHandMultiplier(hand_i) * 180 / Pi, 2) + ' degrees' + k_ram_str(arm_angle * TurnoutHandMultiplier(hand_i)));
       Add('peg from notch :  X = ' + round_str(pegx_on_pad - notchx, 2) +
-        '   Y = ' + round_str((pegy_on_pad * hand_i + y_datum) - notchy, 2) +
-        '   K = ' + round_str(((arm_angle * hand_i) - notch_angle) * 180 / Pi, 2) +
-        ' degrees' + k_ram_str((arm_angle * hand_i) - notch_angle));
+        '   Y = ' + round_str((pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum) - notchy, 2) +
+        '   K = ' + round_str(((arm_angle * TurnoutHandMultiplier(hand_i)) - notch_angle) * 180 / Pi, 2) +
+        ' degrees' + k_ram_str((arm_angle * TurnoutHandMultiplier(hand_i)) - notch_angle));
 
       Add('');
 
@@ -6224,7 +6224,7 @@ begin
       dotransform(kform, xform, yform, pin, pout);
 
       rad1_orgx := pout.x + xshift;
-      rad1_orgy := (pout.y + yshift) * hand_i + y_datum;
+      rad1_orgy := (pout.y + yshift) * TurnoutHandMultiplier(hand_i) + y_datum;
 
       if controlTemplate.curve.isSpiral then begin
         pin.x := xt2;
@@ -6232,7 +6232,7 @@ begin
         dotransform(kform, xform, yform, pin, pout);
 
         rad2_orgx := pout.x + xshift;
-        rad2_orgy := (pout.y + yshift) * hand_i + y_datum;
+        rad2_orgy := (pout.y + yshift) * TurnoutHandMultiplier(hand_i) + y_datum;
       end;
 
       // add radial centres to info...
@@ -7254,7 +7254,7 @@ begin
     docurving(True, True, dist, cl_offset, dvx1, dvy1, dummy1, dummy2);
   end;
 
-  Result.set_xy(dvx1, dvy1 * hand_i + y_datum);
+  Result.set_xy(dvx1, dvy1 * TurnoutHandMultiplier(hand_i) + y_datum);
 end;
 
 procedure draw_dummy_vehicle_on_control_template(on_canvas: TCanvas);    // 0.98.a
@@ -11577,7 +11577,7 @@ end;
 procedure trail_adj_centres_ts(Y: integer);    // adjacent centres TS  213a
 
 begin
-  cpi.trtscent_pi := trtscent_pi_now + (Y - ts_adj_now) * hand_i * ffy;
+  cpi.trtscent_pi := trtscent_pi_now + (Y - ts_adj_now) * TurnoutHandMultiplier(hand_i) * ffy;
   // ffy in mm per pixel at mouse-down.
 
   if cpi.trtscent_pi < (g / 2) then
@@ -11590,7 +11590,7 @@ end;
 procedure trail_adj_centres_ms(Y: integer);    // adjacent centres MS  213a
 
 begin
-  cpi.trmscent_pi := trmscent_pi_now + (ms_adj_now - Y) * hand_i * ffy;
+  cpi.trmscent_pi := trmscent_pi_now + (ms_adj_now - Y) * TurnoutHandMultiplier(hand_i) * ffy;
   // ffy in mm per pixel at mouse-down.
 
   if cpi.trmscent_pi < (g / 2) then
@@ -11633,7 +11633,7 @@ procedure trail_platform_ts_start_width_ins(Y: integer);
 
 begin
   platform_ts_start_width_ins := platform_ts_start_width_ins_now +
-    (Y - platform_ts_start_width_now_Y) * ffy * hand_i / inscale;
+    (Y - platform_ts_start_width_now_Y) * ffy * TurnoutHandMultiplier(hand_i) / inscale;
   // ffy in mm per pixel at mouse-down.
 
   if platform_ts_start_width_ins < 0 then
@@ -11646,7 +11646,7 @@ procedure trail_platform_ts_end_width_ins(Y: integer);
 
 begin
   platform_ts_end_width_ins := platform_ts_end_width_ins_now +
-    (Y - platform_ts_end_width_now_Y) * ffy * hand_i / inscale;
+    (Y - platform_ts_end_width_now_Y) * ffy * TurnoutHandMultiplier(hand_i) / inscale;
   // ffy in mm per pixel at mouse-down.
 
   if platform_ts_end_width_ins < 0 then
@@ -11687,7 +11687,7 @@ procedure trail_platform_ms_start_width_ins(Y: integer);
 
 begin
   platform_ms_start_width_ins := platform_ms_start_width_ins_now -
-    (Y - platform_ms_start_width_now_Y) * ffy * hand_i / inscale;
+    (Y - platform_ms_start_width_now_Y) * ffy * TurnoutHandMultiplier(hand_i) / inscale;
   // ffy in mm per pixel at mouse-down.
 
   if platform_ms_start_width_ins < 0 then
@@ -11700,7 +11700,7 @@ procedure trail_platform_ms_end_width_ins(Y: integer);
 
 begin
   platform_ms_end_width_ins := platform_ms_end_width_ins_now -
-    (Y - platform_ms_end_width_now_Y) * ffy * hand_i / inscale;
+    (Y - platform_ms_end_width_now_Y) * ffy * TurnoutHandMultiplier(hand_i) / inscale;
   // ffy in mm per pixel at mouse-down.
 
   if platform_ms_end_width_ins < 0 then
@@ -11880,7 +11880,7 @@ procedure trail_shift(X, Y: integer);
 
 begin
   xshift := xshift_now + (X - shift_now_x) * ffx;
-  yshift := yshift_now + (Y - shift_now_y) * ffy * hand_i;
+  yshift := yshift_now + (Y - shift_now_y) * ffy * TurnoutHandMultiplier(hand_i);
 end;
 //___________________________________________________________________________________________
 
@@ -12008,7 +12008,7 @@ var
 begin
 
   modin.x := (X - peg_now_x) * ffx;
-  modin.y := (Y - peg_now_y) * ffy * hand_i;
+  modin.y := (Y - peg_now_y) * ffy * TurnoutHandMultiplier(hand_i);
 
   if peg_rail = 0                           // free peg move...
   then begin
@@ -12209,7 +12209,7 @@ end;
 procedure trail_twist(Y: integer);
 
 begin
-  kform := kform_now + twist_dir * (Y - shift_now_y) * ffy * hand_i * 100 /
+  kform := kform_now + twist_dir * (Y - shift_now_y) * ffy * TurnoutHandMultiplier(hand_i) * 100 /
     (mouse_rot_factor * fine_adjust * screenx);
   // 100 arbitrary.
   normalize_kform;
@@ -12403,7 +12403,7 @@ end;
 procedure trail_slew_amount(Y: integer);           // adjust amount of slew.
 
 begin
-  controlTemplate.curve.slewAmount := slew_now + (Y - slew_amount_now) * hand_i / fy;
+  controlTemplate.curve.slewAmount := slew_now + (Y - slew_amount_now) * TurnoutHandMultiplier(hand_i) / fy;
   // neg OK
   if ABS(controlTemplate.curve.slewAmount) > controlTemplate.curve.slewLength then
     controlTemplate.curve.slewAmount :=
@@ -12455,7 +12455,7 @@ end;
 procedure trail_shove_throw(Y: integer);
 
 begin
-  shoveo := shoveo_now + (Y - shove_now_y) * ffy * hand_i / shove_mouse_factor;
+  shoveo := shoveo_now + (Y - shove_now_y) * ffy * TurnoutHandMultiplier(hand_i) / shove_mouse_factor;
   current_shove_list[shove_index].offsetModifier := shoveo;
 end;
 //________________________________________________________________________________________
@@ -12471,7 +12471,7 @@ end;
 procedure trail_shove_length(Y: integer);
 
 begin
-  shovel := shovel_now + (Y - shove_now_y) * ffy * hand_i / shove_mouse_factor;
+  shovel := shovel_now + (Y - shove_now_y) * ffy * TurnoutHandMultiplier(hand_i) / shove_mouse_factor;
   current_shove_list[shove_index].lengthModifier := shovel;
 end;
 //________________________________________________________________________________________
@@ -12488,7 +12488,7 @@ end;
 procedure trail_shove_twist(Y: integer);
 
 begin
-  shovek := normalize_angle(shovek_now + (Y - shove_now_y) * ffy * hand_i /
+  shovek := normalize_angle(shovek_now + (Y - shove_now_y) * ffy * TurnoutHandMultiplier(hand_i) /
     (shove_mouse_factor * screenx));
   current_shove_list[shove_index].angleModifier := shovek;
 end;
@@ -12696,7 +12696,7 @@ var
 begin
   old_dp := dpx - xorg;
 
-  gaunt_offset_in := (gaunt_offset_now_mm + (Y - gaunt_now) * ffy * hand_i /
+  gaunt_offset_in := (gaunt_offset_now_mm + (Y - gaunt_now) * ffy * TurnoutHandMultiplier(hand_i) /
     (mouse_gaunt_offset_factor * fine_adjust * screenx)) / inscale;
 
   // offset can't exceed the knuckle..
@@ -12760,7 +12760,7 @@ var
 begin
   old_dp := dpx - xorg;
 
-  gaunt_curvature := (gaunt_curvature_now + (Y - gaunt_rad_now) * ffy * hand_i /
+  gaunt_curvature := (gaunt_curvature_now + (Y - gaunt_rad_now) * ffy * TurnoutHandMultiplier(hand_i) /
     (mouse_gaunt_radius_factor * fine_adjust * screenx));
 
   try
@@ -12954,7 +12954,7 @@ var
   dummy: integer;
 
 begin
-  new_curvature := curvature_now + (Y - curving_now) * ffy * hand_i /
+  new_curvature := curvature_now + (Y - curving_now) * ffy * TurnoutHandMultiplier(hand_i) /
     (mouse_curv_factor * fine_adjust * scale * screenx);
 
   if Abs(new_curvature) > minfp then begin
@@ -13038,7 +13038,7 @@ var
   swing_sin: double;
 
 begin
-  new_curvature := curvature_now - (Y - curving_now) * ffy * hand_i /
+  new_curvature := curvature_now - (Y - curving_now) * ffy * TurnoutHandMultiplier(hand_i) /
     (mouse_curv_factor * fine_adjust * scale * screenx);
 
   swing_sin := ends_apart_now * ABS(new_curvature) / 2;      // SIN of swing angle.
@@ -13728,9 +13728,9 @@ begin
 
       if trace_mouse = True then
         gocalc(2, mode{+first_click});
-      trail_str := 'by : ' + captext((kform - kform_start) * hand_i * 180 / Pi) +
-        ' degrees.   peg  at : ' + captext(arm_angle * hand_i * 180 / Pi) +
-        ' degrees' + k_ram_str(arm_angle * hand_i);
+      trail_str := 'by : ' + captext((kform - kform_start) * TurnoutHandMultiplier(hand_i) * 180 / Pi) +
+        ' degrees.   peg  at : ' + captext(arm_angle * TurnoutHandMultiplier(hand_i) * 180 / Pi) +
+        ' degrees' + k_ram_str(arm_angle * TurnoutHandMultiplier(hand_i));
     end;
 
     7: begin
@@ -13812,8 +13812,8 @@ begin
 
       if trace_mouse = True then
         gocalc(2, mode{+first_click});
-      trail_str := 'peg  at : ' + captext(arm_angle * hand_i * 180 / Pi) +
-        ' degrees' + k_ram_str(arm_angle * hand_i);
+      trail_str := 'peg  at : ' + captext(arm_angle * TurnoutHandMultiplier(hand_i) * 180 / Pi) +
+        ' degrees' + k_ram_str(arm_angle * TurnoutHandMultiplier(hand_i));
     end;
 
     15: begin
@@ -14531,7 +14531,7 @@ begin
     dummy_str := calc_peg_dims(notch_linked_code, linkx, linky, linkangle);
     // don't need string result.
     docurving(True, True, linkx, linky, notchx, temp_y, temp_k, curving_rad);
-    notchy := temp_y * hand_i + y_datum;
+    notchy := temp_y * TurnoutHandMultiplier(hand_i) + y_datum;
 
     // 217b  gradient correction for radial shrink/enlarge ...
 
@@ -14553,7 +14553,7 @@ begin
 
     //link_arm_angle:=linkangle+temp_k+kform;        // arm angle (actual on pad including curving and transforms).
 
-    notch_angle := link_arm_angle * hand_i;
+    notch_angle := link_arm_angle * TurnoutHandMultiplier(hand_i);
 
     if group_notch_linked = True then
       do_group_link_to_notch;
@@ -15941,9 +15941,9 @@ begin
         kform_now := kform;          // and current angle.
 
         if Y > rad_centy then
-          orbit_dir := hand_i * SGZ(orbit_rad)        // set orbit direction.
+          orbit_dir := TurnoutHandMultiplier(hand_i) * SGZ(orbit_rad)        // set orbit direction.
         else
-          orbit_dir := 0 - hand_i * SGZ(orbit_rad);
+          orbit_dir := 0 - TurnoutHandMultiplier(hand_i) * SGZ(orbit_rad);
       end
       else begin
         Screen.Cursor := crDefault;
@@ -17110,9 +17110,9 @@ begin
         eMC_502_MSExtensionEnd,
         eMC_506_TSWingRail,
         eMC_507_MSKCheckRail:
-          diff_dir := 1 * hand_i;      // +/-1 mouse diffing direction
+          diff_dir := 1 * TurnoutHandMultiplier(hand_i);      // +/-1 mouse diffing direction
         else
-          diff_dir := 0 - 1 * hand_i;
+          diff_dir := 0 - 1 * TurnoutHandMultiplier(hand_i);
       end;//case
 
       min_diff := fw - fw_end;  // bend-out can't go negative.
@@ -17892,11 +17892,11 @@ procedure set_y_datum;          // set up default y position.
 begin
   case hand_i of
 
-    1:
+    thLeft:
       y_datum := 6 * scale;
     // l.h. turnout y datum default (6ft scale) from left margin.
 
-    -1:
+    thRight:
       if (screeny - page_width / 100) > (4 * scale)
       // more than 4ft scale beyond whole page width visible ?
       then
@@ -18966,7 +18966,9 @@ begin
   docurving(True, True, pegx, pegy, now_peg_x, now_peg_y, dummy1, dummy2);
   // and current peg position.
 
-  hand_i := 0 - hand_i;     // swap hand.
+  // swap hand
+  hand_i := SwapTurnoutHand(hand_i);
+
   // then calc new peg position on pad...
 
   docurving(False, True, pegx, pegy, pc.x, pc.y, dummy1, dummy2);  // first curve it.
@@ -20800,7 +20802,7 @@ begin
 end;
 //_______________________________________________________________________________________
 
-function make_transition_from_current(control_loc, bgnd_loc, trans_hand: integer): boolean;
+function make_transition_from_current(control_loc, bgnd_loc: Integer; trans_hand: TTurnoutHand): boolean;
 
   // 17-9-15 control_loc,bgnd_loc;  // 0=match at peg, 15=at 1st radius, 16=at 2nd radius.  212a
 
@@ -20937,7 +20939,7 @@ begin
       rad_1st := controlTemplate.curve.fixedRadius;
 
       peg1x := pegx_on_pad;                     // and 1st peg position on pad..
-      peg1y := pegy_on_pad * hand_i + y_datum;
+      peg1y := pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
 
       // now get the background template, and repeat...
@@ -21017,7 +21019,7 @@ begin
       rad_2nd := controlTemplate.curve.fixedRadius;
 
       peg2x := pegx_on_pad;                     // and 2nd peg position on pad..
-      peg2y := pegy_on_pad * hand_i + y_datum;
+      peg2y := pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
       cen_apart := SQRT(SQR(old_rad2_orgx - old_rad1_orgx) + SQR(old_rad2_orgy - old_rad1_orgy));
       // distance between rad centres.
@@ -21250,7 +21252,7 @@ begin
 end;
 //__________________________________________________________________________________________
 
-procedure make_transition_click(trans_hand: integer);
+procedure make_transition_click(trans_hand: TTurnoutHand);
 
 var
   i: integer;
@@ -21429,7 +21431,7 @@ begin
           delete_keep(False, False);                        // remove it.
 
           gocalc(0, 0);
-          trans_hand := 0 - trans_hand;
+          trans_hand := SwapTurnoutHand(trans_hand);
           clicked_keep_index := save_index;
           if make_transition_from_current(control_loc, bgnd_loc, trans_hand) = False then
             EXIT;
@@ -21858,7 +21860,7 @@ begin
 
   half_diamond := False;                              // 0.77.a 19-8-02  normal switch calcs.
 
-  hand_i := 1;                                        //  default left-hand turnout.
+  hand_i := thLeft;                                        //  default left-hand turnout.
 
   controlTemplate.curve.isSpiral := False;       // no transition.
   controlTemplate.curve.isSlewing := False;      // no slew
@@ -25811,7 +25813,7 @@ begin
     if show_origin_k then begin
       docurving(False, True,{xtb}xtimbcl, g / 2, dummy1, dummy2, temp_k, dummy3);
       // curving angle to this xtb.
-      shovetimb_keq := (keq + temp_k) * hand_i;
+      shovetimb_keq := (keq + temp_k) * TurnoutHandMultiplier(hand_i);
       // twist angle from template origin.
 
       if shovetimb_keq < 0 then
@@ -25823,7 +25825,7 @@ begin
         ' twist :  ' + round_str(shovetimb_keq * 180 / Pi, 2) + deg_str + '÷';
     end
     else begin
-      shovetimb_keq := keq * hand_i;
+      shovetimb_keq := keq * TurnoutHandMultiplier(hand_i);
       if shovetimb_keq < 0 then
         deg_str := ' degs '        // no room for "degrees" in full if negative.
       else
@@ -27137,17 +27139,17 @@ begin
 end;
 //______________________________________________________________________________
 
-function create_id_number_str(idnum, hand: integer; startx, turnoutx, ipx, fpx: double;
+function create_id_number_str(idnum: Integer; hand: TTurnoutHand; startx, turnoutx, ipx, fpx: double;
   plain_track, half_diamond, any_omitted: boolean): string;    // 208a
 
 var
   hand_str, prefix_str: string;
 
 begin
-  if plain_track = True then
+  if plain_track then
     prefix_str := 'P'
   else begin
-    if half_diamond = True then begin
+    if half_diamond then begin
       if turnoutx < fpx then
         prefix_str := 'C'      // custom partial template
       else
@@ -27164,10 +27166,10 @@ begin
       prefix_str := 'C';    // blanking overide -- custom partial template
   end;
 
-  if any_omitted = True then
+  if any_omitted then
     prefix_str := 'C';  // overide -- custom partial template
 
-  if hand = 1 then
+  if hand = thLeft then
     hand_str := 'L'
   else
     hand_str := 'R';
@@ -27567,7 +27569,7 @@ begin
       orgx := notchx;
       orgy := notchy;
       xshift := xshift + (orgx - rad1_orgx);
-      yshift := yshift + (orgy - rad1_orgy) * hand_i;
+      yshift := yshift + (orgy - rad1_orgy) * TurnoutHandMultiplier(hand_i);
 
       //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
       redraw(True);
@@ -27579,7 +27581,7 @@ begin
       if get_new_rad_org('', orgx, orgy) = True   // get new radial centres.
       then begin
         xshift := xshift + (orgx - rad1_orgx);
-        yshift := yshift + (orgy - rad1_orgy) * hand_i;
+        yshift := yshift + (orgy - rad1_orgy) * TurnoutHandMultiplier(hand_i);
 
         //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
         redraw(True);
@@ -27625,7 +27627,7 @@ begin
         orgx := notchx;
         orgy := notchy;
         xshift := xshift + (orgx - rad1_orgx);
-        yshift := yshift + (orgy - rad1_orgy) * hand_i;
+        yshift := yshift + (orgy - rad1_orgy) * TurnoutHandMultiplier(hand_i);
 
         //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
         redraw(True);
@@ -27638,7 +27640,7 @@ begin
         // get new radial centres.
         then begin
           xshift := xshift + (orgx - rad1_orgx);
-          yshift := yshift + (orgy - rad1_orgy) * hand_i;
+          yshift := yshift + (orgy - rad1_orgy) * TurnoutHandMultiplier(hand_i);
 
           //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
           redraw(True);
@@ -27650,7 +27652,7 @@ begin
         orgx := notchx;
         orgy := notchy;
         xshift := xshift + (orgx - rad2_orgx);
-        yshift := yshift + (orgy - rad2_orgy) * hand_i;
+        yshift := yshift + (orgy - rad2_orgy) * TurnoutHandMultiplier(hand_i);
 
         //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
         redraw(True);
@@ -27663,7 +27665,7 @@ begin
         // get new radial centres.
         then begin
           xshift := xshift + (orgx - rad2_orgx);
-          yshift := yshift + (orgy - rad2_orgy) * hand_i;
+          yshift := yshift + (orgy - rad2_orgy) * TurnoutHandMultiplier(hand_i);
 
           //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
           redraw(True);
@@ -27692,8 +27694,8 @@ begin
       normalize_transforms;
       docurving(True, True, pegx, pegy, notch_x, temp, dummy1, dummy2);
       // get notch data from current peg position.
-      notch_y := temp * hand_i + y_datum;
-      notch_k := arm_angle * hand_i;
+      notch_y := temp * TurnoutHandMultiplier(hand_i) + y_datum;
+      notch_k := arm_angle * TurnoutHandMultiplier(hand_i);
     except
       EXIT;
     end;//try
@@ -27787,10 +27789,10 @@ begin
   // calc current peg position.
 
   xshift := xshift + (notchx - padpegx);
-  yshift := yshift + (notchy - (padpegy * hand_i + y_datum)) * hand_i;
+  yshift := yshift + (notchy - (padpegy * TurnoutHandMultiplier(hand_i) + y_datum)) * TurnoutHandMultiplier(hand_i);
   // then shift turnout onto notch.
 
-  angle_diff := notch_angle * hand_i - arm_angle;
+  angle_diff := notch_angle * TurnoutHandMultiplier(hand_i) - arm_angle;
 
   if (click = True) or (min_rot = True)
   // he's not likely to be wanting more than 90 degs of rotation...
@@ -27815,8 +27817,8 @@ begin
     // calc new peg position.
 
     saved_pegging_shiftx := new_padpegx - padpegx;
-    saved_pegging_shifty := (new_padpegy - padpegy) * hand_i;
-    saved_pegging_rot := 0 - angle_diff * hand_i;
+    saved_pegging_shifty := (new_padpegy - padpegy) * TurnoutHandMultiplier(hand_i);
+    saved_pegging_rot := 0 - angle_diff * TurnoutHandMultiplier(hand_i);
 
     if (ABS(saved_pegging_shiftx) < minfp) and (ABS(saved_pegging_shifty) < minfp) and
       (ABS(saved_pegging_rot) < minfp) and (creating_tandem = False)
@@ -28026,7 +28028,7 @@ begin
 
     xorg := turnoutx;           // keep current length for starters.
 
-    hand_i := 0 - hand_i;
+    hand_i := SwapTurnoutHand(hand_i);
     // swap hand (so turnout-side is to same double-track centre).
     if controlTemplate.curve.isSlewing then
       controlTemplate.curve.slewAmount := 0 - controlTemplate.curve.slewAmount;
@@ -29495,7 +29497,7 @@ begin
 
       trans := t.boxDims.transformInfo;
       trans.x2Shift := trans.x2Shift + xshift_keeps;
-      trans.y2Shift := trans.y2Shift + yshift_keeps * t.boxDims.turnoutInfo1.hand;
+      trans.y2Shift := trans.y2Shift + yshift_keeps * TurnoutHandMultiplier(t.boxDims.turnoutInfo1.hand);
 
       trans.notchInfo.x := trans.notchInfo.x + xshift_keeps;
       trans.notchInfo.y := trans.notchInfo.y + yshift_keeps;
@@ -29554,7 +29556,7 @@ begin
 
       trans := t.boxDims.transformInfo;
 
-      hand := t.boxDims.turnoutInfo1.hand;
+      hand := TurnoutHandMultiplier(t.boxDims.turnoutInfo1.hand);
       trans.kShift := normalize_angle(trans.kShift - kform_keeps * hand);    // update angle.
 
       x := trans.x2Shift - notchx;                   // shift to origin
@@ -30503,7 +30505,7 @@ begin
     t.boxDims.labelModifierX := 0 - t.boxDims.labelModifierX;
     // modified template label position.
 
-    t.boxDims.turnoutInfo1.hand := 0 - t.boxDims.turnoutInfo1.hand;   // swap hand.
+    t.boxDims.turnoutInfo1.hand := SwapTurnoutHand(t.boxDims.turnoutInfo1.hand);   // swap hand.
 
     // True=has been shifted/rotated/mirrored, needs a new timestamp on rebuilding.
     t.new_stamp_wanted := True;
@@ -31153,7 +31155,7 @@ begin
     else begin
       xshift := zoom_offsetx + (screenx - turnoutx) / 2;
       // or put it across the centre of the pad,
-      yshift := (zoom_offsety + screeny / 2.5 - y_datum) * hand_i - g / 2;
+      yshift := (zoom_offsety + screeny / 2.5 - y_datum) * TurnoutHandMultiplier(hand_i) - g / 2;
       // 0.93.a was /2.0  // and on main centre-line (if straight turnout).
     end;
 
@@ -33519,7 +33521,7 @@ begin
 
     docurving(True, True, x, y, notch_x, temp_y, turn_k, curving_rad);
     // get notch data from current peg position.
-    notch_y := temp_y * hand_i + y_datum;
+    notch_y := temp_y * TurnoutHandMultiplier(hand_i) + y_datum;
 
     // 217b  gradient correction for radial shrink/enlarge ...
 
@@ -33538,7 +33540,7 @@ begin
 
     angle := normalize_angle(modk + turn_k + kform);
     // arm angle (actual on pad including curving and transforms).
-    notch_k := angle * hand_i;
+    notch_k := angle * TurnoutHandMultiplier(hand_i);
   end;//with
 
   Result := notch_data;
@@ -34753,7 +34755,7 @@ var
 
 begin
   xscaled := pin.x * list_factor_x;                                      // these are all in mm ...
-  yscaled := pin.y * list_factor_y * hand_i;
+  yscaled := pin.y * list_factor_y * TurnoutHandMultiplier(hand_i);
 
   xconed := xscaled + (x_coning_distortion_factor * xscaled * yscaled);
   yconed := yscaled + (y_coning_distortion_factor * yscaled * xscaled);
@@ -35198,7 +35200,7 @@ begin
 
     xshift := stored_xshift + (slide_on_store - 1) * slide_inc;
     // 50 = displace by g*2 before sliding back
-    yshift := stored_yshift + (slide_on_store - 1) * slide_inc * hand_i;
+    yshift := stored_yshift + (slide_on_store - 1) * slide_inc * TurnoutHandMultiplier(hand_i);
 
     math_form.reveal_timer.Interval := 750;   // 3/4 second wait
     math_form.reveal_timer.Enabled := True;
@@ -35239,7 +35241,7 @@ begin
     // 0.93.a invalidate after storing.
     xshift := zoom_offsetx + (screenx - turnoutx) / 2;
     // put it on the centre of the pad,
-    yshift := (zoom_offsety + screeny / 2.5 - y_datum) * hand_i - g / 2;
+    yshift := (zoom_offsety + screeny / 2.5 - y_datum) * TurnoutHandMultiplier(hand_i) - g / 2;
     // 0.93.a was /2.0 // and on main centre-line (if straight turnout).
   end;
 
@@ -35288,7 +35290,7 @@ begin
       BREAK;  // taking too long, so abandon slide and jump back.
 
     xshift := stored_xshift + (slide_on_store - 1) * slide_inc;
-    yshift := stored_yshift + (slide_on_store - 1) * slide_inc * hand_i;
+    yshift := stored_yshift + (slide_on_store - 1) * slide_inc * TurnoutHandMultiplier(hand_i);
     Dec(slide_on_store);
     gocalc(2, 7);           // control template over bgnd bitmap
 
@@ -35727,7 +35729,7 @@ begin
   with Result do begin
     docurving(True, True, x, y, notch_x, temp_y, temp_k, dummy2);
     // get notch data from current peg position.
-    notch_y := temp_y * hand_i + y_datum;
+    notch_y := temp_y * TurnoutHandMultiplier(hand_i) + y_datum;
   end;//with
 
 end;

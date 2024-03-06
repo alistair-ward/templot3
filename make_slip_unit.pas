@@ -81,12 +81,12 @@ uses
   OTUndoRedoManager,
   pad_unit, math_unit, keep_select, alert_unit, info_unit, control_room, shove_timber,
   switch_select,
-  shoved_timber,
   curve,
   template_records,
   template,
   ConvertTemplateToGlobals,
-  NotchInfo{ OT-FIRST , web_browser_unit};
+  NotchInfo,
+  TurnoutInfo1{ OT-FIRST , web_browser_unit};
 
 //______________________________________________________________________________
 
@@ -607,14 +607,14 @@ begin
       // at FP
 
       x1 := fp_pegx_on_pad;
-      y1 := fp_pegy_on_pad * hand_i + y_datum;
+      y1 := fp_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
       normalize_transforms;
       docurving(True, True, fpx - switch_length, g, nom_heel_pegx_on_pad,
         nom_heel_pegy_on_pad, dummy1, dummy2);   // at approx switch heel
 
       x2 := nom_heel_pegx_on_pad;
-      y2 := nom_heel_pegy_on_pad * hand_i + y_datum;
+      y2 := nom_heel_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
       temp := SQR(x2 - x1) + SQR(y2 - y1);
 
@@ -644,14 +644,14 @@ begin
         sw_heel_pegx_on_pad, sw_heel_pegy_on_pad, dummy1, dummy2);
 
       x3 := sw_heel_pegx_on_pad;
-      y3 := sw_heel_pegy_on_pad * hand_i + y_datum;
+      y3 := sw_heel_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
       temp1 := SQR(x3 - x2) + SQR(y3 - y2);
 
       if temp1 > minfp then begin
         rot_move := ABS(SQRT(temp1));  // distance to move by rotation
 
-        rot_k := 0 - rot_move * hand_i / (nom_sw_len * controlTemplate.curve.fixedRadius / (controlTemplate.curve.fixedRadius - g / 2));
+        rot_k := 0 - rot_move * TurnoutHandMultiplier(hand_i) / (nom_sw_len * controlTemplate.curve.fixedRadius / (controlTemplate.curve.fixedRadius - g / 2));
 
         rotate_turnout(rot_k, False);
 
@@ -664,7 +664,7 @@ begin
           0, sw_heel_pegx_on_pad, sw_heel_pegy_on_pad, dummy1, dummy2);
 
         x3 := sw_heel_pegx_on_pad;
-        y3 := sw_heel_pegy_on_pad * hand_i + y_datum;
+        y3 := sw_heel_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
         temp2 := SQR(x3 - x2) + SQR(y3 - y2);
 
@@ -740,14 +740,14 @@ begin
     docurving(True, True, fpx, g, fp_pegx_on_pad, fp_pegy_on_pad, dummy1, dummy2);       // at FP
 
     x1 := fp_pegx_on_pad;
-    y1 := fp_pegy_on_pad * hand_i + y_datum;
+    y1 := fp_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
     normalize_transforms;
     docurving(True, True, fpx - switch_length * COS(k3), g - switch_length * SIN(k3),
       nom_heel_pegx_on_pad, nom_heel_pegy_on_pad, dummy1, dummy2);   // at approx switch heel
 
     x2 := nom_heel_pegx_on_pad;
-    y2 := nom_heel_pegy_on_pad * hand_i + y_datum;
+    y2 := nom_heel_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
     temp := SQR(x2 - x1) + SQR(y2 - y1);
 
@@ -776,14 +776,14 @@ begin
       sw_heel_pegy_on_pad, dummy1, dummy2);
 
     x3 := sw_heel_pegx_on_pad;
-    y3 := sw_heel_pegy_on_pad * hand_i + y_datum;
+    y3 := sw_heel_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
     temp1 := SQR(x3 - x2) + SQR(y3 - y2);
 
     if temp1 > minfp then begin
       rot_move := ABS(SQRT(temp1));  // distance to move by rotation
 
-      rot_k := 0 - rot_move * hand_i / (nom_sw_len * controlTemplate.curve.fixedRadius / (controlTemplate.curve.fixedRadius - g / 2));
+      rot_k := 0 - rot_move * TurnoutHandMultiplier(hand_i) / (nom_sw_len * controlTemplate.curve.fixedRadius / (controlTemplate.curve.fixedRadius - g / 2));
 
       rotate_turnout(rot_k, False);
 
@@ -796,7 +796,7 @@ begin
         sw_heel_pegx_on_pad, sw_heel_pegy_on_pad, dummy1, dummy2);
 
       x3 := sw_heel_pegx_on_pad;
-      y3 := sw_heel_pegy_on_pad * hand_i + y_datum;
+      y3 := sw_heel_pegy_on_pad * TurnoutHandMultiplier(hand_i) + y_datum;
 
       temp2 := SQR(x3 - x2) + SQR(y3 - y2);
 
@@ -858,7 +858,7 @@ begin
     normalize_transforms;
     docurving(True, True, turnoutx, g / 2, x3, temp, dummy1, dummy2);
     // get pad location data for end.
-    y3 := temp * hand_i + y_datum;
+    y3 := temp * TurnoutHandMultiplier(hand_i) + y_datum;
 
     temp := SQR(x3 - x1) + SQR(y3 - y1);
 
@@ -897,7 +897,7 @@ begin
     normalize_transforms;
     docurving(True, True, turnoutx, g / 2, x3, temp, dummy1, dummy2);
     // get pad location data for end.
-    y3 := temp * hand_i + y_datum;
+    y3 := temp * TurnoutHandMultiplier(hand_i) + y_datum;
 
     offset_pos_sq := SQR(x3 - x1) + SQR(y3 - y1);
 
@@ -911,7 +911,7 @@ begin
     normalize_transforms;
     docurving(True, True, turnoutx, g / 2, x3, temp, dummy1, dummy2);
     // get pad location data for end.
-    y3 := temp * hand_i + y_datum;
+    y3 := temp * TurnoutHandMultiplier(hand_i) + y_datum;
 
     offset_neg_sq := SQR(x3 - x1) + SQR(y3 - y1);
 
@@ -1027,7 +1027,7 @@ begin
     gocalc(0, 0);
 
     xshift := xshift - 7 * g;
-    yshift := yshift - 7 * g * hand_i;      // move it down the pad and left. 7*g arbitrary
+    yshift := yshift - 7 * g * TurnoutHandMultiplier(hand_i);      // move it down the pad and left. 7*g arbitrary
 
     redraw(False);
 

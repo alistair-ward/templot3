@@ -513,7 +513,8 @@ uses
   LCLIntf, Math, Clipbrd,
   config_unit,
   control_room, grid_unit, colour_unit, help_sheet, chat_unit, alert_unit,
-  entry_sheet, math_unit, wait_message, image_viewer_unit, xml_unit, map_loader_unit, action_unit;
+  entry_sheet, math_unit, wait_message, image_viewer_unit, xml_unit, map_loader_unit, action_unit,
+  TurnoutInfo1;
 
 //________________________________________________________________________________________
 
@@ -7828,7 +7829,7 @@ begin
           repeat
             docurving(True, True, xs_on_control, ys_on_control, x_on_pad, ycurved, dummy_k, dummy_r);
 
-            y_on_pad := ycurved * hand_i + y_datum;
+            y_on_pad := ycurved * TurnoutHandMultiplier(hand_i) + y_datum;
 
             if get_col_row(x_on_pad, y_on_pad, incol, inrow) = True then begin
               if max_y < (ys_on_control - g / 2) then
@@ -7850,7 +7851,7 @@ begin
           repeat
             docurving(True, True, xs_on_control, ys_on_control, x_on_pad, ycurved, dummy_k, dummy_r);
 
-            y_on_pad := ycurved * hand_i + y_datum;
+            y_on_pad := ycurved * TurnoutHandMultiplier(hand_i) + y_datum;
 
             if get_col_row(x_on_pad, y_on_pad, incol, inrow) = True then begin
               if max_y < (ys_on_control - g / 2) then
@@ -7923,7 +7924,7 @@ begin
             repeat
               docurving(True, True, xs_on_control, ys_on_control, x_on_pad, ycurved, dummy_k, dummy_r);
 
-              y_on_pad := ycurved * hand_i + y_datum;
+              y_on_pad := ycurved * TurnoutHandMultiplier(hand_i) + y_datum;
 
               if get_col_row(x_on_pad, y_on_pad, incol, inrow) = True    // on the image
               then begin
@@ -7961,7 +7962,7 @@ begin
             repeat
               docurving(True, True, xs_on_control, ys_on_control, x_on_pad, ycurved, dummy_k, dummy_r);
 
-              y_on_pad := ycurved * hand_i + y_datum;
+              y_on_pad := ycurved * TurnoutHandMultiplier(hand_i) + y_datum;
 
               if get_col_row(x_on_pad, y_on_pad, incol, inrow) = True    // on the image
               then begin
@@ -8013,7 +8014,7 @@ begin
 
           docurving(True, True, pegx, g / 2, x_org_mm, ycurved, dummy_k, dummy_r);   // peg position on pad
 
-          y_org_mm := ycurved * hand_i + y_datum;
+          y_org_mm := ycurved * TurnoutHandMultiplier(hand_i) + y_datum;
 
           docurving(True, True, turnoutx, g / 2, x_end_mm, ycurved, dummy_k, dummy_r);
           // CTRL-9 on pad (to get direction from peg)
@@ -8160,14 +8161,14 @@ begin
             xs := pegx + (incol / inwidth * old_shapewidth) * x_factor;
 
             ys := g / 2 + (old_shapeheight - inrow / inheight * old_shapeheight - datum_offset_mm) *
-              y_factor * hand_i;
+              y_factor * TurnoutHandMultiplier(hand_i);
 
             // get xc,yc,tn,rn ...
 
             docurving(True, True, xs, ys, xc, yc, tn, rn);
             // calc curving to control template, and call any transforms wanted.
 
-            yc_on_pad := yc * hand_i + y_datum;
+            yc_on_pad := yc * TurnoutHandMultiplier(hand_i) + y_datum;
 
             if xc > max_extent_x then
               max_extent_x := xc;
@@ -8227,14 +8228,14 @@ begin
               xs := pegx + (incol / inwidth * old_shapewidth) * x_factor;
 
               ys := g / 2 + (old_shapeheight - inrow / inheight * old_shapeheight - datum_offset_mm) *
-                y_factor * hand_i;
+                y_factor * TurnoutHandMultiplier(hand_i);
 
               // get xc,yc,tn,rn ...
 
               docurving(True, True, xs, ys, xc, yc, tn, rn);
               // calc curving to control template, and call any transforms wanted.
 
-              yc_on_pad := yc * hand_i + y_datum;
+              yc_on_pad := yc * TurnoutHandMultiplier(hand_i) + y_datum;
 
               with destination_bitmap.Canvas do begin
                 outcol := Trunc((xc - min_extent_x) * picture_scale_width);

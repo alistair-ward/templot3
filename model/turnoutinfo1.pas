@@ -66,7 +66,7 @@ attributes:
 - name: approachRailsOnly
   type: Boolean
 - name: hand
-  type: Integer
+  type: TTurnoutHand
 - name: timbering
   type: Boolean
 - name: switchTimbers
@@ -94,6 +94,8 @@ attributes:
 
 type
 
+  TTurnoutHand = (thLeft, thY, thRight);
+
   TTurnoutInfo1 = class(TOTPersistent)
   private
     //# genMemberVars
@@ -101,7 +103,7 @@ type
     FRolledInSleepered: Boolean;
     FFrontTimbers: Boolean;
     FApproachRailsOnly: Boolean;
-    FHand: Integer;
+    FHand: TTurnoutHand;
     FTimbering: Boolean;
     FSwitchTimbers: Boolean;
     FClosureTimbers: Boolean;
@@ -117,15 +119,15 @@ type
 
   protected
     procedure Calculate; override;
-    procedure RestoreAttributes(AStream : TStream); override;
-    procedure SaveAttributes(AStream : TStream); override;
+    procedure RestoreAttributes(AStream: TStream); override;
+    procedure SaveAttributes(AStream: TStream); override;
 
     //# genGetSetDeclarations
     procedure SetPlainTrack(const AValue: Boolean);
     procedure SetRolledInSleepered(const AValue: Boolean);
     procedure SetFrontTimbers(const AValue: Boolean);
     procedure SetApproachRailsOnly(const AValue: Boolean);
-    procedure SetHand(const AValue: Integer);
+    procedure SetHand(const AValue: TTurnoutHand);
     procedure SetTimbering(const AValue: Boolean);
     procedure SetSwitchTimbers(const AValue: Boolean);
     procedure SetClosureTimbers(const AValue: Boolean);
@@ -146,26 +148,29 @@ type
     //# genPublicDeclarations
     //# endGenPublicDeclarations
 
-    procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
-    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+    procedure RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+      ALoader: TOTPersistentLoader); override;
+    procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property plainTrack: Boolean read FPlainTrack write SetPlainTrack;
-    property rolledInSleepered: Boolean read FRolledInSleepered write SetRolledInSleepered;
-    property frontTimbers: Boolean read FFrontTimbers write SetFrontTimbers;
-    property approachRailsOnly: Boolean read FApproachRailsOnly write SetApproachRailsOnly;
-    property hand: Integer read FHand write SetHand;
-    property timbering: Boolean read FTimbering write SetTimbering;
-    property switchTimbers: Boolean read FSwitchTimbers write SetSwitchTimbers;
-    property closureTimbers: Boolean read FClosureTimbers write SetClosureTimbers;
-    property xingTimbers: Boolean read FXingTimbers write SetXingTimbers;
-    property exitTimbering: Integer read FExitTimbering write SetExitTimbering;
-    property turnoutRoadCode: Integer read FTurnoutRoadCode write SetTurnoutRoadCode;
-    property turnoutLength: Double read FTurnoutLength write SetTurnoutLength;
-    property originToToe: Double read FOriginToToe write SetOriginToToe;
-    property stepSize: Double read FStepSize write SetStepSize;
-    property turnoutRoadIsAdjustable: Boolean read FTurnoutRoadIsAdjustable write SetTurnoutRoadIsAdjustable;
-    property turnoutRoadIsMinimum: Boolean read FTurnoutRoadIsMinimum write SetTurnoutRoadIsMinimum;
+    property plainTrack: Boolean Read FPlainTrack Write SetPlainTrack;
+    property rolledInSleepered: Boolean Read FRolledInSleepered Write SetRolledInSleepered;
+    property frontTimbers: Boolean Read FFrontTimbers Write SetFrontTimbers;
+    property approachRailsOnly: Boolean Read FApproachRailsOnly Write SetApproachRailsOnly;
+    property hand: TTurnoutHand Read FHand Write SetHand;
+    property timbering: Boolean Read FTimbering Write SetTimbering;
+    property switchTimbers: Boolean Read FSwitchTimbers Write SetSwitchTimbers;
+    property closureTimbers: Boolean Read FClosureTimbers Write SetClosureTimbers;
+    property xingTimbers: Boolean Read FXingTimbers Write SetXingTimbers;
+    property exitTimbering: Integer Read FExitTimbering Write SetExitTimbering;
+    property turnoutRoadCode: Integer Read FTurnoutRoadCode Write SetTurnoutRoadCode;
+    property turnoutLength: Double Read FTurnoutLength Write SetTurnoutLength;
+    property originToToe: Double Read FOriginToToe Write SetOriginToToe;
+    property stepSize: Double Read FStepSize Write SetStepSize;
+    property turnoutRoadIsAdjustable: Boolean Read FTurnoutRoadIsAdjustable
+      Write SetTurnoutRoadIsAdjustable;
+    property turnoutRoadIsMinimum: Boolean Read FTurnoutRoadIsMinimum
+      Write SetTurnoutRoadIsMinimum;
     //# endGenProperty
   end;
 
@@ -173,14 +178,57 @@ type
   TTurnoutInfo1ReferenceList = class(TOTReferenceList<TTurnoutInfo1>);
 
 
+function StrToTTurnoutHand(AValue: String): TTurnoutHand;
+procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TTurnoutHand);
+
+function TurnoutHandMultiplier(AHand: TTurnoutHand): Integer;
+function SwapTurnoutHand(AHand: TTurnoutHand): TTurnoutHand;
+
 implementation
 
 uses
-  TLoggerUnit;
+  TLoggerUnit,
+  Typinfo;
 
 var
-  log : ILogger;
+  log: ILogger;
 
+function StrToTTurnoutHand(AValue: String): TTurnoutHand;
+begin
+  Result := TTurnoutHand(GetEnumValue(TypeInfo(TTurnoutHand), AValue));
+end;
+
+procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TTurnoutHand);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TTurnoutHand), Ord(AValue)));
+end;
+
+function TurnoutHandMultiplier(AHand: TTurnoutHand): Integer;
+begin
+  case AHand of
+    thLeft:
+      Result := 1;
+    thY:
+      Result := 0;
+    thRight:
+      Result := -1;
+    else
+      raise Exception.Create('Unknown TTurnoutHand');
+  end;
+end;
+
+function SwapTurnoutHand(AHand: TTurnoutHand): TTurnoutHand;
+begin
+  if AHand = thLeft then
+    Result := thRight
+  else
+  if AHand = thRight then
+    Result := thLeft
+  else
+    Result := thY;
+end;
 
 { TTurnoutInfo1 }
 
@@ -203,7 +251,8 @@ begin
   // Add your calculation code here, and cache the results...
 end;
 
-procedure TTurnoutInfo1.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
+procedure TTurnoutInfo1.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+  ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
   if AName = 'plainTrack' then
@@ -219,7 +268,7 @@ begin
     FApproachRailsOnly := StrToBoolean(AValue)
   else
   if AName = 'hand' then
-    FHand := StrToInteger(AValue)
+    FHand := StrToTTurnoutHand(AValue)
   else
   if AName = 'timbering' then
     FTimbering := StrToBoolean(AValue)
@@ -254,14 +303,14 @@ begin
   if AName = 'turnoutRoadIsMinimum' then
     FTurnoutRoadIsMinimum := StrToBoolean(AValue)
   else
-  //# endGenRestoreYamlVars
+    //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
 
-procedure TTurnoutInfo1.RestoreAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TTurnoutInfo1.RestoreAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genRestoreVars
@@ -269,7 +318,7 @@ procedure TTurnoutInfo1.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FRolledInSleepered, sizeof(Boolean));
   AStream.ReadBuffer(FFrontTimbers, sizeof(Boolean));
   AStream.ReadBuffer(FApproachRailsOnly, sizeof(Boolean));
-  AStream.ReadBuffer(FHand, sizeof(Integer));
+  AStream.ReadBuffer(FHand, sizeof(TTurnoutHand));
   AStream.ReadBuffer(FTimbering, sizeof(Boolean));
   AStream.ReadBuffer(FSwitchTimbers, sizeof(Boolean));
   AStream.ReadBuffer(FClosureTimbers, sizeof(Boolean));
@@ -282,12 +331,12 @@ procedure TTurnoutInfo1.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FTurnoutRoadIsAdjustable, sizeof(Boolean));
   AStream.ReadBuffer(FTurnoutRoadIsMinimum, sizeof(Boolean));
   //# endGenRestoreVars
-  end;
+end;
 
-procedure TTurnoutInfo1.SaveAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TTurnoutInfo1.SaveAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genSaveVars
@@ -295,7 +344,7 @@ procedure TTurnoutInfo1.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FRolledInSleepered, sizeof(Boolean));
   AStream.WriteBuffer(FFrontTimbers, sizeof(Boolean));
   AStream.WriteBuffer(FApproachRailsOnly, sizeof(Boolean));
-  AStream.WriteBuffer(FHand, sizeof(Integer));
+  AStream.WriteBuffer(FHand, sizeof(TTurnoutHand));
   AStream.WriteBuffer(FTimbering, sizeof(Boolean));
   AStream.WriteBuffer(FSwitchTimbers, sizeof(Boolean));
   AStream.WriteBuffer(FClosureTimbers, sizeof(Boolean));
@@ -308,20 +357,20 @@ procedure TTurnoutInfo1.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FTurnoutRoadIsAdjustable, sizeof(Boolean));
   AStream.WriteBuffer(FTurnoutRoadIsMinimum, sizeof(Boolean));
   //# endGenSaveVars
-  end;
-  
-procedure TTurnoutInfo1.SaveYamlAttributes(AEmitter : TYamlEmitter);
-  var
-    i: Integer;
-  begin
+end;
+
+procedure TTurnoutInfo1.SaveYamlAttributes(AEmitter: TYamlEmitter);
+var
+  i: Integer;
+begin
   inherited;
-  
+
   //# genSaveYamlVars
   SaveYamlBoolean(AEmitter, 'plainTrack', FPlainTrack);
   SaveYamlBoolean(AEmitter, 'rolledInSleepered', FRolledInSleepered);
   SaveYamlBoolean(AEmitter, 'frontTimbers', FFrontTimbers);
   SaveYamlBoolean(AEmitter, 'approachRailsOnly', FApproachRailsOnly);
-  SaveYamlInteger(AEmitter, 'hand', FHand);
+  SaveYamlTTurnoutHand(AEmitter, 'hand', FHand);
   SaveYamlBoolean(AEmitter, 'timbering', FTimbering);
   SaveYamlBoolean(AEmitter, 'switchTimbers', FSwitchTimbers);
   SaveYamlBoolean(AEmitter, 'closureTimbers', FClosureTimbers);
@@ -334,7 +383,7 @@ procedure TTurnoutInfo1.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'turnoutRoadIsAdjustable', FTurnoutRoadIsAdjustable);
   SaveYamlBoolean(AEmitter, 'turnoutRoadIsMinimum', FTurnoutRoadIsMinimum);
   //# endGenSaveYamlVars
-  end;
+end;
 
 //# genGetSetMethods
 // GENERATED METHOD - DO NOT EDIT
@@ -374,7 +423,7 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TTurnoutInfo1.SetHand(const AValue: Integer);
+procedure TTurnoutInfo1.SetHand(const AValue: TTurnoutHand);
 begin
   if AValue <> FHand then begin
     SetModified;

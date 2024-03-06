@@ -8,7 +8,7 @@ object t2box_form: Tt2box_form
   Font.Color = clWindowText
   Font.Height = -13
   Font.Name = 'MS Sans Serif'
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '3.0.0.3'
   Scaled = False
   object load_t2box_dialog: TOpenDialog
     Title = 'Open Templot2 box file'

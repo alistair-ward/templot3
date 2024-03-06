@@ -50,7 +50,8 @@ uses
   template_records,
   Template,
   NotchInfo,
-  BoxDims
+  BoxDims,
+  TurnoutInfo1
   { OT-FIRST ,}{ OT-FIRST ReadHTML,}{ OT-FIRST framview}{,
   OleCtnrs, OleCtrls, SHDocVw};
 
@@ -3433,7 +3434,7 @@ var
   list_planing_mark_aq1: integer = 0;
   list_planing_mark_aq2: integer = 0;
 
-  hand_i: integer;
+  hand_i: TTurnoutHand;
 
   xing_type_i: integer = 0;     //0.93 18-05-10
   xing_calc_i: integer = 0;
@@ -9101,14 +9102,14 @@ end;
 procedure Tpad_form.try_left_maketrans_first_popup_entryClick(Sender: TObject);
 
 begin
-  make_transition_click(1);
+  make_transition_click(thLeft);
 end;
 //______________________________________________________________________________________
 
 procedure Tpad_form.try_right_maketrans_first_popup_entryClick(Sender: TObject);
 
 begin
-  make_transition_click(-1);
+  make_transition_click(thRight);
 end;
 //________________________________________________________________________________________
 
@@ -9985,25 +9986,25 @@ begin
     False, True, False, False);
   // neg ok, no preset, allow zero, don't terminate on zero.
   n := putdim('', 1, 'rotation centre dimension Y (from bottom)', yform *
-    hand_i + y_datum, False, True, False, False);        // ditto.
-  n := putdim('', 3, 'rotation  angle  ( + = anticlockwise ) ', kform * hand_i *
+    TurnoutHandMultiplier(hand_i) + y_datum, False, True, False, False);        // ditto.
+  n := putdim('', 3, 'rotation  angle  ( + = anticlockwise ) ', kform * TurnoutHandMultiplier(hand_i) *
     180.0 / Pi, False, True, False, False); // ditto.
   n := putdim('', 1, '+ / -  X  shift  (after rotation) ', xshift, False, True, False, False);
   // ditto.
-  n := putdim('', 1, '+ / -  Y  shift  (after rotation) ', yshift * hand_i,
+  n := putdim('', 1, '+ / -  Y  shift  (after rotation) ', yshift * TurnoutHandMultiplier(hand_i),
     False, True, False, False);
   // ditto.
   if n <> 4 then
     EXIT;
   if getdims('control  template  -  shifts  and  rotations', '', pad_form, n, od) = True then begin
     xform := od[0];
-    yform := (od[1] - y_datum) * hand_i;
+    yform := (od[1] - y_datum) * TurnoutHandMultiplier(hand_i);
 
-    kform := od[2] * hand_i * Pi / 180.0;     // to rads. adjust for hand of turnout.
+    kform := od[2] * TurnoutHandMultiplier(hand_i) * Pi / 180.0;     // to rads. adjust for hand of turnout.
     normalize_kform;
 
     xshift := od[3];
-    yshift := od[4] * hand_i;
+    yshift := od[4] * TurnoutHandMultiplier(hand_i);
 
     redraw(True);
   end;
@@ -10020,9 +10021,9 @@ begin
   kform_start := kform;     // for angle read-out.
 
   mouse_action_selected('F8    rotate  around  fixing  peg ...', 'F8  rotate  around  peg',
-    'by : ' + captext((kform - kform_start) * hand_i * 180 / Pi) +
-    ' degrees.   peg  at : ' + captext(arm_angle * hand_i * 180 / Pi) +
-    ' degrees' + k_ram_str(arm_angle * hand_i));
+    'by : ' + captext((kform - kform_start) * TurnoutHandMultiplier(hand_i) * 180 / Pi) +
+    ' degrees.   peg  at : ' + captext(arm_angle * TurnoutHandMultiplier(hand_i) * 180 / Pi) +
+    ' degrees' + k_ram_str(arm_angle * TurnoutHandMultiplier(hand_i)));
   twist_mod := 1;
 end;
 //_______________________________________________________________________________________
@@ -10049,8 +10050,8 @@ begin
     mouse_str := 'CTRL-F5  orbit around radial centre';
 
   mouse_action_selected('CTRL-F5    orbit  template  around  radial  centre ...',
-    mouse_str, 'peg  at : ' + captext(arm_angle * hand_i * 180 / Pi) + ' degrees' +
-    k_ram_str(arm_angle * hand_i));
+    mouse_str, 'peg  at : ' + captext(arm_angle * TurnoutHandMultiplier(hand_i) * 180 / Pi) + ' degrees' +
+    k_ram_str(arm_angle * TurnoutHandMultiplier(hand_i)));
   orbit_mod := 1;
 end;
 //________________________________________________________________________________________
@@ -14077,7 +14078,7 @@ begin
     EXIT;
   if getdims('shift  control  template', '', pad_form, n, od) = True then begin
     xshift := xshift + od[0];
-    yshift := yshift + od[1] * hand_i;
+    yshift := yshift + od[1] * TurnoutHandMultiplier(hand_i);
 
     //if transform=False then transform_on_and_redraw;    //  won't work otherwise - also does a redraw.
     redraw(True);
@@ -14102,7 +14103,7 @@ begin
   if n <> 0 then
     EXIT;
   if getdims('rotate  control  template  around  peg', '', pad_form, n, od) = True then
-    rotate_turnout(od[0] * hand_i * Pi / 180, True);
+    rotate_turnout(od[0] * TurnoutHandMultiplier(hand_i) * Pi / 180, True);
 end;
 //_________________________________________________________________________________________
 
@@ -14778,7 +14779,7 @@ begin
   // calc current peg position.
 
   zoom_offsetx := padpegx - screenx / 2;
-  zoom_offsety := padpegy * hand_i + y_datum - screeny / 2;
+  zoom_offsety := padpegy * TurnoutHandMultiplier(hand_i) + y_datum - screeny / 2;
   redraw_pad(True, False);
 end;
 //___________________________________________________________________________________________
@@ -15474,7 +15475,7 @@ begin
 
   tb_roll_percent := 98.2;  // roll rails for best match to parallel crossing
 
-  hand_i := 0 - hand_i;       // return curve is opposite hand to turnout
+  hand_i := SwapTurnoutHand(hand_i);       // return curve is opposite hand to turnout
 
   chord := get_notch_distance(exit_notch, trp_notch);
   turn_angle := ARCSIN(chord / 2 / rcurve) * 2;
@@ -15640,7 +15641,7 @@ begin
   plain_track := True;
   set_plain_track(True, True);
 
-  hand_i := 0 - hand_i;       // branch track is opposite hand to turnout.
+  hand_i := SwapTurnoutHand(hand_i);       // branch track is opposite hand to turnout.
 
   if creating_tandem = False then begin
     xorg := 132 * scale;        // length of branch track.  2 chains arbitrary.
@@ -19364,9 +19365,9 @@ begin
         // set new template from drop-downs ...
 
         if left_hand_radio_button.Checked = True then
-          hand_i := 1
+          hand_i := thLeft
         else
-          hand_i := -1;
+          hand_i := thRight;
 
         sx_index := turnout_combo.ItemIndex;
 

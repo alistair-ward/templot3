@@ -9,14 +9,13 @@ object tandem_form: Ttandem_form
   ClientHeight = 330
   ClientWidth = 600
   Color = 15794175
-  DesignTimePPI = 120
   Font.Color = clWindowText
   Font.Height = -13
   Font.Name = 'Arial'
   Font.Style = [fsBold]
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '1.8.4.0'
+  LCLVersion = '3.0.0.3'
   Scaled = False
   object datestamp_label: TLabel
     Left = 0
@@ -150,6 +149,7 @@ object tandem_form: Ttandem_form
     ClientHeight = 126
     ClientWidth = 365
     Color = 16777200
+    ParentBackground = False
     ParentColor = False
     TabOrder = 1
     object Label1: TLabel
@@ -182,9 +182,9 @@ object tandem_form: Ttandem_form
     end
     object regular_xing_radio: TRadioButton
       Left = 28
-      Height = 23
+      Height = 20
       Top = 14
-      Width = 143
+      Width = 137
       Caption = 'regular  V-crossing'
       Checked = True
       TabOrder = 0
@@ -192,9 +192,9 @@ object tandem_form: Ttandem_form
     end
     object curviform_xing_radio: TRadioButton
       Left = 28
-      Height = 23
+      Height = 20
       Top = 74
-      Width = 157
+      Width = 151
       Caption = 'curviform  V-crossing'
       TabOrder = 1
     end
@@ -214,7 +214,7 @@ object tandem_form: Ttandem_form
     Top = 160
     Width = 169
     Caption = 'please  click  this  first'
-    OnClick = click_first_buttonClick
     TabOrder = 3
+    OnClick = click_first_buttonClick
   end
 end

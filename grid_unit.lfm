@@ -15,7 +15,7 @@ object grid_form: Tgrid_form
   Font.Style = [fsBold]
   OnCreate = FormCreate
   OnShow = FormShow
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '3.0.0.3'
   Scaled = False
   object help_shape: TShape
     Left = 628
@@ -45,6 +45,7 @@ object grid_form: Tgrid_form
     Font.Height = -17
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 15
@@ -67,6 +68,7 @@ object grid_form: Tgrid_form
       Width = 15
       ClientHeight = 16
       ClientWidth = 15
+      ParentBackground = False
       TabOrder = 1
       OnClick = colour_panelClick
       object colour_patch: TImage
@@ -136,6 +138,7 @@ object grid_form: Tgrid_form
     Font.Height = -15
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 14
@@ -147,8 +150,8 @@ object grid_form: Tgrid_form
       Width = 14
       Caption = '  '
       Default = True
-      OnClick = close_buttonClick
       TabOrder = 0
+      OnClick = close_buttonClick
     end
   end
   object make_shapes_button: TButton
@@ -157,8 +160,8 @@ object grid_form: Tgrid_form
     Top = 288
     Width = 182
     Caption = 'make  shapes  &from  ring'
-    OnClick = make_shapes_buttonClick
     TabOrder = 8
+    OnClick = make_shapes_buttonClick
   end
   object make_target_button: TButton
     Left = 188
@@ -166,8 +169,8 @@ object grid_form: Tgrid_form
     Top = 288
     Width = 178
     Caption = 'make  tar&get  from  ring'
-    OnClick = make_target_buttonClick
     TabOrder = 9
+    OnClick = make_target_buttonClick
   end
   object ring_copies_groupbox: TGroupBox
     Left = 168
@@ -181,6 +184,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 3
     object make_copy_button: TButton
@@ -189,8 +193,8 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 48
       Caption = 'ma&ke'
-      OnClick = make_copy_buttonClick
       TabOrder = 3
+      OnClick = make_copy_buttonClick
     end
     object delete_copy_button: TButton
       Left = 144
@@ -199,8 +203,8 @@ object grid_form: Tgrid_form
       Width = 54
       Caption = 'de&lete'
       Enabled = False
-      OnClick = delete_copy_buttonClick
       TabOrder = 2
+      OnClick = delete_copy_buttonClick
     end
     object clear_button: TButton
       Left = 70
@@ -209,8 +213,8 @@ object grid_form: Tgrid_form
       Width = 70
       Caption = 'clear  &all'
       Enabled = False
-      OnClick = clear_buttonClick
       TabOrder = 1
+      OnClick = clear_buttonClick
     end
     object ring_copy_colour_button: TButton
       Left = 2
@@ -218,8 +222,8 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 64
       Caption = 'colour...'
-      OnClick = ring_copy_colour_buttonClick
       TabOrder = 0
+      OnClick = ring_copy_colour_buttonClick
     end
   end
   object pen_groupbox: TGroupBox
@@ -245,8 +249,8 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 104
       Caption = 'mo&ve  to  ring'
-      OnClick = move_pen_buttonClick
       TabOrder = 0
+      OnClick = move_pen_buttonClick
     end
     object draw_line_button: TButton
       Left = 4
@@ -254,8 +258,8 @@ object grid_form: Tgrid_form
       Top = 36
       Width = 104
       Caption = 'dra&w  to  ring'
-      OnClick = draw_line_buttonClick
       TabOrder = 1
+      OnClick = draw_line_buttonClick
     end
   end
   object set_groupbox: TGroupBox
@@ -270,6 +274,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 4
     object dia_label: TLabel
@@ -293,8 +298,8 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 50
       Caption = 'size...'
-      OnClick = ring_size_buttonClick
       TabOrder = 1
+      OnClick = ring_size_buttonClick
     end
     object ring_location_button: TButton
       Left = 114
@@ -302,8 +307,8 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 74
       Caption = 'position...'
-      OnClick = ring_location_buttonClick
       TabOrder = 2
+      OnClick = ring_location_buttonClick
     end
     object colour_button: TButton
       Left = 124
@@ -311,8 +316,8 @@ object grid_form: Tgrid_form
       Top = 34
       Width = 64
       Caption = 'colour...'
-      OnClick = colour_buttonClick
       TabOrder = 3
+      OnClick = colour_buttonClick
     end
     object six_foot_button: TButton
       Left = 2
@@ -321,10 +326,10 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 58
       Caption = 'six-foot'
-      OnClick = six_foot_buttonClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
+      OnClick = six_foot_buttonClick
     end
   end
   object measuring_panel: TPanel
@@ -343,6 +348,7 @@ object grid_form: Tgrid_form
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 0
@@ -396,10 +402,10 @@ object grid_form: Tgrid_form
     Top = 172
     Width = 85
     Caption = 'cross-hairs'
-    OnClick = cross_hairs_buttonClick
     ParentShowHint = False
     ShowHint = True
     TabOrder = 6
+    OnClick = cross_hairs_buttonClick
   end
   object jump_groupbox: TGroupBox
     Left = 0
@@ -413,6 +419,7 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 5
     object jump_to_notch_button: TButton
@@ -421,8 +428,8 @@ object grid_form: Tgrid_form
       Top = 62
       Width = 80
       Caption = 'to  notch'
-      OnClick = jump_to_notch_buttonClick
       TabOrder = 2
+      OnClick = jump_to_notch_buttonClick
     end
     object jump_to_centre_button: TButton
       Left = 8
@@ -430,8 +437,8 @@ object grid_form: Tgrid_form
       Top = 34
       Width = 80
       Caption = 'to  centre'
-      OnClick = jump_to_centre_buttonClick
       TabOrder = 1
+      OnClick = jump_to_centre_buttonClick
     end
     object jump_to_mouse_button: TButton
       Left = 8
@@ -439,8 +446,8 @@ object grid_form: Tgrid_form
       Top = 6
       Width = 80
       Caption = 'to  mo&Use'
-      OnClick = jump_to_mouse_buttonClick
       TabOrder = 0
+      OnClick = jump_to_mouse_buttonClick
     end
   end
   object mouse_actions_groupbox: TGroupBox
@@ -466,8 +473,8 @@ object grid_form: Tgrid_form
       Top = 4
       Width = 82
       Caption = 'm&ove  ring'
-      OnClick = mouse_buttonClick
       TabOrder = 0
+      OnClick = mouse_buttonClick
     end
     object adjust_ring_dia_button: TButton
       Left = 4
@@ -475,8 +482,8 @@ object grid_form: Tgrid_form
       Top = 34
       Width = 82
       Caption = 'ring  si&ze'
-      OnClick = adjust_ring_dia_buttonClick
       TabOrder = 1
+      OnClick = adjust_ring_dia_buttonClick
     end
     object roll_dummy_vehicle_button: TButton
       Left = 296
@@ -484,8 +491,8 @@ object grid_form: Tgrid_form
       Top = 4
       Width = 150
       Caption = '&roll  dummy  vehicle'
-      OnClick = roll_dummy_vehicle_buttonClick
       TabOrder = 4
+      OnClick = roll_dummy_vehicle_buttonClick
     end
     object dummy_vehicle_clearance_button: TButton
       Left = 252
@@ -493,8 +500,8 @@ object grid_form: Tgrid_form
       Top = 34
       Width = 194
       Caption = 'dumm&y  vehicle  clearance'
-      OnClick = dummy_vehicle_clearance_buttonClick
       TabOrder = 5
+      OnClick = dummy_vehicle_clearance_buttonClick
     end
     object adjust_adjacent_centres_ms_button: TButton
       Left = 92
@@ -502,8 +509,8 @@ object grid_form: Tgrid_form
       Top = 34
       Width = 154
       Caption = 'adjacent  centres  MS'
-      OnClick = adjust_adjacent_centres_ms_buttonClick
       TabOrder = 3
+      OnClick = adjust_adjacent_centres_ms_buttonClick
     end
     object adjust_adjacent_centres_ts_button: TButton
       Left = 92
@@ -511,8 +518,8 @@ object grid_form: Tgrid_form
       Top = 4
       Width = 154
       Caption = 'adjacent  centres  TS'
-      OnClick = adjust_adjacent_centres_ts_buttonClick
       TabOrder = 2
+      OnClick = adjust_adjacent_centres_ts_buttonClick
     end
   end
   object help_button: TButton
@@ -525,9 +532,9 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = help_buttonClick
     ParentFont = False
     TabOrder = 1
+    OnClick = help_buttonClick
   end
   object dummy_vehicle_copies_groupbox: TGroupBox
     Left = 430
@@ -553,8 +560,8 @@ object grid_form: Tgrid_form
       Width = 80
       Caption = '&make  one'
       Enabled = False
-      OnClick = dummy_vehicle_make_copy_buttonClick
       TabOrder = 0
+      OnClick = dummy_vehicle_make_copy_buttonClick
     end
     object dummy_vehicle_delete_copy_button: TButton
       Left = 80
@@ -563,8 +570,8 @@ object grid_form: Tgrid_form
       Width = 88
       Caption = '&delete  last'
       Enabled = False
-      OnClick = dummy_vehicle_delete_copy_buttonClick
       TabOrder = 1
+      OnClick = dummy_vehicle_delete_copy_buttonClick
     end
     object dummy_vehicle_clear_copies_button: TButton
       Left = 4
@@ -573,8 +580,8 @@ object grid_form: Tgrid_form
       Width = 72
       Caption = '&clear  all'
       Enabled = False
-      OnClick = dummy_vehicle_clear_copies_buttonClick
       TabOrder = 2
+      OnClick = dummy_vehicle_clear_copies_buttonClick
     end
   end
   object show_ring_groupbox: TGroupBox
@@ -589,27 +596,28 @@ object grid_form: Tgrid_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentFont = False
     TabOrder = 2
     object show_rings_radio_button: TRadioButton
       Left = 6
       Height = 20
       Top = 8
-      Width = 53
+      Width = 51
       Caption = 'show'
       Checked = True
-      OnClick = show_rings_radio_buttonClick
       TabOrder = 0
       TabStop = True
+      OnClick = show_rings_radio_buttonClick
     end
     object hide_rings_radio_button: TRadioButton
       Left = 72
       Height = 20
       Top = 8
-      Width = 48
+      Width = 46
       Caption = 'hid&e'
-      OnClick = hide_rings_radio_buttonClick
       TabOrder = 1
+      OnClick = hide_rings_radio_buttonClick
     end
   end
   object dummy_vehicle_groupbox: TGroupBox
@@ -649,21 +657,21 @@ object grid_form: Tgrid_form
       Left = 8
       Height = 20
       Top = 10
-      Width = 53
+      Width = 51
       Caption = 'show'
-      OnClick = show_dummy_vehicles_radio_buttonClick
       TabOrder = 0
+      OnClick = show_dummy_vehicles_radio_buttonClick
     end
     object hide_dummy_vehicles_radio_button: TRadioButton
       Left = 8
       Height = 20
       Top = 34
-      Width = 48
+      Width = 46
       Caption = 'h&ide'
       Checked = True
-      OnClick = hide_dummy_vehicles_radio_buttonClick
       TabOrder = 1
       TabStop = True
+      OnClick = hide_dummy_vehicles_radio_buttonClick
     end
     object road_groupbox: TGroupBox
       Left = 200
@@ -677,37 +685,38 @@ object grid_form: Tgrid_form
       Font.Height = -12
       Font.Name = 'Arial'
       Font.Style = [fsBold]
+      ParentBackground = False
       ParentFont = False
       TabOrder = 3
       object main_road_dummy_vehicle_radio_button: TRadioButton
         Left = 10
         Height = 20
         Top = 2
-        Width = 105
+        Width = 103
         Caption = 'on mai&n road'
         Checked = True
         Font.Color = clMaroon
         Font.Height = -13
         Font.Name = 'Arial'
         Font.Style = [fsBold]
-        OnClick = main_road_dummy_vehicle_radio_buttonClick
         ParentFont = False
         TabOrder = 0
         TabStop = True
+        OnClick = main_road_dummy_vehicle_radio_buttonClick
       end
       object turnout_road_dummy_vehicle_radio_button: TRadioButton
         Left = 135
         Height = 20
         Top = 2
-        Width = 118
+        Width = 116
         Caption = 'on &turnout road'
         Font.Color = clMaroon
         Font.Height = -13
         Font.Name = 'Arial'
         Font.Style = [fsBold]
-        OnClick = turnout_road_dummy_vehicle_radio_buttonClick
         ParentFont = False
         TabOrder = 1
+        OnClick = turnout_road_dummy_vehicle_radio_buttonClick
       end
     end
     object dummy_vehicle_dimensions_button: TButton
@@ -716,25 +725,25 @@ object grid_form: Tgrid_form
       Top = 10
       Width = 110
       Caption = 'dimen&sions ...'
-      OnClick = dummy_vehicle_dimensions_buttonClick
       TabOrder = 2
+      OnClick = dummy_vehicle_dimensions_buttonClick
     end
     object attach_ring_checkbox: TCheckBox
       Left = 78
       Height = 20
       Hint = 'attach the spacing-ring to the dummy vehicle'
       Top = 40
-      Width = 141
+      Width = 139
       Caption = 'attach spacing-ring'
       Font.Color = clMaroon
       Font.Height = -13
       Font.Name = 'Arial'
       Font.Style = [fsBold]
-      OnClick = attach_ring_checkboxClick
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 4
+      OnClick = attach_ring_checkboxClick
     end
     object vehicle_envelope_button: TButton
       Left = 8
@@ -742,8 +751,8 @@ object grid_form: Tgrid_form
       Top = 64
       Width = 194
       Caption = 'generate  outline  envelope'
-      OnClick = vehicle_envelope_buttonClick
       TabOrder = 6
+      OnClick = vehicle_envelope_buttonClick
     end
     object clear_first_envelope_button: TButton
       Left = 336
@@ -751,8 +760,8 @@ object grid_form: Tgrid_form
       Top = 64
       Width = 38
       Caption = 'first'
-      OnClick = clear_first_envelope_buttonClick
       TabOrder = 7
+      OnClick = clear_first_envelope_buttonClick
     end
     object clear_last_envelope_button: TButton
       Left = 382
@@ -760,8 +769,8 @@ object grid_form: Tgrid_form
       Top = 64
       Width = 36
       Caption = 'last'
-      OnClick = clear_last_envelope_buttonClick
       TabOrder = 8
+      OnClick = clear_last_envelope_buttonClick
     end
     object clear_all_envelopes_button: TButton
       Left = 426
@@ -769,14 +778,14 @@ object grid_form: Tgrid_form
       Top = 64
       Width = 32
       Caption = 'all'
-      OnClick = clear_all_envelopes_buttonClick
       TabOrder = 9
+      OnClick = clear_all_envelopes_buttonClick
     end
     object blank_ends_checkbox: TCheckBox
       Left = 250
       Height = 20
       Top = 40
-      Width = 219
+      Width = 217
       Caption = 'blank off invalid envelope ends'
       Checked = True
       State = cbChecked
@@ -789,7 +798,7 @@ object grid_form: Tgrid_form
     Top = 288
     Width = 226
     Caption = 'reset  normal  centre-line  offset'
-    OnClick = reset_centre_line_buttonClick
     TabOrder = 13
+    OnClick = reset_centre_line_buttonClick
   end
 end

@@ -88,7 +88,9 @@ uses
   point_ex, pad_unit, math_unit, math2_unit, keep_select, alert_unit, info_unit,
   control_room, shove_timber,
   switch_select, { OT-FIRST web_browser_unit,} wait_message, help_sheet,
-  shoved_timber, template_records, NotchInfo;
+  template_records,
+  NotchInfo,
+  TurnoutInfo1;
 
 var
   trad_1st: double;
@@ -571,7 +573,7 @@ begin
     second_xing_notch);
   // get turnout rad and 3 points on it
 
-  if hand_i = 1 then begin
+  if hand_i = thLeft then begin
     left_rad := trad_2nd;
     right_rad := trad_1st;
   end
@@ -1648,7 +1650,7 @@ begin
 
   equivalent_rad := equiv_rad_calc(trad_2nd, trad_1st) + g / 2;  //  for 3rd xing calcs
 
-  if hand_i = 1 then begin
+  if hand_i = thLeft then begin
     left_rad := trad_2nd;
     right_rad := clrad1;
   end
@@ -1687,7 +1689,7 @@ begin
 
       docurving(True, True, midx, midy, notch_x, temp_y, temp_k, dummy);
       // get notch on pad data from intersection
-      notch_y := temp_y * hand_i + y_datum;
+      notch_y := temp_y * TurnoutHandMultiplier(hand_i) + y_datum;
       notch_k := 0;                          // angle not yet
     end;//with
 
@@ -1697,7 +1699,7 @@ begin
 
       docurving(True, True, midsplicex, midsplicey, notch_x, temp_y, temp_k, dummy);
       // get notch on pad data from intersection
-      notch_y := temp_y * hand_i + y_datum;
+      notch_y := temp_y * TurnoutHandMultiplier(hand_i) + y_datum;
       notch_k := 0;                          // angle not needed
     end;//with
 

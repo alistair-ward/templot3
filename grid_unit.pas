@@ -232,6 +232,7 @@ uses
   template_records,
   AlignmentInfo,
   BoxDims,
+  TurnoutInfo1,
   TurnoutInfo2,
   PlatformTrackbedInfo,
   mark_unit
@@ -4713,22 +4714,22 @@ begin
   dv_copies[dv_copies_index] := dv_corners_calc;   // x dims
 
   with dv_copies[dv_copies_index] do begin       // modify y dims for bgnd...
-    pt1.y := pt1.y * hand_i + y_datum;
-    pt2.y := pt2.y * hand_i + y_datum;
-    b1.y := b1.y * hand_i + y_datum;
-    b2.y := b2.y * hand_i + y_datum;
-    b3.y := b3.y * hand_i + y_datum;
-    b4.y := b4.y * hand_i + y_datum;
-    c1.y := c1.y * hand_i + y_datum;
-    c2.y := c2.y * hand_i + y_datum;
-    c3.y := c3.y * hand_i + y_datum;
-    c4.y := c4.y * hand_i + y_datum;
-    m1.y := m1.y * hand_i + y_datum;
-    m2.y := m2.y * hand_i + y_datum;
-    o1.y := o1.y * hand_i + y_datum;
-    o2.y := o2.y * hand_i + y_datum;
-    o3.y := o3.y * hand_i + y_datum;
-    o4.y := o4.y * hand_i + y_datum;
+    pt1.y := pt1.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    pt2.y := pt2.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    b1.y := b1.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    b2.y := b2.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    b3.y := b3.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    b4.y := b4.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    c1.y := c1.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    c2.y := c2.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    c3.y := c3.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    c4.y := c4.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    m1.y := m1.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    m2.y := m2.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    o1.y := o1.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    o2.y := o2.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    o3.y := o3.y * TurnoutHandMultiplier(hand_i) + y_datum;
+    o4.y := o4.y * TurnoutHandMultiplier(hand_i) + y_datum;
   end;//with
 
   dummy_vehicle_delete_copy_button.Enabled := True;

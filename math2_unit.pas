@@ -80,9 +80,9 @@ implementation
 uses
   control_room, math_unit, info_unit, keep_select, shove_timber, alert_unit,
   help_sheet, grid_unit, wait_message,
-  shoved_timber,
   curve,
-  rail_data_unit;
+  rail_data_unit,
+  TurnoutInfo1;
 
 var
   dummy: double = 0;
@@ -852,7 +852,7 @@ var
         // curve and transform FP to get position on pad.
 
         fp_on_pad_x := fp_loc_x;
-        fp_on_pad_y := fp_loc_y * hand_i + y_datum;
+        fp_on_pad_y := fp_loc_y * TurnoutHandMultiplier(hand_i) + y_datum;
 
         Result :=
           (SQRT(SQR(fp_on_pad_x - xing.x) + SQR(fp_on_pad_y - xing.y)) < proximity_limit);

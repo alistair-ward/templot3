@@ -201,7 +201,6 @@ uses
   help_sheet,
   shove_timber,
   wait_message,
-  shoved_timber,
   template_records,
   Template,
   BoxDims,
