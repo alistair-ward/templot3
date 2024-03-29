@@ -51,7 +51,8 @@ uses
   Template,
   NotchInfo,
   BoxDims,
-  TurnoutInfo1
+  TurnoutInfo1,
+  Centreline
   { OT-FIRST ,}{ OT-FIRST ReadHTML,}{ OT-FIRST framview}{,
   OleCtnrs, OleCtrls, SHDocVw};
 
@@ -3745,7 +3746,7 @@ var
 
   dummy_template: boolean = False;  // 211c draw centre-line as a background shape thickness/colour
 
-  cl_options_code: integer = 0;            // which centre-line? 0=main road  206a
+  cl_options_code: TCentrelineOption = cloNormal;
   cl_options_custom_offset: double = 0;  // custom offset
 
   hover_keep_index: integer = -1;     // mouse hovering over this one...
@@ -10262,9 +10263,8 @@ var
   pad_str, mouse_str: string;
 
 begin
-  if half_diamond = True
-  // menu item should be disabled, but could be repeat_last_action call or beginner button
-  then begin
+  if half_diamond then begin
+    // menu item should be disabled, but could be repeat_last_action call or beginner button
     alert(6, '    F3  adjust  turnout  approach  length',
       'F3  adjust  turnout  approach  length.' +
       '||This mouse action applies only to turnout templates.' +
@@ -10275,7 +10275,7 @@ begin
   end;
 
   cancel_adjusts(True);
-  if plain_track = False then begin
+  if not plain_track then begin
     pad_str := 'F3    adjust  length  of  turnout  approach  track ...';
     mouse_str := 'F3  approach  length';
   end
@@ -10323,7 +10323,7 @@ begin
     EXIT;
   end;
 
-  if isolated_crossing = True then begin
+  if isolated_crossing then begin
     alert(6, '    CTRL-F3  adjust  blanking  length',
       'The V-crossing has been isolated.' +
       '||Blanking is not available when the V-crossing is isolated.',
@@ -25038,7 +25038,7 @@ end;
 procedure Tpad_form.centre_line_option_ts_track_menu_entryClick(Sender: TObject);  // 206a ...
 
 begin
-  cl_options_code := 2;
+  cl_options_code := cloTurnoutSideTrack;
   redraw_pad(True, True);
 end;
 //___________________
@@ -25046,7 +25046,7 @@ end;
 procedure Tpad_form.centre_line_option_ts_double_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := 1;
+  cl_options_code := cloTurnoutSideDouble;
   redraw_pad(True, True);
 end;
 //___________________
@@ -25054,7 +25054,7 @@ end;
 procedure Tpad_form.centre_line_option_ts_sleeper_ends_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := 3;
+  cl_options_code := cloTurnoutSideSleeperEnds;
   redraw_pad(True, True);
 end;
 //___________________
@@ -25062,7 +25062,7 @@ end;
 procedure Tpad_form.centre_line_option_normal_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := 0;
+  cl_options_code := cloNormal;
   redraw_pad(True, True);
 end;
 //___________________
@@ -25070,7 +25070,7 @@ end;
 procedure Tpad_form.centre_line_option_ms_sleeper_ends_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := -3;
+  cl_options_code := cloMainSideSleeperEnds;
   redraw_pad(True, True);
 end;
 //___________________
@@ -25078,7 +25078,7 @@ end;
 procedure Tpad_form.centre_line_option_ms_double_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := -1;
+  cl_options_code := cloMainSideDouble;
   redraw_pad(True, True);
 end;
 //___________________
@@ -25086,7 +25086,7 @@ end;
 procedure Tpad_form.centre_line_option_ms_track_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := -2;
+  cl_options_code := cloMainSideTrack;
   redraw_pad(True, True);
 end;
 //______________________________________________________________________________
@@ -25094,7 +25094,7 @@ end;
 procedure Tpad_form.centre_line_option_custom_menu_entryClick(Sender: TObject);
 
 begin
-  cl_options_code := 99;
+  cl_options_code := cloCustom;
   redraw_pad(True, True);
 end;
 //______________________________________________________________________________
@@ -25103,21 +25103,21 @@ procedure Tpad_form.centre_line_offset_options_menu_entryClick(Sender: TObject);
 
 begin
   case cl_options_code of
-    -3:
+    cloMainSideSleeperEnds:
       centre_line_option_ms_sleeper_ends_menu_entry.Checked := True; // radio item
-    -2:
+    cloMainSideTrack:
       centre_line_option_ms_track_menu_entry.Checked := True;        // radio item
-    -1:
+    cloMainSideDouble:
       centre_line_option_ms_double_menu_entry.Checked := True;       // radio item
-    0:
+    cloNormal:
       centre_line_option_normal_menu_entry.Checked := True;          // radio item
-    1:
+    cloTurnoutSideDouble:
       centre_line_option_ts_double_menu_entry.Checked := True;       // radio item
-    2:
+    cloTurnoutSideTrack:
       centre_line_option_ts_track_menu_entry.Checked := True;        // radio item
-    3:
+    cloTurnoutSideSleeperEnds:
       centre_line_option_ts_sleeper_ends_menu_entry.Checked := True; // radio item
-    99:
+    cloCustom:
       centre_line_option_custom_menu_entry.Checked := True;          // radio item
   end;//case;
 end;

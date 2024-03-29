@@ -78,10 +78,6 @@ attributes:
 - name: dummyTemplateFlag
   type: Boolean
   comment: dummy templates not part of track plan
-- name: centrelineOptionsCode
-  type: Integer
-- name: centrelineOptionsCustomOffset
-  type: Double
 - name: reminderFlag
   type: Boolean
 - name: reminderColour
@@ -98,8 +94,6 @@ type
     //# genMemberVars
     FDrawCentrelineOnly: Boolean;
     FDummyTemplateFlag: Boolean;
-    FCentrelineOptionsCode: Integer;
-    FCentrelineOptionsCustomOffset: Double;
     FReminderFlag: Boolean;
     FReminderColour: Integer;
     FReminderStr: String;
@@ -113,8 +107,6 @@ type
     //# genGetSetDeclarations
     procedure SetDrawCentrelineOnly(const AValue: Boolean);
     procedure SetDummyTemplateFlag(const AValue: Boolean);
-    procedure SetCentrelineOptionsCode(const AValue: Integer);
-    procedure SetCentrelineOptionsCustomOffset(const AValue: Double);
     procedure SetReminderFlag(const AValue: Boolean);
     procedure SetReminderColour(const AValue: Integer);
     procedure SetReminderStr(const AValue: String);
@@ -137,8 +129,6 @@ type
 
     // dummy templates not part of track plan
     property dummyTemplateFlag: Boolean read FDummyTemplateFlag write SetDummyTemplateFlag;
-    property centrelineOptionsCode: Integer read FCentrelineOptionsCode write SetCentrelineOptionsCode;
-    property centrelineOptionsCustomOffset: Double read FCentrelineOptionsCustomOffset write SetCentrelineOptionsCustomOffset;
     property reminderFlag: Boolean read FReminderFlag write SetReminderFlag;
     property reminderColour: Integer read FReminderColour write SetReminderColour;
     property reminderStr: String read FReminderStr write SetReminderStr;
@@ -188,12 +178,6 @@ begin
   if AName = 'dummyTemplateFlag' then
     FDummyTemplateFlag := StrToBoolean(AValue)
   else
-  if AName = 'centrelineOptionsCode' then
-    FCentrelineOptionsCode := StrToInteger(AValue)
-  else
-  if AName = 'centrelineOptionsCustomOffset' then
-    FCentrelineOptionsCustomOffset := StrToDouble(AValue)
-  else
   if AName = 'reminderFlag' then
     FReminderFlag := StrToBoolean(AValue)
   else
@@ -216,8 +200,6 @@ procedure TAlignmentInfo.RestoreAttributes(AStream : TStream);
   //# genRestoreVars
   AStream.ReadBuffer(FDrawCentrelineOnly, sizeof(Boolean));
   AStream.ReadBuffer(FDummyTemplateFlag, sizeof(Boolean));
-  AStream.ReadBuffer(FCentrelineOptionsCode, sizeof(Integer));
-  AStream.ReadBuffer(FCentrelineOptionsCustomOffset, sizeof(Double));
   AStream.ReadBuffer(FReminderFlag, sizeof(Boolean));
   AStream.ReadBuffer(FReminderColour, sizeof(Integer));
   FReminderStr := AStream.ReadAnsiString;
@@ -233,8 +215,6 @@ procedure TAlignmentInfo.SaveAttributes(AStream : TStream);
   //# genSaveVars
   AStream.WriteBuffer(FDrawCentrelineOnly, sizeof(Boolean));
   AStream.WriteBuffer(FDummyTemplateFlag, sizeof(Boolean));
-  AStream.WriteBuffer(FCentrelineOptionsCode, sizeof(Integer));
-  AStream.WriteBuffer(FCentrelineOptionsCustomOffset, sizeof(Double));
   AStream.WriteBuffer(FReminderFlag, sizeof(Boolean));
   AStream.WriteBuffer(FReminderColour, sizeof(Integer));
   AStream.WriteAnsiString(FReminderStr);
@@ -250,8 +230,6 @@ procedure TAlignmentInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   //# genSaveYamlVars
   SaveYamlBoolean(AEmitter, 'drawCentrelineOnly', FDrawCentrelineOnly);
   SaveYamlBoolean(AEmitter, 'dummyTemplateFlag', FDummyTemplateFlag);
-  SaveYamlInteger(AEmitter, 'centrelineOptionsCode', FCentrelineOptionsCode);
-  SaveYamlDouble(AEmitter, 'centrelineOptionsCustomOffset', FCentrelineOptionsCustomOffset);
   SaveYamlBoolean(AEmitter, 'reminderFlag', FReminderFlag);
   SaveYamlInteger(AEmitter, 'reminderColour', FReminderColour);
   SaveYamlString(AEmitter, 'reminderStr', FReminderStr);
@@ -274,24 +252,6 @@ begin
   if AValue <> FDummyTemplateFlag then begin
     SetModified;
     FDummyTemplateFlag := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TAlignmentInfo.SetCentrelineOptionsCode(const AValue: Integer);
-begin
-  if AValue <> FCentrelineOptionsCode then begin
-    SetModified;
-    FCentrelineOptionsCode := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TAlignmentInfo.SetCentrelineOptionsCustomOffset(const AValue: Double);
-begin
-  if AValue <> FCentrelineOptionsCustomOffset then begin
-    SetModified;
-    FCentrelineOptionsCustomOffset := AValue;
   end;
 end;
 

@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="91">
+    <Units Count="93">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -429,6 +429,16 @@
         <Filename Value="test\template_test.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit90>
+      <Unit91>
+        <Filename Value="model\template\centreline.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Centreline"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="model\template\feature.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Feature"/>
+      </Unit92>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -439,7 +449,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="model;test;log4delphi\util;log4delphi;model\curve;test\curve;t2box_reader;otpersist;submodules\otYaml\src"/>
+      <OtherUnitFiles Value="model;test;log4delphi\util;log4delphi;model\curve;test\curve;t2box_reader;otpersist;submodules\otYaml\src;model\template"/>
       <UnitOutputDirectory Value="libtest\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
   </CompilerOptions>

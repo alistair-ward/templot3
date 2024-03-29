@@ -14,7 +14,8 @@ uses
   template_records,
   BoxDims,
   TurnoutInfo2,
-  ShovedTimber;
+  ShovedTimber,
+  Centreline;
 
 
 {# class TTemplate
@@ -43,6 +44,10 @@ attributes:
     type: TShovedTimberOwningList
     owns: create
     access: [get]
+  - name: centreline
+    type: TCentreline
+    owns: create
+    access: [get]
 ...
 }
 
@@ -58,7 +63,10 @@ type
     FBoxDims: TOID;
     FTurnoutInfo2: TOID;
     FShovedTimbers: TOID;
+    FCentreline: TOID;
     //# endGenMemberVars
+
+    FLineCount: Integer;
 
   protected
     procedure Calculate; override;
@@ -70,10 +78,13 @@ type
     function GetBoxDims: TBoxDims;
     function GetTurnoutInfo2: TTurnoutInfo2;
     function GetShovedTimbers: TShovedTimberOwningList;
+    function GetCentreline: TCentreline;
     procedure SetName(const AValue: String);
     procedure SetTopLabel(const AValue: String);
     procedure SetMemo(const AValue: String);
     //# endGenGetSetDeclarations
+
+    function GetLineCount: Integer;
 
   public
     // True=has been copied to the background. (not included in file).
@@ -133,7 +144,10 @@ type
     property boxDims: TBoxDims read GetBoxDims;
     property turnoutInfo2: TTurnoutInfo2 read GetTurnoutInfo2;
     property shovedTimbers: TShovedTimberOwningList read GetShovedTimbers;
+    property centreline: TCentreline read GetCentreline;
     //# endGenProperty
+
+    property lineCount: Integer read GetLineCount;
   end;
 
   TTemplateOwningList = class(TOTOwningList<TTemplate>);
@@ -171,7 +185,15 @@ begin
     FShovedTimbers := TShovedTimberOwningList.Create(nil).oid
   else
     FShovedTimbers := 0;
+  if AOID = 0 then
+    FCentreline := TCentreline.Create(nil).oid
+  else
+    FCentreline := 0;
   //# endGenCreate
+
+  if AOID = 0 then begin
+    centreline.curve := curve;
+  end;
 end;
 
 destructor TTemplate.Destroy;
@@ -181,6 +203,7 @@ begin
   SetOwned(FBoxDims, nil);
   SetOwned(FTurnoutInfo2, nil);
   SetOwned(FShovedTimbers, nil);
+  SetOwned(FCentreline, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -214,6 +237,9 @@ begin
   if AName = 'shovedTimbers' then
     RestoreYamlObjectOwn(FShovedTimbers, StrToInteger(AValue), ALoader)
   else
+  if AName = 'centreline' then
+    RestoreYamlObjectOwn(FCentreline, StrToInteger(AValue), ALoader)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -232,6 +258,7 @@ procedure TTemplate.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FBoxDims, sizeof(TOID));
   AStream.ReadBuffer(FTurnoutInfo2, sizeof(TOID));
   AStream.ReadBuffer(FShovedTimbers, sizeof(TOID));
+  AStream.ReadBuffer(FCentreline, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -249,6 +276,7 @@ procedure TTemplate.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FBoxDims, sizeof(TOID));
   AStream.WriteBuffer(FTurnoutInfo2, sizeof(TOID));
   AStream.WriteBuffer(FShovedTimbers, sizeof(TOID));
+  AStream.WriteBuffer(FCentreline, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -266,6 +294,7 @@ procedure TTemplate.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlObject(AEmitter, 'boxDims', FBoxDims);
   SaveYamlObject(AEmitter, 'turnoutInfo2', FTurnoutInfo2);
   SaveYamlObject(AEmitter, 'shovedTimbers', FShovedTimbers);
+  SaveYamlObject(AEmitter, 'centreline', FCentreline);
   //# endGenSaveYamlVars
   end;
 
@@ -321,7 +350,19 @@ begin
   Result := TShovedTimberOwningList(FromOID(FShovedTimbers));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+function TTemplate.GetCentreline: TCentreline;
+begin
+  Result := TCentreline(FromOID(FCentreline));
+end;
+
 //# endGenGetSetMethods
+
+function TTemplate.GetLineCount: Integer;
+begin
+  CheckCalculated;
+  Result := FLineCount;
+end;
 
 initialization
   TTemplate.RegisterClass;

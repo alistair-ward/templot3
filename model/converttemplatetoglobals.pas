@@ -54,7 +54,8 @@ uses
   TurnoutInfo2,
   PlainTrackInfo,
   SwitchInfo,
-  CrossingInfo;
+  CrossingInfo,
+  Centreline;
 
 
 procedure CopyToTCheckEndDiff(cd: TCheckEndDiff; const from: Tcheck_end_diff);
@@ -120,6 +121,7 @@ var
   pt: TPlainTrackInfo;
   swi: TSwitchInfo;
   xi: TCrossingInfo;
+  cl: TCentreline;
 
 begin
   target.Name := Copy(current_name_str, 1, 99);
@@ -375,12 +377,14 @@ begin
 
   ai.dummyTemplateFlag := dummy_template;  // 212a
 
-  ai.centrelineOptionsCode := cl_options_code;                   // 206a
-  ai.centrelineOptionsCustomOffset := cl_options_custom_offset; // 206a
-
   ai.reminderFlag := False;          // 216a  defaults no reminder yet
   ai.reminderColour := clYellow;
   ai.reminderStr := '';
+
+  cl := target.centreline;
+  cl.option := cl_options_code;                   // 206a
+  cl.customOffset := cl_options_custom_offset; // 206a
+
 
   bd.railSection := rail_section;               // rail head only or head+foot(BH/FB).
   bd.railsInclined := vertical_rails;      // True = rails vertical.
@@ -657,6 +661,7 @@ var
   pt: TPlainTrackInfo;
   swi: TSwitchInfo;
   xi: TCrossingInfo;
+  cl: TCentreline;
 
   exact_flag: boolean;
   custom_flag: boolean;
@@ -861,14 +866,15 @@ begin
 
   controlTemplate.curve.CopyFrom(Source.curve);
 
+  cl := Source.centreline;
+  cl_options_code := cl.option;                   // 206a
+  cl_options_custom_offset := cl.customOffset; // 206a
+
   ai := bd.alignmentInfo;
 
   cl_only := ai.drawCentrelineOnly;   // for bgnd centre-line only.
 
   dummy_template := ai.dummyTemplateFlag;  // 212a
-
-  cl_options_code := ai.centrelineOptionsCode;                   // 206a
-  cl_options_custom_offset := ai.centrelineOptionsCustomOffset; // 206a
 
   if ai.reminderFlag       // 216a
   then begin

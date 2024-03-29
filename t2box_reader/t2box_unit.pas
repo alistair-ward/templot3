@@ -112,10 +112,11 @@ uses
   CrossingInfo,
   PlainTrackInfo,
   HdkCheckRailInfo,
-  VeeCheckRailInfo;
+  VeeCheckRailInfo,
+  Centreline;
 
 
-{$R *.lfm}
+  {$R *.lfm}
 
 const
   shovedim_c_048: integer = 29;
@@ -1243,16 +1244,19 @@ type
     spareZeroes: integer;
   end;
 
-//______________________________________________________________________________
+  //______________________________________________________________________________
 
 function ConvertBox2Hand(hand: Integer): TTurnoutHand;
 begin
   case hand of
-    1: Result := thLeft;
-    0: Result := thY;
-    -1: Result := thRight;
-  else
-    raise Exception.Create('Unexpected hand value');
+    1:
+      Result := thLeft;
+    0:
+      Result := thY;
+    -1:
+      Result := thRight;
+    else
+      raise Exception.Create('Unexpected hand value');
   end;
 end;
 
@@ -1262,17 +1266,14 @@ function version_mismatch(var okd: TBox2KeepDims): boolean;
 
   // use the old_keep_data format for compatibility when reloading old files.
   // return True if there is a version mismatch (re-save needed).
-
 var
   n, list_index: integer;
 
   ////////////////////////////////////////////////////////
 
   function any_loaded_rails_omitted: boolean;  // 208a
-
   var
     pt_all, turnout_all, hd_all: boolean;
-
   begin
     Result := False;  // init
 
@@ -1306,7 +1307,6 @@ var
     end;//with okd
   end;
   ////////////////////////////////////////////////////////
-
 begin
   Result := False;      // init return, no mismatch
 
@@ -2507,6 +2507,30 @@ begin
   end;
 end;
 
+function ConvertBox2CentrelineOptionCode(option_code: Integer): TCentrelineOption;
+begin
+  case option_code of
+    -3:
+      Result := cloMainSideSleeperEnds;
+    -2:
+      Result := cloMainSideTrack;
+    -1:
+      Result := cloMainSideDouble;
+    0:
+      Result := cloNormal;
+    1:
+      Result := cloTurnoutSideDouble;
+    2:
+      Result := cloTurnoutSideTrack;
+    3:
+      Result := cloMainSideSleeperEnds;
+    99:
+      Result := cloCustom;
+    else
+      raise Exception.CreateFmt('Unknown centreline option_code: %d', [option_code]);
+  end;
+end;
+
 procedure ConvertBox2ToRailInfo(rail_info: TBox2RailInfo; template: TTemplate);
 var
   ri: TRailInfo;
@@ -2669,16 +2693,19 @@ end;
 procedure ConvertBox2ToAlignmentInfo(const align: TBox2AlignmentInfo; template: TTemplate);
 var
   ai: TAlignmentInfo;
+  cl: TCentreline;
 begin
   ai := template.boxDims.alignmentInfo;
 
   ai.drawCentrelineOnly := align.cl_only_flag;
   ai.dummyTemplateFlag := align.dummy_template_flag;
-  ai.centrelineOptionsCode := align.cl_options_code_int;
-  ai.centrelineOptionsCustomOffset := align.cl_options_custom_offset_ext;
   ai.reminderFlag := align.reminder_flag;
   ai.reminderColour := align.reminder_colour;
   ai.reminderStr := align.reminder_str;
+
+  cl := template.centreline;
+  cl.option := ConvertBox2CentrelineOptionCode(align.cl_options_code_int);
+  cl.customOffset := align.cl_options_custom_offset_ext;
 end;
 
 function ConvertBox2SlewMode(slew_type: Byte): ESlewMode;
@@ -2796,7 +2823,7 @@ begin
 
   //bd.keepTimestamp := ConvertBox2DateTime(boxDims1.keep_date, boxDims1.keep_time);
 
-  bd.thisWasControlTemplate:=boxDims1.this_was_control_template;
+  bd.thisWasControlTemplate := boxDims1.this_was_control_template;
   bd.gaugeIndex := boxDims1.gauge_index;
   bd.gaugeExact := boxDims1.gauge_exact;
   bd.gaugeCustom := boxDims1.gauge_custom;
@@ -3131,7 +3158,6 @@ function import_t2box(normal_load: boolean; file_name: string;
   // return True any templates loaded/added.
   // also return any change to append.
   // also return last_bgnd_loaded_index, highest bgnd template loaded (for minting).
-
 const
   ask_restore_str: string = '      `0Restore On Startup`9' +
     '||Your work in progress can be restored from your previous working session with Templot0.'
@@ -3140,7 +3166,6 @@ const
     +
     '||This is done independently of any saving to data files which you may have performed.' +
     '||If you answer "no thanks" the previous data can be restored later by selecting the `0FILES > RESTORE PREVIOUS`1 menu item on the storage box menus.' + '||tree.gif The restore feature works correctly even if your previous session terminated abnormally as a result of a power failure or system malfunction, so there is no need to perform repeated saves as a precaution against these events.' + '||rp.gif The restore feature does not include your Background Shapes or Sketchboard files, which must be saved and reloaded separately as required.' + '||rp.gif If you run two instances of Templot0 concurrently (not recommended for Windows 95/98/ME) from the same `0\TEMPLOT\`2 folder,' + ' the restore data will be held in common between the two. To prevent this happening, create and run the second instance from a different folder (directory).';
-
 var
   i, n, fsize{,timb_index}: integer;
   loaded_str, box_str, ixt_str, ident: string;
@@ -3165,7 +3190,6 @@ var
   gridInfo: TGridInfo;
   newProject: TProject;
   t: TTemplate;
-
 begin
 
   t2box_log := Logger.GetInstance('T2-box');
@@ -3358,7 +3382,7 @@ begin
               // don't update info, reloading=True.
             end
             else begin
-                t.boxDims.backgroundCode  := bkcUnused;          // make it unused instead.
+              t.boxDims.backgroundCode := bkcUnused;          // make it unused instead.
             end;
           end;
         end;//for
