@@ -143,7 +143,7 @@ type
     procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
     procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
-    procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
+    procedure CalculateCurveAt(distance, offset: double; out pt, direction: Tpex; out radius: double);
 
     procedure CopyFrom(ASource: TCurve);
 
@@ -506,12 +506,18 @@ begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(ESlewMode), ord(AValue)));
 end;
 
-procedure TCurve.CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
+procedure TCurve.CalculateCurveAt(distance, offset: double; out pt, direction: Tpex; out radius: double);
+var
+  normal: Tpex;
 begin
   CheckCalculated;
 
-  if Assigned(FCurveCalculator) then
-    FCurveCalculator.CalculateCurveAt(distance, pt, direction, radius)
+  if Assigned(FCurveCalculator) then begin
+    FCurveCalculator.CalculateCurveAt(distance, pt, direction, radius);
+    // rotate 90 degrees clockwise
+    normal.set_xy(direction.y, -direction.x);
+    pt := pt + normal * offset;
+  end
   else begin
     pt.set_xy(NaN, NaN);
     direction.set_xy(NaN, NaN);

@@ -68,6 +68,8 @@ type
     max: Tpex;
   end;
 
+  TpexArray = array of Tpex;
+
 function StrToTpex(const AValue: String): Tpex;
 procedure SaveYamlTpex(AEmitter: TYamlEmitter; const AName: String; AValue: Tpex);
 

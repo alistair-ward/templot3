@@ -153,24 +153,22 @@ type
     procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property plainTrack: Boolean Read FPlainTrack Write SetPlainTrack;
-    property rolledInSleepered: Boolean Read FRolledInSleepered Write SetRolledInSleepered;
-    property frontTimbers: Boolean Read FFrontTimbers Write SetFrontTimbers;
-    property approachRailsOnly: Boolean Read FApproachRailsOnly Write SetApproachRailsOnly;
-    property hand: TTurnoutHand Read FHand Write SetHand;
-    property timbering: Boolean Read FTimbering Write SetTimbering;
-    property switchTimbers: Boolean Read FSwitchTimbers Write SetSwitchTimbers;
-    property closureTimbers: Boolean Read FClosureTimbers Write SetClosureTimbers;
-    property xingTimbers: Boolean Read FXingTimbers Write SetXingTimbers;
-    property exitTimbering: Integer Read FExitTimbering Write SetExitTimbering;
-    property turnoutRoadCode: Integer Read FTurnoutRoadCode Write SetTurnoutRoadCode;
-    property turnoutLength: Double Read FTurnoutLength Write SetTurnoutLength;
-    property originToToe: Double Read FOriginToToe Write SetOriginToToe;
-    property stepSize: Double Read FStepSize Write SetStepSize;
-    property turnoutRoadIsAdjustable: Boolean Read FTurnoutRoadIsAdjustable
-      Write SetTurnoutRoadIsAdjustable;
-    property turnoutRoadIsMinimum: Boolean Read FTurnoutRoadIsMinimum
-      Write SetTurnoutRoadIsMinimum;
+    property plainTrack: Boolean read FPlainTrack write SetPlainTrack;
+    property rolledInSleepered: Boolean read FRolledInSleepered write SetRolledInSleepered;
+    property frontTimbers: Boolean read FFrontTimbers write SetFrontTimbers;
+    property approachRailsOnly: Boolean read FApproachRailsOnly write SetApproachRailsOnly;
+    property hand: TTurnoutHand read FHand write SetHand;
+    property timbering: Boolean read FTimbering write SetTimbering;
+    property switchTimbers: Boolean read FSwitchTimbers write SetSwitchTimbers;
+    property closureTimbers: Boolean read FClosureTimbers write SetClosureTimbers;
+    property xingTimbers: Boolean read FXingTimbers write SetXingTimbers;
+    property exitTimbering: Integer read FExitTimbering write SetExitTimbering;
+    property turnoutRoadCode: Integer read FTurnoutRoadCode write SetTurnoutRoadCode;
+    property turnoutLength: Double read FTurnoutLength write SetTurnoutLength;
+    property originToToe: Double read FOriginToToe write SetOriginToToe;
+    property stepSize: Double read FStepSize write SetStepSize;
+    property turnoutRoadIsAdjustable: Boolean read FTurnoutRoadIsAdjustable write SetTurnoutRoadIsAdjustable;
+    property turnoutRoadIsMinimum: Boolean read FTurnoutRoadIsMinimum write SetTurnoutRoadIsMinimum;
     //# endGenProperty
   end;
 

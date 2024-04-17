@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="93">
+    <Units Count="96">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -439,6 +439,19 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Feature"/>
       </Unit92>
+      <Unit93>
+        <Filename Value="test\template\centreline_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="model\template\line.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Line"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="test\template\line_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit95>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -449,12 +462,22 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="model;test;log4delphi\util;log4delphi;model\curve;test\curve;t2box_reader;otpersist;submodules\otYaml\src;model\template"/>
+      <OtherUnitFiles Value="model;test;log4delphi\util;log4delphi;model\curve;test\curve;t2box_reader;otpersist;submodules\otYaml\src;model\template;test\template"/>
       <UnitOutputDirectory Value="libtest\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <SyntaxMode Value="Delphi"/>
+      </SyntaxOptions>
+    </Parsing>
+    <Linking>
+      <Debugging>
+        <DebugInfoType Value="dsDwarf3"/>
+      </Debugging>
+    </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="5">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -467,6 +490,9 @@
       <Item4>
         <Name Value="EConvertError"/>
       </Item4>
+      <Item5>
+        <Name Value="Exception"/>
+      </Item5>
     </Exceptions>
   </Debugging>
 </CONFIG>

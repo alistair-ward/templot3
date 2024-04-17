@@ -39,6 +39,7 @@ uses
            // Lazarus units:
 
   Forms, Interfaces, SysUtils, Dialogs, FileUtil, Classes,
+  Math,
 
 
            // OpenTemplot units:
@@ -120,6 +121,8 @@ var
   log: ILogger;
 
 begin
+  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide,
+                     exOverflow, exUnderflow, exPrecision]);
   RequireDerivedFormResource:=True;
 
   Application.Title:='OpenTemplot';

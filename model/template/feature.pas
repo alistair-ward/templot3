@@ -7,10 +7,16 @@ interface
 uses
   Classes,
   SysUtils,
+  Generics.Collections,
   OTPersistent,
   OTPersistentList,
   OTYamlEmitter,
-  Curve;
+  point_ex,
+  mark_unit,
+  rail_data_unit,
+  line,
+  Curve,
+  TurnoutInfo1;
 
 
 {# class TFeature
@@ -20,26 +26,43 @@ attributes:
 - name: curve
   type: TCurve
   owns: ref
+- name: turnoutInfo
+  type: TTurnoutInfo1
+  owns: ref
 ...
 }
 
 type
 
+  { TFeature }
+
   TFeature = class(TOTPersistent)
   private
     //# genMemberVars
     FCurve: TOID;
+    FTurnoutInfo: TOID;
     //# endGenMemberVars
 
   protected
+    FLines: TObjectList<TLine>;
+    FMarks: TMarkExArray;
+
     procedure Calculate; override;
     procedure RestoreAttributes(AStream : TStream); override;
     procedure SaveAttributes(AStream : TStream); override;
 
     //# genGetSetDeclarations
     function GetCurve: TCurve;
+    function GetTurnoutInfo: TTurnoutInfo1;
     procedure SetCurve(const AValue: TCurve);
+    procedure SetTurnoutInfo(const AValue: TTurnoutInfo1);
     //# endGenGetSetDeclarations
+
+    function GetNumberOfLines: Integer;
+    function GetLine(idx: Integer): TLine;
+    function GetNumberOfMarks: Integer;
+
+    procedure DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double);
 
   public
     constructor Create(AParent: TOTPersistent; AOID: TOID = 0); override;
@@ -53,7 +76,12 @@ type
 
     //# genProperty
     property curve: TCurve read GetCurve write SetCurve;
+    property turnoutInfo: TTurnoutInfo1 read GetTurnoutInfo write SetTurnoutInfo;
     //# endGenProperty
+
+    property numberOfLines: Integer read GetNumberOfLines;
+    property lines[idx: Integer]: TLine read GetLine;
+    property numberOfMarks: Integer read GetNumberOfMarks;
   end;
 
   TFeatureOwningList = class(TOTOwningList<TFeature>);
@@ -76,14 +104,20 @@ begin
   inherited Create(AParent);
   //# genCreate
   FCurve := 0;
+  FTurnoutInfo := 0;
   //# endGenCreate
+
+  FLines := TObjectList<TLine>.Create;
 end;
 
 destructor TFeature.Destroy;
 begin
   //# genDestroy
   SetReference(FCurve, nil);
+  SetReference(FTurnoutInfo, nil);
   //# endGenDestroy
+
+  FLines.Free;
   inherited;
 end;
 
@@ -98,6 +132,9 @@ begin
   if AName = 'curve' then
     RestoreYamlObjectRef(FCurve, StrToInteger(AValue), ALoader)
   else
+  if AName = 'turnoutInfo' then
+    RestoreYamlObjectRef(FTurnoutInfo, StrToInteger(AValue), ALoader)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -110,6 +147,7 @@ procedure TFeature.RestoreAttributes(AStream : TStream);
 
   //# genRestoreVars
   AStream.ReadBuffer(FCurve, sizeof(TOID));
+  AStream.ReadBuffer(FTurnoutInfo, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -121,6 +159,7 @@ procedure TFeature.SaveAttributes(AStream : TStream);
 
   //# genSaveVars
   AStream.WriteBuffer(FCurve, sizeof(TOID));
+  AStream.WriteBuffer(FTurnoutInfo, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -132,6 +171,7 @@ procedure TFeature.SaveYamlAttributes(AEmitter : TYamlEmitter);
   
   //# genSaveYamlVars
   SaveYamlObjectReference(AEmitter, 'curve', FCurve);
+  SaveYamlObjectReference(AEmitter, 'turnoutInfo', FTurnoutInfo);
   //# endGenSaveYamlVars
   end;
 
@@ -148,7 +188,61 @@ begin
   SetReference(FCurve, AValue);
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+function TFeature.GetTurnoutInfo: TTurnoutInfo1;
+begin
+  Result := TTurnoutInfo1(FromOID(FTurnoutInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TFeature.SetTurnoutInfo(const AValue: TTurnoutInfo1);
+begin
+  SetReference(FTurnoutInfo, AValue);
+end;
+
 //# endGenGetSetMethods
+
+function TFeature.GetNumberOfLines: Integer;
+begin
+  CheckCalculated;
+  Result := FLines.Count;
+end;
+
+function TFeature.GetLine(idx: Integer): TLine;
+begin
+  CheckCalculated;
+  Result := FLines[idx];
+end;
+
+function TFeature.GetNumberOfMarks: Integer;
+begin
+  CheckCalculated;
+  Result := Length(FMarks);
+end;
+
+procedure TFeature.DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double );
+var
+  crvX: Double;
+  crv: TCurve;
+  incX: Double;
+  pt: Tpex;
+  dir: Tpex;
+  radius: Double;
+begin
+  crv := curve;
+  incX := turnoutInfo.stepSize;
+  crvX := AStartX;
+
+  repeat
+    crv.CalculateCurveAt(crvX, AYOffset, pt, dir, radius);
+    ALine.AddPoint(TPex.xy(crvX, AYOffset), pt);
+    crvX := crvX + incX;
+  until crvX > AEndX - (incX * 0.1);
+
+  crv.CalculateCurveAt(AEndX, AYOffset, pt, dir, radius);
+  ALine.AddPoint(TPex.xy(AEndX, AYOffset), pt);
+
+end;
 
 initialization
   TFeature.RegisterClass;

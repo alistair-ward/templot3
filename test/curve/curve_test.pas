@@ -81,6 +81,8 @@ type
     procedure test_transition_curve_negative_to_larger_positive;
     procedure test_transition_curve_negative_to_smaller_positive;
 
+    procedure test_straight_line_offset;
+
     procedure test_slew_creation;
 
     procedure test_CopyFrom;
@@ -123,7 +125,7 @@ begin
 
   distance := 0;
   for i := 0 to 20 do begin
-    curve.CalculateCurveAt(distance, pt, direction, radius);
+    curve.CalculateCurveAt(distance, 0, pt, direction, radius);
 
     CheckEquals(i, pt.X, 1e-6, format('pt.X at %f', [distance]));
     CheckEquals(0, pt.Y, 1e-6, format('pt.Y at %f', [distance]));
@@ -164,7 +166,7 @@ begin
 
   distance := 0;
   for i := 0 to 20 do begin
-    curve.CalculateCurveAt(distance, pt, direction, radius);
+    curve.CalculateCurveAt(distance, 0, pt, direction, radius);
 
     angle := distance / testRadius;
     expectedDirection.set_xy(cos(angle), sin(angle));
@@ -209,7 +211,7 @@ begin
 
   distance := 0;
   for i := 0 to 20 do begin
-    curve.CalculateCurveAt(distance, pt, direction, radius);
+    curve.CalculateCurveAt(distance, 0, pt, direction, radius);
 
     angle := distance / testRadius;
     expectedDirection.set_xy(cos(angle), sin(angle));
@@ -259,10 +261,10 @@ begin
   else
     curvature2 := 0;
 
-  curve.CalculateCurveAt(0, previousPoint, direction, radius);
+  curve.CalculateCurveAt(0, 0, previousPoint, direction, radius);
   distance := 5;
   while distance < initialLength * 2 + transitionLength do begin
-    curve.CalculateCurveAt(distance, pt, direction, radius);
+    curve.CalculateCurveAt(distance, 0, pt, direction, radius);
 
     // linear interpolation to determine expected curvature
     if distance <= initialLength then begin
@@ -469,7 +471,7 @@ begin
   curve.isSpiral := False;
   curve.fixedRadius := max_rad;
 
-  curve.CalculateCurveAt(0, pt, direction, radius);
+  curve.CalculateCurveAt(0, 0, pt, direction, radius);
 
   Check(curve.curveCalculator is TSlewCalculator, 'curveCalculator not expected class');
 end;
@@ -517,6 +519,49 @@ begin
   finally
     curve2.Free;
   end;
+end;
+
+procedure TTestCurve.test_straight_line_offset;
+var
+  pt: Tpex;
+  direction: Tpex;
+  radius: double;
+  i: integer;
+  distance: double;
+begin
+  // Given a curve that is defined as straight
+  //    ( radius = max_radius, not spiral )
+  //
+  // When I ask for a point offset from the "curve"
+  //
+  // Then that point is on a straight line
+  // and is at the expected distance
+  //
+
+  curve.fixedRadius := max_rad_limit;
+  curve.isSpiral := False;
+
+  distance := 0;
+  for i := 0 to 20 do begin
+    curve.CalculateCurveAt(distance, -1, pt, direction, radius);
+
+    CheckEquals(i, pt.X, 1e-6, format('pt.X at %f', [distance]));
+    CheckEquals(1, pt.Y, 1e-6, format('pt.Y at %f', [distance]));
+    CheckEquals(1, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(0, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(max_rad, radius, 1, format('radius at %f', [distance]));
+
+    curve.CalculateCurveAt(distance, 3, pt, direction, radius);
+
+    CheckEquals(i, pt.X, 1e-6, format('pt.X at %f', [distance]));
+    CheckEquals(-3, pt.Y, 1e-6, format('pt.Y at %f', [distance]));
+    CheckEquals(1, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(0, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(max_rad, radius, 1, format('radius at %f', [distance]));
+
+    distance := distance + 1.0;
+  end;
+
 end;
 
 initialization

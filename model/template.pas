@@ -15,6 +15,7 @@ uses
   BoxDims,
   TurnoutInfo2,
   ShovedTimber,
+  Feature,
   Centreline;
 
 
@@ -66,7 +67,7 @@ type
     FCentreline: TOID;
     //# endGenMemberVars
 
-    FLineCount: Integer;
+    FFeatures: array of TFeature;
 
   protected
     procedure Calculate; override;
@@ -84,7 +85,8 @@ type
     procedure SetMemo(const AValue: String);
     //# endGenGetSetDeclarations
 
-    function GetLineCount: Integer;
+    function GetFeature(idx: Integer): TFeature;
+    function GetFeatureCount: Integer;
 
   public
     // True=has been copied to the background. (not included in file).
@@ -147,7 +149,8 @@ type
     property centreline: TCentreline read GetCentreline;
     //# endGenProperty
 
-    property lineCount: Integer read GetLineCount;
+    property featureCount: Integer read GetFeatureCount;
+    property features[idx: Integer] : TFeature read GetFeature;
   end;
 
   TTemplateOwningList = class(TOTOwningList<TTemplate>);
@@ -358,10 +361,16 @@ end;
 
 //# endGenGetSetMethods
 
-function TTemplate.GetLineCount: Integer;
+function TTemplate.GetFeature(idx: Integer): TFeature;
 begin
   CheckCalculated;
-  Result := FLineCount;
+  Result := FFeatures[idx];
+end;
+
+function TTemplate.GetFeatureCount: Integer;
+begin
+  CheckCalculated;
+  Result := Length(FFeatures);
 end;
 
 initialization

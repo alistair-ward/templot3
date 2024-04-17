@@ -37,7 +37,7 @@ unit mark_unit;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, point_ex;
 
 type
   // Enumeration of the possible values for Mark codes
@@ -142,6 +142,14 @@ type
   end;
 
   Tmark_array = array of Tmark;
+
+  TMarkEx = record
+    p1: Tpex;
+    p2: Tpex;
+    code: EMarkCode;
+  end;
+
+  TMarkExArray = array of TMarkEx;
 
 
 implementation

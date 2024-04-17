@@ -10,7 +10,9 @@ uses
   OTPersistent,
   OTPersistentList,
   OTYamlEmitter,
-  Feature;
+  Feature,
+  TurnoutInfo1,
+  ProtoInfo;
 
 
 {# class TCentreline
@@ -21,6 +23,9 @@ attributes:
     type: TCentrelineOption
   - name: customOffset
     type: Double
+  - name: protoInfo
+    type: TProtoInfo
+    owns: ref
 ...
 }
 
@@ -34,7 +39,12 @@ type
     //# genMemberVars
     FOption: TCentrelineOption;
     FCustomOffset: Double;
+    FProtoInfo: TOID;
     //# endGenMemberVars
+
+    FCentrelineOffset: Double;
+
+    function CalculateCentrelineOffset: Double;
 
   protected
     procedure Calculate; override;
@@ -42,9 +52,13 @@ type
     procedure SaveAttributes(AStream: TStream); override;
 
     //# genGetSetDeclarations
+    function GetProtoInfo: TProtoInfo;
     procedure SetOption(const AValue: TCentrelineOption);
     procedure SetCustomOffset(const AValue: Double);
+    procedure SetProtoInfo(const AValue: TProtoInfo);
     //# endGenGetSetDeclarations
+
+    function GetCentrelineOffset: Double;
 
   public
     constructor Create(AParent: TOTPersistent; AOID: TOID = 0); override;
@@ -60,7 +74,10 @@ type
     //# genProperty
     property option: TCentrelineOption Read FOption Write SetOption;
     property customOffset: Double Read FCustomOffset Write SetCustomOffset;
+    property protoInfo: TProtoInfo Read GetProtoInfo Write SetProtoInfo;
     //# endGenProperty
+
+    property centrelineOffset: Double Read GetCentrelineOffset;
   end;
 
   TCentrelineOwningList = class(TOTOwningList<TCentreline>);
@@ -75,7 +92,9 @@ implementation
 
 uses
   TLoggerUnit,
-  Typinfo;
+  Typinfo,
+  rail_data_unit,
+  line;
 
 var
   log: ILogger;
@@ -97,12 +116,14 @@ constructor TCentreline.Create(AParent: TOTPersistent; AOID: TOID);
 begin
   inherited Create(AParent);
   //# genCreate
+  FProtoInfo := 0;
   //# endGenCreate
 end;
 
 destructor TCentreline.Destroy;
 begin
   //# genDestroy
+  SetReference(FProtoInfo, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -110,6 +131,16 @@ end;
 procedure TCentreline.Calculate;
 begin
   // Add your calculation code here, and cache the results...
+  inherited;
+
+  SetLength(FMarks, 0);
+
+  FLines.Clear;
+  FLines.Add(TLine.Create(rdMainRoadCentreLine));
+
+  FCentrelineOffset := CalculateCentrelineOffset;
+
+  DoStraightLine(FLines[0], 0, turnoutInfo.turnoutLength, FCentrelineOffset);
 end;
 
 procedure TCentreline.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
@@ -121,6 +152,9 @@ begin
   else
   if AName = 'customOffset' then
     FCustomOffset := StrToDouble(AValue)
+  else
+  if AName = 'protoInfo' then
+    RestoreYamlObjectRef(FProtoInfo, StrToInteger(AValue), ALoader)
   else
     //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -135,6 +169,7 @@ begin
   //# genRestoreVars
   AStream.ReadBuffer(FOption, sizeof(TCentrelineOption));
   AStream.ReadBuffer(FCustomOffset, sizeof(Double));
+  AStream.ReadBuffer(FProtoInfo, sizeof(TOID));
   //# endGenRestoreVars
 end;
 
@@ -147,6 +182,7 @@ begin
   //# genSaveVars
   AStream.WriteBuffer(FOption, sizeof(TCentrelineOption));
   AStream.WriteBuffer(FCustomOffset, sizeof(Double));
+  AStream.WriteBuffer(FProtoInfo, sizeof(TOID));
   //# endGenSaveVars
 end;
 
@@ -159,6 +195,7 @@ begin
   //# genSaveYamlVars
   SaveYamlTCentrelineOption(AEmitter, 'option', FOption);
   SaveYamlDouble(AEmitter, 'customOffset', FCustomOffset);
+  SaveYamlObjectReference(AEmitter, 'protoInfo', FProtoInfo);
   //# endGenSaveYamlVars
 end;
 
@@ -181,7 +218,52 @@ begin
   end;
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+function TCentreline.GetProtoInfo: TProtoInfo;
+begin
+  Result := TProtoInfo(FromOID(FProtoInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TCentreline.SetProtoInfo(const AValue: TProtoInfo);
+begin
+  SetReference(FProtoInfo, AValue);
+end;
+
 //# endGenGetSetMethods
+
+function TCentreline.GetCentrelineOffset: Double;
+begin
+  CheckCalculated;
+  Result := FCentrelineOffset;
+end;
+
+function TCentreline.CalculateCentrelineOffset: Double;
+begin
+  case FOption of
+    cloMainSideSleeperEnds:
+      Result := protoInfo.sleeperLength/2;
+    cloMainSideTrack:
+      Result := protoInfo.mainSideTrackCentres;
+    cloMainSideDouble:
+      Result := protoInfo.mainSideTrackCentres/2;
+    cloNormal:
+      Result := 0;
+    cloTurnoutSideDouble:
+      Result := -protoInfo.turnoutSideTrackCentres/2;
+    cloTurnoutSideTrack:
+      Result := -protoInfo.turnoutSideTrackCentres;
+    cloTurnoutSideSleeperEnds:
+      Result := -protoInfo.sleeperLength/2;
+    cloCustom:
+      // custom offset if +ve to the turnout side
+      Result := -FCustomOffset;
+  end;
+
+  if turnoutInfo.hand = thRight then begin
+    Result := -Result;
+  end;
+end;
 
 initialization
   TCentreline.RegisterClass;
