@@ -418,25 +418,7 @@ begin
 
   // compatibility mods 211a  217a ...
 
-  if turnout_road_i = 2          // adjustable turnout road exit
-  then begin
-    ti1.turnoutRoadCode := 0;
-    // so can be loaded in 208 and earlier ( =2 will crash)
-    ti1.turnoutRoadIsAdjustable := True;
-  end
-  else
-  if turnout_road_i = 3  // minimum turnout road exit   217a
-  then begin
-    ti1.turnoutRoadCode := 0;
-    // so can be loaded in 208 and earlier ( =3 will crash)
-    ti1.turnoutRoadIsMinimum := True;
-  end
-
-  else begin
-    ti1.turnoutRoadCode := turnout_road_i;    //  length of turnout exit road.
-    ti1.turnoutRoadIsAdjustable := False;
-    ti1.turnoutRoadIsMinimum := False;       // 217a
-  end;
+  ti1.turnoutRoadCode:=turnout_road_i;
 
   ti1.turnoutLength := turnoutx;           //  mm overall length.
   ti1.originToToe := xorg;                //  mm approach length.
@@ -910,15 +892,7 @@ begin
 
   // compatibility mods 211a ...
 
-  if ti1.turnoutRoadIsAdjustable then
-    turnout_road_i := 2                    // adjustable turnout road exit
-  else
-  if ti1.turnoutRoadIsMinimum then
-    turnout_road_i := 3            // minimum turnout road exit     217a
-
-  else
-    turnout_road_i := ti1.turnoutRoadCode;   // length of turnout exit road.
-
+  turnout_road_i := ti1.turnoutRoadCode;
 
   turnoutx := ti1.turnoutLength;           //  mm overall length.
   xorg := ti1.originToToe;                //  mm approach length.

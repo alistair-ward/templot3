@@ -9,7 +9,8 @@ uses
   SysUtils,
   OTPersistent,
   OTPersistentList,
-  OTYamlEmitter;
+  OTYamlEmitter,
+  TurnoutInfo1;
 
 {
 Tcrossing_info = record        // crossing stuff...
@@ -144,7 +145,7 @@ attributes:
 - name: curviformTimbering
   type: Boolean
 - name: mainRoadCode
-  type: Integer
+  type: TMainOrTurnoutRoadLengthOption
   comment: length of main-side exit road.
 - name: tandemTimberCode
   type: Integer
@@ -238,7 +239,7 @@ type
     FKCheckModDS: Double;
     FKCheckFlare: Double;
     FCurviformTimbering: Boolean;
-    FMainRoadCode: Integer;
+    FMainRoadCode: TMainOrTurnoutRoadLengthOption;
     FTandemTimberCode: Integer;
     FBluntNoseWidth: Double;
     FBluntNoseToTimber: Double;
@@ -285,7 +286,7 @@ type
     procedure SetKCheckModDS(const AValue: Double);
     procedure SetKCheckFlare(const AValue: Double);
     procedure SetCurviformTimbering(const AValue: Boolean);
-    procedure SetMainRoadCode(const AValue: Integer);
+    procedure SetMainRoadCode(const AValue: TMainOrTurnoutRoadLengthOption);
     procedure SetTandemTimberCode(const AValue: Integer);
     procedure SetBluntNoseWidth(const AValue: Double);
     procedure SetBluntNoseToTimber(const AValue: Double);
@@ -363,7 +364,7 @@ type
     property curviformTimbering: Boolean read FCurviformTimbering write SetCurviformTimbering;
 
     // length of main-side exit road.
-    property mainRoadCode: Integer read FMainRoadCode write SetMainRoadCode;
+    property mainRoadCode: TMainOrTurnoutRoadLengthOption read FMainRoadCode write SetMainRoadCode;
     property tandemTimberCode: Integer read FTandemTimberCode write SetTandemTimberCode;
 
     // full-size inches.
@@ -511,7 +512,7 @@ begin
     FCurviformTimbering := StrToBoolean(AValue)
   else
   if AName = 'mainRoadCode' then
-    FMainRoadCode := StrToInteger(AValue)
+    FMainRoadCode := StrToTMainOrTurnoutRoadLengthOption(AValue)
   else
   if AName = 'tandemTimberCode' then
     FTandemTimberCode := StrToInteger(AValue)
@@ -612,7 +613,7 @@ procedure TCrossingInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FKCheckModDS, sizeof(Double));
   AStream.ReadBuffer(FKCheckFlare, sizeof(Double));
   AStream.ReadBuffer(FCurviformTimbering, sizeof(Boolean));
-  AStream.ReadBuffer(FMainRoadCode, sizeof(Integer));
+  AStream.ReadBuffer(FMainRoadCode, sizeof(TMainOrTurnoutRoadLengthOption));
   AStream.ReadBuffer(FTandemTimberCode, sizeof(Integer));
   AStream.ReadBuffer(FBluntNoseWidth, sizeof(Double));
   AStream.ReadBuffer(FBluntNoseToTimber, sizeof(Double));
@@ -661,7 +662,7 @@ procedure TCrossingInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FKCheckModDS, sizeof(Double));
   AStream.WriteBuffer(FKCheckFlare, sizeof(Double));
   AStream.WriteBuffer(FCurviformTimbering, sizeof(Boolean));
-  AStream.WriteBuffer(FMainRoadCode, sizeof(Integer));
+  AStream.WriteBuffer(FMainRoadCode, sizeof(TMainOrTurnoutRoadLengthOption));
   AStream.WriteBuffer(FTandemTimberCode, sizeof(Integer));
   AStream.WriteBuffer(FBluntNoseWidth, sizeof(Double));
   AStream.WriteBuffer(FBluntNoseToTimber, sizeof(Double));
@@ -710,7 +711,7 @@ procedure TCrossingInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlDouble(AEmitter, 'kCheckModDS', FKCheckModDS);
   SaveYamlDouble(AEmitter, 'kCheckFlare', FKCheckFlare);
   SaveYamlBoolean(AEmitter, 'curviformTimbering', FCurviformTimbering);
-  SaveYamlInteger(AEmitter, 'mainRoadCode', FMainRoadCode);
+  SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter, 'mainRoadCode', FMainRoadCode);
   SaveYamlInteger(AEmitter, 'tandemTimberCode', FTandemTimberCode);
   SaveYamlDouble(AEmitter, 'bluntNoseWidth', FBluntNoseWidth);
   SaveYamlDouble(AEmitter, 'bluntNoseToTimber', FBluntNoseToTimber);
@@ -858,7 +859,7 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TCrossingInfo.SetMainRoadCode(const AValue: Integer);
+procedure TCrossingInfo.SetMainRoadCode(const AValue: TMainOrTurnoutRoadLengthOption);
 begin
   if AValue <> FMainRoadCode then begin
     SetModified;

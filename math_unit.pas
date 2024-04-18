@@ -143,7 +143,6 @@ type
     function get_xy(dist: double): Tpex;
   end;
 
-
 const
 
   pt_templates_help_str: string =
@@ -530,11 +529,8 @@ var
 
   // was turnout_road  208g mod for easier searching..
 
-  // -1=crossover,  0=normal, 1=long, 2=adjustable,  3=minimu
-  turnout_road_i: integer = 0;
-
-  // -1=crossover,  0=normal,         2=adjustable,  3=minimum     // 217a
-  main_road_i: integer = 0;
+  turnout_road_i: TMainOrTurnoutRoadLengthOption = rloNormal;
+  main_road_i: TMainOrTurnoutRoadLengthOption = rloNormal;
 
 
   centre_lines: boolean = True;                // track centre-lines on.
@@ -2570,7 +2566,7 @@ begin
   startx := 0;            // default starting point. (f28000 list entry limit) 1-11-99.
   turnout_i := 1;         // 208d length locked.  was 0 length free.
 
-  turnout_road_i := 0;
+  turnout_road_i := rloNormal;
   // normal turnout road exit length.
 
   gauge_dims(True, False, False);       // set up scale, switch-on defaults (ignore return).
@@ -4076,14 +4072,14 @@ begin
     //  217a (from CTRL-1)   (turnout-road dim is to track centre-line)
 
     case turnout_road_i of
-      -1:
+      rloCrossover:
         turnout_road_endx := txpx - xorg;      // crossover
-      0:
+      rloNormal:
         turnout_road_endx := tvjpx - xorg;     // normal
-      1:
+      rloLong:
         turnout_road_endx := turnoutx - xorg;  // long
 
-      3:
+      rloMinimum:
         turnout_road_endx := min_turnout_road_endx;     // minimum 217a
 
       // no change to turnout_road_endx  if 2: adjustable
@@ -4101,12 +4097,12 @@ begin
     // 217a mods ...
 
     case main_road_i of
-      -1:
+      rloCrossover:
         main_road_endx := mxpx - xorg;      // crossover
-      0:
+      rloNormal:
         main_road_endx := turnoutx - xorg;     // normal
 
-      3:
+      rloMinimum:
         main_road_endx := min_main_road_endx;     // 217a
 
       // no change to main_road_endx  if 2: adjustable      1: not valid
@@ -4131,25 +4127,26 @@ begin
       end
       else begin
         case turnout_road_i of
-          -1: begin
+          rloCrossover: begin
             vendx := txpx + (g / 2) * SIN(k3);
             // short - for crossover.
             csrendx := vendx - g * SIN(k3);
             // x to curved stock rail end (slight error for curved crossing).
           end;
-          0: begin
+          rloNormal: begin
             vendx := bnx + veelong * COS(k3) + scale / 2;
             // normal - length of splice rail only  (add 6" for luck - looks better).
             csrendx := vendx - g * SIN(k3);
             // x to curved stock rail end (slight error for curved crossing).
           end;
-          1: begin
+          rloLong: begin
             vendx := turnoutx;
             // long - x to rail end - full length of turnout. (could be shorter than normal, e.g. catch points).
             csrendx := vendx - g * SIN(k3);
             // 209a  was vendx;  ditto x to curved stock rail end.
           end;
-          2, 3: begin
+          rloAdjustable,
+          rloMinimum: begin
             // 209a              3 added 217a
             vendx := xorg + turnout_road_endx + g * SIN(k3) / 2;
             // adjustable
@@ -4181,7 +4178,7 @@ begin
       tradius_cl := tradius - g / 2;     // centre-line radius, turnout road
 
       case turnout_road_i of
-        -1:
+        rloCrossover:
           if ABS(tradius_cl) < minfp      // crossover  //^^^
           then
             k4 := k4_limit
@@ -4194,14 +4191,14 @@ begin
             //^^^ // crossover - angle to end of turnout road.
           end;
 
-        0: begin                         // normal
+        rloNormal: begin                         // normal
           k4 := tvjpk;
           // normal length, stop at vee splice rail joint.
           if ABS(tradius_cl) > minfp then
             k4 := k4 + scale / 2 / tradius_cl;  //^^^ // add 6" beyond joint for luck.
         end;
 
-        1:
+        rloLong:
           if ABS(tradius_cl) < minfp      // long
           then
             k4 := k4_limit                                         //^^^
@@ -4214,7 +4211,8 @@ begin
             //^^^ // angle to end of long turnout road.
           end;
 
-        2, 3:
+        rloAdjustable,
+        rloMinimum:
           if ABS(tradius_cl) < minfp      // 209a adjustable          //  3 added 216c
           then
             k4 := k4_limit
@@ -6719,7 +6717,7 @@ begin
       rdStraightStockOuterFace,
       rdStraightStockFootInnerEdge,
       rdStraightStockFootOuterEdge:
-        if main_road_i <> 0 then
+        if main_road_i <> rloNormal then
           list_size := (xorg + main_road_endx) / incx       // straight stock rail   217a
         else
           list_size := turnoutx / incx;
@@ -6770,7 +6768,7 @@ begin
       rdCurvedStockOuterFace,
       rdCurvedStockFootInnerEdge,
       rdCurvedStockFootOuterEdge:
-        if turnout_road_i > 1 then
+        if turnout_road_i > rloLong then
           list_size := (xorg + turnout_road_endx) /
             incx       // 209a  curved stock rail.     was =2 217a
         else
@@ -6780,7 +6778,7 @@ begin
       rdVeeSpliceOuterFace,
       rdVeeSpliceFootInnerEdge,
       rdVeeSpliceFootOuterEdge:
-        if turnout_road_i > 1 then
+        if turnout_road_i > rloLong then
           list_size := (xorg + turnout_road_endx - fpx) /
             incx   // 209a  vee splice rail.       was =2 217a
         else
@@ -6790,7 +6788,7 @@ begin
       rdVeePointOuterFace,
       rdVeePointFootInnerEdge,
       rdVeePointFootOuterEdge:
-        if main_road_i <> 0 then
+        if main_road_i <> rloNormal then
           list_size := (xorg + main_road_endx - fpx) / incx   // vee point rail. 217a
         else
           list_size := (turnoutx - fpx) / incx;
@@ -6815,13 +6813,13 @@ begin
       //25 : list_size:=(turnoutx-dpx)/incx;   // turnout-side centre-line.
 
       rdMainRoadCentreLine:
-        if main_road_i <> 0 then
+        if main_road_i <> rloNormal then
           list_size := (xorg + main_road_endx) / incx   // 217a  main-road centre-line
         else
           list_size := turnoutx / incx;
 
       rdTurnoutRoadCentreLine:
-        if turnout_road_i > 1 then
+        if turnout_road_i > rloLong then
           list_size := (xorg + turnout_road_endx) /
             incx   // 209a  turnout-road centre-line   was =2 217a
         else
@@ -7605,7 +7603,7 @@ begin
   try
 
     if not plain_track then begin
-      if main_road_i <> 0 then
+      if main_road_i <> rloNormal then
         stxmax := xorg + main_road_endx      // stop at end of main-road exit  217a
       else
         stxmax := turnoutx;                // stop at end of template.
@@ -8069,7 +8067,7 @@ begin
   Result := g / 2;    // init defaults
   k := 0;
 
-  if (gaunt = True) and (xs < torgx) then begin
+  if (gaunt) and (xs < torgx) then begin
     do_gaunt;
     EXIT;
   end;
@@ -8103,10 +8101,10 @@ var
   xs, ys, ks, xe: double;
   curve_startx: double;  // 213a
 begin
-  if plain_track = True then
+  if plain_track then
     EXIT;
 
-  if (half_diamond = True) or (gaunt = True)            // mods 213a
+  if (half_diamond) or (gaunt)            // mods 213a
   then
     xs := blank_start(0)                        // start at origin
   else begin
@@ -8116,12 +8114,13 @@ begin
 
   case turnout_road_i of       // 209a
 
-    -1:
+    rloCrossover:
       xe := txpx;     // stop at crossover mid-point.
 
-    0, 1: begin
+    rloNormal,
+    rloLong: begin
       if retpar_i = 1 then begin                                     // parallel crossing...
-        if turnout_road_i = 1 then
+        if turnout_road_i = rloLong then
           xe := turnoutx   // long turnout road - stop at end of turnout.
         else
           xe := trpx;
@@ -8130,7 +8129,8 @@ begin
         xe := vendx;     // stop at end of vee rail.
     end;
 
-    2, 3:
+    rloAdjustable,
+    rloMinimum:
       if turnoutx > (xorg + min_turnout_road_endx) then
         xe := xorg + turnout_road_endx      // 2=adjustable turnout road      3 added  217a
       else
@@ -8143,7 +8143,7 @@ begin
 
   //if xe>turnoutx then xe:=turnoutx;     // stop at end of turnout. v:0.76.a  28-4-02
 
-  if (turnout_road_i < 2) and (xe > turnoutx) then
+  if (turnout_road_i < rloAdjustable) and (xe > turnoutx) then
     xe := turnoutx;   // 209a           was <>2 217a
 
   if xs > (xe - minfp) then
@@ -8387,7 +8387,7 @@ begin
   xb := 0;                   // to keep the compiler happy.
   retrmod := 0;              // ditto.
 
-  if turnout_road_i = 1 then
+  if turnout_road_i = rloLong then
     xe := turnoutx       // long turnout road - rails full length.
   else
     xe := trpx;          // end turnout road at return point.
@@ -8521,7 +8521,7 @@ begin
     // 209a mods..   if xe>turnoutx then xe:=turnoutx; // !!! mod 26-3-99. smooth F4 length adjust.
 
     if xe > turnoutx then begin
-      if (turnout_road_i > 1) and (xing_calc_i = 1)
+      if (turnout_road_i > rloLong) and (xing_calc_i = 1)
       // 209a mods   curviform crossing           was turnout_road_i=2 217a
       then begin
         // adjustable..
@@ -8723,7 +8723,7 @@ begin
   // 209a mods...  if xe>turnoutx then xe:=turnoutx;     // stop at end of turnout. v:0.76.a  28-4-02
 
   if xe > turnoutx then begin
-    if turnout_road_i < 2
+    if turnout_road_i < rloAdjustable
     // 209a mods  not adjustable            was turnout_road_i<>2 216c
     then
       xe := turnoutx      // stop at end of template
@@ -9053,7 +9053,7 @@ begin
 
         // 209a mods... xe:=csrendx;            // end of turnout.
 
-        if (turnout_road_i > 1)
+        if (turnout_road_i > rloLong)
         // adjustable turnout road         was turnout_road_i=2 217a
         then begin
           if turnoutx > (xorg + min_turnout_road_endx)
@@ -9072,7 +9072,7 @@ begin
 
         // 209a mods...   xe:=csrendox;
 
-        if (turnout_road_i > 1)
+        if (turnout_road_i > rloLong)
         // adjustable turnout road       was turnout_road_i=2 217a
         then begin
           if turnoutx > (xorg + min_turnout_road_endx)
@@ -9106,7 +9106,7 @@ begin
   xe := 0;
   ys := 0;            //  these to keep the compiler happy.
 
-  if main_road_i <> 0 then
+  if main_road_i <> rloNormal then
     endx := xorg + main_road_endx      // stop at end of main-road exit  217a
   else
     endx := turnoutx;                // stop at end of template.
@@ -9144,7 +9144,7 @@ begin
   xe := 0;           //  these to keep the compiler happy.
 
 
-  if (turnout_road_i > 1) and (turnoutx < (xorg + min_turnout_road_endx))
+  if (turnout_road_i > rloLong) and (turnoutx < (xorg + min_turnout_road_endx))
   // 209a ...      was turnout_road_i=2 217a
   then begin
     case aq of
@@ -10119,7 +10119,7 @@ begin
   if ((aq = rdCurvedStockGaugeFace) or (aq = rdCurvedStockOuterFace) or
     (aq = rdVeeSpliceGaugeFace) or (aq = rdVeeSpliceOuterFace) or
     (aq = rdTurnoutRoadCentreLine))   // turnout road
-    and (turnout_road_i > 1)                                  // was turnout_road_i=2 217a
+    and (turnout_road_i > rloLong)                                  // was turnout_road_i=2 217a
   then begin
     if xs > (xorg + turnout_road_endx + incx * 2) then
       EXIT; // no data allowed beyond this. // 209a
@@ -21566,7 +21566,7 @@ begin
   startx := 0;           // no blanking. default starting point. (f28000 list entry limit) 1-11-99.
   turnout_i := 0;        // length free.
 
-  turnout_road_i := 0;
+  turnout_road_i := rloNormal;
   // normal turnout road exit length.
   pad_form.snap_exit_to_return_curve_menu_entry.Enabled := False;   // no return curve.
 
@@ -23994,7 +23994,7 @@ begin
 
         xtb := xtba;        // now first vee timber "A".
 
-        if (turnout_road_i = -1) and (xing_type_i <> 1)
+        if (turnout_road_i = rloCrossover) and (xing_type_i <> 1)
         // 0.93.a not if curviform
         then
           tb_xing_end := txpx + xingtb_v / 2
@@ -28253,7 +28253,7 @@ begin
 
     pad_form.peg_on_txp_menu_entry.Click;                // put the peg on the mid-point.
 
-    turnout_road_i := -1;              // shorten turnout road to suit.
+    turnout_road_i := rloCrossover;              // shorten turnout road to suit.
 
     if turnoutx < (txpx + 2.5 * scale)     // lengthen existing if nec. (2ft6ins arbitrary)
     then begin
@@ -28627,7 +28627,7 @@ begin
     retain_on_make;
     // do blanking, shoves, diffs, crossing entry straight, cancel platforms  213a
 
-    turnout_road_i := 0;
+    turnout_road_i := rloNormal;
     // reset normal turnout road (in case first half-diamond is part of crossover).
     turnout_i := 0;          // and free overall length.
 
@@ -28840,7 +28840,7 @@ begin
     do_rollback := False;
     pad_form.notch_under_peg_menu_entry.Click;       // and the notch.
 
-    turnout_road_i := -1;              // shorten turnout road to crossover
+    turnout_road_i := rloCrossover;              // shorten turnout road to crossover
 
     if turnoutx < (txpx + 2.5 * scale)     // lengthen existing if nec. (2ft6ins arbitrary)
     then begin
@@ -30171,7 +30171,10 @@ begin
   if xorg > turnoutx then
     xorg := turnoutx;
 
-  turnout_road_i := retpar_i;   // 206e bug fix -- need long turnout road for parallel crossing
+  if retpar_i = 1 then
+    turnout_road_i := rloLong  // 206e bug fix -- need long turnout road for parallel crossing
+  else
+    turnout_road_i := rloNormal;
 
   startx := 0;           // cancel any previous blanking (shouldn't be any for plain track!)
   tb_roll_percent := 0;  // cancel any previous timber rolling (in case he reverts to plain track).
@@ -30628,8 +30631,8 @@ begin
 
     reset_peg_menu_entry.Click;  // Ctrl-0 position.
 
-    turnout_road_i := 0;     // standard length.
-    main_road_i := 0;        // 217a
+    turnout_road_i := rloNormal;     // standard length.
+    main_road_i := rloNormal;        // 217a
 
     xing_type_i := 0;        // regular crossing (normal)...
 

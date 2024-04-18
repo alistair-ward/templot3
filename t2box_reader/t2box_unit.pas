@@ -2786,6 +2786,19 @@ begin
   ConvertBox2CheckEndDiffs(check_diffs.end_diff_dk, cd.endDiffDK);
 end;
 
+function ConvertBox2ToMainOrTurnoutRoadLengthOption(option: Integer): TMainOrTurnoutRoadLengthOption;
+begin
+  case option of
+    -1: Result := rloCrossover;
+    0: Result := rloNormal;
+    1: Result := rloLong;
+    2: Result := rloAdjustable;
+    3: Result := rloMinimum;
+  else
+    raise Exception.CreateFmt('Unknown code for Main or Turnout Road Length: %d', [option]);
+  end;
+end;
+
 procedure ConvertBox2ToTurnoutInfo1(const turnout_info1: TBox2TurnoutInfo1; template: TTemplate);
 var
   ti: TTurnoutInfo1;
@@ -2802,12 +2815,15 @@ begin
   ti.closureTimbers := turnout_info1.closure_timbers_flag;
   ti.xingTimbers := turnout_info1.xing_timbers_flag;
   ti.exitTimbering := turnout_info1.exit_timbering;
-  ti.turnoutRoadCode := turnout_info1.turnout_road_code;
   ti.turnoutLength := turnout_info1.turnout_length;
   ti.originToToe := turnout_info1.origin_to_toe;
   ti.stepSize := turnout_info1.step_size;
-  ti.turnoutRoadIsAdjustable := turnout_info1.turnout_road_is_adjustable;
-  ti.turnoutRoadIsMinimum := turnout_info1.turnout_road_is_minimum;
+  if turnout_info1.turnout_road_is_adjustable then
+    ti.turnoutRoadCode := rloAdjustable
+  else if turnout_info1.turnout_road_is_minimum then
+    ti.turnoutRoadCode := rloMinimum
+  else
+    ti.turnoutRoadCode := ConvertBox2ToMainOrTurnoutRoadLengthOption(turnout_info1.turnout_road_code);
 end;
 
 function ConvertBox2DateTime(keepDate, keepTime: String): TDateTime;
@@ -2932,7 +2948,7 @@ begin
   ci.kCheckModMS := crossing.k_check_mod_ms;
   ci.kCheckFlare := crossing.k_check_flare;
   ci.curviformTimbering := crossing.curviform_timbering_keep;
-  ci.mainRoadCode := crossing.main_road_code;
+  ci.mainRoadCode := ConvertBox2ToMainOrTurnoutRoadLengthOption(crossing.main_road_code);
   ci.tandemTimberCode := crossing.tandem_timber_code;
   ci.bluntNoseWidth := crossing.blunt_nose_width;
   ci.bluntNoseToTimber := crossing.blunt_nose_to_timb;

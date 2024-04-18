@@ -783,7 +783,7 @@ begin
     else
       xing_type_i := 1;
 
-    turnout_road_i := 3;        // set minimum length to minimize mis-match
+    turnout_road_i := rloMinimum;        // set minimum length to minimize mis-match
 
     gocalc(0, 0);
 
@@ -980,7 +980,7 @@ var
     insert_half_diamond;
 
     xing_type_i := 1;          // default to curviform crossings
-    turnout_road_i := 3;       // set minimum exit length to minimize mis-match
+    turnout_road_i := rloMinimum;       // set minimum exit length to minimize mis-match
 
     hd_vcheck_rails := 0;     // normal check rails
     hd_timbers := 0;          // normal timber lengths
@@ -1051,7 +1051,7 @@ var
       then begin
         hdkn := k3n;
         xing_type_i := 0;     // change to regular crossing
-        turnout_road_i := 0;  // normal
+        turnout_road_i := rloNormal;  // normal
         gocalc(0, 0);
       end;
 
@@ -1071,7 +1071,7 @@ var
     then begin
       hdkn := k3n;
       xing_type_i := 0;     // change to regular crossing
-      turnout_road_i := 0;  // normal
+      turnout_road_i := rloNormal;  // normal
     end;
 
     gocalc(0, 0);

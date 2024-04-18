@@ -7228,7 +7228,7 @@ begin
   case xing_list_i of
     0: begin
       if retpar_i = 1 then
-        turnout_road_i := 0;
+        turnout_road_i := rloNormal;
       // 0.93.a changing from parallel, assume long turnout road not now needed.
       xing_type_i := 0;                        // regular crossing (normal)...
       retpar_i := 0;
@@ -7245,7 +7245,7 @@ begin
       xing_type_i := 0;             // parallel...
       retpar_i := 1;
 
-      turnout_road_i := 1;       // long turnout road needed.
+      turnout_road_i := rloLong;       // long turnout road needed.
       //if turnout_road=-1 then turnout_road:=0;
       //crossover_turnout_road_menu_entry.Enabled:=False;  // can't do a crossover.
       snap_exit_to_return_curve_menu_entry.Enabled := True;
@@ -7254,7 +7254,7 @@ begin
 
     2: begin
       if retpar_i = 1 then
-        turnout_road_i := 0;
+        turnout_road_i := rloNormal;
       // 0.93.a changing from parallel, assume long turnout road not now needed.
       xing_type_i := 1;             // curviform...
       retpar_i := 0;
@@ -7269,7 +7269,7 @@ begin
 
     3: begin                    // generic...
       if retpar_i = 1 then
-        turnout_road_i := 0;
+        turnout_road_i := rloNormal;
       // 0.93.a changing from parallel, assume long turnout road not now needed.
       xing_type_i := -1;
       retpar_i := 0;
@@ -7680,7 +7680,7 @@ begin
   xorg := 0;                                // remove any aproach track;
   turnout_i := 0;                           // length free. default overall length.
   reset_peg_menu_entry.Click;             // Ctrl-0 position.
-  turnout_road_i := 0;
+  turnout_road_i := rloNormal;
 
   fit_current_only_menu_entry.Click;
   clear_transform_data;
@@ -10402,7 +10402,7 @@ end;
 procedure Tpad_form.long_turnout_road_menu_entryClick(Sender: TObject);
 
 begin
-  turnout_road_i := 1;
+  turnout_road_i := rloLong;
   redraw_pad(True, True);
 end;
 //______________________________________________________________________________
@@ -10421,7 +10421,7 @@ begin
     EXIT;
   end;
 
-  turnout_road_i := 2;
+  turnout_road_i := rloAdjustable;
   turnout_i := 1;              // 209b  length needs to be locked
   redraw_pad(True, True);
 end;
@@ -10430,7 +10430,7 @@ end;
 procedure Tpad_form.normal_turnout_road_menu_entryClick(Sender: TObject);
 
 begin
-  turnout_road_i := 0;
+  turnout_road_i := rloNormal;
   redraw_pad(True, True);                     //  do a re-draw.
 end;
 //______________________________________________________________________________
@@ -10438,7 +10438,7 @@ end;
 procedure Tpad_form.crossover_road_menu_entryClick(Sender: TObject);
 
 begin
-  turnout_road_i := -1;
+  turnout_road_i := rloCrossover;
   redraw_pad(True, True);
 end;
 //_______________________________________________________________________________________
@@ -10455,7 +10455,7 @@ begin
     EXIT;
   end;
 
-  turnout_road_i := 3;
+  turnout_road_i := rloMinimum;
   turnout_i := 1;            // length needs to be locked
   redraw_pad(True, True);
 end;
@@ -10465,15 +10465,15 @@ procedure Tpad_form.turnout_road_options_menu_entryClick(Sender: TObject);
 
 begin
   case turnout_road_i of
-    -1:
+    rloCrossover:
       pad_form.crossover_road_menu_entry.Checked := True;           //  radio item.
-    0:
+    rloNormal:
       pad_form.normal_turnout_road_menu_entry.Checked := True;      //  radio item.
-    1:
+    rloLong:
       pad_form.long_turnout_road_menu_entry.Checked := True;        //  radio item.
-    2:
+    rloAdjustable:
       pad_form.adjustable_turnout_road_menu_entry.Checked := True;  //  radio item.
-    3:
+    rloMinimum:
       pad_form.minimum_turnout_road_menu_entry.Checked := True;     //  radio item.
   end;//case
 end;
@@ -10483,13 +10483,13 @@ procedure Tpad_form.main_road_options_menu_entryClick(Sender: TObject);   // 217
 
 begin
   case main_road_i of
-    -1:
+    rloCrossover:
       pad_form.main_road_crossover_menu_entry.Checked := True;   //  radio item.
-    0:
+    rloNormal:
       pad_form.normal_main_road_menu_entry.Checked := True;      //  radio item.
-    2:
+    rloAdjustable:
       pad_form.adjustable_main_road_menu_entry.Checked := True;  //  radio item.
-    3:
+    rloMinimum:
       pad_form.minimum_main_road_menu_entry.Checked := True;     //  radio item.
   end;//case
 end;
@@ -10498,7 +10498,7 @@ end;
 procedure Tpad_form.minimum_main_road_menu_entryClick(Sender: TObject);    // 217a ...
 
 begin
-  main_road_i := 3;
+  main_road_i := rloMinimum;
   turnout_i := 1;            // length needs to be locked
   redraw_pad(True, True);
 end;
@@ -10507,7 +10507,7 @@ end;
 procedure Tpad_form.main_road_crossover_menu_entryClick(Sender: TObject);
 
 begin
-  main_road_i := -1;
+  main_road_i := rloCrossover;
   turnout_i := 1;            // length needs to be locked
   redraw_pad(True, True);
 end;
@@ -10516,7 +10516,7 @@ end;
 procedure Tpad_form.normal_main_road_menu_entryClick(Sender: TObject);
 
 begin
-  main_road_i := 0;
+  main_road_i := rloNormal;
   turnout_i := 1;            // length needs to be locked
   redraw_pad(True, True);
 end;
@@ -10525,7 +10525,7 @@ end;
 procedure Tpad_form.adjustable_main_road_menu_entryClick(Sender: TObject);
 
 begin
-  main_road_i := 2;
+  main_road_i := rloAdjustable;
   turnout_i := 1;            // length needs to be locked
   redraw_pad(True, True);
 end;
@@ -15451,7 +15451,7 @@ begin
   if turnoutx > turnoutx_max then
     turnoutx := turnoutx_max;
 
-  turnout_road_i := 0;               // need standard length.
+  turnout_road_i := rloNormal;               // need standard length.
 
   peg_on_trp_menu_entry.Click;              // peg on end of return curve
   gocalc(0, 0);
@@ -15607,7 +15607,7 @@ begin
 
   if retpar_i <> 1       // not parallel V-crossing
   then begin
-    turnout_road_i := 0;                // need standard length.
+    turnout_road_i := rloNormal;                // need standard length.
     peg_on_TVJP_menu_entry.Click;     // put the peg on splice rail joint.
   end
   else
@@ -24050,7 +24050,7 @@ var
 
 begin
   if retpar_i = 1 then
-    turnout_road_i := 0;  // changing from parallel, assume long turnout road not now needed.
+    turnout_road_i := rloNormal;  // changing from parallel, assume long turnout road not now needed.
 
   xing_type_i := 0;
   retpar_i := 0;
@@ -24083,7 +24083,7 @@ var
 
 begin
   if retpar_i = 1 then
-    turnout_road_i := 0;  // changing from parallel, assume long turnout road not now needed.
+    turnout_road_i := rloNormal;  // changing from parallel, assume long turnout road not now needed.
 
   xing_type_i := 1;
   retpar_i := 0;
@@ -24117,7 +24117,7 @@ var
 
 begin
   if retpar_i = 1 then
-    turnout_road_i := 0;  // changing from parallel, assume long turnout road not now needed.
+    turnout_road_i := rloNormal;  // changing from parallel, assume long turnout road not now needed.
 
   xing_type_i := 0 - 1;
   retpar_i := 0;
@@ -24155,7 +24155,7 @@ begin
 
   cpi.retcent_pi := cpi.trtscent_pi;   // use TS centres.  bug fix 214a
 
-  turnout_road_i := 1;       // long turnout road needed.
+  turnout_road_i := rloLong;       // long turnout road needed.
   snap_exit_to_return_curve_menu_entry.Enabled := True;
 
   kform_now := kform;
@@ -25944,7 +25944,7 @@ begin
     EXIT;
   end;
 
-  turnout_road_i := 2;         // set control template adjustable
+  turnout_road_i := rloAdjustable;         // set control template adjustable
   turnout_i := 1;              // 209b  length needs to be locked
 
   redraw_pad(False, True);          // and show it like that
@@ -25978,7 +25978,7 @@ begin
     EXIT;
   end;
 
-  main_road_i := 2;         // set control template adjustable
+  main_road_i := rloAdjustable;         // set control template adjustable
   turnout_i := 1;           // length needs to be locked
 
   redraw_pad(False, True);          // and show it like that
@@ -27354,8 +27354,8 @@ begin
   isolated_crossing := not isolated_crossing;
 
   if isolated_crossing = True then begin
-    main_road_i := 3;   // minimum..
-    turnout_road_i := 3;
+    main_road_i := rloMinimum;   // minimum..
+    turnout_road_i := rloMinimum;
 
     main_road_stock_rail_flag := False;
     turnout_road_stock_rail_flag := False;
@@ -27365,8 +27365,8 @@ begin
     peg_on_mcp_menu_entry.Click;
   end
   else begin
-    main_road_i := 0;      // normal..
-    turnout_road_i := 0;
+    main_road_i := rloNormal;      // normal..
+    turnout_road_i := rloNormal;
 
     with rail_options_form do begin
       main_road_stock_rail_flag := main_road_stock_rail_checkbox.Checked;
@@ -27646,9 +27646,9 @@ begin
   tandem_timb := 0;
   isolated_crossing := False;
 
-  if turnout_road_i > 0 then
-    turnout_road_i := 0;      // normal    no change if set to crossover (-1)
-  main_road_i := 0;                                  // normal
+  if turnout_road_i > rloNormal then
+    turnout_road_i := rloNormal;      // normal    no change if set to crossover (-1)
+  main_road_i := rloNormal;                                  // normal
 
   startx := 0;
 

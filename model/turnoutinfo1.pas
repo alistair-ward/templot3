@@ -78,23 +78,21 @@ attributes:
 - name: exitTimbering
   type: Integer
 - name: turnoutRoadCode
-  type: Integer
+  type: TMainOrTurnoutRoadLengthOption
 - name: turnoutLength
   type: Double
 - name: originToToe
   type: Double
 - name: stepSize
   type: Double
-- name: turnoutRoadIsAdjustable
-  type: Boolean
-- name: turnoutRoadIsMinimum
-  type: Boolean
 ...
 }
 
 type
 
   TTurnoutHand = (thLeft, thY, thRight);
+  // options for length of either the main or turnout roads
+  TMainOrTurnoutRoadLengthOption = (rloCrossover, rloNormal, rloLong, rloAdjustable, rloMinimum);
 
   TTurnoutInfo1 = class(TOTPersistent)
   private
@@ -109,12 +107,10 @@ type
     FClosureTimbers: Boolean;
     FXingTimbers: Boolean;
     FExitTimbering: Integer;
-    FTurnoutRoadCode: Integer;
+    FTurnoutRoadCode: TMainOrTurnoutRoadLengthOption;
     FTurnoutLength: Double;
     FOriginToToe: Double;
     FStepSize: Double;
-    FTurnoutRoadIsAdjustable: Boolean;
-    FTurnoutRoadIsMinimum: Boolean;
     //# endGenMemberVars
 
   protected
@@ -133,12 +129,10 @@ type
     procedure SetClosureTimbers(const AValue: Boolean);
     procedure SetXingTimbers(const AValue: Boolean);
     procedure SetExitTimbering(const AValue: Integer);
-    procedure SetTurnoutRoadCode(const AValue: Integer);
+    procedure SetTurnoutRoadCode(const AValue: TMainOrTurnoutRoadLengthOption);
     procedure SetTurnoutLength(const AValue: Double);
     procedure SetOriginToToe(const AValue: Double);
     procedure SetStepSize(const AValue: Double);
-    procedure SetTurnoutRoadIsAdjustable(const AValue: Boolean);
-    procedure SetTurnoutRoadIsMinimum(const AValue: Boolean);
     //# endGenGetSetDeclarations
 
   public
@@ -163,12 +157,10 @@ type
     property closureTimbers: Boolean read FClosureTimbers write SetClosureTimbers;
     property xingTimbers: Boolean read FXingTimbers write SetXingTimbers;
     property exitTimbering: Integer read FExitTimbering write SetExitTimbering;
-    property turnoutRoadCode: Integer read FTurnoutRoadCode write SetTurnoutRoadCode;
+    property turnoutRoadCode: TMainOrTurnoutRoadLengthOption read FTurnoutRoadCode write SetTurnoutRoadCode;
     property turnoutLength: Double read FTurnoutLength write SetTurnoutLength;
     property originToToe: Double read FOriginToToe write SetOriginToToe;
     property stepSize: Double read FStepSize write SetStepSize;
-    property turnoutRoadIsAdjustable: Boolean read FTurnoutRoadIsAdjustable write SetTurnoutRoadIsAdjustable;
-    property turnoutRoadIsMinimum: Boolean read FTurnoutRoadIsMinimum write SetTurnoutRoadIsMinimum;
     //# endGenProperty
   end;
 
@@ -179,6 +171,10 @@ type
 function StrToTTurnoutHand(AValue: String): TTurnoutHand;
 procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
   AValue: TTurnoutHand);
+
+function StrToTMainOrTurnoutRoadLengthOption(AValue: String): TMainOrTurnoutRoadLengthOption;
+procedure SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TMainOrTurnoutRoadLengthOption);
 
 function TurnoutHandMultiplier(AHand: TTurnoutHand): Integer;
 function SwapTurnoutHand(AHand: TTurnoutHand): TTurnoutHand;
@@ -202,6 +198,18 @@ procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TTurnoutHand), Ord(AValue)));
 end;
+
+function StrToTMainOrTurnoutRoadLengthOption(AValue: String): TMainOrTurnoutRoadLengthOption;
+begin
+  Result := TMainOrTurnoutRoadLengthOption(GetEnumValue(TypeInfo(TMainOrTurnoutRoadLengthOption), AValue));
+end;
+
+procedure SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TMainOrTurnoutRoadLengthOption);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TMainOrTurnoutRoadLengthOption), Ord(AValue)));
+end;
+
 
 function TurnoutHandMultiplier(AHand: TTurnoutHand): Integer;
 begin
@@ -284,7 +292,7 @@ begin
     FExitTimbering := StrToInteger(AValue)
   else
   if AName = 'turnoutRoadCode' then
-    FTurnoutRoadCode := StrToInteger(AValue)
+    FTurnoutRoadCode := StrToTMainOrTurnoutRoadLengthOption(AValue)
   else
   if AName = 'turnoutLength' then
     FTurnoutLength := StrToDouble(AValue)
@@ -294,12 +302,6 @@ begin
   else
   if AName = 'stepSize' then
     FStepSize := StrToDouble(AValue)
-  else
-  if AName = 'turnoutRoadIsAdjustable' then
-    FTurnoutRoadIsAdjustable := StrToBoolean(AValue)
-  else
-  if AName = 'turnoutRoadIsMinimum' then
-    FTurnoutRoadIsMinimum := StrToBoolean(AValue)
   else
     //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -322,12 +324,10 @@ begin
   AStream.ReadBuffer(FClosureTimbers, sizeof(Boolean));
   AStream.ReadBuffer(FXingTimbers, sizeof(Boolean));
   AStream.ReadBuffer(FExitTimbering, sizeof(Integer));
-  AStream.ReadBuffer(FTurnoutRoadCode, sizeof(Integer));
+  AStream.ReadBuffer(FTurnoutRoadCode, sizeof(TMainOrTurnoutRoadLengthOption));
   AStream.ReadBuffer(FTurnoutLength, sizeof(Double));
   AStream.ReadBuffer(FOriginToToe, sizeof(Double));
   AStream.ReadBuffer(FStepSize, sizeof(Double));
-  AStream.ReadBuffer(FTurnoutRoadIsAdjustable, sizeof(Boolean));
-  AStream.ReadBuffer(FTurnoutRoadIsMinimum, sizeof(Boolean));
   //# endGenRestoreVars
 end;
 
@@ -348,12 +348,10 @@ begin
   AStream.WriteBuffer(FClosureTimbers, sizeof(Boolean));
   AStream.WriteBuffer(FXingTimbers, sizeof(Boolean));
   AStream.WriteBuffer(FExitTimbering, sizeof(Integer));
-  AStream.WriteBuffer(FTurnoutRoadCode, sizeof(Integer));
+  AStream.WriteBuffer(FTurnoutRoadCode, sizeof(TMainOrTurnoutRoadLengthOption));
   AStream.WriteBuffer(FTurnoutLength, sizeof(Double));
   AStream.WriteBuffer(FOriginToToe, sizeof(Double));
   AStream.WriteBuffer(FStepSize, sizeof(Double));
-  AStream.WriteBuffer(FTurnoutRoadIsAdjustable, sizeof(Boolean));
-  AStream.WriteBuffer(FTurnoutRoadIsMinimum, sizeof(Boolean));
   //# endGenSaveVars
 end;
 
@@ -374,12 +372,10 @@ begin
   SaveYamlBoolean(AEmitter, 'closureTimbers', FClosureTimbers);
   SaveYamlBoolean(AEmitter, 'xingTimbers', FXingTimbers);
   SaveYamlInteger(AEmitter, 'exitTimbering', FExitTimbering);
-  SaveYamlInteger(AEmitter, 'turnoutRoadCode', FTurnoutRoadCode);
+  SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter, 'turnoutRoadCode', FTurnoutRoadCode);
   SaveYamlDouble(AEmitter, 'turnoutLength', FTurnoutLength);
   SaveYamlDouble(AEmitter, 'originToToe', FOriginToToe);
   SaveYamlDouble(AEmitter, 'stepSize', FStepSize);
-  SaveYamlBoolean(AEmitter, 'turnoutRoadIsAdjustable', FTurnoutRoadIsAdjustable);
-  SaveYamlBoolean(AEmitter, 'turnoutRoadIsMinimum', FTurnoutRoadIsMinimum);
   //# endGenSaveYamlVars
 end;
 
@@ -475,7 +471,7 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TTurnoutInfo1.SetTurnoutRoadCode(const AValue: Integer);
+procedure TTurnoutInfo1.SetTurnoutRoadCode(const AValue: TMainOrTurnoutRoadLengthOption);
 begin
   if AValue <> FTurnoutRoadCode then begin
     SetModified;
@@ -507,24 +503,6 @@ begin
   if AValue <> FStepSize then begin
     SetModified;
     FStepSize := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TTurnoutInfo1.SetTurnoutRoadIsAdjustable(const AValue: Boolean);
-begin
-  if AValue <> FTurnoutRoadIsAdjustable then begin
-    SetModified;
-    FTurnoutRoadIsAdjustable := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TTurnoutInfo1.SetTurnoutRoadIsMinimum(const AValue: Boolean);
-begin
-  if AValue <> FTurnoutRoadIsMinimum then begin
-    SetModified;
-    FTurnoutRoadIsMinimum := AValue;
   end;
 end;
 

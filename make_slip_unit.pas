@@ -475,7 +475,7 @@ begin
     if sides < 1      // opposite hand or double-slip wanted, so do opposite side first      //sides=-1
     then begin
       if making_crossover = True then
-        turnout_road_i := -1;  // for the crossover
+        turnout_road_i := rloCrossover;  // for the crossover
 
       omit_wj_marks := True;
       // and omit the wing rail joint marks      // restored in retain_on_make
@@ -491,7 +491,7 @@ begin
       // and omit the wing rail joint marks      // restored in retain_on_make
 
       if making_crossover = True then
-        turnout_road_i := 0;  // normal
+        turnout_road_i := rloNormal;
 
 
       temp := switch_mid_rad2;                // swap the switch radii

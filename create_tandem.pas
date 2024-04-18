@@ -352,7 +352,7 @@ begin
     // now create 2nd turnout ...
 
     if retpar_i = 1 then begin
-      turnout_road_i := 0;
+      turnout_road_i := rloNormal;
       // changing from parallel, assume long turnout road not now needed.
       retpar_i := 0;
       pad_form.snap_exit_to_return_curve_menu_entry.Enabled := False;
@@ -1369,7 +1369,7 @@ begin
     startx := 0;        // show approach track
     xing_type_i := 1;   // curviform only
 
-    turnout_road_i := 1;  // long turnout side exit
+    turnout_road_i := rloLong;  // long turnout side exit
 
     include_front_timbers := True;   // back on
 
@@ -1889,9 +1889,9 @@ begin
     waitMessage := nil;
     Application.ProcessMessages;
 
-    main_road_i := 3;   // minimum
+    main_road_i := rloMinimum;   // minimum
 
-    turnout_road_i := 0;  // normal exit
+    turnout_road_i := rloNormal;  // normal exit
 
     main_road_stock_rail_flag := False;
 
