@@ -1373,8 +1373,7 @@ var
 
   no_rad_confirm: boolean = False;
 
-  switch_type: integer = -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  switch_type: TSwitchPattern;
 
   //   k4_limit:double=Pi/2-0.001;   // turnout road mustn't swing more than 90 degrees (for straight turnout).
   k4_limit: double = Pi / 3;
@@ -2763,7 +2762,7 @@ begin      // calculate the switch data.
     h_inches := 0;               // arbitrary heel location at intesect.
     lh_inches := 0;              // lead to "heel" at intersect.
     swrad := max_rad + g / 2;        // straight switch.
-    switch_type := 0;                               // ditto.
+    switch_type := spStraightOrCurved;                               // ditto.
     sw_front_inches := g * TAN(hdk / 2) / 2 / inscale;
     // front to tips. = Ctrl-0 = Ctrl-1 = Ctrl-2.
 
@@ -2790,8 +2789,7 @@ begin      // calculate the switch data.
   end
   else begin               // turnout...
 
-    if gaunt = True     // 0.81
-    then begin
+    if gaunt then begin
       joggled := False;
       joggle_long := 0;
       joggle_deep := 0;
@@ -2801,7 +2799,7 @@ begin      // calculate the switch data.
 
       swrad := max_rad;
 
-      switch_type := 0;
+      switch_type := spStraightOrCurved;
       sw_front_inches := 0;
       current_switch_name := 'gaunt';
     end
@@ -2817,11 +2815,14 @@ begin      // calculate the switch data.
       h_inches := sw_info.heel_offset_inches;
       lh_inches := sw_info.heel_lead_inches;
 
-      if sw_info.switch_radius_inchormax > max_rad_test      // straight switch
-      then
+      if sw_info.switch_radius_inchormax > max_rad_test then begin
+        // straight switch
         swrad := max_rad + g / 2
-      else
-        swrad := sw_info.switch_radius_inchormax * inscale;    // switch radius.
+      end
+      else begin
+            // switch radius.
+        swrad := sw_info.switch_radius_inchormax * inscale;
+      end;
 
       switch_type := sw_info.sw_pattern;
       sw_front_inches := sw_info.switch_front_inches;
@@ -2866,8 +2867,8 @@ begin      // calculate the switch data.
 
   lh := lh_inches * inscale;      // lead, toe to heel (incl. planing).
 
-  if gaunt = True      // gaunt template 0.81.a
-  then begin
+  if gaunt then begin
+    // gaunt template 0.81.a
     p := 0;
     pl := 0;          // no planing.
     h := h_inches * inscale;  // gaunt offset.
@@ -2893,8 +2894,8 @@ begin      // calculate the switch data.
       EXIT;
     end; // can't use zero or negative values.
 
-    if switch_type = 0         // curved planing or straight switch...
-    then begin
+    if switch_type = spStraightOrCurved then begin
+      // curved planing or straight switch...
       p := 0;
       pl := 0;
       // the switch curve starts at the toe - a straight switch is treated as a curved switch of infinite radius.
@@ -2945,7 +2946,8 @@ begin      // calculate the switch data.
       k2cossw := swrad * COS(k2);
       scl := k2sinsw - k1sinsw;                 // switch curve length.
     end
-    else begin                   // semi-curved switch...
+    else begin
+      // semi-curved switch...
 
       k1n := sw_info.planing_angle;                       // RAM unit planing angle.
       if k1n < minfp then begin
@@ -3007,9 +3009,10 @@ begin      // calculate the switch data.
 
   // now can calculate some x dims...
 
-  if switch_type = 0 then begin         // straight switch or curved planing...
+  if switch_type = spStraightOrCurved then begin
+    // straight switch or curved planing...
 
-    if gaunt = True then begin
+    if gaunt then begin
       setx := toex;
       setox := toex;
       plx3 := toex;
@@ -3109,8 +3112,8 @@ begin      // calculate the switch data.
     then begin
       // kludge approximations...
 
-      if switch_type = 0    // straight or curved no plx available
-      then begin
+      if switch_type = spStraightOrCurved then begin
+        // straight or curved no plx available
         temp := SQR(swrad + railtop) - SQR(sworgy);
         if temp < 0 then begin
           Result := 106;
@@ -3304,7 +3307,7 @@ begin
       EXIT;                     // abandon ship.
     end;
 
-    if gaunt = True then
+    if gaunt then
       equiv_rad := max_rad       // no switch deflection
     else begin
       if swrad >= max_rad_test then
@@ -3317,15 +3320,17 @@ begin
 
     tradius_is_straight := (ABS(k2 - k3) < minfp);
     // ^^^ straight turnout radius if switch and crossing angles equal.
-    if tradius_is_straight = True then
+    if tradius_is_straight then
       xing_calc_i := 0              // calc as if a regular crossing.
     else
       xing_calc_i := xing_type_i;
 
-    if xing_calc_i <> 0                      // ^^^ curved or generic crossing.
-    then
+    if xing_calc_i <> 0 then begin
+      // ^^^ curved or generic crossing.
       sl := 0                          // no entry sl.
-    else begin                          // regular crossing or ^^^ straight turnout radius.
+    end
+    else begin
+      // regular crossing or ^^^ straight turnout radius.
       case entry_straight_code of
         -1, 0:
           sl := fw * 2 * k3n;
@@ -3339,14 +3344,13 @@ begin
 
     temp := (COS(k2) - COS(k3));
     // switch and crossing angles equal, turnout radius is straight.
-    if (ABS(temp) < minfp) or (tradius_is_straight = True) then
+    if (ABS(temp) < minfp) or (tradius_is_straight) then
       tradius := max_rad + g / 2                          // this value not actually used.
     else begin
       // mods 0.93.a ...
 
-      if xing_calc_i = 0  // regular
-      then begin
-
+      if xing_calc_i = 0 then begin
+        // regular
         heel_to_xing := (th - h) * (SIN(k3) - SIN(k2)) / temp;
         // inter-lead length, heel to curve end (curve end at angle=k3).
 
@@ -3360,7 +3364,7 @@ begin
 
       end
       else
-      if (gaunt = True) and (gaunt_offset_in > ((g - fw - minfp) / inscale)) then begin
+      if (gaunt) and (gaunt_offset_in > ((g - fw - minfp) / inscale)) then begin
         gaunt_offset_in := (g - fw - minfp) / inscale;
         // curviform and generic          offset cannot exceed gauge-flangeway   217a
         h := g - fw - minfp;
@@ -3371,8 +3375,8 @@ begin
 
     end;
 
-    if (half_diamond = False) and (tradius > minfp) and (tradius > (equiv_rad + minfp)) and
-      (entry_straight_code = 0) and (xing_calc_i = 0) and (tradius_is_straight = False)
+    if (not half_diamond) and (tradius > minfp) and (tradius > (equiv_rad + minfp)) and
+      (entry_straight_code = 0) and (xing_calc_i = 0) and (not tradius_is_straight)
 
     // turnout rad is positive non-straight and exceeds switch rad.
     // this is or is being calced as a regular crossing.
@@ -3393,7 +3397,7 @@ begin
     end;
 
 
-    if tradius_is_straight = False then begin
+    if not tradius_is_straight then begin
       //k2sint:=tradius*SIN(k2);       //^^^ turnout curve centres :
       //k3sint:=tradius*SIN(k3);
 
@@ -7476,14 +7480,14 @@ procedure straight_planing(aq: ERailData; do_joggle: boolean);
 var
   xpl, y, len, jog: double;
 begin
-  if switch_type <> -1 then
+  if switch_type <> spSemiCurved then
     run_error(154); // only come here for semi-curved switches.
 
   len := stox - setx;   // length of planing for joggle.
 
   xpl := xs - setx;     // current length along planing.
 
-  if (do_joggle = True) and ((aq = rdCurvedStockGaugeFace) or
+  if (do_joggle) and ((aq = rdCurvedStockGaugeFace) or
     (aq = rdCurvedStockOuterFace)) and (len > minfp) then begin
     if xpl >= len then
       jog := 0                           // beyond end of planing.
@@ -7535,12 +7539,12 @@ begin
     EXIT;
   end;
 
-  if (do_joggle = True) and (switch_type <> 0) then
+  if (do_joggle) and (switch_type <> spStraightOrCurved) then
     run_error(155); // planing should only come here for curved switches.
 
   len := stox - setx;   // length of planing for joggle.
 
-  if (do_joggle = True) and ((aq = rdCurvedStockGaugeFace) or
+  if (do_joggle) and ((aq = rdCurvedStockGaugeFace) or
     (aq = rdCurvedStockOuterFace)) and (len > minfp) then begin
     xjog := xs - setx;              // length along planing.
     if xjog >= len then
@@ -8072,14 +8076,13 @@ begin
     EXIT;
   end;
 
-  if xing_calc_i = 1     // curviform crossing, all templates.
-  then begin
+  if xing_calc_i = 1 then begin
+    // curviform crossing, all templates.
     do_turnout_curve;  // turnout curve runs through
     EXIT;
   end;
 
-  if tradius_is_straight = True // regular diamonds, straight line from DP to TCP ...
-  then begin
+  if tradius_is_straight then begin // regular diamonds, straight line from DP to TCP ...
     do_regular_beyond_curve_end;
     EXIT;
   end;
@@ -8538,9 +8541,8 @@ begin
       // !!! mods 18-8-01 0.73.a to ensure plox occurs in the list (for neater blade infill on printing)...
 
       if (aq = rdCurvedTurnoutWingGaugeFace) and (segment_index = 2) and
-        (switch_type = 0) and (xb < plox) and (xs > plox) and (plox_done = False)
+        (switch_type = spStraightOrCurved) and (xb < plox) and (xs > plox) and (not plox_done) then begin
       // planing and switch curve all in one for straight and curved switches...
-      then begin
         xs := blank_start(plox);
         plox_done := True;
       end;
@@ -8556,22 +8558,22 @@ begin
           toe(aq);
         1:
           case switch_type of
-            -1:
+            spSemiCurved:
               straight_planing(aq, do_joggle); // semi-curved switch.
 
-            0:
+            spStraightOrCurved:
               swcurve(aq, do_joggle);
             // for straight switch or curved switch, the planing is part of the switch curve.
             // so this section draws only the joggle length in front of the toe (if joggled, and nothing otherwise, xb=xe).
 
-            1:
+            spDoubleCurved:
               double_curved_planing(aq);  // double-curved switch planing.
             else
               run_error(68);
           end;//case
 
         2:
-          swcurve(aq, (do_joggle = True) and (switch_type = 0));
+          swcurve(aq, (do_joggle) and (switch_type = spStraightOrCurved));
         // this section includes planing for curved and straight switches.
 
         3:
@@ -18896,12 +18898,12 @@ begin
       //0: toe(2);
       1:
         case switch_type of
-          -1:
+          spSemiCurved:
             straight_planing(rdCurvedTurnoutWingGaugeFace, False);    // semi-curved switch.
-          0:
+          spStraightOrCurved:
             swcurve(rdCurvedTurnoutWingGaugeFace, False);
           // for straight switch or curved switch, the planing is part of the switch curve.
-          1:
+          spDoubleCurved:
             double_curved_planing(rdCurvedTurnoutWingGaugeFace);
             // double-curved switch planing.
           else
@@ -18976,12 +18978,12 @@ begin
         toe(rdCurvedStockGaugeFace);
       1:
         case switch_type of
-          -1:
+          spSemiCurved:
             straight_planing(rdCurvedStockGaugeFace, False);      // semi-curved switch.
-          0:
+          spStraightOrCurved:
             swcurve(rdCurvedStockGaugeFace, False);
           // for straight switch or curved switch, the planing is part of the switch curve.
-          1:
+          spDoubleCurved:
             double_curved_planing(rdCurvedStockGaugeFace);       // double-curved switch planing.
           else
             run_error(68);
@@ -22924,9 +22926,8 @@ begin
     if (Abs(k1 - k2) > minfp) and (swrad < max_rad_test) and (half_diamond = False)
     // (do nothing for straight switch.)
     then begin
-      if switch_type = 0
+      if switch_type = spStraightOrCurved then begin
       // curved planing, switch curve starts at toe (mark across between tips instead of strictly radial).
-      then begin
         p1.x := setx;
         p1.y := g;
         p2.x := toex;
@@ -32472,7 +32473,7 @@ begin
   case sw_info.sw_pattern of
     // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
 
-    -1: begin   // semi-curved switch ...
+    spSemiCurved: begin   // semi-curved switch ...
 
       info_str := info_str + 'SEMI-CURVED pattern switch:';
 
@@ -32489,7 +32490,7 @@ begin
       info_str := info_str + '|length of stock-rail from joint' + val_str(sw_info.stock_rail);
     end;
 
-    0: begin
+    spStraightOrCurved: begin
       if sw_info.switch_radius_inchormax < max_rad_test  // not a straight switch.
 
       then begin       // curved switch...
@@ -32519,7 +32520,7 @@ begin
       end;
     end;
 
-    1: begin
+    spDoubleCurved: begin
       info_str := info_str + 'DOUBLE-CURVED pattern switch (not yet implemented)';
     end;
 
@@ -32537,7 +32538,7 @@ begin
 
     info_str := info_str + '|heel angle = ' + ram_clm_str(k2n);
 
-    if sw_info.sw_pattern = -1 then
+    if sw_info.sw_pattern = spSemiCurved then
       info_str := info_str + '|heel offset' + val_str(h / inscale);
   end;
 

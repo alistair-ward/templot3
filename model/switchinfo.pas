@@ -17,7 +17,7 @@ uses
 class: TSwitchInfo
 attributes:
   - name: switchPattern
-    type: Integer
+    type: TSwitchPattern
   - name: planingLength
     type: Double
   - name: planingAngle
@@ -101,10 +101,13 @@ attributes:
 
 type
 
+  // 0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  TSwitchPattern = (spStraightOrCurved, spSemiCurved, spDoubleCurved);
+
   TSwitchInfo = class(TOTPersistent)
   private
     //# genMemberVars
-    FSwitchPattern: Integer;
+    FSwitchPattern: TSwitchPattern;
     FPlaningLength: Double;
     FPlaningAngle: Double;
     FSwitchRadius: Double;
@@ -138,13 +141,13 @@ type
 
   protected
     procedure Calculate; override;
-    procedure RestoreAttributes(AStream : TStream); override;
-    procedure SaveAttributes(AStream : TStream); override;
+    procedure RestoreAttributes(AStream: TStream); override;
+    procedure SaveAttributes(AStream: TStream); override;
 
     //# genGetSetDeclarations
     function GetTimberCentres(AIndex: Integer): Double;
     function GetTimberCentresCount: Integer;
-    procedure SetSwitchPattern(const AValue: Integer);
+    procedure SetSwitchPattern(const AValue: TSwitchPattern);
     procedure SetPlaningLength(const AValue: Double);
     procedure SetPlaningAngle(const AValue: Double);
     procedure SetSwitchRadius(const AValue: Double);
@@ -186,11 +189,12 @@ type
     procedure ClearTimberCentres;
     //# endGenPublicDeclarations
 
-    procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
-    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+    procedure RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+      ALoader: TOTPersistentLoader); override;
+    procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property switchPattern: Integer read FSwitchPattern write SetSwitchPattern;
+    property switchPattern: TSwitchPattern read FSwitchPattern write SetSwitchPattern;
     property planingLength: Double read FPlaningLength write SetPlaningLength;
     property planingAngle: Double read FPlaningAngle write SetPlaningAngle;
     property switchRadius: Double read FSwitchRadius write SetSwitchRadius;
@@ -263,15 +267,31 @@ type
   TSwitchInfoOwningList = class(TOTOwningList<TSwitchInfo>);
   TSwitchInfoReferenceList = class(TOTReferenceList<TSwitchInfo>);
 
+function StrToTSwitchPattern(AValue: String): TSwitchPattern;
+procedure SaveYamlTSwitchPattern(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TSwitchPattern);
+
 
 implementation
 
 uses
+  TypInfo,
   TLoggerUnit;
 
 var
-  log : ILogger;
+  log: ILogger;
 
+
+function StrToTSwitchPattern(AValue: String): TSwitchPattern;
+begin
+  Result := TSwitchPattern(GetEnumValue(TypeInfo(TSwitchPattern), AValue));
+end;
+
+procedure SaveYamlTSwitchPattern(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TSwitchPattern);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TSwitchPattern), Ord(AValue)));
+end;
 
 { TSwitchInfo }
 
@@ -294,11 +314,12 @@ begin
   // Add your calculation code here, and cache the results...
 end;
 
-procedure TSwitchInfo.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
+procedure TSwitchInfo.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;
+  ALoader: TOTPersistentLoader);
 begin
   //# genRestoreYamlVars
   if AName = 'switchPattern' then
-    FSwitchPattern := StrToInteger(AValue)
+    FSwitchPattern := StrToTSwitchPattern(AValue)
   else
   if AName = 'planingLength' then
     FPlaningLength := StrToDouble(AValue)
@@ -390,18 +411,18 @@ begin
   if AName = 'numBlockHeelChairs' then
     FNumBlockHeelChairs := StrToInteger(AValue)
   else
-  //# endGenRestoreYamlVars
+    //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
 
-procedure TSwitchInfo.RestoreAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TSwitchInfo.RestoreAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genRestoreVars
-  AStream.ReadBuffer(FSwitchPattern, sizeof(Integer));
+  AStream.ReadBuffer(FSwitchPattern, sizeof(TSwitchPattern));
   AStream.ReadBuffer(FPlaningLength, sizeof(Double));
   AStream.ReadBuffer(FPlaningAngle, sizeof(Double));
   AStream.ReadBuffer(FSwitchRadius, sizeof(Double));
@@ -433,16 +454,16 @@ procedure TSwitchInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FNumBlockSlideChairs, sizeof(Integer));
   AStream.ReadBuffer(FNumBlockHeelChairs, sizeof(Integer));
   //# endGenRestoreVars
-  end;
+end;
 
-procedure TSwitchInfo.SaveAttributes(AStream : TStream);
-  var
-    i: Integer;
-  begin
+procedure TSwitchInfo.SaveAttributes(AStream: TStream);
+var
+  i: Integer;
+begin
   inherited;
 
   //# genSaveVars
-  AStream.WriteBuffer(FSwitchPattern, sizeof(Integer));
+  AStream.WriteBuffer(FSwitchPattern, sizeof(TSwitchPattern));
   AStream.WriteBuffer(FPlaningLength, sizeof(Double));
   AStream.WriteBuffer(FPlaningAngle, sizeof(Double));
   AStream.WriteBuffer(FSwitchRadius, sizeof(Double));
@@ -474,16 +495,16 @@ procedure TSwitchInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FNumBlockSlideChairs, sizeof(Integer));
   AStream.WriteBuffer(FNumBlockHeelChairs, sizeof(Integer));
   //# endGenSaveVars
-  end;
-  
-procedure TSwitchInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
-  var
-    i: Integer;
-  begin
+end;
+
+procedure TSwitchInfo.SaveYamlAttributes(AEmitter: TYamlEmitter);
+var
+  i: Integer;
+begin
   inherited;
-  
+
   //# genSaveYamlVars
-  SaveYamlInteger(AEmitter, 'switchPattern', FSwitchPattern);
+  SaveYamlTSwitchPattern(AEmitter, 'switchPattern', FSwitchPattern);
   SaveYamlDouble(AEmitter, 'planingLength', FPlaningLength);
   SaveYamlDouble(AEmitter, 'planingAngle', FPlaningAngle);
   SaveYamlDouble(AEmitter, 'switchRadius', FSwitchRadius);
@@ -518,11 +539,11 @@ procedure TSwitchInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlInteger(AEmitter, 'numBlockSlideChairs', FNumBlockSlideChairs);
   SaveYamlInteger(AEmitter, 'numBlockHeelChairs', FNumBlockHeelChairs);
   //# endGenSaveYamlVars
-  end;
+end;
 
 //# genGetSetMethods
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSwitchPattern(const AValue: Integer);
+procedure TSwitchInfo.SetSwitchPattern(const AValue: TSwitchPattern);
 begin
   if AValue <> FSwitchPattern then begin
     SetModified;

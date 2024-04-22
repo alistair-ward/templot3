@@ -45,7 +45,8 @@ uses
   rail_data_unit,
   curve,
   curve_parameters_interface,
-  NotchInfo;
+  NotchInfo,
+  SwitchInfo;
 
 
 const
@@ -632,7 +633,7 @@ type
     alignment_byte_2: byte;   // D5 0.81 12-06-05
     alignment_byte_3: byte;   // D5 0.81 12-06-05
 
-    sw_pattern: integer;    // type of switch.
+    sw_pattern: TSwitchPattern;    // type of switch.
     planing: double;   // (B) planing length (inches).
     planing_angle: double;   // unit planing angle.
     switch_radius_inchormax: double;

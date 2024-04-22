@@ -22,7 +22,7 @@ object switch_select_form: Tswitch_select_form
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnShow = FormShow
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '3.0.0.3'
   Scaled = False
   object datestamp_label: TLabel
     Left = 0
@@ -130,6 +130,7 @@ object switch_select_form: Tswitch_select_form
     Font.Height = -18
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 8
@@ -145,9 +146,9 @@ object switch_select_form: Tswitch_select_form
       Font.Height = -17
       Font.Name = 'MS Sans Serif'
       Font.Style = [fsBold]
-      OnClick = ok_panelClick
       ParentFont = False
       TabOrder = 0
+      OnClick = ok_panelClick
     end
   end
   object switch_selector_listbox: TListBox
@@ -164,11 +165,11 @@ object switch_select_form: Tswitch_select_form
       'switch_selector_listbox'
     )
     ItemHeight = 18
-    OnClick = switch_selector_listboxClick
-    OnDblClick = ok_panelClick
     ParentShowHint = False
     ParentFont = False
     TabOrder = 0
+    OnClick = switch_selector_listboxClick
+    OnDblClick = ok_panelClick
   end
   object cancel_panel: TPanel
     Left = 569
@@ -184,6 +185,7 @@ object switch_select_form: Tswitch_select_form
     Font.Height = -15
     Font.Name = 'Arial'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 7
@@ -198,9 +200,9 @@ object switch_select_form: Tswitch_select_form
       Font.Color = clBlack
       Font.Height = -12
       Font.Name = 'Arial'
-      OnClick = cancel_panelClick
       ParentFont = False
       TabOrder = 0
+      OnClick = cancel_panelClick
     end
   end
   object blue_corner_panel: TPanel
@@ -216,6 +218,7 @@ object switch_select_form: Tswitch_select_form
     Font.Height = -17
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
+    ParentBackground = False
     ParentColor = False
     ParentFont = False
     TabOrder = 9
@@ -231,6 +234,7 @@ object switch_select_form: Tswitch_select_form
       Font.Height = -17
       Font.Name = 'Arial'
       Font.Style = [fsBold]
+      ParentBackground = False
       ParentColor = False
       ParentFont = False
       ParentShowHint = False
@@ -250,6 +254,7 @@ object switch_select_form: Tswitch_select_form
       Font.Height = -17
       Font.Name = 'Arial'
       Font.Style = [fsBold]
+      ParentBackground = False
       ParentColor = False
       ParentFont = False
       ParentShowHint = False
@@ -264,6 +269,7 @@ object switch_select_form: Tswitch_select_form
       Width = 15
       ClientHeight = 16
       ClientWidth = 15
+      ParentBackground = False
       TabOrder = 2
       OnClick = colour_panelClick
       object colour_patch: TImage
@@ -330,17 +336,17 @@ object switch_select_form: Tswitch_select_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = custom_switch_buttonClick
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 5
+    OnClick = custom_switch_buttonClick
   end
   object joggled_checkbox: TCheckBox
     Left = 508
     Height = 20
     Top = 46
-    Width = 147
+    Width = 145
     Caption = ' j&oggled  stock  rails'
     Font.Color = clBlack
     Font.Height = -13
@@ -360,11 +366,11 @@ object switch_select_form: Tswitch_select_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = show_info_buttonClick
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 2
+    OnClick = show_info_buttonClick
   end
   object help_button: TButton
     Left = 572
@@ -376,39 +382,39 @@ object switch_select_form: Tswitch_select_form
     Font.Height = -13
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = how_panelClick
     ParentFont = False
     TabOrder = 10
+    OnClick = how_panelClick
   end
   object full_size_ins_radiobutton: TRadioButton
     Left = 569
     Height = 19
     Top = 238
-    Width = 44
+    Width = 42
     Caption = 'inch'
     Checked = True
     Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = show_info_buttonClick
     ParentFont = False
     TabOrder = 3
     TabStop = True
+    OnClick = show_info_buttonClick
   end
   object full_size_mm_radiobutton: TRadioButton
     Left = 621
     Height = 19
     Top = 238
-    Width = 42
+    Width = 40
     Caption = 'mm'
     Font.Color = clBlack
     Font.Height = -12
     Font.Name = 'Arial'
     Font.Style = [fsBold]
-    OnClick = show_info_buttonClick
     ParentFont = False
     TabOrder = 4
+    OnClick = show_info_buttonClick
   end
   object restore_settings_button: TButton
     Left = 504
@@ -417,10 +423,10 @@ object switch_select_form: Tswitch_select_form
     Top = 350
     Width = 58
     Caption = '&restore'
-    OnClick = restore_settings_buttonClick
     ParentShowHint = False
     ShowHint = True
     TabOrder = 6
+    OnClick = restore_settings_buttonClick
   end
   object Button1: TButton
     Left = 506
@@ -428,8 +434,8 @@ object switch_select_form: Tswitch_select_form
     Top = 384
     Width = 36
     Caption = 'Button1'
-    OnClick = Button1Click
     TabOrder = 11
+    OnClick = Button1Click
   end
   object Button2: TButton
     Left = 508
@@ -437,7 +443,7 @@ object switch_select_form: Tswitch_select_form
     Top = 408
     Width = 34
     Caption = 'Button2'
-    OnClick = Button2Click
     TabOrder = 12
+    OnClick = Button2Click
   end
 end

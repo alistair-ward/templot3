@@ -2786,16 +2786,22 @@ begin
   ConvertBox2CheckEndDiffs(check_diffs.end_diff_dk, cd.endDiffDK);
 end;
 
-function ConvertBox2ToMainOrTurnoutRoadLengthOption(option: Integer): TMainOrTurnoutRoadLengthOption;
+function ConvertBox2ToMainOrTurnoutRoadLengthOption(option: Integer):
+TMainOrTurnoutRoadLengthOption;
 begin
   case option of
-    -1: Result := rloCrossover;
-    0: Result := rloNormal;
-    1: Result := rloLong;
-    2: Result := rloAdjustable;
-    3: Result := rloMinimum;
-  else
-    raise Exception.CreateFmt('Unknown code for Main or Turnout Road Length: %d', [option]);
+    -1:
+      Result := rloCrossover;
+    0:
+      Result := rloNormal;
+    1:
+      Result := rloLong;
+    2:
+      Result := rloAdjustable;
+    3:
+      Result := rloMinimum;
+    else
+      raise Exception.CreateFmt('Unknown code for Main or Turnout Road Length: %d', [option]);
   end;
 end;
 
@@ -2820,10 +2826,12 @@ begin
   ti.stepSize := turnout_info1.step_size;
   if turnout_info1.turnout_road_is_adjustable then
     ti.turnoutRoadCode := rloAdjustable
-  else if turnout_info1.turnout_road_is_minimum then
+  else
+  if turnout_info1.turnout_road_is_minimum then
     ti.turnoutRoadCode := rloMinimum
   else
-    ti.turnoutRoadCode := ConvertBox2ToMainOrTurnoutRoadLengthOption(turnout_info1.turnout_road_code);
+    ti.turnoutRoadCode := ConvertBox2ToMainOrTurnoutRoadLengthOption(
+      turnout_info1.turnout_road_code);
 end;
 
 function ConvertBox2DateTime(keepDate, keepTime: String): TDateTime;
@@ -2890,13 +2898,27 @@ begin
   end;
 end;
 
+function ConvertBox2ToSwitchPattern(const sw_pattern: Integer): TSwitchPattern;
+begin
+  case sw_pattern of
+    -1:
+      Result := spSemiCurved;
+    0:
+      Result := spStraightOrCurved;
+    1:
+      Result := spDoubleCurved;
+    else
+      raise Exception.CreateFmt('Unknown switch pattern: %d', [sw_pattern]);
+  end;
+end;
+
 procedure ConvertBox2ToSwitchInfo(const switch_info: TBox2SwitchInfo; template: TTemplate);
 var
   sw: TSwitchInfo;
 begin
   sw := template.turnoutInfo2.switchInfo;
 
-  sw.switchPattern := switch_info.sw_pattern;
+  sw.switchPattern := ConvertBox2ToSwitchPattern(switch_info.sw_pattern);
   sw.planingLength := switch_info.planing;
   sw.planingAngle := switch_info.planing_angle;
   sw.switchRadius := switch_info.switch_radius_inchormax;

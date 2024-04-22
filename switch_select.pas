@@ -107,7 +107,7 @@ type
 var
   switch_select_form: Tswitch_select_form;
 
-//---------------------------
+  //---------------------------
 
 const
   switch_help_str: string = '          Switch  Size  and  Type'
@@ -250,7 +250,6 @@ function get_switch_data(sw_group, sw_size: integer; var sw_info: Tswitch_info):
 //______________________________________________________________________________________
 
 function get_switch(sw: integer): integer;   // called from pad menu item.
-
 begin
   switch_index := sw;
   do_show_modal(switch_select_form);   // 212a ShowModal;     // get new switch size.
@@ -259,7 +258,6 @@ end;
 //_______________________________________________________________________________________
 
 procedure Tswitch_select_form.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-
 begin
   if Key = VK_PAUSE then
     Application.Minimize;    //  hide TEMPLOT on PAUSE key.
@@ -402,14 +400,16 @@ begin
           if event is TSequenceEndEvent then begin
             state := stExpectDocumentEnd;
           end
-          else if event is TMappingStartEvent then begin
+          else
+          if event is TMappingStartEvent then begin
             loader := TOTPersistentLoader.Create;
             try
-              obj := TOTPersistent.RestoreYamlObject(nil, parser, event as TMappingStartEvent, loader);
+              obj := TOTPersistent.RestoreYamlObject(nil, parser, event as
+                TMappingStartEvent, loader);
               if not (obj is TSwitchInfo) then begin
                 obj.Free;
                 raise Exception.Create('Expected TSwitchInfo instance');
-                end;
+              end;
 
             finally
               loader.Free;
@@ -441,7 +441,6 @@ end;
 //____________________________________________________________________________________________
 
 function check_valid_switch_selected: boolean;
-
 begin
   Result := False;  // default init.
 
@@ -477,16 +476,15 @@ begin
   end;//with
   Result := True;
 end;//func
+
 //_________________________________________________________________________________________
 
 procedure Tswitch_select_form.ok_panelClick(Sender: TObject);
 
 // 205d mods to check FB or BH
-
 var
   listed_str: string;
   i: integer;
-
 begin
   if check_valid_switch_selected = False then
     EXIT;  // no switch or no data for it.
@@ -495,8 +493,8 @@ begin
 
   listed_str := switch_selector_listbox.Items[switch_index];
 
-  if ((Pos('REA', listed_str) > 0) or (Pos('GWR', listed_str) > 0)) and (rail_section = rsFlatbottom) then
-  begin
+  if ((Pos('REA', listed_str) > 0) or (Pos('GWR', listed_str) > 0)) and
+    (rail_section = rsFlatbottom) then begin
     i := alert(4, 'php/702    bullhead  switch  selected',
       'green_panel_begintree.gif  The switch which you have selected:||`0'
       + Trim(listed_str) +
@@ -542,7 +540,6 @@ end;
 //______________________________________________________________________________
 
 procedure Tswitch_select_form.cancel_panelClick(Sender: TObject);   // 212a
-
 begin
   restore_settings_button.Click;
   ModalResult := mrCancel;
@@ -552,7 +549,6 @@ end;
 procedure Tswitch_select_form.FormShow(Sender: TObject);
 
 // init...
-
 begin
   switch_selector_listbox.ItemIndex := switch_index;
   switch_selector_listbox.SetFocus;
@@ -563,7 +559,6 @@ end;
 procedure Tswitch_select_form.restore_settings_buttonClick(Sender: TObject);
 
 // 212a  re-init...
-
 begin
   switch_selector_listbox.ItemIndex := switch_index;
   switch_selector_listbox.SetFocus;
@@ -575,21 +570,18 @@ end;
 //______________________________________________________________________________
 
 procedure Tswitch_select_form.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-
 begin
   switch_selector_listbox.ItemIndex := switch_index;     // restore previous
 end;
 //________________________________________________________________________________________
 
 procedure Tswitch_select_form.colour_panelClick(Sender: TObject);
-
 begin
   Color := get_colour('choose  a  new  colour  for  the  switch  selector  dialog', Color);
 end;
 //________________________________________________________________________________________
 
 procedure Tswitch_select_form.custom_switch_buttonClick(Sender: TObject);
-
 const
   custom_help_str: string = 'Custom  Switch'
     + '||Before entering data for a custom switch you ideally need to have access to the appropriate prototype information. It is possible to save some'
@@ -708,7 +700,6 @@ const
   joggled_stock  // joggle flag.
   fb_tip_offset  // 0.76.a  2-1-02. fbtip dimension (FB foot from gauge-face at tip).
 }
-
 var
   i, ii, m, n: integer;
   item_index: integer;
@@ -720,7 +711,6 @@ var
   existing_pattern: integer;
 
   new_switch_info: Tswitch_info;
-
 begin
   help_str := custom_help_str + '||' + switch_geo_help_str;
 
@@ -841,14 +831,14 @@ begin
         Caption := '    ' + Application.Title;   // reset form caption.
       end;//with math_form
 
-      if list_switch_info.valid_data = True then begin
+      if list_switch_info.valid_data then begin
         case list_switch_info.sw_pattern of
-          -1: begin
+          spSemiCurved: begin
             type_str := 'semi - curved';
             existing_pattern := -1;
           end;
 
-          0:
+          spStraightOrCurved:
             if list_switch_info.switch_radius_inchormax > max_rad_test then begin
               type_str := 'straight';
               existing_pattern := 0;
@@ -858,7 +848,7 @@ begin
               existing_pattern := 2;
             end;
 
-          1: begin
+          spDoubleCurved: begin
             type_str := 'double - curved';
             existing_pattern := 1;
           end;
@@ -912,8 +902,7 @@ begin
 
       if i = 3 then begin    // curved switch...
 
-        if (list_switch_info.sw_pattern <> 0)
-          // 0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+        if (list_switch_info.sw_pattern <> spStraightOrCurved)
           or (list_switch_info.switch_radius_inchormax > max_rad_test) // straight switch.
           or (list_switch_info.valid_data = False) then begin
           if get_switch_data(3, 1, new_switch_info) = False
@@ -928,8 +917,7 @@ begin
 
         new_switch_info.planing := 0;
         // no planing length specified - curved switch.
-        new_switch_info.sw_pattern := 0;
-        // flag curved switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+        new_switch_info.sw_pattern := spStraightOrCurved;
         new_switch_info.planing_angle := 0;   // no planing angle specified - curved switch.
 
         putdim(lead_help_str, 2, 'lead length to heel (incl. planing, full-size inches)',
@@ -963,13 +951,12 @@ begin
 
       if i = 4 then begin    // semi-curved switch ...
 
-        if (list_switch_info.sw_pattern <>
-          -1)          // 0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
-          or (list_switch_info.valid_data = False) then begin
-          if get_switch_data(2, 2, new_switch_info) = False
+        if (list_switch_info.sw_pattern <> spSemiCurved)
+          or (not list_switch_info.valid_data) then begin
           // set REA B default semi-curved switch if existing data not a semi-curved switch.
-          then
+          if not get_switch_data(2, 2, new_switch_info) then begin
             run_error(82);                         // ?????? no REA B switch in list?
+          end;
         end
         else
           new_switch_info := list_switch_info;               // use existing data as default.
@@ -978,8 +965,7 @@ begin
 
         new_switch_info.heel_offset_inches := 0;
         // heel_offset calculated for semi-curved switch.
-        new_switch_info.sw_pattern := -1;
-        // flag semi-curved switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+        new_switch_info.sw_pattern := spSemiCurved;
 
         putdim(planing_help_str, 2, 'straight planing length (full-size inches)',
           new_switch_info.planing, True, True, True, False);
@@ -1016,8 +1002,7 @@ begin
 
       if i = 6 then begin                    // straight switch...
 
-        if (list_switch_info.sw_pattern <> 0)
-          // 0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+        if (list_switch_info.sw_pattern <> spStraightOrCurved)
           or (list_switch_info.switch_radius_inchormax < max_rad_test) // curved switch.
           or (list_switch_info.valid_data = False) then begin
           if get_switch_data(1, 2, new_switch_info) = False
@@ -1032,7 +1017,7 @@ begin
 
         new_switch_info.planing := 0;
         // no planing length specified - straight switch is calculated.
-        new_switch_info.sw_pattern := 0;
+        new_switch_info.sw_pattern := spStraightOrCurved;
         // flag curved switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
         new_switch_info.planing_angle := 0;
         // no planing angle specified - straight switch is calculated.
@@ -1279,27 +1264,23 @@ end;
 //________________________________________________________________________________________
 
 procedure Tswitch_select_form.how_panelClick(Sender: TObject);
-
 begin
   help(0, switch_help_str + '||' + switch_geo_help_str, '');
 end;
 //_____________________________________________________________________________________________
 
 procedure Tswitch_select_form.chat_panelClick(Sender: TObject);
-
 const
   chat_str: string = '    Switches Chat' +
     '||If you are using a custom switch based on prototype information, I would be very pleased to learn the details,'
     + ' so that I can offer an even wider choice of pre-set switch sizes in this list in later versions.'
     + '||Please also consider sharing your custom switch with other users via the Templot0 Club forum - details are on the Templot web site at templot.com';
-
 begin
   chat(chat_str);
 end;
 //_______________________________________________________________________________________
 
 procedure Tswitch_select_form.FormCreate(Sender: TObject);
-
 begin
   if Screen.Height < 500 then
     Top := 4;    // move form up the screen for lo-res.
@@ -1339,7 +1320,6 @@ end;
 //______________________________________________________________________________________
 
 procedure Tswitch_select_form.show_info_buttonClick(Sender: TObject);
-
 begin
   if check_valid_switch_selected = False then
     EXIT;  // no switch or no data for it.
@@ -1362,10 +1342,8 @@ end;
 
 function get_switch_list_index(sw_group, sw_size: integer): integer;
   // get switch listbox index, or -1 if not found in list.
-
 var
   n: integer;
-
 begin
   Result := -1;  // default init.
   try
@@ -1396,14 +1374,13 @@ begin
     EXIT;
   end;//try
 end;//func;
+
 //__________________________________________________________________________________________
 
 function get_switch_data(sw_group, sw_size: integer; var sw_info: Tswitch_info): boolean;
   // return switch data from listbox entries.
-
 var
   n: integer;
-
 begin
   Result := False;      // default init.
   try
@@ -1422,10 +1399,8 @@ end;
 
 function set_csi_data(sw_group, sw_size: integer): boolean;
   // set control template switch data from listbox entries.
-
 var
   csi_switch_info: Tswitch_info;
-
 begin
   Result := False;      // default init.
   try
@@ -1438,6 +1413,7 @@ begin
     EXIT;
   end;//try
 end;//func
+
 //________________________________________________________________________________________
 
 procedure init_switch_data;    // this routine runs once only on startup.
@@ -1540,7 +1516,6 @@ list entries:
 
   settings  as  most  recent  custom  switch
 }
-
 var
   sw_init_info: Tswitch_info;
 
@@ -1552,10 +1527,8 @@ var
   /////////////////////////////////////////////////////////////
 
   procedure clear_sw_init_info;   // clear all data.
-
   var
     n: integer;
-
   begin
     sw_init_info.valid_data := False;      // NO valid data here !!
 
@@ -1572,7 +1545,7 @@ var
     sw_init_info.planing := 0;
     sw_init_info.heel_lead_inches := 0;
     sw_init_info.heel_offset_inches := 0;
-    sw_init_info.sw_pattern := 0;
+    sw_init_info.sw_pattern := spStraightOrCurved;
     sw_init_info.switch_front_inches := 0;
     sw_init_info.planing_angle := 0;
     sw_init_info.switch_radius_inchormax := 0;
@@ -1605,10 +1578,8 @@ var
 
   function add_to_list(sw_group, sw_size, sw_size_max: integer;
     list_str, sw_str: string): integer;    // 215a for make_slip functions access to slip switches
-
   var
     i: integer;
-
   begin
     sw_init_info.sw_name_str := sw_str;        // name of switch.
     sw_init_info.group_code := sw_group;
@@ -1625,8 +1596,8 @@ var
 
     Result := i;    // 215a added
   end;//proc
-  ///////////////////////////////////////////////////////////////////
 
+  ///////////////////////////////////////////////////////////////////
 begin
   switch_select_form.switch_selector_listbox.Items.Clear;  // init.
   // -----------------------
@@ -1640,8 +1611,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 108;           // 9ft Standard Straight Switch
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -1691,8 +1661,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 144;            // 12'
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -1746,8 +1715,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 180;            // 15'
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern :=spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -1801,8 +1769,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 216;            // 18'
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -1863,8 +1830,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 288;            // 24'
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -1926,8 +1892,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 360;            // 30'
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -1996,8 +1961,7 @@ begin
   sw_init_info.planing := 66;
   sw_init_info.heel_lead_inches := 227;            // A+
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 24;
@@ -2056,7 +2020,7 @@ begin
   sw_init_info.planing := 88;
   sw_init_info.heel_lead_inches := 257;            // B+
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
+  sw_init_info.sw_pattern := spSemiCurved;
   // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
@@ -2117,8 +2081,7 @@ begin
   sw_init_info.planing := 110;
   sw_init_info.heel_lead_inches := 329;            // C+
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 40;
@@ -2180,8 +2143,7 @@ begin
   sw_init_info.planing := 132;
   sw_init_info.heel_lead_inches := 379;           // D+
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 48;
@@ -2244,8 +2206,7 @@ begin
   sw_init_info.planing := 176;
   sw_init_info.heel_lead_inches := 529;           // E+
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 64;
@@ -2314,8 +2275,7 @@ begin
   sw_init_info.planing := 220;
   sw_init_info.heel_lead_inches := 649;           // F*
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 80;
@@ -2397,8 +2357,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 270;            // B CURVED GWR
   sw_init_info.heel_offset_inches := 10.03356;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2451,8 +2410,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 342;            // C CURVED GWR
   sw_init_info.heel_offset_inches := 10.22868;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2507,8 +2465,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 416;           // D CURVED GWR (heel at end of stock rail)
   sw_init_info.heel_offset_inches := 10;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2564,8 +2521,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 360;           // GWR 30 ft. Straight Switch
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2635,8 +2591,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 108;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2690,8 +2645,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 120;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2746,8 +2700,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 144;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2803,8 +2756,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 168;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2861,8 +2813,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 180;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2919,8 +2870,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 192;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -2978,8 +2928,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 216;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3038,8 +2987,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 240;
   sw_init_info.heel_offset_inches := 4.5;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 64;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3105,8 +3053,7 @@ begin
   sw_init_info.planing := 66;
   sw_init_info.heel_lead_inches := 258.75;   // SA  21'-6.3/4"
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;          // valid data here
   sw_init_info.planing_angle := 24;
@@ -3161,8 +3108,7 @@ begin
   sw_init_info.planing := 88;
   sw_init_info.heel_lead_inches := 324;     // SB 27'-0"
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;          // valid data here
   sw_init_info.planing_angle := 32;
@@ -3217,8 +3163,7 @@ begin
   sw_init_info.planing := 110;
   sw_init_info.heel_lead_inches := 359.5;   // SC  29'-11.5"
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;          // valid data here
   sw_init_info.planing_angle := 40;
@@ -3275,8 +3220,7 @@ begin
   sw_init_info.planing := 132;
   sw_init_info.heel_lead_inches := 414.5;     // SD 34'-6.5"
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;            // valid data here
   sw_init_info.planing_angle := 48;
@@ -3335,8 +3279,7 @@ begin
   sw_init_info.planing := 176;
   sw_init_info.heel_lead_inches := 559.5;   // SE 46'-7.5"
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;          // valid data here
   sw_init_info.planing_angle := 64;
@@ -3401,8 +3344,7 @@ begin
   sw_init_info.planing := 220;
   sw_init_info.heel_lead_inches := 709.5;   // SF 59'-1.5"
   sw_init_info.heel_offset_inches := 0;
-  sw_init_info.sw_pattern := -1;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spSemiCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 80;
@@ -3483,8 +3425,7 @@ begin
   sw_init_info.heel_lead_inches := 295;            // 24'-7" CA
   sw_init_info.heel_offset_inches := 14.640625;
   // 14.41/64"       // was 14.765625;    // 14.49/64"
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3542,8 +3483,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 354.5;          // 29'-6.5" CB
   sw_init_info.heel_offset_inches := 13.921875;    // 13.59/64"
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3601,8 +3541,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 397.75;         // 33'-1.75" CC
   sw_init_info.heel_offset_inches := 11.703125;    // 11.45/64"
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3662,8 +3601,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 460.5;          // 38'-4.5" CD
   sw_init_info.heel_offset_inches := 11.05;        // 11.3/64" mod to match SD
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3723,8 +3661,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 620.875;        // 51'-8.7/8" CE
   sw_init_info.heel_offset_inches := 11.246;       // 11.1/4" mod to match SE
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -3792,8 +3729,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 787;          // 65'-4.1/4" CF mod to match SF
   sw_init_info.heel_offset_inches := 11.484375;  // 11.31/64"
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;                // valid data here
   sw_init_info.planing_angle := 0;
@@ -3953,8 +3889,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 66;      // 1:24 Model Switch, heel at planing.
   sw_init_info.heel_offset_inches := 2.75;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -4006,8 +3941,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 88;       // 1:32
   sw_init_info.heel_offset_inches := 2.75;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -4063,8 +3997,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 110;      // 1:40
   sw_init_info.heel_offset_inches := 2.75;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -4128,8 +4061,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 66;           // 1:24 slip Switch
   sw_init_info.heel_offset_inches := 2.75;       // heel at end of planing.
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 76.5;      // arbitrary to suit timbering (1:6 slip).
   sw_init_info.valid_data := True;               // valid data here
   sw_init_info.planing_angle := 0;
@@ -4171,8 +4103,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 88;           // 1:32 slip Switch
   sw_init_info.heel_offset_inches := 2.75;       // heel at end of planing.
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 76.5;      // arbitrary to suit timbering (1:7 slip).
   sw_init_info.valid_data := True;               // valid data here
   sw_init_info.planing_angle := 0;
@@ -4214,8 +4145,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 88;           // 1:32 slip Switch
   sw_init_info.heel_offset_inches := 2.75;       // heel at end of planing.
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 103.5;
   // 215a        was 99.5       // arbitrary to suit timbering (1:8 slip).
   sw_init_info.valid_data := True;               // valid data here
@@ -4258,8 +4188,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 110;          // 1:40 slip Switch
   sw_init_info.heel_offset_inches := 2.75;       // heel at end of planing.
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 102;
   // 215a        was 98.5      // arbitrary to suit timbering (1:10 slip).
   sw_init_info.valid_data := True;               // valid data here
@@ -4317,8 +4246,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 66;      // 1:24 Tandem Switch, heel at planing.
   sw_init_info.heel_offset_inches := 2.75;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -4370,8 +4298,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 88;       // 1:32
   sw_init_info.heel_offset_inches := 2.75;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -4424,8 +4351,7 @@ begin
   sw_init_info.planing := 0;
   sw_init_info.heel_lead_inches := 110;      // 1:40
   sw_init_info.heel_offset_inches := 2.75;
-  sw_init_info.sw_pattern := 0;
-  // type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
+  sw_init_info.sw_pattern := spStraightOrCurved;
   sw_init_info.switch_front_inches := 65;
   sw_init_info.valid_data := True;             // valid data here
   sw_init_info.planing_angle := 0;
@@ -4514,10 +4440,8 @@ end;
 // ________________________________________________________
 
 procedure Tswitch_select_form.FormDestroy(Sender: TObject);
-
 var
   n: integer;
-
 begin
   with switch_selector_listbox.Items do begin
     if Count > 0 then
