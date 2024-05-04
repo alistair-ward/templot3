@@ -50,7 +50,8 @@ uses
   OTOIDManager, OTPersistent, OTPersistentList, OTUndoRedoManager, Murmur3,
   otQueue, otStack, otYaml, otYamlChars, otYamlDOM, otYamlEmitter, otYamlEvent,
   otYamlParser, otYamlReader, otYamlScanner, otYamlToken, otYamlWriter,
-  template_test, centreline_test, line, line_test;
+  template_test, centreline_test, line, line_test, switchinfo_test, 
+TemplotConstants;
 
 type
 

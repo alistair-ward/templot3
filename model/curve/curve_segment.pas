@@ -51,6 +51,24 @@ type
     constructor Create(segLength: double);
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
       virtual; abstract;
+
+    // Calculates the distance from a point on an offset curve to the end of the
+    // current segment (along the offset curve).
+    // @param(distance is along the original (centreline/non-offset) curve)
+    // @param(offset is the offset from the centreline curve(+ve to the ))
+    // @returns(the distance along to the offset curve to the end of this segment)
+    function CalculateOffsetDistanceToEndOfSegment(distance, offset: Double): Double;
+      virtual; abstract;
+
+    // Calculates the distance along the centreline that corresponds to a point that is a
+    // given distance along the offset curve
+    // @param(distance is along the original (centreline/non-offset) curve)
+    // @param(offset is the offset from the centreline curve (+ve to the right))
+    // @param(distanceFromOffset is the distance along the offset curve from the specified point)
+    // @returns(the distance along the centreline curve that when passed back to CalculateCurveAt() will give a point that is the specified distance along the offset curve)
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffsetPoint:
+      Double): Double;
+      virtual; abstract;
   end;
 
   TCurveSegmentList = class(TObjectList<TCurveSegment>)
@@ -67,4 +85,3 @@ begin
 end;
 
 end.
-

@@ -2745,14 +2745,12 @@ var
   h_inches, lh_inches, sw_front_inches: double;
 begin      // calculate the switch data.
 
-  // sw_info.pattern is type of switch.  0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
-
   fbtip := sw_info.fb_tip_offset;  // FB foot from gauge-face at tip.
 
-  if h_diamond = True        // override - ignore sw_info and calc this switch as a half-diamond.
-  // switch not used - diagonal rails are all on turnout radius.
+  if h_diamond  then begin
+    // override - ignore sw_info and calc this switch as a half-diamond.
+    // switch not used - diagonal rails are all on turnout radius.
 
-  then begin
     joggled := False;
     joggle_long := 0;
     joggle_deep := 0;
@@ -2807,7 +2805,7 @@ begin      // calculate the switch data.
 
       joggled := sw_info.joggled_stock_rail;
       joggle_long := sw_info.joggle_length * inscale;
-      if overscale_joggles = True then
+      if overscale_joggles then
         joggle_deep := inscale * 3 / 4            // 3/4" joggle
       else
         joggle_deep := sw_info.joggle_depth * inscale;
@@ -2830,8 +2828,8 @@ begin      // calculate the switch data.
     end;
   end;
 
-  if current_calc = True   // may need to update rail edges...
-  then begin
+  if current_calc then begin
+    // may need to update rail edges...
     // defaults for turnout...
 
     aqyn[rdKCrossingCheckMainSideGaugeFace] := False;
@@ -2842,21 +2840,18 @@ begin      // calculate the switch data.
     // h-d DS check rail. (DS check is in main road.)
     aqyn[rdKCrossingCheckTurnoutSideOuterEdge] := False;
 
-    if (h_diamond = True) and (fixed_diamond = True) and pad_form.check_rails_menu_entry.Checked =
-      True   // generator switch.
-    then begin
-      if k_main_side_check_rail_flag = True
-      // 0.93.a      was turnout_road_check_rail_flag=True
-      then begin
+    if (h_diamond) and (fixed_diamond) and pad_form.check_rails_menu_entry.Checked then begin
+      // generator switch.
+      if k_main_side_check_rail_flag then begin
+        // 0.93.a      was turnout_road_check_rail_flag=True
         aqyn[rdKCrossingCheckMainSideGaugeFace] := gauge_faces;
         // h-d MS check rail. (MS check is in diagonal road.)
         aqyn[rdKCrossingCheckMainSideOuterEdge] :=
           (full_draw or (mouse_modify <= 0)) and outer_edges;
       end;
 
-      if k_diagonal_side_check_rail_flag = True
-      // 0.93.a      was main_road_check_rail_flag=True
-      then begin
+      if k_diagonal_side_check_rail_flag then begin
+        // 0.93.a      was main_road_check_rail_flag=True
         aqyn[rdKCrossingCheckTurnoutSideGaugeFace] := gauge_faces;
         // h-d DS check rail. (DS check is in main road.)
         aqyn[rdKCrossingCheckTurnoutSideOuterEdge] :=
@@ -2901,24 +2896,26 @@ begin      // calculate the switch data.
       // the switch curve starts at the toe - a straight switch is treated as a curved switch of infinite radius.
       h := h_inches * inscale;  // heel offset.
 
-      if (h < minfp) and (h_diamond = False) then begin
+      if (h < minfp) and (not h_diamond) then begin
         Result := 96;
         EXIT;
       end;  // can't use zero or negative values.
 
-      if h_diamond = False then
-        beta := ARCTAN(h / lh)  // (radians) average of planing angle and heel angle, k1 and k2.
+      if not h_diamond then begin
+        // (radians) average of planing angle and heel angle, k1 and k2.
+        beta := ARCTAN(h / lh)
+      end
       else
         beta := hdk;
 
-      if swrad >= max_rad_test       // straight switch...
-      then begin
-
+      if swrad >= max_rad_test then begin
+        // straight switch...
         alpha := 0;     // no swing on the switch curve.
         k1 := beta;     // planing angle.
         k2 := beta;     // heel angle.
       end
-      else begin                                 // curved planing...
+      else begin
+        // curved planing...
         temp := SQRT(SQR(lh) + SQR(h)) / 2 / swrad;
         if ABS(temp) > 1 then begin
           Result := 97;
@@ -3042,15 +3039,16 @@ begin      // calculate the switch data.
       // no "planing length", switch curve starts at the "set", curved stock rail gauge-face, aq=3.
       plox11 := setox;     // ditto, outer-edge, aq=11.
 
-      if rail_section = rsFlatbottom       // head+foot (FB section) ... 0.76.a 2-01-02
-      then begin
+      if rail_section = rsFlatbottom then begin
+        // head+foot (FB section) ... 0.76.a 2-01-02
         temp := SQR(swrad - g + ifb) - SQR(sworgy - g + ifb);
         if temp < 0 then begin
           Result := 134;
           EXIT;
         end;  // switch rad doesn't cut the straight (FB foot of curved stock rail).
-        fbsetx := sworgx + SQRT(temp);
+
         // x to "set" in curved stock rail (FB foot inner - intercept with switch curve).
+        fbsetx := sworgx + SQRT(temp);
 
         temp := SQR(swrad - g - ofb) - SQR(sworgy - g - ofb);
         if temp < 0 then begin
@@ -3076,8 +3074,8 @@ begin      // calculate the switch data.
     // x to start of curve, curved stock rail gauge-face.
     plox11 := plx3 - j * SIN(k1);             // x to ditto, outer-edge.
 
-    if rail_section = rsFlatbottom    // head+foot (FB section)... 0.76.a 2-01-02  (unfinished)
-    then begin
+    if rail_section = rsFlatbottom then begin
+      // head+foot (FB section)... 0.76.a 2-01-02  (unfinished)
       fbsetx := setx + ifb * SIN(k1 / 2);
       // x to "set" in curved stock rail (FB foot inner).
       fbsetox := setx - ofb * SIN(k1 / 2);  // x to "set" FB foot outer.
@@ -3089,7 +3087,7 @@ begin      // calculate the switch data.
   end;
 
 
-  if gaunt = True then begin
+  if gaunt then begin
     toemidx := toex;     // toe mark on track centre-line.
     plox := toex;
     kpl := 0;
@@ -3107,9 +3105,8 @@ begin      // calculate the switch data.
   else begin
     toemidx := (toex + setx) / 2;     // toe mark on track centre-line.
 
-    if (rail_section = rsFlatbottom) and (fb_kludge = 1)
-    // 0.94.a kludging inner FB foot as negative outer
-    then begin
+    if (rail_section = rsFlatbottom) and (fb_kludge = 1) then begin
+      // 0.94.a kludging inner FB foot as negative outer
       // kludge approximations...
 
       if switch_type = spStraightOrCurved then begin
@@ -3162,8 +3159,8 @@ begin      // calculate the switch data.
     heelox := heelx + j * SIN(k2);                       // x to heel, outer rail-edge.
 
 
-    if rail_section = rsFlatbottom       // head+foot (FB section)... 0.76.a 2-01-02   (unfinished)
-    then begin
+    if rail_section = rsFlatbottom then begin
+      // head+foot (FB section)... 0.76.a 2-01-02   (unfinished)
       fbtoex := toex - fbtip * SIN(k1);
 
       fbplx := plox - (j + ifb) * SIN(kpl);
@@ -11333,7 +11330,7 @@ end;
 
 procedure trail_roam(X: integer);      // change xorg but maintain turnoutx constant.
 begin
-  if plain_track = True then
+  if plain_track then
     EXIT;                //  !!! shouldn't be here.
 
   xorg := xorg_now + (X - roam_now) * ffx;

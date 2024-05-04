@@ -393,9 +393,6 @@ const
   cross_hairs_cursor = 10;          // added 13-1-01.
   group_rectangle_cursor = 11;      // added 22-2-01.
 
-  maxfp: double = 1.0E300;         // max float value for our calcs.
-  minfp: double = 1.0E-12;         // min float value for our calcs
-  // (less than this is regarded as zero to avoid rounding errors).
 
   max_single: single = 1.0E10;       // used for sketchboard calcs. 212a
 

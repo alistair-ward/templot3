@@ -63,6 +63,8 @@ type
     procedure TearDown; override;
 
     procedure do_test_transition(r1, r2, initialLength, transitionLength: double);
+    procedure do_test_centreline_distance_from_offset_transition(r1, r2,
+      initialLength, transitionLength: double);
 
   published
     procedure test_straight_line;
@@ -82,6 +84,22 @@ type
     procedure test_transition_curve_negative_to_smaller_positive;
 
     procedure test_straight_line_offset;
+
+    procedure test_calculate_centreline_distance_from_offset_distance_straight;
+    procedure test_calculate_centreline_distance_from_offset_distance_single_radius_positive;
+    procedure test_calculate_centreline_distance_from_offset_distance_single_radius_negative;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_straight_positive;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_straight_negative;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_straight;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_straight;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_positive_increasing;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_positive_decreasing;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_negative_increasing;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_negative_decreasing;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_to_larger_negative;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_to_smaller_negative;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_to_larger_positive;
+    procedure test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_to_smaller_positive;
 
     procedure test_slew_creation;
 
@@ -133,6 +151,22 @@ begin
     CheckEquals(0, direction.y, 1e-6, format('direction.Y at %f', [distance]));
     CheckEquals(max_rad, radius, 1, format('radius at %f', [distance]));
 
+    curve.CalculateCurveAt(distance, 10, pt, direction, radius);
+
+    CheckEquals(i, pt.X, 1e-6, format('pt.X at %f', [distance]));
+    CheckEquals(-10, pt.Y, 1e-6, format('pt.Y at %f', [distance]));
+    CheckEquals(1, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(0, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(max_rad, radius, 1, format('radius at %f', [distance]));
+
+    curve.CalculateCurveAt(distance, -10, pt, direction, radius);
+
+    CheckEquals(i, pt.X, 1e-6, format('pt.X at %f', [distance]));
+    CheckEquals(10, pt.Y, 1e-6, format('pt.Y at %f', [distance]));
+    CheckEquals(1, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(0, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(max_rad, radius, 1, format('radius at %f', [distance]));
+
     distance := distance + 1.0;
   end;
 
@@ -179,6 +213,28 @@ begin
     CheckEquals(expectedDirection.Y, direction.y, 1e-6, format('direction.Y at %f', [distance]));
     CheckEquals(testRadius, radius, 1, format('radius at %f', [distance]));
 
+
+    // and now check a +ve offset curve - radius should be greater...
+    curve.CalculateCurveAt(distance, 100, pt, direction, radius);
+    distanceFromOrigin := (circleOrigin - pt).magnitude;
+
+    CheckEquals(testRadius + 100, distanceFromOrigin, 1e-6,
+      format('distance from origin at %f', [distance]));
+    CheckEquals(expectedDirection.X, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(expectedDirection.Y, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(testRadius + 100, radius, 1, format('radius at %f', [distance]));
+
+    // and now check -ve offset curve - radius should be less...
+    curve.CalculateCurveAt(distance, -100, pt, direction, radius);
+    distanceFromOrigin := (circleOrigin - pt).magnitude;
+
+    CheckEquals(testRadius - 100, distanceFromOrigin, 1e-6,
+      format('distance from origin at %f', [distance]));
+    CheckEquals(expectedDirection.X, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(expectedDirection.Y, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(testRadius - 100, radius, 1, format('radius at %f', [distance]));
+
+
     distance := distance + 100;
   end;
 end;
@@ -224,6 +280,28 @@ begin
     CheckEquals(expectedDirection.Y, direction.y, 1e-6, format('direction.Y at %f', [distance]));
     CheckEquals(testRadius, radius, 1, format('radius at %f', [distance]));
 
+    // check a +ve offset curve, radius should be less..
+    curve.CalculateCurveAt(distance, 100, pt, direction, radius);
+
+    distanceFromOrigin := (circleOrigin - pt).magnitude;
+
+    CheckEquals(abs(testRadius) - 100, distanceFromOrigin, 1e-6,
+      format('distance from origin at %f', [distance]));
+    CheckEquals(expectedDirection.X, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(expectedDirection.Y, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(testRadius + 100, radius, 1, format('radius at %f', [distance]));
+
+    // check a -ve offset curve, radius should be greater..
+    curve.CalculateCurveAt(distance, -100, pt, direction, radius);
+
+    distanceFromOrigin := (circleOrigin - pt).magnitude;
+
+    CheckEquals(abs(testRadius) + 100, distanceFromOrigin, 1e-6,
+      format('distance from origin at %f', [distance]));
+    CheckEquals(expectedDirection.X, direction.X, 1e-6, format('direction.X at %f', [distance]));
+    CheckEquals(expectedDirection.Y, direction.y, 1e-6, format('direction.Y at %f', [distance]));
+    CheckEquals(testRadius - 100, radius, 1, format('radius at %f', [distance]));
+
     distance := distance + 100;
   end;
 end;
@@ -245,6 +323,9 @@ var
   distanceFromPrevious: double;
   curvature1: double;
   curvature2: double;
+  offsetPt: Tpex;
+  offsetDirection: Tpex;
+  offsetRadius: Double;
 begin
   curve.transitionStartRadius := r1;
   curve.transitionEndRadius := r2;
@@ -295,6 +376,25 @@ begin
     // check the delta values make sense
     Check(delta.x > 0, format('delta.x at %f = %f', [distance, delta.x]));
 
+    // now check some offsets...
+    curve.CalculateCurveAt(distance, -5, offsetPt, offsetDirection, offsetRadius);
+
+    delta := pt - offsetPt;
+    CheckEquals(5, delta.magnitude, 1e-3, format('offset -5, distance %f: delta', [distance]));
+    if abs(radius) < max_rad_test then
+      CheckEquals(radius - 5, offsetRadius, 1e-3,
+        format('offset -5, distance %f: radius', [distance]));
+
+    curve.CalculateCurveAt(distance, 5, offsetPt, offsetDirection, offsetRadius);
+
+    delta := pt - offsetPt;
+    CheckEquals(5, delta.magnitude, 1e-3, format('offset 5, distance %f: delta', [distance]));
+    if abs(radius) < max_rad_test then
+      CheckEquals(radius + 5, offsetRadius, 1e-3,
+        format('offset 5, distance %f: radius', [distance]));
+
+
+    // and move on...
     distance := distance + testStepSize;
     previousPoint := pt;
   end;
@@ -506,11 +606,13 @@ begin
     CheckEquals(curve.isSpiral, curve2.isSpiral, 'isSpiral');
     CheckEquals(curve.isSlewing, curve2.isSlewing, 'isSlewing');
     CheckEquals(curve.fixedRadius, curve2.fixedRadius, 'fixedRadius');
-    CheckEquals(curve.transitionStartRadius, curve2.transitionStartRadius, 'transitionStartRadius');
+    CheckEquals(curve.transitionStartRadius, curve2.transitionStartRadius,
+      'transitionStartRadius');
     CheckEquals(curve.transitionEndRadius, curve2.transitionEndRadius, 'transitionEndRadius');
     CheckEquals(curve.distanceToTransition, curve2.distanceToTransition, 'distanceToTransition');
     CheckEquals(curve.transitionLength, curve2.transitionLength, 'transitionLength');
-    CheckEquals(curve.distanceToStartOfSlew, curve2.distanceToStartOfSlew, 'distanceToStartOfSlew');
+    CheckEquals(curve.distanceToStartOfSlew, curve2.distanceToStartOfSlew,
+      'distanceToStartOfSlew');
     CheckEquals(curve.slewAmount, curve2.slewAmount, 'slewAmount');
     CheckEquals(curve.slewLength, curve2.slewLength, 'slewLength');
     CheckEquals(curve.slewFactor, curve2.slewFactor, 'slewFactor');
@@ -562,6 +664,326 @@ begin
     distance := distance + 1.0;
   end;
 
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_straight;
+var
+  dCentreline: Double;
+begin
+  //
+  // Given a curve that is a straight line
+  // When CalculateDistanceFromOffset is called
+  // Then the result is the same as the original distance
+  //
+  curve.fixedRadius := max_rad_limit;
+  curve.isSpiral := False;
+
+  dCentreLine := curve.CalculateCurveDistanceFromOffset(0, 0, 0);
+  CheckEquals(0.0, dCentreline, 1e-6, '(0, 0, 0)');
+
+  dCentreLine := curve.CalculateCurveDistanceFromOffset(5, 5, 10);
+  CheckEquals(15, dCentreline, 1e-6, '(5, 5, 10)');
+
+  dCentreLine := curve.CalculateCurveDistanceFromOffset(5, -5, 20);
+  CheckEquals(25, dCentreline, 1e-6, '(5, -5, 20)');
+
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_single_radius_positive;
+const
+  testRadius = 5000;
+var
+  angle: Double;
+  newDistance: Double;
+  expectedDistanceAlongOriginalPath: Double;
+begin
+  // Given a curve that is defined as a single radius
+  //    ( radius = 5m, not spiral )
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  curve.fixedRadius := testRadius;
+  curve.isSpiral := False;
+
+  // with a fixed radius, the original distance doesn't matter...
+
+  // start at an offset to the inside of the curve
+  newDistance := curve.CalculateCurveDistanceFromOffset(100, -100, 100);
+
+  // effective radius is testRadius - 100
+  // angle = arclength/r
+  // so
+  angle := 100 / (testRadius - 100);
+  expectedDistanceAlongOriginalPath := 100 + angle * testRadius;
+
+  CheckEquals(expectedDistanceAlongOriginalPath, newDistance, 1e-6,
+    'newDistance inside of curve');
+
+
+  // and now check an offset to the outside of the curve...
+  newDistance := curve.CalculateCurveDistanceFromOffset(100, 200, 300);
+  angle := 300 / (testRadius + 200);
+  expectedDistanceAlongOriginalPath := 100 + angle * testRadius;
+
+  CheckEquals(expectedDistanceAlongOriginalPath, newDistance, 1e-6,
+    'newDistance outside of curve');
+
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_single_radius_negative;
+const
+  testRadius = -5000;
+var
+  angle: Double;
+  newDistance: Double;
+  expectedDistanceAlongOriginalPath: Double;
+begin
+  // Given a curve that is defined as a single radius
+  //    ( radius = 5m, not spiral )
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  curve.fixedRadius := testRadius;
+  curve.isSpiral := False;
+
+  // with a fixed radius, the original distance doesn't matter...
+
+  // start at an offset to the outside of the curve
+  newDistance := curve.CalculateCurveDistanceFromOffset(100, -100, 100);
+
+  // effective radius is testRadius + 100
+  // angle = arclength/r
+  // so
+  angle := 100 / (abs(testRadius) + 100);
+  expectedDistanceAlongOriginalPath := 100 + angle * abs(testRadius);
+
+  CheckEquals(expectedDistanceAlongOriginalPath, newDistance, 1e-6,
+    'newDistance outside of curve');
+
+
+  // and now check an offset to the inside of the curve...
+  newDistance := curve.CalculateCurveDistanceFromOffset(100, 200, 300);
+  angle := 300 / (abs(testRadius) - 200);
+  expectedDistanceAlongOriginalPath := 100 + angle * abs(testRadius);
+
+  CheckEquals(expectedDistanceAlongOriginalPath, newDistance, 1e-6,
+    'newDistance inside of curve');
+
+end;
+
+procedure TTestCurve.do_test_centreline_distance_from_offset_transition(
+  r1, r2, initialLength, transitionLength: double);
+var
+  distance: Double;
+  newLeftDistance: Double;
+  newRightDistance: Double;
+  pt: Tpex;
+  direction: Tpex;
+  radius: double;
+  i: Integer;
+begin
+  curve.transitionStartRadius := r1;
+  curve.transitionEndRadius := r2;
+  curve.transitionLength := transitionLength;
+  curve.distanceToTransition := initialLength;
+  curve.isSpiral := True;
+
+
+  // want to test points:
+  //  - immediately before the start of the transition
+  //    where the offset distance extends into the transition
+  //  - 1/4 along the transition
+  //  - 1/2 along the transition
+  //  - 3/4 along the transition
+  //  - just before the end of the transition
+  //    where the offset distance extends past the transition
+  //
+  for i := 1 to 5 do begin
+    case i of
+      1: begin
+        if initialLength < 10 then
+          continue;
+        distance := initialLength - 5;
+      end;
+      2:
+        distance := initialLength + transitionLength * 0.25;
+      3:
+        distance := initialLength + transitionLength * 0.50;
+      4:
+        distance := initialLength + transitionLength * 0.75;
+      5:
+        distance := initialLength + transitionLength - 5;
+    end;
+
+    // check points to the left and right
+    curve.CalculateCurveAt(distance, 0, pt, direction, radius);
+    newLeftDistance := curve.CalculateCurveDistanceFromOffset(distance, -10, 10);
+    newRightDistance := curve.CalculateCurveDistanceFromOffset(distance, 10, 10);
+
+    if abs(radius) > max_rad_test then begin
+      // we're at a straight section of the curve
+      CheckEquals( distance+10, newLeftDistance, 1, format('newLeftDistance straight at %d', [i]));
+      CheckEquals( distance+10, newRightDistance, 1, format('newRightDistance straight at %d', [i]));
+    end
+    else if radius > 0 then begin
+      // curving to left
+      Check(newLeftDistance > distance + 10, format('newLeftDistance curving left at %d', [i]));
+      Check(newRightDistance < distance + 10, format('newRightDistance curving left at %d', [i]));
+    end
+    else begin
+      // curving to right
+      Check(newLeftDistance < distance + 10, format('newLeftDistance curving right at %d', [i]));
+      Check(newRightDistance > distance + 10, format('newRightDistance curving right at %d', [i]));
+    end;
+
+  end;
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_straight_positive;
+begin
+  // Given a curve that is defined as a transition from straight to a positive radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(max_rad, 1000, 100, 100);
+
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_straight_negative;
+begin
+  // Given a curve that is defined as a transition from straight to a negative radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(max_rad, -1000, 100, 100);
+end;
+
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_straight;
+begin
+  // Given a curve that is defined as a transition from a positive radius to straight
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(1000, max_rad, 100, 100);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_straight;
+begin
+  // Given a curve that is defined as a transition from a negative radius to straight
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(-1000, max_rad, 100, 100);
+end;
+
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_positive_increasing;
+begin
+  // Given a curve that is defined as a transition from a positive radius to
+  //   a larger positive radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(1000, 2000, 100, 100);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_positive_decreasing;
+begin
+  // Given a curve that is defined as a transition from a positive radius to
+  //   a smaller positive radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(2000, 1000, 100, 100);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_negative_increasing;
+begin
+  // Given a curve that is defined as a transition from a negative radius to
+  //   a larger negative radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(-1000, -2000, 100, 100);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_negative_decreasing;
+begin
+  // Given a curve that is defined as a transition from a negative radius to
+  //   a smaller negative radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(-2000, -1000, 100, 100);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_to_larger_negative;
+begin
+  // Given a curve that is defined as a transition from a positive radius to
+  //   a larger negative radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(1000, -2000, 100, 150);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_positive_to_smaller_negative;
+begin
+  // Given a curve that is defined as a transition from a positive radius to
+  //   a larger negative radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(2000, -1000, 100, 150);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_to_larger_positive;
+begin
+  // Given a curve that is defined as a transition from a negative radius to
+  //   a smaller positive radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(-1000, 2000, 100, 150);
+end;
+
+procedure TTestCurve.test_calculate_centreline_distance_from_offset_distance_transition_curve_negative_to_smaller_positive;
+begin
+  // Given a curve that is defined as a transition from a negative radius to
+  //   a smaller positive radius
+  //
+  // When CalculateDistanceFromOffset is called
+  // Then if the offset is on the inside of the curve, the result will be greater than the original distance
+  //   or if the offset is on the outside of the curve, the result will be less than the original distance
+  //
+  do_test_centreline_distance_from_offset_transition(-2000, 1000, 100, 150);
 end;
 
 initialization

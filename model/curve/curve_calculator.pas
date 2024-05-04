@@ -45,9 +45,11 @@ type
   public
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
       virtual; abstract;
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffset:
+      Double): Double;
+      virtual; abstract;
   end;
 
 implementation
 
 end.
-

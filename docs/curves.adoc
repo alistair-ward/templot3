@@ -81,16 +81,27 @@ The user-defined properties of a Curve are:
 TCurve provides a public method to calculate curve information:
 [source,pascal]
 ....
-  procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
+  procedure CalculateCurveAt(distance, offset: double; out pt, direction: Tpex; out radius: double);
 ....
 
 This method constructs the required TCurveCalculator and TCurveSegment objects, if necessary (ie if any user-defined properties have changed), and then 
-determines which segment to call to calculate the curve information at the requested point.
+determines which segment to call to calculate the curve information at the requested point. `distance` is the distance along the curve, and `offset` is the perpendicular distance from the curve, where a positive value is to the right of the curve. 
 
-The outputs of the CalculateCurveAt method are the point at the specified distance along the curve, the direction of the curve at the point, 
+Between them, `distance` and `offset` effectively define a 2-D coordinate system relative to the curve path.
+
+The outputs of the CalculateCurveAt method are the point at the specified distance/offset along the curve, the direction of the curve at the point, 
 and the radius of the curve at that point.
 
 Note that if the curve is slewed, the radius of the underlying curve is not adjusted to reflect the slew.
+
+TCurve provides another public method to calculate the equivalent distance along a curve for a given distance at an offset from the curve.
+[source,pascal]
+....
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffset:
+      Double): Double;
+....
+
+This function will calculate the distance `d1` along the curve, such that the point (d1,offset) is equal to the point (d,offset) moved along the offset curve by the amount `distanceFromOffset`.
 
 ## CurveSegment Creation
 

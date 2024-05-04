@@ -42,6 +42,9 @@ uses
   point_ex;
 
 type
+
+  { TCircleSegment }
+
   TCircleSegment = class(TCurveSegment)
   private
     FOrigin: Tpex;
@@ -52,6 +55,9 @@ type
     constructor Create(segLength: double; initialPoint, direction: Tpex; radius: double);
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex;
       out radius: double); override;
+    function CalculateOffsetDistanceToEndOfSegment(distance, offset: Double): Double; override;
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffsetPoint:
+      Double): Double; override;
   end;
 
 implementation
@@ -93,6 +99,28 @@ begin
   pt := FOrigin + Tpex.xy(cosAngle, sinAngle) * FRadius;
   direction.set_xy(-sinAngle, cosAngle);
   radius := FRadius;
+end;
+
+function TCircleSegment.CalculateOffsetDistanceToEndOfSegment(distance,
+  offset: Double): Double;
+var
+  remainingAngle: Double;
+  offsetRadius: Double;
+begin
+  remainingAngle := (segmentLength - distance) / abs(FRadius);
+  offsetRadius := FRadius + offset;
+  Result := remainingAngle * abs(offsetRadius);
+end;
+
+function TCircleSegment.CalculateCurveDistanceFromOffset(distance, offset,
+  distanceFromOffsetPoint: Double): Double;
+var
+  angle: Double;
+  offsetRadius: Double;
+begin
+  offsetRadius := FRadius + offset;
+  angle := (distanceFromOffsetPoint) / abs(offsetRadius);
+  Result := distance + angle * abs(FRadius);
 end;
 
 end.

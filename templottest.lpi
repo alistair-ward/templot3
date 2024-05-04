@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="96">
+    <Units Count="98">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -452,6 +452,15 @@
         <Filename Value="test\template\line_test.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit95>
+      <Unit96>
+        <Filename Value="test\template\switchinfo_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="templotconstants.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TemplotConstants"/>
+      </Unit97>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

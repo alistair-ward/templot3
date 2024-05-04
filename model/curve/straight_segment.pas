@@ -42,6 +42,9 @@ uses
   point_ex;
 
 type
+
+  { TStraightSegment }
+
   TStraightSegment = class(TCurveSegment)
   private
     FOrigin: Tpex;
@@ -51,6 +54,9 @@ type
     constructor Create(segLength: double; origin, direction: Tpex);
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex;
       out radius: double); override;
+    function CalculateOffsetDistanceToEndOfSegment(distance, offset: Double): Double; override;
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffsetPoint:
+      Double): Double; override;
   end;
 
 implementation
@@ -74,6 +80,18 @@ begin
   direction := FDirection;
   pt := FOrigin + FDirection * distance;
   radius := max_rad;
+end;
+
+function TStraightSegment.CalculateOffsetDistanceToEndOfSegment(distance,
+  offset: Double): Double;
+begin
+  Result := segmentLength - distance;
+end;
+
+function TStraightSegment.CalculateCurveDistanceFromOffset(distance, offset,
+  distanceFromOffsetPoint: Double): Double;
+begin
+  Result := distance + distanceFromOffsetPoint;
 end;
 
 end.

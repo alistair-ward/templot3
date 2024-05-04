@@ -56,7 +56,7 @@ type
     procedure CalculateCurveSegments(ACurveParameters: ICurveParameters);
 
     // for unit tests...
-    property CurveSegments: TCurveSegmentList read FSegments;
+    property CurveSegments: TCurveSegmentList Read FSegments;
 
   public
     constructor Create(ACurveParameters: ICurveParameters);
@@ -64,6 +64,9 @@ type
 
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex; out radius: double);
       override;
+    function CalculateCurveDistanceFromOffset(
+      distance, offset, distanceFromOffset:
+      Double): Double; override;
   end;
 
 implementation
@@ -75,7 +78,7 @@ uses
   circle_segment,
   transition_segment;
 
-{ TCurveSegmentCalculator }
+  { TCurveSegmentCalculator }
 
 constructor TCurveSegmentCalculator.Create(ACurveParameters: ICurveParameters);
 begin
@@ -96,7 +99,8 @@ var
   transitionEndDirection: Tpex;
   radius: double;
 begin
-  FIsStraight := (Abs(ACurveParameters.fixedRadius) > max_rad_test) and not ACurveParameters.isSpiral;
+  FIsStraight := (Abs(ACurveParameters.fixedRadius) > max_rad_test) and not
+    ACurveParameters.isSpiral;
   FIsSimpleCurve := not FIsStraight and not ACurveParameters.isSpiral;
 
   FSegments := TCurveSegmentList.Create;
@@ -122,7 +126,8 @@ begin
         FSegments.Add(TCircleSegment.Create(ACurveParameters.distanceToTransition, Tpex.xy(0, 0),
           Tpex.xy(1, 0), ACurveParameters.transitionStartRadius));
       end;
-      FSegments.Items[0].CalculateCurveAt(ACurveParameters.distanceToTransition, transitionStartPoint,
+      FSegments.Items[0].CalculateCurveAt(ACurveParameters.distanceToTransition,
+        transitionStartPoint,
         transitionStartDirection, radius);
     end
     else begin
@@ -130,8 +135,10 @@ begin
       transitionStartDirection.set_xy(1, 0);
     end;
 
-    FSegments.Add(TTransitionSegment.Create(ACurveParameters.transitionLength, transitionStartPoint,
-      transitionStartDirection, ACurveParameters.transitionStartRadius, ACurveParameters.transitionEndRadius));
+    FSegments.Add(TTransitionSegment.Create(ACurveParameters.transitionLength,
+      transitionStartPoint,
+      transitionStartDirection, ACurveParameters.transitionStartRadius,
+      ACurveParameters.transitionEndRadius));
 
     FSegments.Items[FSegments.Count - 1].CalculateCurveAt(ACurveParameters.transitionLength,
       transitionEndPoint, transitionEndDirection, radius);
@@ -167,5 +174,35 @@ begin
   radius := NaN;
 end;
 
-end.
+function TCurveSegmentCalculator.CalculateCurveDistanceFromOffset(distance,
+  offset, distanceFromOffset:
+  Double): Double;
+var
+  i: Integer;
+  s: TCurveSegment;
+  offsetDistanceToEndOfSegment: Double;
+  distanceFromStart: Double;
+begin
+  distanceFromStart := 0;
+  for i := 0 to FSegments.Count - 1 do begin
+    s := FSegments[i];
+    if (distance < s.segmentLength) then begin
+      offsetDistanceToEndOfSegment := s.CalculateOffsetDistanceToEndOfSegment(distance, offset);
+      if offsetDistanceToEndOfSegment >= distanceFromOffset then begin
+        Result := distanceFromStart + s.CalculateCurveDistanceFromOffset(distance,
+          offset, distanceFromOffset);
+        Exit;
+      end;
+      distanceFromOffset := distanceFromOffset - offsetDistanceToEndOfSegment;
+      distance := 0;
+      distanceFromStart := distanceFromStart + s.segmentLength;
+    end
+    else begin
+      distance := distance - s.segmentLength;
+      distanceFromStart := distanceFromStart + s.segmentLength;
+    end;
+  end;
+  Result := NaN;
+end;
 
+end.

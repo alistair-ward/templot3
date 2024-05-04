@@ -143,7 +143,9 @@ type
     procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
     procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
-    procedure CalculateCurveAt(distance, offset: double; out pt, direction: Tpex; out radius: double);
+    procedure CalculateCurveAt(distance, offset: Double; out pt, direction: Tpex; out radius: Double);
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffset:
+      Double): Double;
 
     procedure CopyFrom(ASource: TCurve);
 
@@ -177,6 +179,7 @@ uses
   TLoggerUnit,
   typinfo,
   Math,
+  TemplotConstants,
   curve_segment_calculator,
   slew_calculator;
 
@@ -506,7 +509,7 @@ begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(ESlewMode), ord(AValue)));
 end;
 
-procedure TCurve.CalculateCurveAt(distance, offset: double; out pt, direction: Tpex; out radius: double);
+procedure TCurve.CalculateCurveAt(distance, offset: Double; out pt, direction: Tpex; out radius: Double);
 var
   normal: Tpex;
 begin
@@ -517,6 +520,10 @@ begin
     // rotate 90 degrees clockwise
     normal.set_xy(direction.y, -direction.x);
     pt := pt + normal * offset;
+    if (abs(offset) > minfp) and (abs(radius) < max_rad_test) then begin
+      // calculate radius correction
+      radius := radius + offset;
+    end;
   end
   else begin
     pt.set_xy(NaN, NaN);
@@ -524,6 +531,18 @@ begin
     radius := NaN;
   end;
 
+end;
+
+function TCurve.CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffset: Double): Double;
+begin
+  CheckCalculated;
+
+  if Assigned(FCurveCalculator) then begin
+    Result := FCurveCalculator.CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffset);
+  end
+  else begin
+    Result := NaN;
+  end;
 end;
 
 function TCurve.GetDistanceToEndOfTransition: Double;

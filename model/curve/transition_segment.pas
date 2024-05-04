@@ -43,6 +43,9 @@ uses
   matrix_2d;
 
 type
+
+  { TTransitionSegment }
+
   TTransitionSegment = class(TCurveSegment)
   private
     // transform point from Cornu Spiral to Curve Space
@@ -57,12 +60,25 @@ type
     FLength: double;
     // 1 or -1 for +ve or -ve radius curves
     FDirectionSign: double;
+    // Curvature at the start point of the segment
+    FInitialCurvature: double;
+    // Curvature at the end point of the segment
+    FFinalCurvature: double;
+
+    function CurvatureAt(d: Double): Double;
+    function EstimateCurveLength(d1, d2, offset: Double): Double;
 
   public
     constructor Create(segLength: double; initialPoint, initialDirection: Tpex;
       initialRadius, finalRadius: double);
     procedure CalculateCurveAt(distance: double; out pt, direction: Tpex;
       out radius: double); override;
+
+    function CalculateOffsetDistanceToEndOfSegment(distance, offset: Double): Double; override;
+
+    function CalculateCurveDistanceFromOffset(distance, offset, distanceFromOffsetPoint:
+      Double): Double; override;
+
   end;
 
 implementation
@@ -93,8 +109,6 @@ end;
 constructor TTransitionSegment.Create(segLength: double; initialPoint, initialDirection: Tpex;
   initialRadius, finalRadius: double);
 var
-  initialCurvature: double;
-  finalCurvature: double;
   startDistance: double;
   endDistance: double;
   arcLength: double;
@@ -106,22 +120,22 @@ begin
   inherited Create(segLength);
 
   // calculate the start and end "distances" along the curve
-  initialCurvature := RadiusToCurvature(initialRadius);
-  finalCurvature := RadiusToCurvature(finalRadius);
+  FInitialCurvature := RadiusToCurvature(initialRadius);
+  FFinalCurvature := RadiusToCurvature(finalRadius);
 
   if Abs(initialRadius) < Abs(finalRadius) then begin
     radius := Abs(initialRadius);
-    startDistance := -initialCurvature * segLength / (initialCurvature - finalCurvature);
+    startDistance := -FInitialCurvature * segLength / (FInitialCurvature - FFinalCurvature);
     arcLength := Abs(startDistance);
   end
   else begin
     radius := Abs(finalRadius);
-    endDistance := segLength * finalCurvature / (finalCurvature - initialCurvature);
+    endDistance := segLength * FFinalCurvature / (FFinalCurvature - FInitialCurvature);
     startDistance := endDistance - segLength;
     arcLength := Abs(endDistance);
   end;
 
-  if initialCurvature < finalCurvature then begin
+  if FInitialCurvature < FFinalCurvature then begin
     FDirectionSign := 1;
   end
   else begin
@@ -177,6 +191,88 @@ begin
   direction := FTransform.transform_vector(d);
 end;
 
+function TTransitionSegment.CurvatureAt(d: Double): Double;
+begin
+  result := FInitialCurvature + (FFinalCurvature - FInitialCurvature) * d / segmentLength;
+end;
+
+function TTransitionSegment.EstimateCurveLength(d1, d2, offset: Double): Double;
+var
+  r: Double;
+  r1: Double;
+  r2: Double;
+  d: Double;
+  angle: Double;
+  offsetRadius: Double;
+begin
+  r1 := CurvatureToRadius(CurvatureAt(d1));
+  r2 := CurvatureToRadius(CurvatureAt(d2));
+
+  r := (r1 + r2) / 2;
+  d := d2 - d1;
+
+  if abs(r) > max_rad_test then begin
+    // straight...
+    Result := d;
+  end
+  else begin
+    angle := d / abs(r);
+    offsetRadius := r + offset;
+    Result := angle * abs(offsetRadius);
+  end;
+
+end;
+
+function TTransitionSegment.CalculateOffsetDistanceToEndOfSegment(distance,
+  offset: Double): Double;
+const
+  steps = 100;
+var
+  stepSize: Double;
+  previousDistance: Double;
+begin
+  Result := 0;
+
+  stepSize := FLength / steps;
+
+  previousDistance := distance;
+  distance := distance + stepSize;
+  while distance < segmentLength do begin
+    Result := Result + EstimateCurveLength(previousDistance, distance, offset);
+
+    previousDistance := distance;
+    distance := distance + stepSize;
+  end;
+
+  Result := Result + EstimateCurveLength(previousDistance, segmentLength, offset);
+end;
+
+function TTransitionSegment.CalculateCurveDistanceFromOffset(distance, offset,
+  distanceFromOffsetPoint: Double): Double;
+const
+  threshold = 0.001; // 10 micron!
+  thresholdCount = 20; // max iterations
+var
+  estimatedResult: Double;
+  estimateLength: Double;
+  error: Double;
+  count: Integer;
+begin
+  count := 0;
+  estimatedResult := distance + distanceFromOffsetPoint;
+  estimateLength := EstimateCurveLength(distance, estimatedResult, offset);
+  error := estimateLength - distanceFromOffsetPoint;
+  while (abs(error) > threshold) and (count < thresholdCount) do begin
+    Writeln('error: ', error);
+    estimatedResult := estimatedResult - error;
+    estimateLength := EstimateCurveLength(distance, estimatedResult, offset);
+    error := estimateLength - distanceFromOffsetPoint;
+    Inc(count);
+  end;
+
+  WriteLn('count: ', count);
+  Result := estimatedResult;
+end;
+
 
 end.
-
