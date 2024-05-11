@@ -14,9 +14,12 @@ uses
   template_records,
   BoxDims,
   TurnoutInfo2,
+  PlainTrackInfo,
   ShovedTimber,
   Feature,
-  Centreline;
+  Centreline,
+  MainsideStockRail,
+  TurnoutsideStockRail;
 
 
 {# class TTemplate
@@ -41,12 +44,25 @@ attributes:
     type: TTurnoutInfo2
     owns: create
     access: [get]
+  - name: plainTrackInfo
+    type: TPlainTrackInfo
+    owns: create
+    access: [get]
+    comment: need the plain track info for approach and exit tracks.
   - name: shovedTimbers
     type: TShovedTimberOwningList
     owns: create
     access: [get]
   - name: centreline
     type: TCentreline
+    owns: create
+    access: [get]
+  - name: mainsideStockRail
+    type: TMainsideStockRail
+    owns: create
+    access: [get]
+  - name: turnoutsideStockRail
+    type: TTurnoutsideStockRail
     owns: create
     access: [get]
 ...
@@ -63,8 +79,11 @@ type
     FCurve: TOID;
     FBoxDims: TOID;
     FTurnoutInfo2: TOID;
+    FPlainTrackInfo: TOID;
     FShovedTimbers: TOID;
     FCentreline: TOID;
+    FMainsideStockRail: TOID;
+    FTurnoutsideStockRail: TOID;
     //# endGenMemberVars
 
     FFeatures: array of TFeature;
@@ -78,8 +97,11 @@ type
     function GetCurve: TCurve;
     function GetBoxDims: TBoxDims;
     function GetTurnoutInfo2: TTurnoutInfo2;
+    function GetPlainTrackInfo: TPlainTrackInfo;
     function GetShovedTimbers: TShovedTimberOwningList;
     function GetCentreline: TCentreline;
+    function GetMainsideStockRail: TMainsideStockRail;
+    function GetTurnoutsideStockRail: TTurnoutsideStockRail;
     procedure SetName(const AValue: String);
     procedure SetTopLabel(const AValue: String);
     procedure SetMemo(const AValue: String);
@@ -145,8 +167,13 @@ type
     property curve: TCurve read GetCurve;
     property boxDims: TBoxDims read GetBoxDims;
     property turnoutInfo2: TTurnoutInfo2 read GetTurnoutInfo2;
+
+    // need the plain track info for approach and exit tracks.
+    property plainTrackInfo: TPlainTrackInfo read GetPlainTrackInfo;
     property shovedTimbers: TShovedTimberOwningList read GetShovedTimbers;
     property centreline: TCentreline read GetCentreline;
+    property mainsideStockRail: TMainsideStockRail read GetMainsideStockRail;
+    property turnoutsideStockRail: TTurnoutsideStockRail read GetTurnoutsideStockRail;
     //# endGenProperty
 
     property featureCount: Integer read GetFeatureCount;
@@ -185,6 +212,10 @@ begin
   else
     FTurnoutInfo2 := 0;
   if AOID = 0 then
+    FPlainTrackInfo := TPlainTrackInfo.Create(nil).oid
+  else
+    FPlainTrackInfo := 0;
+  if AOID = 0 then
     FShovedTimbers := TShovedTimberOwningList.Create(nil).oid
   else
     FShovedTimbers := 0;
@@ -192,10 +223,20 @@ begin
     FCentreline := TCentreline.Create(nil).oid
   else
     FCentreline := 0;
+  if AOID = 0 then
+    FMainsideStockRail := TMainsideStockRail.Create(nil).oid
+  else
+    FMainsideStockRail := 0;
+  if AOID = 0 then
+    FTurnoutsideStockRail := TTurnoutsideStockRail.Create(nil).oid
+  else
+    FTurnoutsideStockRail := 0;
   //# endGenCreate
 
   if AOID = 0 then begin
     centreline.curve := curve;
+    mainsideStockRail.curve := curve;
+    turnoutsideStockRail.curve := curve;
   end;
 end;
 
@@ -205,8 +246,11 @@ begin
   SetOwned(FCurve, nil);
   SetOwned(FBoxDims, nil);
   SetOwned(FTurnoutInfo2, nil);
+  SetOwned(FPlainTrackInfo, nil);
   SetOwned(FShovedTimbers, nil);
   SetOwned(FCentreline, nil);
+  SetOwned(FMainsideStockRail, nil);
+  SetOwned(FTurnoutsideStockRail, nil);
   //# endGenDestroy
   inherited;
 end;
@@ -237,11 +281,20 @@ begin
   if AName = 'turnoutInfo2' then
     RestoreYamlObjectOwn(FTurnoutInfo2, StrToInteger(AValue), ALoader)
   else
+  if AName = 'plainTrackInfo' then
+    RestoreYamlObjectOwn(FPlainTrackInfo, StrToInteger(AValue), ALoader)
+  else
   if AName = 'shovedTimbers' then
     RestoreYamlObjectOwn(FShovedTimbers, StrToInteger(AValue), ALoader)
   else
   if AName = 'centreline' then
     RestoreYamlObjectOwn(FCentreline, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'mainsideStockRail' then
+    RestoreYamlObjectOwn(FMainsideStockRail, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'turnoutsideStockRail' then
+    RestoreYamlObjectOwn(FTurnoutsideStockRail, StrToInteger(AValue), ALoader)
   else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -260,8 +313,11 @@ procedure TTemplate.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FCurve, sizeof(TOID));
   AStream.ReadBuffer(FBoxDims, sizeof(TOID));
   AStream.ReadBuffer(FTurnoutInfo2, sizeof(TOID));
+  AStream.ReadBuffer(FPlainTrackInfo, sizeof(TOID));
   AStream.ReadBuffer(FShovedTimbers, sizeof(TOID));
   AStream.ReadBuffer(FCentreline, sizeof(TOID));
+  AStream.ReadBuffer(FMainsideStockRail, sizeof(TOID));
+  AStream.ReadBuffer(FTurnoutsideStockRail, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -278,8 +334,11 @@ procedure TTemplate.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FCurve, sizeof(TOID));
   AStream.WriteBuffer(FBoxDims, sizeof(TOID));
   AStream.WriteBuffer(FTurnoutInfo2, sizeof(TOID));
+  AStream.WriteBuffer(FPlainTrackInfo, sizeof(TOID));
   AStream.WriteBuffer(FShovedTimbers, sizeof(TOID));
   AStream.WriteBuffer(FCentreline, sizeof(TOID));
+  AStream.WriteBuffer(FMainsideStockRail, sizeof(TOID));
+  AStream.WriteBuffer(FTurnoutsideStockRail, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -296,8 +355,11 @@ procedure TTemplate.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlObject(AEmitter, 'curve', FCurve);
   SaveYamlObject(AEmitter, 'boxDims', FBoxDims);
   SaveYamlObject(AEmitter, 'turnoutInfo2', FTurnoutInfo2);
+  SaveYamlObject(AEmitter, 'plainTrackInfo', FPlainTrackInfo);
   SaveYamlObject(AEmitter, 'shovedTimbers', FShovedTimbers);
   SaveYamlObject(AEmitter, 'centreline', FCentreline);
+  SaveYamlObject(AEmitter, 'mainsideStockRail', FMainsideStockRail);
+  SaveYamlObject(AEmitter, 'turnoutsideStockRail', FTurnoutsideStockRail);
   //# endGenSaveYamlVars
   end;
 
@@ -348,6 +410,12 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
+function TTemplate.GetPlainTrackInfo: TPlainTrackInfo;
+begin
+  Result := TPlainTrackInfo(FromOID(FPlainTrackInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
 function TTemplate.GetShovedTimbers: TShovedTimberOwningList;
 begin
   Result := TShovedTimberOwningList(FromOID(FShovedTimbers));
@@ -357,6 +425,18 @@ end;
 function TTemplate.GetCentreline: TCentreline;
 begin
   Result := TCentreline(FromOID(FCentreline));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TTemplate.GetMainsideStockRail: TMainsideStockRail;
+begin
+  Result := TMainsideStockRail(FromOID(FMainsideStockRail));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TTemplate.GetTurnoutsideStockRail: TTurnoutsideStockRail;
+begin
+  Result := TTurnoutsideStockRail(FromOID(FTurnoutsideStockRail));
 end;
 
 //# endGenGetSetMethods

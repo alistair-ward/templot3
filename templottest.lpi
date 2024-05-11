@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="98">
+    <Units Count="102">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -461,6 +461,24 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="TemplotConstants"/>
       </Unit97>
+      <Unit98>
+        <Filename Value="model\template\mainsidestockrail.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="MainsideStockRail"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="model\template\turnoutsidestockrail.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TurnoutsideStockRail"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="test\template\mainsidestockrail_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="test\template\turnoutsidestockrail_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit101>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -18,36 +18,30 @@ class: TSwitchInfo
 attributes:
   - name: switchPattern
     type: TSwitchPattern
-  - name: planingLength
+  - name: planingLengthInches
     type: Double
   - name: planingAngle
     type: Double
-  - name: switchRadius
+  - name: switchRadiusInches
     type: Double
-  - name: switchRailLength
+  - name: switchRailLengthInches
     type: Double
     comment: (C) length of switch rail (inches)
-  - name: stockRailLength
+  - name: stockRailLengthInches
     type: Double
     comment: (S) length of stock rail (inches)
-  - name: heelLead
+  - name: heelLeadInches
     type: Double
     comment: (L) lead to heel (incl. planing) (inches)
-  - name: heelOffset
+  - name: heelOffsetInches
     type: Double
     comment: (H) heel-offset (inches)
-  - name: switchFront
+  - name: switchFrontInches
     type: Double
     comment: stock-rail-end to toe (inches)
-  - name: planingRadius
+  - name: planingRadiusInches
     type: Double
     comment: planing radius for couble-curved switch
-  - name: sleeperJ1
-    type: Double
-    comment: first switch-front sleeper spacing back from TOE (NEGATIVE inches).
-  - name: sleeperJ2
-    type: Double
-    comment: seond switch-front sleeper spacing back from the first (NEGATIVE inches).
   - name: timberCentres
     type: Double
     array: dynamic
@@ -59,10 +53,10 @@ attributes:
   - name: sizeCode
     type: Integer
     comment: size within group (1=shortest)
-  - name: joggleDepth
+  - name: joggleDepthInches
     type: Double
     comment: depth of joggle
-  - name: joggleLength
+  - name: joggleLengthInches
     type: Double
     comment: length of joggle in front of toe (+ve)
   - name: groupCount
@@ -78,16 +72,22 @@ attributes:
     type: Integer
   - name: numBridgeChairsTurnoutRail
     type: Integer
-  - name: fbTipOffset
+  - name: fbTipOffsetInches
     type: Double
     comment: fbtip dimension (FB foot from gauge-face at tip).
-  - name: sleeperJ3
+  - name: sleeperJ1Inches
+    type: Double
+    comment: first switch-front sleeper spacing back from TOE (NEGATIVE inches).
+  - name: sleeperJ2Inches
+    type: Double
+    comment: seond switch-front sleeper spacing back from the first (NEGATIVE inches).
+  - name: sleeperJ3Inches
     type: Double
     comment: third switch-front sleeper spacing back from the second (NEGATIVE inches).
-  - name: sleeperJ4
+  - name: sleeperJ4Inches
     type: Double
     comment: fourth switch-front sleeper spacing back from the third (NEGATIVE inches).
-  - name: sleeperJ5
+  - name: sleeperJ5Inches
     type: Double
     comment: fifth switch-front sleeper spacing back from the fourth (NEGATIVE inches).
   - name: numSlideChairs
@@ -108,32 +108,32 @@ type
   private
     //# genMemberVars
     FSwitchPattern: TSwitchPattern;
-    FPlaningLength: Double;
+    FPlaningLengthInches: Double;
     FPlaningAngle: Double;
-    FSwitchRadius: Double;
-    FSwitchRailLength: Double;
-    FStockRailLength: Double;
-    FHeelLead: Double;
-    FHeelOffset: Double;
-    FSwitchFront: Double;
-    FPlaningRadius: Double;
-    FSleeperJ1: Double;
-    FSleeperJ2: Double;
+    FSwitchRadiusInches: Double;
+    FSwitchRailLengthInches: Double;
+    FStockRailLengthInches: Double;
+    FHeelLeadInches: Double;
+    FHeelOffsetInches: Double;
+    FSwitchFrontInches: Double;
+    FPlaningRadiusInches: Double;
     FTimberCentres: array of Double;
     FGroupCode: Integer;
     FSizeCode: Integer;
-    FJoggleDepth: Double;
-    FJoggleLength: Double;
+    FJoggleDepthInches: Double;
+    FJoggleLengthInches: Double;
     FGroupCount: Integer;
     FJoggledStockRail: Boolean;
     FValidData: Boolean;
     FFrontTimbered: Boolean;
     FNumBridgeChairsMainRail: Integer;
     FNumBridgeChairsTurnoutRail: Integer;
-    FFbTipOffset: Double;
-    FSleeperJ3: Double;
-    FSleeperJ4: Double;
-    FSleeperJ5: Double;
+    FFbTipOffsetInches: Double;
+    FSleeperJ1Inches: Double;
+    FSleeperJ2Inches: Double;
+    FSleeperJ3Inches: Double;
+    FSleeperJ4Inches: Double;
+    FSleeperJ5Inches: Double;
     FNumSlideChairs: Integer;
     FNumBlockSlideChairs: Integer;
     FNumBlockHeelChairs: Integer;
@@ -148,32 +148,32 @@ type
     function GetTimberCentres(AIndex: Integer): Double;
     function GetTimberCentresCount: Integer;
     procedure SetSwitchPattern(const AValue: TSwitchPattern);
-    procedure SetPlaningLength(const AValue: Double);
+    procedure SetPlaningLengthInches(const AValue: Double);
     procedure SetPlaningAngle(const AValue: Double);
-    procedure SetSwitchRadius(const AValue: Double);
-    procedure SetSwitchRailLength(const AValue: Double);
-    procedure SetStockRailLength(const AValue: Double);
-    procedure SetHeelLead(const AValue: Double);
-    procedure SetHeelOffset(const AValue: Double);
-    procedure SetSwitchFront(const AValue: Double);
-    procedure SetPlaningRadius(const AValue: Double);
-    procedure SetSleeperJ1(const AValue: Double);
-    procedure SetSleeperJ2(const AValue: Double);
+    procedure SetSwitchRadiusInches(const AValue: Double);
+    procedure SetSwitchRailLengthInches(const AValue: Double);
+    procedure SetStockRailLengthInches(const AValue: Double);
+    procedure SetHeelLeadInches(const AValue: Double);
+    procedure SetHeelOffsetInches(const AValue: Double);
+    procedure SetSwitchFrontInches(const AValue: Double);
+    procedure SetPlaningRadiusInches(const AValue: Double);
     procedure SetTimberCentres(AIndex: Integer; const AValue: Double);
     procedure SetGroupCode(const AValue: Integer);
     procedure SetSizeCode(const AValue: Integer);
-    procedure SetJoggleDepth(const AValue: Double);
-    procedure SetJoggleLength(const AValue: Double);
+    procedure SetJoggleDepthInches(const AValue: Double);
+    procedure SetJoggleLengthInches(const AValue: Double);
     procedure SetGroupCount(const AValue: Integer);
     procedure SetJoggledStockRail(const AValue: Boolean);
     procedure SetValidData(const AValue: Boolean);
     procedure SetFrontTimbered(const AValue: Boolean);
     procedure SetNumBridgeChairsMainRail(const AValue: Integer);
     procedure SetNumBridgeChairsTurnoutRail(const AValue: Integer);
-    procedure SetFbTipOffset(const AValue: Double);
-    procedure SetSleeperJ3(const AValue: Double);
-    procedure SetSleeperJ4(const AValue: Double);
-    procedure SetSleeperJ5(const AValue: Double);
+    procedure SetFbTipOffsetInches(const AValue: Double);
+    procedure SetSleeperJ1Inches(const AValue: Double);
+    procedure SetSleeperJ2Inches(const AValue: Double);
+    procedure SetSleeperJ3Inches(const AValue: Double);
+    procedure SetSleeperJ4Inches(const AValue: Double);
+    procedure SetSleeperJ5Inches(const AValue: Double);
     procedure SetNumSlideChairs(const AValue: Integer);
     procedure SetNumBlockSlideChairs(const AValue: Integer);
     procedure SetNumBlockHeelChairs(const AValue: Integer);
@@ -195,33 +195,27 @@ type
 
     //# genProperty
     property switchPattern: TSwitchPattern read FSwitchPattern write SetSwitchPattern;
-    property planingLength: Double read FPlaningLength write SetPlaningLength;
+    property planingLengthInches: Double read FPlaningLengthInches write SetPlaningLengthInches;
     property planingAngle: Double read FPlaningAngle write SetPlaningAngle;
-    property switchRadius: Double read FSwitchRadius write SetSwitchRadius;
+    property switchRadiusInches: Double read FSwitchRadiusInches write SetSwitchRadiusInches;
 
     // (C) length of switch rail (inches)
-    property switchRailLength: Double read FSwitchRailLength write SetSwitchRailLength;
+    property switchRailLengthInches: Double read FSwitchRailLengthInches write SetSwitchRailLengthInches;
 
     // (S) length of stock rail (inches)
-    property stockRailLength: Double read FStockRailLength write SetStockRailLength;
+    property stockRailLengthInches: Double read FStockRailLengthInches write SetStockRailLengthInches;
 
     // (L) lead to heel (incl. planing) (inches)
-    property heelLead: Double read FHeelLead write SetHeelLead;
+    property heelLeadInches: Double read FHeelLeadInches write SetHeelLeadInches;
 
     // (H) heel-offset (inches)
-    property heelOffset: Double read FHeelOffset write SetHeelOffset;
+    property heelOffsetInches: Double read FHeelOffsetInches write SetHeelOffsetInches;
 
     // stock-rail-end to toe (inches)
-    property switchFront: Double read FSwitchFront write SetSwitchFront;
+    property switchFrontInches: Double read FSwitchFrontInches write SetSwitchFrontInches;
 
     // planing radius for couble-curved switch
-    property planingRadius: Double read FPlaningRadius write SetPlaningRadius;
-
-    // first switch-front sleeper spacing back from TOE (NEGATIVE inches).
-    property sleeperJ1: Double read FSleeperJ1 write SetSleeperJ1;
-
-    // seond switch-front sleeper spacing back from the first (NEGATIVE inches).
-    property sleeperJ2: Double read FSleeperJ2 write SetSleeperJ2;
+    property planingRadiusInches: Double read FPlaningRadiusInches write SetPlaningRadiusInches;
 
     // timber centres (in inches).
     property timberCentres[AIndex: Integer]: Double read GetTimberCentres write SetTimberCentres;
@@ -234,10 +228,10 @@ type
     property sizeCode: Integer read FSizeCode write SetSizeCode;
 
     // depth of joggle
-    property joggleDepth: Double read FJoggleDepth write SetJoggleDepth;
+    property joggleDepthInches: Double read FJoggleDepthInches write SetJoggleDepthInches;
 
     // length of joggle in front of toe (+ve)
-    property joggleLength: Double read FJoggleLength write SetJoggleLength;
+    property joggleLengthInches: Double read FJoggleLengthInches write SetJoggleLengthInches;
     property groupCount: Integer read FGroupCount write SetGroupCount;
     property joggledStockRail: Boolean read FJoggledStockRail write SetJoggledStockRail;
     property validData: Boolean read FValidData write SetValidData;
@@ -248,20 +242,27 @@ type
     property numBridgeChairsTurnoutRail: Integer read FNumBridgeChairsTurnoutRail write SetNumBridgeChairsTurnoutRail;
 
     // fbtip dimension (FB foot from gauge-face at tip).
-    property fbTipOffset: Double read FFbTipOffset write SetFbTipOffset;
+    property fbTipOffsetInches: Double read FFbTipOffsetInches write SetFbTipOffsetInches;
+
+    // first switch-front sleeper spacing back from TOE (NEGATIVE inches).
+    property sleeperJ1Inches: Double read FSleeperJ1Inches write SetSleeperJ1Inches;
+
+    // seond switch-front sleeper spacing back from the first (NEGATIVE inches).
+    property sleeperJ2Inches: Double read FSleeperJ2Inches write SetSleeperJ2Inches;
 
     // third switch-front sleeper spacing back from the second (NEGATIVE inches).
-    property sleeperJ3: Double read FSleeperJ3 write SetSleeperJ3;
+    property sleeperJ3Inches: Double read FSleeperJ3Inches write SetSleeperJ3Inches;
 
     // fourth switch-front sleeper spacing back from the third (NEGATIVE inches).
-    property sleeperJ4: Double read FSleeperJ4 write SetSleeperJ4;
+    property sleeperJ4Inches: Double read FSleeperJ4Inches write SetSleeperJ4Inches;
 
     // fifth switch-front sleeper spacing back from the fourth (NEGATIVE inches).
-    property sleeperJ5: Double read FSleeperJ5 write SetSleeperJ5;
+    property sleeperJ5Inches: Double read FSleeperJ5Inches write SetSleeperJ5Inches;
     property numSlideChairs: Integer read FNumSlideChairs write SetNumSlideChairs;
     property numBlockSlideChairs: Integer read FNumBlockSlideChairs write SetNumBlockSlideChairs;
     property numBlockHeelChairs: Integer read FNumBlockHeelChairs write SetNumBlockHeelChairs;
     //# endGenProperty
+
   end;
 
   TSwitchInfoOwningList = class(TOTOwningList<TSwitchInfo>);
@@ -321,38 +322,32 @@ begin
   if AName = 'switchPattern' then
     FSwitchPattern := StrToTSwitchPattern(AValue)
   else
-  if AName = 'planingLength' then
-    FPlaningLength := StrToDouble(AValue)
+  if AName = 'planingLengthInches' then
+    FPlaningLengthInches := StrToDouble(AValue)
   else
   if AName = 'planingAngle' then
     FPlaningAngle := StrToDouble(AValue)
   else
-  if AName = 'switchRadius' then
-    FSwitchRadius := StrToDouble(AValue)
+  if AName = 'switchRadiusInches' then
+    FSwitchRadiusInches := StrToDouble(AValue)
   else
-  if AName = 'switchRailLength' then
-    FSwitchRailLength := StrToDouble(AValue)
+  if AName = 'switchRailLengthInches' then
+    FSwitchRailLengthInches := StrToDouble(AValue)
   else
-  if AName = 'stockRailLength' then
-    FStockRailLength := StrToDouble(AValue)
+  if AName = 'stockRailLengthInches' then
+    FStockRailLengthInches := StrToDouble(AValue)
   else
-  if AName = 'heelLead' then
-    FHeelLead := StrToDouble(AValue)
+  if AName = 'heelLeadInches' then
+    FHeelLeadInches := StrToDouble(AValue)
   else
-  if AName = 'heelOffset' then
-    FHeelOffset := StrToDouble(AValue)
+  if AName = 'heelOffsetInches' then
+    FHeelOffsetInches := StrToDouble(AValue)
   else
-  if AName = 'switchFront' then
-    FSwitchFront := StrToDouble(AValue)
+  if AName = 'switchFrontInches' then
+    FSwitchFrontInches := StrToDouble(AValue)
   else
-  if AName = 'planingRadius' then
-    FPlaningRadius := StrToDouble(AValue)
-  else
-  if AName = 'sleeperJ1' then
-    FSleeperJ1 := StrToDouble(AValue)
-  else
-  if AName = 'sleeperJ2' then
-    FSleeperJ2 := StrToDouble(AValue)
+  if AName = 'planingRadiusInches' then
+    FPlaningRadiusInches := StrToDouble(AValue)
   else
   if AName = 'timberCentres-length' then
     SetLength(FTimberCentres, StrToInteger(AValue))
@@ -366,11 +361,11 @@ begin
   if AName = 'sizeCode' then
     FSizeCode := StrToInteger(AValue)
   else
-  if AName = 'joggleDepth' then
-    FJoggleDepth := StrToDouble(AValue)
+  if AName = 'joggleDepthInches' then
+    FJoggleDepthInches := StrToDouble(AValue)
   else
-  if AName = 'joggleLength' then
-    FJoggleLength := StrToDouble(AValue)
+  if AName = 'joggleLengthInches' then
+    FJoggleLengthInches := StrToDouble(AValue)
   else
   if AName = 'groupCount' then
     FGroupCount := StrToInteger(AValue)
@@ -390,17 +385,23 @@ begin
   if AName = 'numBridgeChairsTurnoutRail' then
     FNumBridgeChairsTurnoutRail := StrToInteger(AValue)
   else
-  if AName = 'fbTipOffset' then
-    FFbTipOffset := StrToDouble(AValue)
+  if AName = 'fbTipOffsetInches' then
+    FFbTipOffsetInches := StrToDouble(AValue)
   else
-  if AName = 'sleeperJ3' then
-    FSleeperJ3 := StrToDouble(AValue)
+  if AName = 'sleeperJ1Inches' then
+    FSleeperJ1Inches := StrToDouble(AValue)
   else
-  if AName = 'sleeperJ4' then
-    FSleeperJ4 := StrToDouble(AValue)
+  if AName = 'sleeperJ2Inches' then
+    FSleeperJ2Inches := StrToDouble(AValue)
   else
-  if AName = 'sleeperJ5' then
-    FSleeperJ5 := StrToDouble(AValue)
+  if AName = 'sleeperJ3Inches' then
+    FSleeperJ3Inches := StrToDouble(AValue)
+  else
+  if AName = 'sleeperJ4Inches' then
+    FSleeperJ4Inches := StrToDouble(AValue)
+  else
+  if AName = 'sleeperJ5Inches' then
+    FSleeperJ5Inches := StrToDouble(AValue)
   else
   if AName = 'numSlideChairs' then
     FNumSlideChairs := StrToInteger(AValue)
@@ -423,33 +424,33 @@ begin
 
   //# genRestoreVars
   AStream.ReadBuffer(FSwitchPattern, sizeof(TSwitchPattern));
-  AStream.ReadBuffer(FPlaningLength, sizeof(Double));
+  AStream.ReadBuffer(FPlaningLengthInches, sizeof(Double));
   AStream.ReadBuffer(FPlaningAngle, sizeof(Double));
-  AStream.ReadBuffer(FSwitchRadius, sizeof(Double));
-  AStream.ReadBuffer(FSwitchRailLength, sizeof(Double));
-  AStream.ReadBuffer(FStockRailLength, sizeof(Double));
-  AStream.ReadBuffer(FHeelLead, sizeof(Double));
-  AStream.ReadBuffer(FHeelOffset, sizeof(Double));
-  AStream.ReadBuffer(FSwitchFront, sizeof(Double));
-  AStream.ReadBuffer(FPlaningRadius, sizeof(Double));
-  AStream.ReadBuffer(FSleeperJ1, sizeof(Double));
-  AStream.ReadBuffer(FSleeperJ2, sizeof(Double));
+  AStream.ReadBuffer(FSwitchRadiusInches, sizeof(Double));
+  AStream.ReadBuffer(FSwitchRailLengthInches, sizeof(Double));
+  AStream.ReadBuffer(FStockRailLengthInches, sizeof(Double));
+  AStream.ReadBuffer(FHeelLeadInches, sizeof(Double));
+  AStream.ReadBuffer(FHeelOffsetInches, sizeof(Double));
+  AStream.ReadBuffer(FSwitchFrontInches, sizeof(Double));
+  AStream.ReadBuffer(FPlaningRadiusInches, sizeof(Double));
   SetLength(FTimberCentres, AStream.ReadDWord);
   AStream.ReadBuffer(FTimberCentres[Low(FTimberCentres)], (Ord(High(FTimberCentres))-Ord(Low(FTimberCentres)) + 1)*sizeof(Double));
   AStream.ReadBuffer(FGroupCode, sizeof(Integer));
   AStream.ReadBuffer(FSizeCode, sizeof(Integer));
-  AStream.ReadBuffer(FJoggleDepth, sizeof(Double));
-  AStream.ReadBuffer(FJoggleLength, sizeof(Double));
+  AStream.ReadBuffer(FJoggleDepthInches, sizeof(Double));
+  AStream.ReadBuffer(FJoggleLengthInches, sizeof(Double));
   AStream.ReadBuffer(FGroupCount, sizeof(Integer));
   AStream.ReadBuffer(FJoggledStockRail, sizeof(Boolean));
   AStream.ReadBuffer(FValidData, sizeof(Boolean));
   AStream.ReadBuffer(FFrontTimbered, sizeof(Boolean));
   AStream.ReadBuffer(FNumBridgeChairsMainRail, sizeof(Integer));
   AStream.ReadBuffer(FNumBridgeChairsTurnoutRail, sizeof(Integer));
-  AStream.ReadBuffer(FFbTipOffset, sizeof(Double));
-  AStream.ReadBuffer(FSleeperJ3, sizeof(Double));
-  AStream.ReadBuffer(FSleeperJ4, sizeof(Double));
-  AStream.ReadBuffer(FSleeperJ5, sizeof(Double));
+  AStream.ReadBuffer(FFbTipOffsetInches, sizeof(Double));
+  AStream.ReadBuffer(FSleeperJ1Inches, sizeof(Double));
+  AStream.ReadBuffer(FSleeperJ2Inches, sizeof(Double));
+  AStream.ReadBuffer(FSleeperJ3Inches, sizeof(Double));
+  AStream.ReadBuffer(FSleeperJ4Inches, sizeof(Double));
+  AStream.ReadBuffer(FSleeperJ5Inches, sizeof(Double));
   AStream.ReadBuffer(FNumSlideChairs, sizeof(Integer));
   AStream.ReadBuffer(FNumBlockSlideChairs, sizeof(Integer));
   AStream.ReadBuffer(FNumBlockHeelChairs, sizeof(Integer));
@@ -464,33 +465,33 @@ begin
 
   //# genSaveVars
   AStream.WriteBuffer(FSwitchPattern, sizeof(TSwitchPattern));
-  AStream.WriteBuffer(FPlaningLength, sizeof(Double));
+  AStream.WriteBuffer(FPlaningLengthInches, sizeof(Double));
   AStream.WriteBuffer(FPlaningAngle, sizeof(Double));
-  AStream.WriteBuffer(FSwitchRadius, sizeof(Double));
-  AStream.WriteBuffer(FSwitchRailLength, sizeof(Double));
-  AStream.WriteBuffer(FStockRailLength, sizeof(Double));
-  AStream.WriteBuffer(FHeelLead, sizeof(Double));
-  AStream.WriteBuffer(FHeelOffset, sizeof(Double));
-  AStream.WriteBuffer(FSwitchFront, sizeof(Double));
-  AStream.WriteBuffer(FPlaningRadius, sizeof(Double));
-  AStream.WriteBuffer(FSleeperJ1, sizeof(Double));
-  AStream.WriteBuffer(FSleeperJ2, sizeof(Double));
+  AStream.WriteBuffer(FSwitchRadiusInches, sizeof(Double));
+  AStream.WriteBuffer(FSwitchRailLengthInches, sizeof(Double));
+  AStream.WriteBuffer(FStockRailLengthInches, sizeof(Double));
+  AStream.WriteBuffer(FHeelLeadInches, sizeof(Double));
+  AStream.WriteBuffer(FHeelOffsetInches, sizeof(Double));
+  AStream.WriteBuffer(FSwitchFrontInches, sizeof(Double));
+  AStream.WriteBuffer(FPlaningRadiusInches, sizeof(Double));
   AStream.WriteDWord(Length(FTimberCentres));
   AStream.WriteBuffer(FTimberCentres[Low(FTimberCentres)], (Ord(High(FTimberCentres))-Ord(Low(FTimberCentres)) + 1)*sizeof(Double));
   AStream.WriteBuffer(FGroupCode, sizeof(Integer));
   AStream.WriteBuffer(FSizeCode, sizeof(Integer));
-  AStream.WriteBuffer(FJoggleDepth, sizeof(Double));
-  AStream.WriteBuffer(FJoggleLength, sizeof(Double));
+  AStream.WriteBuffer(FJoggleDepthInches, sizeof(Double));
+  AStream.WriteBuffer(FJoggleLengthInches, sizeof(Double));
   AStream.WriteBuffer(FGroupCount, sizeof(Integer));
   AStream.WriteBuffer(FJoggledStockRail, sizeof(Boolean));
   AStream.WriteBuffer(FValidData, sizeof(Boolean));
   AStream.WriteBuffer(FFrontTimbered, sizeof(Boolean));
   AStream.WriteBuffer(FNumBridgeChairsMainRail, sizeof(Integer));
   AStream.WriteBuffer(FNumBridgeChairsTurnoutRail, sizeof(Integer));
-  AStream.WriteBuffer(FFbTipOffset, sizeof(Double));
-  AStream.WriteBuffer(FSleeperJ3, sizeof(Double));
-  AStream.WriteBuffer(FSleeperJ4, sizeof(Double));
-  AStream.WriteBuffer(FSleeperJ5, sizeof(Double));
+  AStream.WriteBuffer(FFbTipOffsetInches, sizeof(Double));
+  AStream.WriteBuffer(FSleeperJ1Inches, sizeof(Double));
+  AStream.WriteBuffer(FSleeperJ2Inches, sizeof(Double));
+  AStream.WriteBuffer(FSleeperJ3Inches, sizeof(Double));
+  AStream.WriteBuffer(FSleeperJ4Inches, sizeof(Double));
+  AStream.WriteBuffer(FSleeperJ5Inches, sizeof(Double));
   AStream.WriteBuffer(FNumSlideChairs, sizeof(Integer));
   AStream.WriteBuffer(FNumBlockSlideChairs, sizeof(Integer));
   AStream.WriteBuffer(FNumBlockHeelChairs, sizeof(Integer));
@@ -505,17 +506,15 @@ begin
 
   //# genSaveYamlVars
   SaveYamlTSwitchPattern(AEmitter, 'switchPattern', FSwitchPattern);
-  SaveYamlDouble(AEmitter, 'planingLength', FPlaningLength);
+  SaveYamlDouble(AEmitter, 'planingLengthInches', FPlaningLengthInches);
   SaveYamlDouble(AEmitter, 'planingAngle', FPlaningAngle);
-  SaveYamlDouble(AEmitter, 'switchRadius', FSwitchRadius);
-  SaveYamlDouble(AEmitter, 'switchRailLength', FSwitchRailLength);
-  SaveYamlDouble(AEmitter, 'stockRailLength', FStockRailLength);
-  SaveYamlDouble(AEmitter, 'heelLead', FHeelLead);
-  SaveYamlDouble(AEmitter, 'heelOffset', FHeelOffset);
-  SaveYamlDouble(AEmitter, 'switchFront', FSwitchFront);
-  SaveYamlDouble(AEmitter, 'planingRadius', FPlaningRadius);
-  SaveYamlDouble(AEmitter, 'sleeperJ1', FSleeperJ1);
-  SaveYamlDouble(AEmitter, 'sleeperJ2', FSleeperJ2);
+  SaveYamlDouble(AEmitter, 'switchRadiusInches', FSwitchRadiusInches);
+  SaveYamlDouble(AEmitter, 'switchRailLengthInches', FSwitchRailLengthInches);
+  SaveYamlDouble(AEmitter, 'stockRailLengthInches', FStockRailLengthInches);
+  SaveYamlDouble(AEmitter, 'heelLeadInches', FHeelLeadInches);
+  SaveYamlDouble(AEmitter, 'heelOffsetInches', FHeelOffsetInches);
+  SaveYamlDouble(AEmitter, 'switchFrontInches', FSwitchFrontInches);
+  SaveYamlDouble(AEmitter, 'planingRadiusInches', FPlaningRadiusInches);
   SaveYamlInteger(AEmitter, 'timberCentres-length', Length(FTimberCentres));
   SaveYamlSequence(AEmitter, 'timberCentres');
   for i := Ord(Low(FTimberCentres)) to Ord(High(FTimberCentres)) do
@@ -523,18 +522,20 @@ begin
   SaveYamlEndSequence(AEmitter);
   SaveYamlInteger(AEmitter, 'groupCode', FGroupCode);
   SaveYamlInteger(AEmitter, 'sizeCode', FSizeCode);
-  SaveYamlDouble(AEmitter, 'joggleDepth', FJoggleDepth);
-  SaveYamlDouble(AEmitter, 'joggleLength', FJoggleLength);
+  SaveYamlDouble(AEmitter, 'joggleDepthInches', FJoggleDepthInches);
+  SaveYamlDouble(AEmitter, 'joggleLengthInches', FJoggleLengthInches);
   SaveYamlInteger(AEmitter, 'groupCount', FGroupCount);
   SaveYamlBoolean(AEmitter, 'joggledStockRail', FJoggledStockRail);
   SaveYamlBoolean(AEmitter, 'validData', FValidData);
   SaveYamlBoolean(AEmitter, 'frontTimbered', FFrontTimbered);
   SaveYamlInteger(AEmitter, 'numBridgeChairsMainRail', FNumBridgeChairsMainRail);
   SaveYamlInteger(AEmitter, 'numBridgeChairsTurnoutRail', FNumBridgeChairsTurnoutRail);
-  SaveYamlDouble(AEmitter, 'fbTipOffset', FFbTipOffset);
-  SaveYamlDouble(AEmitter, 'sleeperJ3', FSleeperJ3);
-  SaveYamlDouble(AEmitter, 'sleeperJ4', FSleeperJ4);
-  SaveYamlDouble(AEmitter, 'sleeperJ5', FSleeperJ5);
+  SaveYamlDouble(AEmitter, 'fbTipOffsetInches', FFbTipOffsetInches);
+  SaveYamlDouble(AEmitter, 'sleeperJ1Inches', FSleeperJ1Inches);
+  SaveYamlDouble(AEmitter, 'sleeperJ2Inches', FSleeperJ2Inches);
+  SaveYamlDouble(AEmitter, 'sleeperJ3Inches', FSleeperJ3Inches);
+  SaveYamlDouble(AEmitter, 'sleeperJ4Inches', FSleeperJ4Inches);
+  SaveYamlDouble(AEmitter, 'sleeperJ5Inches', FSleeperJ5Inches);
   SaveYamlInteger(AEmitter, 'numSlideChairs', FNumSlideChairs);
   SaveYamlInteger(AEmitter, 'numBlockSlideChairs', FNumBlockSlideChairs);
   SaveYamlInteger(AEmitter, 'numBlockHeelChairs', FNumBlockHeelChairs);
@@ -552,11 +553,11 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetPlaningLength(const AValue: Double);
+procedure TSwitchInfo.SetPlaningLengthInches(const AValue: Double);
 begin
-  if AValue <> FPlaningLength then begin
+  if AValue <> FPlaningLengthInches then begin
     SetModified;
-    FPlaningLength := AValue;
+    FPlaningLengthInches := AValue;
   end;
 end;
 
@@ -570,83 +571,65 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSwitchRadius(const AValue: Double);
+procedure TSwitchInfo.SetSwitchRadiusInches(const AValue: Double);
 begin
-  if AValue <> FSwitchRadius then begin
+  if AValue <> FSwitchRadiusInches then begin
     SetModified;
-    FSwitchRadius := AValue;
+    FSwitchRadiusInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSwitchRailLength(const AValue: Double);
+procedure TSwitchInfo.SetSwitchRailLengthInches(const AValue: Double);
 begin
-  if AValue <> FSwitchRailLength then begin
+  if AValue <> FSwitchRailLengthInches then begin
     SetModified;
-    FSwitchRailLength := AValue;
+    FSwitchRailLengthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetStockRailLength(const AValue: Double);
+procedure TSwitchInfo.SetStockRailLengthInches(const AValue: Double);
 begin
-  if AValue <> FStockRailLength then begin
+  if AValue <> FStockRailLengthInches then begin
     SetModified;
-    FStockRailLength := AValue;
+    FStockRailLengthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetHeelLead(const AValue: Double);
+procedure TSwitchInfo.SetHeelLeadInches(const AValue: Double);
 begin
-  if AValue <> FHeelLead then begin
+  if AValue <> FHeelLeadInches then begin
     SetModified;
-    FHeelLead := AValue;
+    FHeelLeadInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetHeelOffset(const AValue: Double);
+procedure TSwitchInfo.SetHeelOffsetInches(const AValue: Double);
 begin
-  if AValue <> FHeelOffset then begin
+  if AValue <> FHeelOffsetInches then begin
     SetModified;
-    FHeelOffset := AValue;
+    FHeelOffsetInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSwitchFront(const AValue: Double);
+procedure TSwitchInfo.SetSwitchFrontInches(const AValue: Double);
 begin
-  if AValue <> FSwitchFront then begin
+  if AValue <> FSwitchFrontInches then begin
     SetModified;
-    FSwitchFront := AValue;
+    FSwitchFrontInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetPlaningRadius(const AValue: Double);
+procedure TSwitchInfo.SetPlaningRadiusInches(const AValue: Double);
 begin
-  if AValue <> FPlaningRadius then begin
+  if AValue <> FPlaningRadiusInches then begin
     SetModified;
-    FPlaningRadius := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSleeperJ1(const AValue: Double);
-begin
-  if AValue <> FSleeperJ1 then begin
-    SetModified;
-    FSleeperJ1 := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSleeperJ2(const AValue: Double);
-begin
-  if AValue <> FSleeperJ2 then begin
-    SetModified;
-    FSleeperJ2 := AValue;
+    FPlaningRadiusInches := AValue;
   end;
 end;
 
@@ -713,20 +696,20 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetJoggleDepth(const AValue: Double);
+procedure TSwitchInfo.SetJoggleDepthInches(const AValue: Double);
 begin
-  if AValue <> FJoggleDepth then begin
+  if AValue <> FJoggleDepthInches then begin
     SetModified;
-    FJoggleDepth := AValue;
+    FJoggleDepthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetJoggleLength(const AValue: Double);
+procedure TSwitchInfo.SetJoggleLengthInches(const AValue: Double);
 begin
-  if AValue <> FJoggleLength then begin
+  if AValue <> FJoggleLengthInches then begin
     SetModified;
-    FJoggleLength := AValue;
+    FJoggleLengthInches := AValue;
   end;
 end;
 
@@ -785,38 +768,56 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetFbTipOffset(const AValue: Double);
+procedure TSwitchInfo.SetFbTipOffsetInches(const AValue: Double);
 begin
-  if AValue <> FFbTipOffset then begin
+  if AValue <> FFbTipOffsetInches then begin
     SetModified;
-    FFbTipOffset := AValue;
+    FFbTipOffsetInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSleeperJ3(const AValue: Double);
+procedure TSwitchInfo.SetSleeperJ1Inches(const AValue: Double);
 begin
-  if AValue <> FSleeperJ3 then begin
+  if AValue <> FSleeperJ1Inches then begin
     SetModified;
-    FSleeperJ3 := AValue;
+    FSleeperJ1Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSleeperJ4(const AValue: Double);
+procedure TSwitchInfo.SetSleeperJ2Inches(const AValue: Double);
 begin
-  if AValue <> FSleeperJ4 then begin
+  if AValue <> FSleeperJ2Inches then begin
     SetModified;
-    FSleeperJ4 := AValue;
+    FSleeperJ2Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TSwitchInfo.SetSleeperJ5(const AValue: Double);
+procedure TSwitchInfo.SetSleeperJ3Inches(const AValue: Double);
 begin
-  if AValue <> FSleeperJ5 then begin
+  if AValue <> FSleeperJ3Inches then begin
     SetModified;
-    FSleeperJ5 := AValue;
+    FSleeperJ3Inches := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TSwitchInfo.SetSleeperJ4Inches(const AValue: Double);
+begin
+  if AValue <> FSleeperJ4Inches then begin
+    SetModified;
+    FSleeperJ4Inches := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TSwitchInfo.SetSleeperJ5Inches(const AValue: Double);
+begin
+  if AValue <> FSleeperJ5Inches then begin
+    SetModified;
+    FSleeperJ5Inches := AValue;
   end;
 end;
 

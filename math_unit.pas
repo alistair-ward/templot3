@@ -1303,6 +1303,7 @@ uses
   Printers,
   alert_unit,
   config_unit,
+  TemplotConstants,
   control_room,
   help_sheet,
   colour_unit,
@@ -31578,7 +31579,7 @@ var
   n: integer;
   pti: TPlainTrackInfo;
 begin
-  pti := t.turnoutInfo2.plainTrackInfo;
+  pti := t.plainTrackInfo;
 
   pti.customPlainTrack := (pt_i > 4);  // list index for custom plain track.
 
@@ -32664,18 +32665,18 @@ begin
   //sw_name_str: string[100];   // name of switch.
 
   sw.sw_pattern := from.switchPattern;
-  sw.planing := from.planingLength;
+  sw.planing := from.planingLengthInches;
   sw.planing_angle := from.planingAngle;
-  sw.switch_radius_inchormax := from.switchRadius;
+  sw.switch_radius_inchormax := from.switchRadiusInches;
 
-  sw.switch_rail := from.switchRailLength;
-  sw.stock_rail := from.stockRailLength;
-  sw.heel_lead_inches := from.heelLead;
-  sw.heel_offset_inches := from.heelOffset;
-  sw.switch_front_inches := from.switchFront;
-  sw.planing_radius := from.planingRadius;
-  sw.sleeper_j1 := from.sleeperJ1;
-  sw.sleeper_j2 := from.sleeperJ2;
+  sw.switch_rail := from.switchRailLengthInches;
+  sw.stock_rail := from.stockRailLengthInches;
+  sw.heel_lead_inches := from.heelLeadInches;
+  sw.heel_offset_inches := from.heelOffsetInches;
+  sw.switch_front_inches := from.switchFrontInches;
+  sw.planing_radius := from.planingRadiusInches;
+  sw.sleeper_j1 := from.sleeperJ1Inches;
+  sw.sleeper_j2 := from.sleeperJ2Inches;
 
   for i := 0 to Math.Max(from.timberCentresCount, Integer(swtimbco_c)) do
     sw.timber_centres[i] := from.timberCentres[i];
@@ -32683,8 +32684,8 @@ begin
   sw.group_code := from.groupCode;
   sw.size_code := from.sizeCode;
 
-  sw.joggle_depth := from.joggleDepth;
-  sw.joggle_length := from.joggleLength;
+  sw.joggle_depth := from.joggleDepthInches;
+  sw.joggle_length := from.joggleLengthInches;
 
   sw.group_count := from.groupCount;
 
@@ -32696,11 +32697,11 @@ begin
   sw.num_bridge_chairs_main_rail := from.numBridgeChairsMainRail;
   sw.num_bridge_chairs_turnout_rail := from.numBridgeChairsTurnoutRail;
 
-  sw.fb_tip_offset := from.fbTipOffset;
+  sw.fb_tip_offset := from.fbTipOffsetInches;
 
-  sw.sleeper_j3 := from.sleeperJ3;
-  sw.sleeper_j4 := from.sleeperJ4;
-  sw.sleeper_j5 := from.sleeperJ5;
+  sw.sleeper_j3 := from.sleeperJ3Inches;
+  sw.sleeper_j4 := from.sleeperJ4Inches;
+  sw.sleeper_j5 := from.sleeperJ5Inches;
 
   sw.num_slide_chairs := from.numSlideChairs;
   sw.num_block_slide_chairs := from.numBlockSlideChairs;
@@ -32917,7 +32918,7 @@ begin
   if (keeps_list.Count < 1) or (n < 0) or (n > (keeps_list.Count - 1)) then
     EXIT;
 
-  pti := keeps_list[n].turnoutInfo2.plainTrackInfo;
+  pti := keeps_list[n].plainTrackInfo;
 
   if (pti.customPlainTrack) or (pti.listIndex > 4)  // put data in bottom slot.
   then begin
@@ -33262,9 +33263,9 @@ begin
 
     bgnd_template_len_mm := ABS(t.boxDims.turnoutInfo1.turnoutLength);
     //  mm overall length.
-    bgnd_rail_len_in := ABS(t.turnoutInfo2.plainTrackInfo.railLength);
+    bgnd_rail_len_in := ABS(t.plainTrackInfo.railLength);
     // proto inches
-    bgnd_roll_percent := ABS(t.turnoutInfo2.plainTrackInfo.plainTrackTimberRollingPercent);
+    bgnd_roll_percent := ABS(t.plainTrackInfo.plainTrackTimberRollingPercent);
     // rolled in percent.
 
     if ABS(railen[pt_i] - bgnd_rail_len_in) > minfp then begin

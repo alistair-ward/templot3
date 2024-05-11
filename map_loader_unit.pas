@@ -216,11 +216,20 @@ implementation
 {$R *.lfm}
 
 uses
-  Math, point_ex,
-  config_unit, control_room,
+  Math,
+  point_ex,
+  config_unit,
+  TemplotConstants,
+  control_room,
   background_shapes,
-  bgnd_unit, pad_unit, grid_unit, math_unit, entry_sheet,
-  alert_unit, help_sheet, gauge_unit,
+  bgnd_unit,
+  pad_unit,
+  grid_unit,
+  math_unit,
+  entry_sheet,
+  alert_unit,
+  help_sheet,
+  gauge_unit,
   web_map_help_unit;
 
 type

@@ -34,15 +34,13 @@ program templottest;
 {$mode Delphi}{$H+}
 
 uses
-  Classes,
-  Math,
-  consoletestrunner, dummy_vehicle_test, extended_utils,
+  Classes, Math, consoletestrunner, dummy_vehicle_test, extended_utils,
   extended_utils_test, path_interface, matrix_2d, ShovedTimber, BoxDims,
   AlignmentInfo, CheckDiffs, CheckEndDiff, CrossingInfo, HdkCheckRailInfo,
   NotchInfo, PlainTrackInfo, PlatformTrackbedInfo, Project, ProtoInfo, RailInfo,
   SwitchInfo, Template, TransformInfo, TurnoutInfo1, TurnoutInfo2,
-  VeeCheckRailInfo, Centreline, Feature, matrix_2d_test,
-  point_ex_test, utils_test, curve, curve_test, curve_calculator, curve_segment,
+  VeeCheckRailInfo, Centreline, Feature, matrix_2d_test, point_ex_test,
+  utils_test, curve, curve_test, curve_calculator, curve_segment,
   transition_segment_test, straight_segment_test, straight_segment,
   circle_segment, circle_segment_test, transition_segment,
   curve_segment_calculator, slew_calculator, slew_calculator_test,
@@ -50,8 +48,9 @@ uses
   OTOIDManager, OTPersistent, OTPersistentList, OTUndoRedoManager, Murmur3,
   otQueue, otStack, otYaml, otYamlChars, otYamlDOM, otYamlEmitter, otYamlEvent,
   otYamlParser, otYamlReader, otYamlScanner, otYamlToken, otYamlWriter,
-  template_test, centreline_test, line, line_test, switchinfo_test, 
-TemplotConstants;
+  template_test, centreline_test, line, MainsideStockRail, TurnoutsideStockRail,
+  line_test, switchinfo_test, TemplotConstants, mainsidestockrail_test, 
+turnoutsidestockrail_test;
 
 type
 

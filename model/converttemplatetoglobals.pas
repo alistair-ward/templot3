@@ -468,7 +468,7 @@ begin
   ti2.ipx := ipx;    // 208a needed for ID number creation -- not loaded to the control
   ti2.fpx := fpx;    // 208a needed for ID number creation -- not loaded to the control
 
-  pt := ti2.plainTrackInfo;
+  pt := target.plainTrackInfo;
 
   if pt_i > 4 then
     pt.customPlainTrack := True       // list index for custom plain track.
@@ -505,17 +505,17 @@ begin
   swi := ti2.switchInfo;
 
   swi.switchPattern := csi.sw_pattern;
-  swi.planingLength := csi.planing;
+  swi.planingLengthInches := csi.planing;
   swi.planingAngle := csi.planing_angle;
-  swi.switchRadius := csi.switch_radius_inchormax;
-  swi.switchRailLength := csi.switch_rail;
-  swi.stockRailLength := csi.stock_rail;
-  swi.heelLead := csi.heel_lead_inches;
-  swi.heelOffset := csi.heel_offset_inches;
-  swi.switchFront := csi.switch_front_inches;
-  swi.planingRadius := csi.planing_radius;
-  swi.sleeperJ1 := csi.sleeper_j1;
-  swi.sleeperJ2 := csi.sleeper_j2;
+  swi.switchRadiusInches := csi.switch_radius_inchormax;
+  swi.switchRailLengthInches := csi.switch_rail;
+  swi.stockRailLengthInches := csi.stock_rail;
+  swi.heelLeadInches := csi.heel_lead_inches;
+  swi.heelOffsetInches := csi.heel_offset_inches;
+  swi.switchFrontInches := csi.switch_front_inches;
+  swi.planingRadiusInches := csi.planing_radius;
+  swi.sleeperJ1Inches := csi.sleeper_j1;
+  swi.sleeperJ2Inches := csi.sleeper_j2;
 
   swi.ClearTimberCentres;
   for i := 0 to swtimbco_c do begin
@@ -526,18 +526,18 @@ begin
 
   swi.groupCode := csi.group_code;
   swi.sizeCode := csi.size_code;
-  swi.joggleDepth := csi.joggle_depth;
-  swi.joggleLength := csi.joggle_length;
+  swi.joggleDepthInches := csi.joggle_depth;
+  swi.joggleLengthInches := csi.joggle_length;
   swi.groupCount := csi.group_count;
   swi.joggledStockRail := csi.joggled_stock_rail;
   swi.validData := csi.valid_data;
   swi.frontTimbered := csi.front_timbered;
   swi.numBridgeChairsMainRail := csi.num_bridge_chairs_main_rail;
   swi.numBridgeChairsTurnoutRail := csi.num_bridge_chairs_turnout_rail;
-  swi.fbTipOffset := csi.fb_tip_offset;
-  swi.sleeperJ3 := csi.sleeper_j3;
-  swi.sleeperJ4 := csi.sleeper_j4;
-  swi.sleeperJ5 := csi.sleeper_j5;
+  swi.fbTipOffsetInches := csi.fb_tip_offset;
+  swi.sleeperJ3Inches := csi.sleeper_j3;
+  swi.sleeperJ4Inches := csi.sleeper_j4;
+  swi.sleeperJ5Inches := csi.sleeper_j5;
   swi.numSlideChairs := csi.num_slide_chairs;
   swi.numBlockSlideChairs := csi.num_block_slide_chairs;
   swi.numBlockHeelChairs := csi.num_block_heel_chairs;
@@ -933,7 +933,7 @@ begin
 
   startx := ti2.startDrawX;               //    turnout startx  3-11-99
 
-  pt := ti2.plainTrackInfo;
+  pt := Source.plainTrackInfo;
 
   if (pt.customPlainTrack) or (pt.listIndex > 4) then begin
     pt_i := plain_track_form.plain_track_spacings_listbox.Items.Count - 1;

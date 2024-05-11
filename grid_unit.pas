@@ -207,6 +207,7 @@ uses
   LCLType,
   LCLIntf,
   point_ex,
+  TemplotConstants,
   control_room,
   pad_unit,
   background_shapes,

@@ -274,17 +274,17 @@ begin
   Result := TSwitchInfo.Create(nil);
   try
     Result.switchPattern := AInfo.sw_pattern;
-    Result.planingLength := AInfo.planing;
+    Result.planingLengthInches := AInfo.planing;
     Result.planingAngle := AInfo.planing_angle;
-    Result.switchRadius := AInfo.switch_radius_inchormax;
-    Result.switchRailLength := AInfo.switch_rail;
-    Result.stockRailLength := AInfo.stock_rail;
-    Result.heelLead := AInfo.heel_lead_inches;
-    Result.heelOffset := AInfo.heel_offset_inches;
-    Result.switchFront := AInfo.switch_front_inches;
-    Result.planingRadius := AInfo.planing_radius;
-    Result.sleeperJ1 := AInfo.sleeper_j1;
-    Result.sleeperJ2 := AInfo.sleeper_j2;
+    Result.switchRadiusInches := AInfo.switch_radius_inchormax;
+    Result.switchRailLengthInches := AInfo.switch_rail;
+    Result.stockRailLengthInches := AInfo.stock_rail;
+    Result.heelLeadInches := AInfo.heel_lead_inches;
+    Result.heelOffsetInches := AInfo.heel_offset_inches;
+    Result.switchFrontInches := AInfo.switch_front_inches;
+    Result.planingRadiusInches := AInfo.planing_radius;
+    Result.sleeperJ1Inches := AInfo.sleeper_j1;
+    Result.sleeperJ2Inches := AInfo.sleeper_j2;
 
     for i := 0 to swtimbco_c do begin
       if AInfo.timber_centres[i] = 0 then
@@ -294,16 +294,16 @@ begin
 
     Result.groupCode := AInfo.group_code;
     Result.sizeCode := AInfo.size_code;
-    Result.joggleDepth := AInfo.joggle_depth;
-    Result.joggleLength := AInfo.joggle_length;
+    Result.joggleDepthInches := AInfo.joggle_depth;
+    Result.joggleLengthInches := AInfo.joggle_length;
     Result.groupCount := AInfo.group_count;
     Result.validData := AInfo.valid_data;
     Result.frontTimbered := AInfo.front_timbered;
     Result.numBridgeChairsMainRail := AInfo.num_bridge_chairs_main_rail;
-    Result.fbTipOffset := AInfo.fb_tip_offset;
-    Result.sleeperJ3 := AInfo.sleeper_j3;
-    Result.sleeperJ4 := AInfo.sleeper_j4;
-    Result.sleeperJ5 := AInfo.sleeper_j5;
+    Result.fbTipOffsetInches := AInfo.fb_tip_offset;
+    Result.sleeperJ3Inches := AInfo.sleeper_j3;
+    Result.sleeperJ4Inches := AInfo.sleeper_j4;
+    Result.sleeperJ5Inches := AInfo.sleeper_j5;
     Result.numSlideChairs := AInfo.num_slide_chairs;
     Result.numBlockSlideChairs := AInfo.num_block_slide_chairs;
     Result.numBlockHeelChairs := AInfo.num_block_heel_chairs;

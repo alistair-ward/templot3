@@ -204,6 +204,7 @@ implementation
 
 uses
   Printers,
+  TemplotConstants,
   control_room,
   grid_unit,
   alert_unit,

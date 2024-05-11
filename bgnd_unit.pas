@@ -510,10 +510,24 @@ implementation
 {$R *.lfm}
 
 uses
-  LCLIntf, Math, Clipbrd,
+  LCLIntf,
+  Math,
+  Clipbrd,
   config_unit,
-  control_room, grid_unit, colour_unit, help_sheet, chat_unit, alert_unit,
-  entry_sheet, math_unit, wait_message, image_viewer_unit, xml_unit, map_loader_unit, action_unit,
+  TemplotConstants,
+  control_room,
+  grid_unit,
+  colour_unit,
+  help_sheet,
+  chat_unit,
+  alert_unit,
+  entry_sheet,
+  math_unit,
+  wait_message,
+  image_viewer_unit,
+  xml_unit,
+  map_loader_unit,
+  action_unit,
   TurnoutInfo1;
 
 //________________________________________________________________________________________

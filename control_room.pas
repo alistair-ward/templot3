@@ -646,6 +646,7 @@ uses
   {@demo Clipbrd,}
   Printers,
   TLoggerUnit,
+  TemplotConstants,
   alert_unit,
   config_unit,
   help_sheet,

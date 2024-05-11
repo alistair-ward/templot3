@@ -116,8 +116,15 @@ implementation
 uses
   Printers,
   config_unit,
-  pad_unit, preview_unit, help_sheet, alert_unit, entry_sheet, chat_unit,
-  control_room, math_unit;
+  pad_unit,
+  preview_unit,
+  help_sheet,
+  alert_unit,
+  entry_sheet,
+  chat_unit,
+  TemplotConstants,
+  control_room,
+  math_unit;
 
 const
   cal_help_str: string = '      Printer  Calibration  -  Factors  Known' +

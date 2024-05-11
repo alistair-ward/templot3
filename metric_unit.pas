@@ -124,7 +124,11 @@ implementation
 {$R *.lfm}
 
 uses
-  control_room, pad_unit, math_unit, colour_unit;
+  TemplotConstants,
+  control_room,
+  pad_unit,
+  math_unit,
+  colour_unit;
 
 var
 

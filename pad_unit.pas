@@ -3918,6 +3918,7 @@ uses
   { OT-FIRST dtpRasterFormats,}// dtpResource,
 
   config_unit,
+  TemplotConstants,
   control_room,
   grid_unit,
   switch_select,

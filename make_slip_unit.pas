@@ -79,7 +79,14 @@ implementation
 
 uses
   OTUndoRedoManager,
-  pad_unit, math_unit, keep_select, alert_unit, info_unit, control_room, shove_timber,
+  pad_unit,
+  math_unit,
+  keep_select,
+  alert_unit,
+  info_unit,
+  TemplotConstants,
+  control_room,
+  shove_timber,
   switch_select,
   curve,
   template_records,

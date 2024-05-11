@@ -12,7 +12,6 @@ uses
   OTYamlEmitter,
   SwitchInfo,
   CrossingInfo,
-  PlainTrackInfo,
   HdkCheckRailInfo,
   VeeCheckRailInfo;
 
@@ -113,11 +112,6 @@ attributes:
   type: TCrossingInfo
   owns: create
   access: [get]
-- name: plainTrackInfo
-  type: TPlainTrackInfo
-  owns: create
-  access: [get]
-  comment: need the plain track info for approach and exit tracks.
 - name: diamondAutoCode
   type: Integer
   comment: 0=auto, 1=fixed diamond, 2=switch diamond.
@@ -204,7 +198,6 @@ type
     //# genMemberVars
     FSwitchInfo: TOID;
     FCrossingInfo: TOID;
-    FPlainTrackInfo: TOID;
     FDiamondAutoCode: Integer;
     FBonusTimberCount: Integer;
     FEqualizingFixed: Boolean;
@@ -246,7 +239,6 @@ type
     //# genGetSetDeclarations
     function GetSwitchInfo: TSwitchInfo;
     function GetCrossingInfo: TCrossingInfo;
-    function GetPlainTrackInfo: TPlainTrackInfo;
     function GetHdkCheckRailInfo: THdkCheckRailInfo;
     function GetVeeCheckRailInfo: TVeeCheckRailInfo;
     procedure SetDiamondAutoCode(const AValue: Integer);
@@ -293,9 +285,6 @@ type
     //# genProperty
     property switchInfo: TSwitchInfo read GetSwitchInfo;
     property crossingInfo: TCrossingInfo read GetCrossingInfo;
-
-    // need the plain track info for approach and exit tracks.
-    property plainTrackInfo: TPlainTrackInfo read GetPlainTrackInfo;
 
     // 0=auto, 1=fixed diamond, 2=switch diamond.
     property diamondAutoCode: Integer read FDiamondAutoCode write SetDiamondAutoCode;
@@ -378,10 +367,6 @@ begin
   else
     FCrossingInfo := 0;
   if AOID = 0 then
-    FPlainTrackInfo := TPlainTrackInfo.Create(nil).oid
-  else
-    FPlainTrackInfo := 0;
-  if AOID = 0 then
     FHdkCheckRailInfo := THdkCheckRailInfo.Create(nil).oid
   else
     FHdkCheckRailInfo := 0;
@@ -397,7 +382,6 @@ begin
   //# genDestroy
   SetOwned(FSwitchInfo, nil);
   SetOwned(FCrossingInfo, nil);
-  SetOwned(FPlainTrackInfo, nil);
   SetOwned(FHdkCheckRailInfo, nil);
   SetOwned(FVeeCheckRailInfo, nil);
   //# endGenDestroy
@@ -417,9 +401,6 @@ begin
   else
   if AName = 'crossingInfo' then
     RestoreYamlObjectOwn(FCrossingInfo, StrToInteger(AValue), ALoader)
-  else
-  if AName = 'plainTrackInfo' then
-    RestoreYamlObjectOwn(FPlainTrackInfo, StrToInteger(AValue), ALoader)
   else
   if AName = 'diamondAutoCode' then
     FDiamondAutoCode := StrToInteger(AValue)
@@ -527,7 +508,6 @@ procedure TTurnoutInfo2.RestoreAttributes(AStream : TStream);
   //# genRestoreVars
   AStream.ReadBuffer(FSwitchInfo, sizeof(TOID));
   AStream.ReadBuffer(FCrossingInfo, sizeof(TOID));
-  AStream.ReadBuffer(FPlainTrackInfo, sizeof(TOID));
   AStream.ReadBuffer(FDiamondAutoCode, sizeof(Integer));
   AStream.ReadBuffer(FBonusTimberCount, sizeof(Integer));
   AStream.ReadBuffer(FEqualizingFixed, sizeof(Boolean));
@@ -571,7 +551,6 @@ procedure TTurnoutInfo2.SaveAttributes(AStream : TStream);
   //# genSaveVars
   AStream.WriteBuffer(FSwitchInfo, sizeof(TOID));
   AStream.WriteBuffer(FCrossingInfo, sizeof(TOID));
-  AStream.WriteBuffer(FPlainTrackInfo, sizeof(TOID));
   AStream.WriteBuffer(FDiamondAutoCode, sizeof(Integer));
   AStream.WriteBuffer(FBonusTimberCount, sizeof(Integer));
   AStream.WriteBuffer(FEqualizingFixed, sizeof(Boolean));
@@ -615,7 +594,6 @@ procedure TTurnoutInfo2.SaveYamlAttributes(AEmitter : TYamlEmitter);
   //# genSaveYamlVars
   SaveYamlObject(AEmitter, 'switchInfo', FSwitchInfo);
   SaveYamlObject(AEmitter, 'crossingInfo', FCrossingInfo);
-  SaveYamlObject(AEmitter, 'plainTrackInfo', FPlainTrackInfo);
   SaveYamlInteger(AEmitter, 'diamondAutoCode', FDiamondAutoCode);
   SaveYamlInteger(AEmitter, 'bonusTimberCount', FBonusTimberCount);
   SaveYamlBoolean(AEmitter, 'equalizingFixed', FEqualizingFixed);
@@ -661,12 +639,6 @@ end;
 function TTurnoutInfo2.GetCrossingInfo: TCrossingInfo;
 begin
   Result := TCrossingInfo(FromOID(FCrossingInfo));
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-function TTurnoutInfo2.GetPlainTrackInfo: TPlainTrackInfo;
-begin
-  Result := TPlainTrackInfo(FromOID(FPlainTrackInfo));
 end;
 
 // GENERATED METHOD - DO NOT EDIT

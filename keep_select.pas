@@ -689,6 +689,7 @@ uses
   Generics.Defaults,
   LCLIntf,
   Math,
+  TemplotConstants,
   control_room,
   config_unit,
   {pad_unit,}

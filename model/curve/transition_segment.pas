@@ -263,14 +263,11 @@ begin
   estimateLength := EstimateCurveLength(distance, estimatedResult, offset);
   error := estimateLength - distanceFromOffsetPoint;
   while (abs(error) > threshold) and (count < thresholdCount) do begin
-    Writeln('error: ', error);
     estimatedResult := estimatedResult - error;
     estimateLength := EstimateCurveLength(distance, estimatedResult, offset);
     error := estimateLength - distanceFromOffsetPoint;
     Inc(count);
   end;
-
-  WriteLn('count: ', count);
   Result := estimatedResult;
 end;
 

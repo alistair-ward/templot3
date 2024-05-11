@@ -167,6 +167,7 @@ implementation
 uses
   Printers,
   Clipbrd,
+  TemplotConstants,
   control_room,
   pad_unit,
   entry_sheet,

@@ -2919,31 +2919,31 @@ begin
   sw := template.turnoutInfo2.switchInfo;
 
   sw.switchPattern := ConvertBox2ToSwitchPattern(switch_info.sw_pattern);
-  sw.planingLength := switch_info.planing;
+  sw.planingLengthInches := switch_info.planing;
   sw.planingAngle := switch_info.planing_angle;
-  sw.switchRadius := switch_info.switch_radius_inchormax;
-  sw.switchRailLength := switch_info.switch_rail;
-  sw.stockRailLength := switch_info.stock_rail;
-  sw.heelLead := switch_info.heel_lead_inches;
-  sw.heelOffset := switch_info.heel_offset_inches;
-  sw.switchFront := switch_info.switch_front_inches;
-  sw.planingRadius := switch_info.planing_radius;
-  sw.sleeperJ1 := switch_info.sleeper_j1;
-  sw.sleeperJ2 := switch_info.sleeper_j2;
+  sw.switchRadiusInches := switch_info.switch_radius_inchormax;
+  sw.switchRailLengthInches := switch_info.switch_rail;
+  sw.stockRailLengthInches := switch_info.stock_rail;
+  sw.heelLeadInches := switch_info.heel_lead_inches;
+  sw.heelOffsetInches := switch_info.heel_offset_inches;
+  sw.switchFrontInches := switch_info.switch_front_inches;
+  sw.planingRadiusInches := switch_info.planing_radius;
+  sw.sleeperJ1Inches := switch_info.sleeper_j1;
+  sw.sleeperJ2Inches := switch_info.sleeper_j2;
   sw.groupCode := switch_info.group_code;
   sw.sizeCode := switch_info.size_code;
-  sw.joggleDepth := switch_info.joggle_depth;
-  sw.joggleLength := switch_info.joggle_length;
+  sw.joggleDepthInches := switch_info.joggle_depth;
+  sw.joggleLengthInches := switch_info.joggle_length;
   sw.groupCount := switch_info.group_count;
   sw.joggledStockRail := switch_info.joggled_stock_rail;
   sw.validData := switch_info.valid_data;
   sw.frontTimbered := switch_info.front_timbered;
   sw.numBridgeChairsMainRail := switch_info.num_bridge_chairs_main_rail;
   sw.numBridgeChairsTurnoutRail := switch_info.num_bridge_chairs_turnout_rail;
-  sw.fbTipOffset := switch_info.fb_tip_offset;
-  sw.sleeperJ3 := switch_info.sleeper_j3;
-  sw.sleeperJ4 := switch_info.sleeper_j4;
-  sw.sleeperJ5 := switch_info.sleeper_j5;
+  sw.fbTipOffsetInches := switch_info.fb_tip_offset;
+  sw.sleeperJ3Inches := switch_info.sleeper_j3;
+  sw.sleeperJ4Inches := switch_info.sleeper_j4;
+  sw.sleeperJ5Inches := switch_info.sleeper_j5;
   sw.numSlideChairs := switch_info.num_slide_chairs;
   sw.numBlockSlideChairs := switch_info.num_block_slide_chairs;
   sw.numBlockHeelChairs := switch_info.num_block_heel_chairs;
@@ -3010,7 +3010,7 @@ procedure ConvertBox2ToPlainTrackInfo(const track: TBox2PlainTrackInfo; template
 var
   pi: TPlainTrackInfo;
 begin
-  pi := template.turnoutInfo2.plainTrackInfo;
+  pi := template.plainTrackInfo;
 
   pi.customPlainTrack := track.pt_custom;
   pi.listIndex := track.list_index;

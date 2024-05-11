@@ -78,8 +78,16 @@ function grow_prune_to_meet(boundary1, boundary2: Tnotch; index1, index2: intege
 implementation
 
 uses
-  control_room, math_unit, info_unit, keep_select, shove_timber, alert_unit,
-  help_sheet, grid_unit, wait_message,
+  TemplotConstants,
+  control_room,
+  math_unit,
+  info_unit,
+  keep_select,
+  shove_timber,
+  alert_unit,
+  help_sheet,
+  grid_unit,
+  wait_message,
   curve,
   rail_data_unit,
   TurnoutInfo1;

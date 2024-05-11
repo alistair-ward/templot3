@@ -130,8 +130,17 @@ procedure diffs_gap_mouse_action;
 
 implementation
 
-uses pad_unit, math_unit, control_room, help_sheet, colour_unit, alert_unit,
-  entry_sheet, template_records, mark_unit;
+uses
+  pad_unit,
+  math_unit,
+  TemplotConstants,
+  control_room,
+  help_sheet,
+  colour_unit,
+  alert_unit,
+  entry_sheet,
+  template_records,
+  mark_unit;
 
 {$R *.lfm}
 
