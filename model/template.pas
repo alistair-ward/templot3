@@ -69,6 +69,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TTemplate = class(TOTPersistent)
   private
@@ -183,6 +185,8 @@ type
   TTemplateOwningList = class(TOTOwningList<TTemplate>);
   TTemplateReferenceList = class(TOTReferenceList<TTemplate>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -192,6 +196,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TTemplate }
 

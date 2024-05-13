@@ -67,6 +67,16 @@ end;//record
 
 }
 
+{# enum TRailJointCode
+---
+enum: TRailJointCode
+values:
+- rjNone
+- rjNormal
+- rjStaggered
+...
+}
+
 {# class TPlainTrackInfo
 ---
 class: TPlainTrackInfo
@@ -86,8 +96,7 @@ attributes:
   array: 0..psleep_c
   comment: spacings in inches for custom
 - name: railJointsCode
-  type: Integer
-  comment:  0=normal, 1=staggered, -1=none (cwr).
+  type: TRailJointCode
 - name: userPegRail
   type: Integer
 - name: userPegDataValid
@@ -108,6 +117,14 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  TRailJointCode = (
+    rjNone,
+    rjNormal,
+    rjStaggered
+    );
+
+  //# endGenEnumDeclarations
 
   TPlainTrackInfo = class(TOTPersistent)
   private
@@ -117,7 +134,7 @@ type
     FRailLength: Double;
     FSleepersPerLength: Integer;
     FSleeperCentres: array[0..psleep_c] of Double;
-    FRailJointsCode: Integer;
+    FRailJointsCode: TRailJointCode;
     FUserPegRail: Integer;
     FUserPegDataValid: Boolean;
     FUserPegX: Double;
@@ -140,7 +157,7 @@ type
     procedure SetRailLength(const AValue: Double);
     procedure SetSleepersPerLength(const AValue: Integer);
     procedure SetSleeperCentres(AIndex: Integer; const AValue: Double);
-    procedure SetRailJointsCode(const AValue: Integer);
+    procedure SetRailJointsCode(const AValue: TRailJointCode);
     procedure SetUserPegRail(const AValue: Integer);
     procedure SetUserPegDataValid(const AValue: Boolean);
     procedure SetUserPegX(const AValue: Double);
@@ -173,9 +190,7 @@ type
 
     // spacings in inches for custom
     property sleeperCentres[AIndex: Integer]: Double read GetSleeperCentres write SetSleeperCentres;
-
-    // 0=normal, 1=staggered, -1=none (cwr).
-    property railJointsCode: Integer read FRailJointsCode write SetRailJointsCode;
+    property railJointsCode: TRailJointCode read FRailJointsCode write SetRailJointsCode;
     property userPegRail: Integer read FUserPegRail write SetUserPegRail;
     property userPegDataValid: Boolean read FUserPegDataValid write SetUserPegDataValid;
     property userPegX: Double read FUserPegX write SetUserPegX;
@@ -190,14 +205,37 @@ type
   TPlainTrackInfoOwningList = class(TOTOwningList<TPlainTrackInfo>);
   TPlainTrackInfoReferenceList = class(TOTReferenceList<TPlainTrackInfo>);
 
+  //# genEnumSerialDeclarations
+  function StrToTRailJointCode(AValue: String): TRailJointCode;
+  procedure SaveYamlTRailJointCode(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TRailJointCode);
+
+  //# endGenEnumSerialDeclarations
 
 implementation
 
 uses
+  TypInfo,
   TLoggerUnit;
 
 var
   log : ILogger;
+
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
+function StrToTRailJointCode(AValue: String): TRailJointCode;
+begin
+  Result := TRailJointCode(GetEnumValue(TypeInfo(TRailJointCode), AValue));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYamlTRailJointCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TRailJointCode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TRailJointCode), Ord(AValue)));
+end;
+
+//# endGenEnumSerialMethods
 
 
 { TPlainTrackInfo }
@@ -240,7 +278,7 @@ begin
     FSleeperCentres[Integer(Ord(Low(FSleeperCentres))+AIndex)] := StrToDouble(AValue)
   else
   if AName = 'railJointsCode' then
-    FRailJointsCode := StrToInteger(AValue)
+    FRailJointsCode := StrToTRailJointCode(AValue)
   else
   if AName = 'userPegRail' then
     FUserPegRail := StrToInteger(AValue)
@@ -282,7 +320,7 @@ procedure TPlainTrackInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FRailLength, sizeof(Double));
   AStream.ReadBuffer(FSleepersPerLength, sizeof(Integer));
   AStream.ReadBuffer(FSleeperCentres[Low(FSleeperCentres)], (Ord(High(FSleeperCentres))-Ord(Low(FSleeperCentres)) + 1)*sizeof(Double));
-  AStream.ReadBuffer(FRailJointsCode, sizeof(Integer));
+  AStream.ReadBuffer(FRailJointsCode, sizeof(TRailJointCode));
   AStream.ReadBuffer(FUserPegRail, sizeof(Integer));
   AStream.ReadBuffer(FUserPegDataValid, sizeof(Boolean));
   AStream.ReadBuffer(FUserPegX, sizeof(Double));
@@ -306,7 +344,7 @@ procedure TPlainTrackInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FRailLength, sizeof(Double));
   AStream.WriteBuffer(FSleepersPerLength, sizeof(Integer));
   AStream.WriteBuffer(FSleeperCentres[Low(FSleeperCentres)], (Ord(High(FSleeperCentres))-Ord(Low(FSleeperCentres)) + 1)*sizeof(Double));
-  AStream.WriteBuffer(FRailJointsCode, sizeof(Integer));
+  AStream.WriteBuffer(FRailJointsCode, sizeof(TRailJointCode));
   AStream.WriteBuffer(FUserPegRail, sizeof(Integer));
   AStream.WriteBuffer(FUserPegDataValid, sizeof(Boolean));
   AStream.WriteBuffer(FUserPegX, sizeof(Double));
@@ -333,7 +371,7 @@ procedure TPlainTrackInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   for i := Ord(Low(FSleeperCentres)) to Ord(High(FSleeperCentres)) do
     SaveYamlSequenceDouble(AEmitter, FSleeperCentres[Integer(i)]);
   SaveYamlEndSequence(AEmitter);
-  SaveYamlInteger(AEmitter, 'railJointsCode', FRailJointsCode);
+  SaveYamlTRailJointCode(AEmitter, 'railJointsCode', FRailJointsCode);
   SaveYamlInteger(AEmitter, 'userPegRail', FUserPegRail);
   SaveYamlBoolean(AEmitter, 'userPegDataValid', FUserPegDataValid);
   SaveYamlDouble(AEmitter, 'userPegX', FUserPegX);
@@ -398,7 +436,7 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TPlainTrackInfo.SetRailJointsCode(const AValue: Integer);
+procedure TPlainTrackInfo.SetRailJointsCode(const AValue: TRailJointCode);
 begin
   if AValue <> FRailJointsCode then begin
     SetModified;

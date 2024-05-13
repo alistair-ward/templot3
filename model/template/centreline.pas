@@ -15,6 +15,21 @@ uses
   ProtoInfo;
 
 
+{# enum TCentrelineOption
+---
+enum: TCentrelineOption
+values:
+- cloMainSideSleeperEnds
+- cloMainSideTrack
+- cloMainSideDouble
+- cloNormal
+- cloTurnoutSideDouble
+- cloTurnoutSideTrack
+- cloTurnoutSideSleeperEnds
+- cloCustom
+...
+}
+
 {# class TCentreline
 ---
 class: TCentreline
@@ -31,8 +46,19 @@ attributes:
 
 type
 
-  TCentrelineOption = (cloMainSideSleeperEnds, cloMainSideTrack, cloMainSideDouble,
-    cloNormal, cloTurnoutSideDouble, cloTurnoutSideTrack, cloTurnoutSideSleeperEnds, cloCustom);
+  //# genEnumDeclarations
+  TCentrelineOption = (
+    cloMainSideSleeperEnds,
+    cloMainSideTrack,
+    cloMainSideDouble,
+    cloNormal,
+    cloTurnoutSideDouble,
+    cloTurnoutSideTrack,
+    cloTurnoutSideSleeperEnds,
+    cloCustom
+    );
+
+  //# endGenEnumDeclarations
 
   TCentreline = class(TFeature)
   private
@@ -72,9 +98,9 @@ type
     procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property option: TCentrelineOption Read FOption Write SetOption;
-    property customOffset: Double Read FCustomOffset Write SetCustomOffset;
-    property protoInfo: TProtoInfo Read GetProtoInfo Write SetProtoInfo;
+    property option: TCentrelineOption read FOption write SetOption;
+    property customOffset: Double read FCustomOffset write SetCustomOffset;
+    property protoInfo: TProtoInfo read GetProtoInfo write SetProtoInfo;
     //# endGenProperty
 
     property centrelineOffset: Double Read GetCentrelineOffset;
@@ -83,10 +109,12 @@ type
   TCentrelineOwningList = class(TOTOwningList<TCentreline>);
   TCentrelineReferenceList = class(TOTReferenceList<TCentreline>);
 
-function StrToTCentrelineOption(AValue: String): TCentrelineOption;
-procedure SaveYamlTCentrelineOption(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TCentrelineOption);
+//# genEnumSerialDeclarations
+  function StrToTCentrelineOption(AValue: String): TCentrelineOption;
+  procedure SaveYamlTCentrelineOption(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TCentrelineOption);
 
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -99,16 +127,21 @@ uses
 var
   log: ILogger;
 
+  //# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
 function StrToTCentrelineOption(AValue: String): TCentrelineOption;
 begin
   Result := TCentrelineOption(GetEnumValue(TypeInfo(TCentrelineOption), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTCentrelineOption(AEmitter: TYamlEmitter; const AName: String;
   AValue: TCentrelineOption);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TCentrelineOption), Ord(AValue)));
 end;
+
+  //# endGenEnumSerialMethods
 
 { TCentreline }
 

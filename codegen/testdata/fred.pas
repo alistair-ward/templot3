@@ -21,6 +21,9 @@ attributes:
 
 type
 
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
+
   TFred = class(TOTPersistent)
   private
     //# genMemberVars
@@ -51,6 +54,8 @@ type
   TFredOwningList = class(TOTOwningList<TFred>);
   TFredReferenceList = class(TOTReferenceList<TFred>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -60,6 +65,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TFred }
 

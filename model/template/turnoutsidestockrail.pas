@@ -25,6 +25,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TTurnoutsideStockRail = class(TFeature)
   private
@@ -60,6 +62,8 @@ type
   TTurnoutsideStockRailOwningList = class(TOTOwningList<TTurnoutsideStockRail>);
   TTurnoutsideStockRailReferenceList = class(TOTReferenceList<TTurnoutsideStockRail>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -69,6 +73,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TTurnoutsideStockRail }
 

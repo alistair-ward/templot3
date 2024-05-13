@@ -182,6 +182,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TPlatformTrackbedInfo = class(TOTPersistent)
   private
@@ -324,6 +326,8 @@ type
   TPlatformTrackbedInfoOwningList = class(TOTOwningList<TPlatformTrackbedInfo>);
   TPlatformTrackbedInfoReferenceList = class(TOTReferenceList<TPlatformTrackbedInfo>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -333,6 +337,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TPlatformTrackbedInfo }
 

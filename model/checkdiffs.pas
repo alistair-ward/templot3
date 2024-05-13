@@ -53,6 +53,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TCheckDiffs = class(TOTPersistent)
   private
@@ -108,6 +110,8 @@ type
   TCheckDiffsOwningList = class(TOTOwningList<TCheckDiffs>);
   TCheckDiffsReferenceList = class(TOTReferenceList<TCheckDiffs>);
 
+  //# genEnumSerialDeclarations
+  //# endGenEnumSerialDeclarations
 
 implementation
 
@@ -117,6 +121,8 @@ uses
 var
   log : ILogger;
 
+  //# genEnumSerialMethods
+  //# endGenEnumSerialMethods
 
 { TCheckDiffs }
 

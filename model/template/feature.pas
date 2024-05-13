@@ -33,6 +33,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   { TFeature }
 
@@ -87,6 +89,8 @@ type
   TFeatureOwningList = class(TOTOwningList<TFeature>);
   TFeatureReferenceList = class(TOTReferenceList<TFeature>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -96,6 +100,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TFeature }
 

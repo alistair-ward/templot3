@@ -263,6 +263,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TProtoInfo = class(TOTPersistent)
   private
@@ -479,6 +481,8 @@ type
   TProtoInfoOwningList = class(TOTOwningList<TProtoInfo>);
   TProtoInfoReferenceList = class(TOTReferenceList<TProtoInfo>);
 
+  //# genEnumSerialDeclarations
+  //# endGenEnumSerialDeclarations
 
 implementation
 
@@ -488,6 +492,8 @@ uses
 var
   log : ILogger;
 
+  //# genEnumSerialMethods
+  //# endGenEnumSerialMethods
 
 { TProtoInfo }
 

@@ -62,9 +62,7 @@ begin
   end;
 end;
 
-
 initialization
-
   RegisterTest(TTestUnitGenerator);
 end.
 

@@ -11,6 +11,16 @@ uses
   OTPersistentList,
   OTYamlEmitter;
 
+{# enum TSwitchPattern
+---
+enum: TSwitchPattern
+values:
+- spStraightOrCurved
+- spSemiCurved
+- spDoubleCurved
+...
+}
+
 
 {# class TSwitchInfo
 ---
@@ -100,9 +110,14 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  TSwitchPattern = (
+    spStraightOrCurved,
+    spSemiCurved,
+    spDoubleCurved
+    );
 
-  // 0 = curved planing or straight switch; -1 = semi-curved switch;  1 = double-curved switch.
-  TSwitchPattern = (spStraightOrCurved, spSemiCurved, spDoubleCurved);
+  //# endGenEnumDeclarations
 
   TSwitchInfo = class(TOTPersistent)
   private
@@ -268,9 +283,12 @@ type
   TSwitchInfoOwningList = class(TOTOwningList<TSwitchInfo>);
   TSwitchInfoReferenceList = class(TOTReferenceList<TSwitchInfo>);
 
-function StrToTSwitchPattern(AValue: String): TSwitchPattern;
-procedure SaveYamlTSwitchPattern(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TSwitchPattern);
+//# genEnumSerialDeclarations
+  function StrToTSwitchPattern(AValue: String): TSwitchPattern;
+  procedure SaveYamlTSwitchPattern(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TSwitchPattern);
+
+//# endGenEnumSerialDeclarations
 
 
 implementation
@@ -282,17 +300,21 @@ uses
 var
   log: ILogger;
 
-
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
 function StrToTSwitchPattern(AValue: String): TSwitchPattern;
 begin
   Result := TSwitchPattern(GetEnumValue(TypeInfo(TSwitchPattern), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTSwitchPattern(AEmitter: TYamlEmitter; const AName: String;
   AValue: TSwitchPattern);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TSwitchPattern), Ord(AValue)));
 end;
+
+//# endGenEnumSerialMethods
 
 { TSwitchInfo }
 

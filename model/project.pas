@@ -13,6 +13,18 @@ uses
   template;
 
 
+{# enum TGridUnitCode
+---
+enum: TGridUnitCode
+values:
+- gucFeet
+- gucInches
+- gucProtoFeet
+- gucCentimetres
+- gucMillimetres
+...
+}
+
 {# class TProject
 ---
 class: TProject
@@ -41,7 +53,16 @@ attributes:
 }
 
 type
-  TGridUnitCode = (gucFeet, gucInches, gucProtoFeet, gucCentimetres, gucMillimetres);
+  //# genEnumDeclarations
+  TGridUnitCode = (
+    gucFeet,
+    gucInches,
+    gucProtoFeet,
+    gucCentimetres,
+    gucMillimetres
+    );
+
+  //# endGenEnumDeclarations
 
   TProject = class(TOTPersistent)
   private
@@ -104,6 +125,12 @@ type
   TProjectOwningList = class(TOTOwningList<TProject>);
   TProjectReferenceList = class(TOTReferenceList<TProject>);
 
+//# genEnumSerialDeclarations
+  function StrToTGridUnitCode(AValue: String): TGridUnitCode;
+  procedure SaveYamlTGridUnitCode(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TGridUnitCode);
+
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -114,6 +141,21 @@ uses
 var
   log : ILogger;
 
+  //# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
+function StrToTGridUnitCode(AValue: String): TGridUnitCode;
+begin
+  Result := TGridUnitCode(GetEnumValue(TypeInfo(TGridUnitCode), AValue));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYamlTGridUnitCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TGridUnitCode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TGridUnitCode), Ord(AValue)));
+end;
+
+  //# endGenEnumSerialMethods
 
 { TProject }
 

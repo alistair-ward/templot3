@@ -26,6 +26,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   // old Tnotch record, moved here temporarily...
   Tnotch = record      //  a notch position.
@@ -78,6 +80,8 @@ type
   TNotchInfoOwningList = class(TOTOwningList<TNotchInfo>);
   TNotchInfoReferenceList = class(TOTReferenceList<TNotchInfo>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -87,6 +91,8 @@ uses
 var
   log: ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TNotchInfo }
 

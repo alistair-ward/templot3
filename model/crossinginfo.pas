@@ -222,6 +222,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TCrossingInfo = class(TOTPersistent)
   private
@@ -438,6 +440,8 @@ type
   TCrossingInfoOwningList = class(TOTOwningList<TCrossingInfo>);
   TCrossingInfoReferenceList = class(TOTReferenceList<TCrossingInfo>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -447,6 +451,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TCrossingInfo }
 

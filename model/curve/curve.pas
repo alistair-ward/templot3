@@ -69,6 +69,8 @@ const
 
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TCurve = class(TOTPersistent, ICurveParameters)
   private
@@ -171,6 +173,8 @@ type
   TCurveOwningList = class(TOTOwningList<TCurve>);
   TCurveReferenceList = class(TOTReferenceList<TCurve>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -186,6 +190,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TCurve }
 

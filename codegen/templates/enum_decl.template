@@ -1,0 +1,9 @@
+Name=sub
+Value=msub
+||
+  |Name| = (
+|REPEAT Value SEP ,|
+    |value||SEP|
+|ENDREPEAT Value|
+    );
+

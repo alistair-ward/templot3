@@ -48,6 +48,25 @@ Trail_info = record     // rail switch settings.  23-5-01.
 end;
 *)
 
+{# enum TFlaredEnd
+---
+enum: TFlaredEnd
+values:
+- feBent
+- feMachined
+...
+}
+
+{# enum TKnuckleCode
+---
+enum: TKnuckleCode
+values:
+- kcNormal
+- kcSharp
+- kcCustom
+...
+}
+
 
 {# class TRailInfo
 ---
@@ -88,9 +107,19 @@ attributes:
 }
 
 type
-  TFlaredEnd = (feBent, feMachined);
+  //# genEnumDeclarations
+  TFlaredEnd = (
+    feBent,
+    feMachined
+    );
 
-  TKnuckleCode = (kcNormal, kcSharp, kcCustom);
+  TKnuckleCode = (
+    kcNormal,
+    kcSharp,
+    kcCustom
+    );
+
+  //# endGenEnumDeclarations
 
   TRailInfo = class(TOTPersistent)
   private
@@ -169,6 +198,16 @@ type
   TRailInfoOwningList = class(TOTOwningList<TRailInfo>);
   TRailInfoReferenceList = class(TOTReferenceList<TRailInfo>);
 
+//# genEnumSerialDeclarations
+  function StrToTFlaredEnd(AValue: String): TFlaredEnd;
+  procedure SaveYamlTFlaredEnd(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TFlaredEnd);
+
+  function StrToTKnuckleCode(AValue: String): TKnuckleCode;
+  procedure SaveYamlTKnuckleCode(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TKnuckleCode);
+
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -180,29 +219,34 @@ uses
 var
   log : ILogger;
 
-function StrToTFlaredEnd(const AValue: String): TFlaredEnd;
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
+function StrToTFlaredEnd(AValue: String): TFlaredEnd;
 begin
-  Result := TFlaredEnd(GetEnumValue(Typeinfo(TFlaredEnd), AValue));
+  Result := TFlaredEnd(GetEnumValue(TypeInfo(TFlaredEnd), AValue));
 end;
 
-procedure SaveYamlTFlaredEnd(AEmitter: TYamlEmitter; const AName: String; AValue: TFlaredEnd);
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYamlTFlaredEnd(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TFlaredEnd);
 begin
-  AEmitter.ScalarEvent('', '', AName, True, False, yssPlainScalar);
-  AEmitter.ScalarEvent('', '', GetEnumName(Typeinfo(TFlaredEnd), Ord(AValue)), True, False, yssPlainScalar);
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TFlaredEnd), Ord(AValue)));
 end;
 
-function StrToTKnuckleCode(const AValue: String): TKnuckleCode;
+// GENERATED METHOD - DO NOT EDIT
+function StrToTKnuckleCode(AValue: String): TKnuckleCode;
 begin
-  Result := TKnuckleCode(GetEnumValue(Typeinfo(TKnuckleCode), AValue));
+  Result := TKnuckleCode(GetEnumValue(TypeInfo(TKnuckleCode), AValue));
 end;
 
-procedure SaveYamlTKnuckleCode(AEmitter: TYamlEmitter; const AName: String; AValue: TKnuckleCode);
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYamlTKnuckleCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TKnuckleCode);
 begin
-  AEmitter.ScalarEvent('', '', AName, True, False, yssPlainScalar);
-  AEmitter.ScalarEvent('', '', GetEnumName(Typeinfo(TKnuckleCode), Ord(AValue)), True, False, yssPlainScalar);
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TKnuckleCode), Ord(AValue)));
 end;
 
-
+//# endGenEnumSerialMethods
 
 
 { TRailInfo }

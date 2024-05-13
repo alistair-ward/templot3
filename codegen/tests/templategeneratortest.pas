@@ -18,6 +18,7 @@ type
     procedure TestSimpleSubstitution;
     procedure TestSimpleCondition;
     procedure TestMultiSubstitution;
+    procedure TestMultiSubstitutionWithSeparator;
   end;
 
 implementation
@@ -161,6 +162,58 @@ begin
       AssertEquals(3, dest.Count);
       AssertEquals('Fred Entry 1', dest[0]);
       AssertEquals('Fred Entry 2', dest[1]);
+      AssertEquals('Fred Entry 3', dest[2]);
+    finally
+      dest.Free;
+    end;
+
+
+  finally
+    testGen.Free;
+  end;
+end;
+
+procedure TTestTemplateGenerator.TestMultiSubstitutionWithSeparator;
+var
+  testGen: TOTTemplateGenerator;
+  inp: TOTTemplateInput;
+  subInput: TOTTemplateSubstitution;
+  subList: TStringList;
+  dest: TStringList;
+begin
+  testGen := TOTTemplateGenerator.Create;
+  try
+    testGen.LoadTemplate('testdata/multi_substitution_separator.template');
+
+    AssertEquals(2, testGen.numberOfInputs);
+
+    inp := testGen.input[0];
+    AssertTrue(inp is TOTTemplateMultiSubstitution);
+    AssertEquals('Comments', (inp as TOTTemplateMultiSubstitution).Name);
+
+    subList := TStringList.Create;
+    try
+      subList.Add('Entry 1');
+      subList.Add('Entry 2');
+      subList.Add('Entry 3');
+
+      (inp as TOTTemplateMultiSubstitution).userValues.SetStrings(subList);
+    finally
+      subList.Free;
+    end;
+
+    inp := testGen.input[1];
+    AssertTrue(inp is TOTTemplateSubstitution);
+    AssertEquals('Name', (inp as TOTTemplateSubstitution).Name);
+    (inp as TOTTemplateSubstitution).userValue := 'Fred';
+
+    dest := TStringList.Create;
+    try
+      testGen.Generate(dest);
+
+      AssertEquals(3, dest.Count);
+      AssertEquals('Fred Entry 1,', dest[0]);
+      AssertEquals('Fred Entry 2,', dest[1]);
       AssertEquals('Fred Entry 3', dest[2]);
     finally
       dest.Free;

@@ -88,6 +88,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TAlignmentInfo = class(TOTPersistent)
   private
@@ -138,6 +140,8 @@ type
   TAlignmentInfoOwningList = class(TOTOwningList<TAlignmentInfo>);
   TAlignmentInfoReferenceList = class(TOTReferenceList<TAlignmentInfo>);
 
+  //# genEnumSerialDeclarations
+  //# endGenEnumSerialDeclarations
 
 implementation
 
@@ -147,6 +151,8 @@ uses
 var
   log : ILogger;
 
+  //# genEnumSerialMethods
+  //# endGenEnumSerialMethods
 
 { TAlignmentInfo }
 

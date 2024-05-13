@@ -53,6 +53,29 @@ Tturnout_info1 = record          // data for the turnout size...
 end;//tturnout_info1 record
 }
 
+{# enum TTurnoutHand
+---
+enum: TTurnoutHand
+values:
+- thLeft
+- thY
+- thRight
+...
+}
+
+{# enum TMainOrTurnoutRoadLengthOption
+---
+enum: TMainOrTurnoutRoadLengthOption
+values:
+- rloCrossover
+- rloNormal
+- rloLong
+- rloAdjustable
+- rloMinimum
+...
+}
+
+
 {# class TTurnoutInfo1
 ---
 class: TTurnoutInfo1
@@ -89,10 +112,23 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  TTurnoutHand = (
+    thLeft,
+    thY,
+    thRight
+    );
 
-  TTurnoutHand = (thLeft, thY, thRight);
-  // options for length of either the main or turnout roads
-  TMainOrTurnoutRoadLengthOption = (rloCrossover, rloNormal, rloLong, rloAdjustable, rloMinimum);
+  TMainOrTurnoutRoadLengthOption = (
+    rloCrossover,
+    rloNormal,
+    rloLong,
+    rloAdjustable,
+    rloMinimum
+    );
+
+  //# endGenEnumDeclarations
+
 
   TTurnoutInfo1 = class(TOTPersistent)
   private
@@ -168,13 +204,16 @@ type
   TTurnoutInfo1ReferenceList = class(TOTReferenceList<TTurnoutInfo1>);
 
 
-function StrToTTurnoutHand(AValue: String): TTurnoutHand;
-procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TTurnoutHand);
+//# genEnumSerialDeclarations
+  function StrToTTurnoutHand(AValue: String): TTurnoutHand;
+  procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TTurnoutHand);
 
-function StrToTMainOrTurnoutRoadLengthOption(AValue: String): TMainOrTurnoutRoadLengthOption;
-procedure SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TMainOrTurnoutRoadLengthOption);
+  function StrToTMainOrTurnoutRoadLengthOption(AValue: String): TMainOrTurnoutRoadLengthOption;
+  procedure SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TMainOrTurnoutRoadLengthOption);
+
+//# endGenEnumSerialDeclarations
 
 function TurnoutHandMultiplier(AHand: TTurnoutHand): Integer;
 function SwapTurnoutHand(AHand: TTurnoutHand): TTurnoutHand;
@@ -188,28 +227,34 @@ uses
 var
   log: ILogger;
 
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
 function StrToTTurnoutHand(AValue: String): TTurnoutHand;
 begin
   Result := TTurnoutHand(GetEnumValue(TypeInfo(TTurnoutHand), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTTurnoutHand(AEmitter: TYamlEmitter; const AName: String;
   AValue: TTurnoutHand);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TTurnoutHand), Ord(AValue)));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 function StrToTMainOrTurnoutRoadLengthOption(AValue: String): TMainOrTurnoutRoadLengthOption;
 begin
   Result := TMainOrTurnoutRoadLengthOption(GetEnumValue(TypeInfo(TMainOrTurnoutRoadLengthOption), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTMainOrTurnoutRoadLengthOption(AEmitter: TYamlEmitter; const AName: String;
   AValue: TMainOrTurnoutRoadLengthOption);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TMainOrTurnoutRoadLengthOption), Ord(AValue)));
 end;
 
+//# endGenEnumSerialMethods
 
 function TurnoutHandMultiplier(AHand: TTurnoutHand): Integer;
 begin

@@ -23,4 +23,6 @@ TEMPLATE_CREATE                     RCDATA "templates/create.template"
 TEMPLATE_DESTROY                    RCDATA "templates/destroy.template"
 TEMPLATE_GETSET_METHODS             RCDATA "templates/getset_methods.template"
 TEMPLATE_NEW_CLASS                  RCDATA "templates/newclass.template"
-
+TEMPLATE_ENUM_DECLARATION           RCDATA "templates/enum_decl.template"
+TEMPLATE_ENUM_SERIAL_DECLARATIONS   RCDATA "templates/enum_serial_decl.template"
+TEMPLATE_ENUM_SERIAL_METHODS        RCDATA "templates/enum_serial_methods.template"

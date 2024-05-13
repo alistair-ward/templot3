@@ -1,0 +1,6 @@
+Name=sub
+||
+  function StrTo|Name|(AValue: String): |Name|;
+  procedure SaveYaml|Name|(AEmitter: TYamlEmitter; const AName: String;
+    AValue: |Name|);
+

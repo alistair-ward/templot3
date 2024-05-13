@@ -103,6 +103,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TVeeCheckRailInfo = class(TOTPersistent)
   private
@@ -204,6 +206,8 @@ type
   TVeeCheckRailInfoOwningList = class(TOTOwningList<TVeeCheckRailInfo>);
   TVeeCheckRailInfoReferenceList = class(TOTReferenceList<TVeeCheckRailInfo>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -213,6 +217,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TVeeCheckRailInfo }
 

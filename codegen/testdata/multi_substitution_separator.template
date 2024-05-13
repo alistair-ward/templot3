@@ -1,0 +1,6 @@
+Comments=msub
+Name=sub
+||
+|REPEAT Comments SEP ,|
+|Name| |Comments||SEP|
+|ENDREPEAT Comments|

@@ -24,11 +24,13 @@ type
   end;
 
   EBlockIdentifier = (
-    biClassYaml,
+    biEnumDeclarations,
     biMemberVars,
     biGetSetDeclarations,
     biPublicDeclarations,
     biProperty,
+    biEnumSerialDeclarations,
+    biEnumSerialMethods,
     biCreate,
     biDestroy,
     biRestoreYamlVars,
@@ -45,14 +47,14 @@ type
   TAccessControlSet = set of TAccessControl;
 
   TAttributeUpdate = class
-    private
-      FName: String;
-      FValue: String;
-    public
-      constructor Create(const AName, AValue: String);
+  private
+    FName: String;
+    FValue: String;
+  public
+    constructor Create(const AName, AValue: String);
 
-      property name: String read FName;
-      property value: String read FValue;
+    property Name: String Read FName;
+    property Value: String Read FValue;
   end;
 
   TAttribute = class
@@ -97,6 +99,23 @@ type
     property extraSetCode: TStrings Read FExtraSetCode;
   end;
 
+  TEnum = class
+  private
+    FName: String;
+    FValues: TStringList;
+
+    function GetValueCount: Integer;
+    function GetValue(i: Integer): String;
+
+  public
+    constructor Create(AName: String);
+    destructor Destroy; override;
+    property Name: String Read FName;
+    property valueCount: Integer Read GetValueCount;
+    property Value[i: Integer]: String Read GetValue;
+
+  end;
+
   { TOTClassRegenerator }
 
   TOTClassRegenerator = class
@@ -104,19 +123,27 @@ type
     FFileName: string;
     FBackupFileName: string;
     FInput: TStringList;
+    FYamlBlocks: TObjectList<TBlock>;
     FBlocks: array[EBlockIdentifier] of TBlock;
     FAttributes: TObjectList<TAttribute>;
     FClassName: String;
+    FEnums: TObjectList<TEnum>;
 
+    function GetYamlBlock(i: Integer): TBlock;
+    function GetYamlBlockCount: Integer;
     function GetBlock(bi: EBlockIdentifier): TBlock;
     function GetAttribute(i: Integer): TAttribute;
     function GetAttributeCount: Integer;
+
+    function GetEnum(i: Integer): TEnum;
+    function GetEnumCount: Integer;
 
   protected
     // protected to make accessible for unit tests
     procedure LoadInput;
     procedure ParseInput;
     procedure ParseYaml;
+    procedure ParseYamlBlock(blockIndex: Integer);
     procedure Regenerate;
 
     function GenerateMemberVars: TStringList;
@@ -130,6 +157,9 @@ type
     function GenerateCreate: TStringList;
     function GenerateDestroy: TStringList;
     function GenerateGetSetMethods: TStringList;
+    function GenerateEnumDeclarations: TStringList;
+    function GenerateEnumSerialDeclarations: TStringList;
+    function GenerateEnumSerialMethods: TStringList;
 
   public
     constructor Create(const AFileName: string);
@@ -138,10 +168,15 @@ type
     procedure Generate;
 
     property input: TStringList Read FInput;
+    property yamlBlock[i: Integer]: TBlock Read GetYamlBlock;
+    property yamlBlockCount: Integer Read GetYamlBlockCount;
     property blocks[bi: EBlockIdentifier]: TBlock Read GetBlock;
     property attribute[i: Integer]: TAttribute Read GetAttribute;
     property attributeCount: Integer Read GetAttributeCount;
     property ClassName: String Read FClassName;
+
+    property enumCount: Integer Read GetEnumCount;
+    property enum[i: Integer]: TEnum Read GetEnum;
   end;
 
 implementation
@@ -155,11 +190,13 @@ uses
 
 const
   BLOCK_LABELS: array[EBlockIdentifier] of string = (
-    '',
+    'EnumDeclarations',
     'MemberVars',
     'GetSetDeclarations',
     'PublicDeclarations',
     'Property',
+    'EnumSerialDeclarations',
+    'EnumSerialMethods',
     'Create',
     'Destroy',
     'RestoreYamlVars',
@@ -277,7 +314,8 @@ begin
     else
       raise Exception.CreateFmt('unexpected attribute name/value-- %s: %s', [AName, AValue]);
   end
-  else if AName = 'extraSetCode' then begin
+  else
+  if AName = 'extraSetCode' then begin
     FExtraSetCode.Text := AValue;
   end
   else
@@ -321,6 +359,32 @@ begin
 
 end;
 
+{ TEnum }
+
+constructor TEnum.Create(AName: String);
+begin
+  inherited Create;
+
+  FName := AName;
+  FValues := TStringList.Create;
+end;
+
+destructor TEnum.Destroy;
+begin
+  FValues.Free;
+  inherited;
+end;
+
+function TEnum.GetValueCount: Integer;
+begin
+  Result := FValues.Count;
+end;
+
+function TEnum.GetValue(i: Integer): String;
+begin
+  Result := FValues[i];
+end;
+
 { TOTClassRegenerator }
 
 constructor TOTClassRegenerator.Create(const AFileName: string);
@@ -336,7 +400,9 @@ begin
     FBlocks[blockId] := nil;
   end;
 
+  FYamlBlocks := TObjectList<TBlock>.Create;
   FAttributes := TObjectList<TAttribute>.Create;
+  FEnums := TObjectList<TEnum>.Create;
 end;
 
 destructor TOTClassRegenerator.Destroy;
@@ -348,9 +414,21 @@ begin
   for bi in EBlockIdentifier do
     FBlocks[bi].Free;
 
+  FYamlBlocks.Free;
   FAttributes.Free;
+  FEnums.Free;
 
   inherited;
+end;
+
+function TOTClassRegenerator.GetYamlBlock(i: Integer): TBlock;
+begin
+  Result := FYamlBlocks[i];
+end;
+
+function TOTClassRegenerator.GetYamlBlockCount: Integer;
+begin
+  Result := FYamlBlocks.Count;
 end;
 
 function TOTClassRegenerator.GetBlock(bi: EBlockIdentifier): TBlock;
@@ -366,6 +444,16 @@ end;
 function TOTClassRegenerator.GetAttributeCount: Integer;
 begin
   Result := FAttributes.Count;
+end;
+
+function TOTClassRegenerator.GetEnum(i: Integer): TEnum;
+begin
+  Result := FEnums[i];
+end;
+
+function TOTClassRegenerator.GetEnumCount: Integer;
+begin
+  Result := FEnums.Count;
 end;
 
 procedure TOTClassRegenerator.Generate;
@@ -421,7 +509,7 @@ begin
 
       piCloseComment: begin
         if line = '}' then begin
-          FBlocks[biClassYaml] := TBlock.Create(startLine, i);
+          FYamlBlocks.Add(TBlock.Create(startLine, i));
           state := piStartComment;
         end;
       end;
@@ -429,7 +517,7 @@ begin
   end;
 end;
 
-procedure TOTClassRegenerator.ParseYaml;
+procedure TOTClassRegenerator.ParseYamlBlock(blockIndex: Integer);
 var
   yaml: string;
   i: Integer;
@@ -446,14 +534,14 @@ var
     pyExpectingAttributeStart,
     pyExpectingName,
     pyExpectingValue,
-    pyExpectingValueSequence);
+    pyExpectingValueSequence,
+    pyExpectingEnumName,
+    pyExpectingEnumValue);
   newAttr: TAttribute;
   currentName: string;
   currentSequence: TArray<string>;
 begin
-  yamlBlock := FBlocks[biClassYaml];
-  if not Assigned(yamlBlock) then
-    Exception.Create('class yaml block not defined');
+  yamlBlock := FYamlBlocks[blockIndex];
 
   yaml := '';
   for i := yamlBlock.startLine to yamlBlock.followingLine - 1 do begin
@@ -482,7 +570,8 @@ begin
 
         pyExpectingMappingStart: begin
           if not (event is TMappingStartEvent) then
-            raise Exception.CreateFmt('Expected Yaml Mapping Start, line: %d, col: %d', [event.startMark.Line, event.startMark.Column]);
+            raise Exception.CreateFmt('Expected Yaml Mapping Start, line: %d, col: %d',
+              [event.startMark.Line, event.startMark.Column]);
           state := pyExpectingClassInfo;
         end;
 
@@ -500,6 +589,12 @@ begin
             state := pyExpectingClassInfoValue
           else
           if currentName = 'attributes' then
+            state := pyExpectingSequenceStart
+          else
+          if currentName = 'enum' then
+            state := pyExpectingEnumName
+          else
+          if currentName = 'values' then
             state := pyExpectingSequenceStart;
         end;
 
@@ -513,7 +608,11 @@ begin
         pyExpectingSequenceStart: begin
           if not (event is TSequenceStartEvent) then
             raise Exception.Create('Expected Yaml Sequence Start');
-          state := pyExpectingAttributeStart;
+          if (FClassName = '') then
+            // no class name, so must be an enum...
+            state := pyExpectingEnumValue
+          else
+            state := pyExpectingAttributeStart;
         end;
 
         pyExpectingAttributeStart: begin
@@ -522,7 +621,9 @@ begin
           end
           else begin
             if not (event is TMappingStartEvent) then
-              raise Exception.CreateFmt('Expecting Attribute Start, expected Yaml Mapping Start, line: %d, col: %d', [event.startMark.Line, event.startMark.Column]);
+              raise Exception.CreateFmt(
+                'Expecting Attribute Start, expected Yaml Mapping Start, line: %d, col: %d',
+                [event.startMark.Line, event.startMark.Column]);
             newAttr := TAttribute.Create;
             state := pyExpectingName;
           end;
@@ -553,7 +654,7 @@ begin
               newAttr.SetProperty(currentName, TScalarEvent(event).Value);
               currentName := '';
               state := pyExpectingName;
-              end
+            end
             else
               raise Exception.Create('Expected Yaml Scalar (value)');
           end;
@@ -573,8 +674,27 @@ begin
             end
             else
               raise Exception.Create('Expected Yaml Scalar (value sequence)');
-            end;
           end;
+        end;
+
+        pyExpectingEnumName: begin
+          if not (event is TScalarEvent) then
+            raise Exception.Create('Expecting Yaml Scalar Event (enum name)');
+          FEnums.Add(TEnum.Create(TScalarEvent(event).Value));
+          state := pyExpectingClassInfo;
+        end;
+
+        pyExpectingEnumValue: begin
+          if (event is TSequenceEndEvent) then begin
+            state := pyExpectingClassInfo;
+          end
+          else begin
+            if not (event is TScalarEvent) then
+              raise Exception.Create('Expected Yaml Scale Event (enum value)');
+            FEnums[FEnums.Count - 1].FValues.Add(TScalarEvent(event).Value);
+          end;
+
+        end;
       end;
       FreeAndNil(event);
       event := parser.parse;
@@ -582,6 +702,18 @@ begin
   finally
     event.Free;
     parser.Free;
+  end;
+end;
+
+procedure TOTClassRegenerator.ParseYaml;
+var
+  i: Integer;
+begin
+  if FYamlBlocks.Count = 0 then
+    Exception.Create('no yaml blocks defined');
+
+  for i := 0 to FYamlBlocks.Count - 1 do begin
+    ParseYamlBlock(i);
   end;
 end;
 
@@ -597,10 +729,13 @@ begin
     code[bi] := nil;
   output := TStringList.Create;
   try
+    code[biEnumDeclarations] := GenerateEnumDeclarations;
     code[biMemberVars] := GenerateMemberVars;
     code[biGetSetDeclarations] := GenerateGetSetDeclarations;
     code[biPublicDeclarations] := GeneratePublicDeclarations;
     code[biProperty] := GeneratePropertyDeclarations;
+    code[biEnumSerialDeclarations] := GenerateEnumSerialDeclarations;
+    code[biEnumSerialMethods] := GenerateEnumSerialMethods;
     code[biCreate] := GenerateCreate;
     code[biDestroy] := GenerateDestroy;
     code[biRestoreYamlVars] := GenerateRestoreYamlVars;
@@ -609,7 +744,7 @@ begin
     code[biSaveYamlVars] := GenerateSaveYamlVars;
     code[biGetSetMethods] := GenerateGetSetMethods;
 
-    bi := biMemberVars;
+    bi := biEnumDeclarations;
     startIndex := 0;
 
     while True do begin
@@ -1030,6 +1165,67 @@ begin
       (t['HasDelete'] as TOTTemplateCondition).userValue := (opDelete in attr.operations);
       (t['HasClear'] as TOTTemplateCondition).userValue := (opClear in attr.operations);
       (t['ExtraSetCode'] as TOTTemplateMultiSubstitution).userValues.SetStrings(attr.extraSetCode);
+
+      t.Generate(Result);
+    finally
+      t.Free;
+    end;
+  end;
+end;
+
+function TOTClassRegenerator.GenerateEnumDeclarations: TStringList;
+var
+  enum: TEnum;
+  t: TOTTemplateGenerator;
+begin
+  Result := TStringList.Create;
+
+  for enum in FEnums do begin
+    t := TOTTemplateGenerator.Create;
+    try
+      t.LoadTemplateFromResource('TEMPLATE_ENUM_DECLARATION');
+      (t['Name'] as TOTTemplateSubstitution).userValue := enum.Name;
+      (t['Value'] as TOTTemplateMultiSubstitution).userValues.SetStrings(enum.FValues);
+
+      t.Generate(Result);
+    finally
+      t.Free;
+    end;
+  end;
+end;
+
+function TOTClassRegenerator.GenerateEnumSerialDeclarations: TStringList;
+var
+  enum: TEnum;
+  t: TOTTemplateGenerator;
+begin
+  Result := TStringList.Create;
+
+  for enum in FEnums do begin
+    t := TOTTemplateGenerator.Create;
+    try
+      t.LoadTemplateFromResource('TEMPLATE_ENUM_SERIAL_DECLARATIONS');
+      (t['Name'] as TOTTemplateSubstitution).userValue := enum.Name;
+
+      t.Generate(Result);
+    finally
+      t.Free;
+    end;
+  end;
+end;
+
+function TOTClassRegenerator.GenerateEnumSerialMethods: TStringList;
+var
+  enum: TEnum;
+  t: TOTTemplateGenerator;
+begin
+  Result := TStringList.Create;
+
+  for enum in FEnums do begin
+    t := TOTTemplateGenerator.Create;
+    try
+      t.LoadTemplateFromResource('TEMPLATE_ENUM_SERIAL_METHODS');
+      (t['Name'] as TOTTemplateSubstitution).userValue := enum.Name;
 
       t.Generate(Result);
     finally

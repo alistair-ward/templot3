@@ -11,6 +11,17 @@ uses
   OTPersistentList,
   OTYamlEmitter;
 
+{# enum TDiffType
+---
+enum: TDiffType
+values:
+- dtNoDiff
+- dtBentFlare
+- dtMachinedFlare
+- dtNoFlare
+...
+}
+
 
 {# class TCheckEndDiff
 ---
@@ -31,8 +42,15 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  TDiffType = (
+    dtNoDiff,
+    dtBentFlare,
+    dtMachinedFlare,
+    dtNoFlare
+    );
 
-  TDiffType = (dtNoDiff, dtBentFlare, dtMachinedFlare, dtNoFlare);
+  //# endGenEnumDeclarations
 
   TCheckEndDiff = class(TOTPersistent)
   private
@@ -83,9 +101,12 @@ type
   TCheckEndDiffOwningList = class(TOTOwningList<TCheckEndDiff>);
   TCheckEndDiffReferenceList = class(TOTReferenceList<TCheckEndDiff>);
 
-function StrToTDiffType(AValue: String): TDiffType;
-procedure SaveYamlTDiffType(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TDiffType);
+//# genEnumSerialDeclarations
+  function StrToTDiffType(AValue: String): TDiffType;
+  procedure SaveYamlTDiffType(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TDiffType);
+
+//# endGenEnumSerialDeclarations
 
 
 implementation
@@ -97,17 +118,21 @@ uses
 var
   log: ILogger;
 
-
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
 function StrToTDiffType(AValue: String): TDiffType;
 begin
   Result := TDiffType(GetEnumValue(TypeInfo(TDiffType), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTDiffType(AEmitter: TYamlEmitter; const AName: String;
   AValue: TDiffType);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TDiffType), Ord(AValue)));
 end;
+
+//# endGenEnumSerialMethods
 
 { TCheckEndDiff }
 

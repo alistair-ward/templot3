@@ -26,6 +26,7 @@ type
     procedure TestParseInput;
     procedure TestParseYaml;
     procedure TestParseYamlCollectionOperations;
+    procedure TestParseYamlEnums;
 
     procedure TestGenerateMemberVars;
     procedure TestGenerateGetSetDeclarations;
@@ -65,6 +66,10 @@ type
     procedure TestGenerateCreateOwns;
     procedure TestGenerateDestroyOwns;
     procedure TestGenerateGetSetMethodsOwns;
+
+    procedure TestGenerateEnumDeclarations;
+    procedure TestGenerateEnumSerialDeclarations;
+    procedure TestGenerateEnumSerialMethods;
 
   end;
 
@@ -131,67 +136,79 @@ begin
   cg := TTestableClassRegenerator.Create('testdata/testparserinput.pas');
   try
     cg.LoadInput;
-    AssertEquals(108, cg.input.Count);
+    AssertEquals(115, cg.input.Count);
 
     // When...
     cg.ParseInput;
 
     // Then...
-    AssertNotNull('blocks[biClassYaml]', cg.blocks[biClassYaml]);
-    AssertEquals('blocks[biClassYaml].startLine', 10, cg.blocks[biClassYaml].startLine);
-    AssertEquals('blocks[biClassYaml].followingLine', 12, cg.blocks[biClassYaml].followingLine);
+    AssertEquals(1, cg.yamlBlockCount);
+    AssertEquals('yamlBlock[0].startLine', 10, cg.yamlBlock[0].startLine);
+    AssertEquals('yamlBlock[0].followingLine', 12, cg.yamlBlock[0].followingLine);
+
+    AssertNotNull('blocks[biEnumDeclarations]', cg.blocks[biEnumDeclarations]);
+    AssertEquals('blocks[biEnumDeclarations].startLine', 16, cg.blocks[biEnumDeclarations].startLine);
+    AssertEquals('blocks[biEnumDeclarations].followingLine', 16, cg.blocks[biEnumDeclarations].followingLine);
 
     AssertNotNull('blocks[biMemberVars]', cg.blocks[biMemberVars]);
-    AssertEquals('blocks[biMemberVars].startLine', 19, cg.blocks[biMemberVars].startLine);
-    AssertEquals('blocks[biMemberVars].followingLine', 19, cg.blocks[biMemberVars].followingLine);
+    AssertEquals('blocks[biMemberVars].startLine', 21, cg.blocks[biMemberVars].startLine);
+    AssertEquals('blocks[biMemberVars].followingLine', 21, cg.blocks[biMemberVars].followingLine);
 
     AssertNotNull('blocks[biGetSetDeclarations]', cg.blocks[biGetSetDeclarations]);
-    AssertEquals('blocks[biGetSetDeclarations].startLine', 27,
+    AssertEquals('blocks[biGetSetDeclarations].startLine', 29,
       cg.blocks[biGetSetDeclarations].startLine);
-    AssertEquals('blocks[biGetSetDeclarations].followingLine', 27,
+    AssertEquals('blocks[biGetSetDeclarations].followingLine', 29,
       cg.blocks[biGetSetDeclarations].followingLine);
 
     AssertNotNull('blocks[biPublicDeclarations]', cg.blocks[biPublicDeclarations]);
-    AssertEquals('blocks[biPublicDeclarations].startLine', 34,
+    AssertEquals('blocks[biPublicDeclarations].startLine', 36,
       cg.blocks[biPublicDeclarations].startLine);
-    AssertEquals('blocks[biPublicDeclarations].followingLine', 34,
+    AssertEquals('blocks[biPublicDeclarations].followingLine', 36,
       cg.blocks[biPublicDeclarations].followingLine);
 
     AssertNotNull('blocks[biProperty]', cg.blocks[biProperty]);
-    AssertEquals('blocks[biProperty].startLine', 40, cg.blocks[biProperty].startLine);
-    AssertEquals('blocks[biProperty].followingLine', 40, cg.blocks[biProperty].followingLine);
+    AssertEquals('blocks[biProperty].startLine', 42, cg.blocks[biProperty].startLine);
+    AssertEquals('blocks[biProperty].followingLine', 42, cg.blocks[biProperty].followingLine);
+
+    AssertNotNull('blocks[biEnumSerialDeclarations]', cg.blocks[biEnumSerialDeclarations]);
+    AssertEquals('blocks[biEnumSerialDeclarations].startLine', 46, cg.blocks[biEnumSerialDeclarations].startLine);
+    AssertEquals('blocks[biEnumSerialDeclarations].followingLine', 46, cg.blocks[biEnumSerialDeclarations].followingLine);
+
+    AssertNotNull('blocks[biEnumSerialMethods]', cg.blocks[biEnumSerialMethods]);
+    AssertEquals('blocks[biEnumSerialMethods].startLine', 58, cg.blocks[biEnumSerialMethods].startLine);
+    AssertEquals('blocks[biEnumSerialMethods].followingLine', 58, cg.blocks[biEnumSerialMethods].followingLine);
 
     AssertNotNull('blocks[biCreate]', cg.blocks[biCreate]);
-    AssertEquals('blocks[biCreate].startLine', 59, cg.blocks[biCreate].startLine);
-    AssertEquals('blocks[biCreate].followingLine', 59, cg.blocks[biCreate].followingLine);
+    AssertEquals('blocks[biCreate].startLine', 66, cg.blocks[biCreate].startLine);
+    AssertEquals('blocks[biCreate].followingLine', 66, cg.blocks[biCreate].followingLine);
 
     AssertNotNull('blocks[biDestroy]', cg.blocks[biDestroy]);
-    AssertEquals('blocks[biDestroy].startLine', 65, cg.blocks[biDestroy].startLine);
-    AssertEquals('blocks[biDestroy].followingLine', 65, cg.blocks[biDestroy].followingLine);
+    AssertEquals('blocks[biDestroy].startLine', 72, cg.blocks[biDestroy].startLine);
+    AssertEquals('blocks[biDestroy].followingLine', 72, cg.blocks[biDestroy].followingLine);
 
     AssertNotNull('blocks[biRestoreYamlVars]', cg.blocks[biRestoreYamlVars]);
-    AssertEquals('blocks[biRestoreYamlVars].startLine', 72,
+    AssertEquals('blocks[biRestoreYamlVars].startLine', 79,
       cg.blocks[biRestoreYamlVars].startLine);
-    AssertEquals('blocks[biRestoreYamlVars].followingLine', 72,
+    AssertEquals('blocks[biRestoreYamlVars].followingLine', 79,
       cg.blocks[biRestoreYamlVars].followingLine);
 
     AssertNotNull('blocks[biRestoreVars]', cg.blocks[biRestoreVars]);
-    AssertEquals('blocks[biRestoreVars].startLine', 81, cg.blocks[biRestoreVars].startLine);
-    AssertEquals('blocks[biRestoreVars].followingLine', 81,
+    AssertEquals('blocks[biRestoreVars].startLine', 88, cg.blocks[biRestoreVars].startLine);
+    AssertEquals('blocks[biRestoreVars].followingLine', 88,
       cg.blocks[biRestoreVars].followingLine);
 
     AssertNotNull('blocks[biSaveVars]', cg.blocks[biSaveVars]);
-    AssertEquals('blocks[biSaveVars].startLine', 89, cg.blocks[biSaveVars].startLine);
-    AssertEquals('blocks[biSaveVars].followingLine', 89, cg.blocks[biSaveVars].followingLine);
+    AssertEquals('blocks[biSaveVars].startLine', 96, cg.blocks[biSaveVars].startLine);
+    AssertEquals('blocks[biSaveVars].followingLine', 96, cg.blocks[biSaveVars].followingLine);
 
     AssertNotNull('blocks[biSaveYamlVars]', cg.blocks[biSaveYamlVars]);
-    AssertEquals('blocks[biSaveYamlVars].startLine', 97, cg.blocks[biSaveYamlVars].startLine);
-    AssertEquals('blocks[biSaveYamlVars].followingLine', 97,
+    AssertEquals('blocks[biSaveYamlVars].startLine', 104, cg.blocks[biSaveYamlVars].startLine);
+    AssertEquals('blocks[biSaveYamlVars].followingLine', 104,
       cg.blocks[biSaveYamlVars].followingLine);
 
     AssertNotNull('blocks[biGetSetMethods]', cg.blocks[biGetSetMethods]);
-    AssertEquals('blocks[biGetSetMethods].startLine', 101, cg.blocks[biGetSetMethods].startLine);
-    AssertEquals('blocks[biGetSetMethods].followingLine', 101,
+    AssertEquals('blocks[biGetSetMethods].startLine', 108, cg.blocks[biGetSetMethods].startLine);
+    AssertEquals('blocks[biGetSetMethods].followingLine', 108,
       cg.blocks[biGetSetMethods].followingLine);
 
   finally
@@ -260,6 +277,37 @@ begin
     AssertTrue(opAdd in cg.attribute[2].operations);
     AssertFalse(opDelete in cg.attribute[2].operations);
     AssertTrue(opClear in cg.attribute[2].operations);
+  finally
+    cg.Free;
+  end;
+
+end;
+
+procedure TTestClassRegenerator.TestParseYamlEnums;
+var
+  cg: TTestableClassRegenerator;
+  enum: TEnum;
+begin
+  // Given sample input with attribute containing a sequence of values
+  // When ParseYaml is called
+  // Then all the attributes are created with the values populated
+
+  cg := TTestableClassRegenerator.Create('testdata/testparseyaml_enums.pas');
+  try
+    cg.LoadInput;
+    cg.ParseInput;
+
+    // When...
+    cg.ParseYaml;
+
+    // Then...
+    AssertEquals(1, cg.enumCount);
+    enum := cg.enum[0];
+    AssertEquals('TSampleEnum', enum.Name);
+    AssertEquals(3, enum.valueCount);
+    AssertEquals('seValue1', enum.value[0]);
+    AssertEquals('seValue2', enum.value[1]);
+    AssertEquals('seValue3', enum.value[2]);
   finally
     cg.Free;
   end;
@@ -1637,6 +1685,120 @@ begin
 
     // When...
     s := cg.GenerateGetSetMethods;
+
+    // Then
+    AssertEquals(expected, s);
+  finally
+    cg.Free;
+    s.Free;
+  end;
+end;
+
+procedure TTestClassRegenerator.TestGenerateEnumDeclarations;
+var
+  cg: TTestableClassRegenerator;
+  s: TStringList;
+const
+  expected: TArray<string> = [
+    '  TSampleEnum = (',
+    '    seValue1,',
+    '    seValue2,',
+    '    seValue3',
+    '    );',
+    ''
+    ];
+begin
+  // Given a regen object with enum declarations
+  // When GenerateEnumDeclarations is called
+  // Then the expected text is returned
+
+  s := nil;
+  cg := TTestableClassRegenerator.Create('testdata/testparseyaml_enums.pas');
+  try
+    cg.LoadInput;
+    cg.ParseInput;
+    cg.ParseYaml;
+
+    // When...
+    s := cg.GenerateEnumDeclarations;
+
+    // Then
+    AssertEquals(expected, s);
+  finally
+    cg.Free;
+    s.Free;
+  end;
+end;
+
+procedure TTestClassRegenerator.TestGenerateEnumSerialDeclarations;
+var
+  cg: TTestableClassRegenerator;
+  s: TStringList;
+const
+  expected: TArray<string> = [
+    '  function StrToTSampleEnum(AValue: String): TSampleEnum;',
+    '  procedure SaveYamlTSampleEnum(AEmitter: TYamlEmitter; const AName: String;',
+    '    AValue: TSampleEnum);',
+    ''
+    ];
+begin
+  // Given a regen object with enum declarations
+  // When GenerateEnumSerialDeclarations is called
+  // Then the expected text is returned
+
+  s := nil;
+  cg := TTestableClassRegenerator.Create('testdata/testparseyaml_enums.pas');
+  try
+    cg.LoadInput;
+    cg.ParseInput;
+    cg.ParseYaml;
+
+    // When...
+    s := cg.GenerateEnumSerialDeclarations;
+
+    // Then
+    AssertEquals(expected, s);
+  finally
+    cg.Free;
+    s.Free;
+  end;
+end;
+
+
+procedure TTestClassRegenerator.TestGenerateEnumSerialMethods;
+var
+  cg: TTestableClassRegenerator;
+  s: TStringList;
+const
+  expected: TArray<string> = [
+    '// GENERATED METHOD - DO NOT EDIT',
+    'function StrToTSampleEnum(AValue: String): TSampleEnum;',
+    'begin',
+    '  Result := TSampleEnum(GetEnumValue(TypeInfo(TSampleEnum), AValue));',
+    'end;',
+    '',
+    '// GENERATED METHOD - DO NOT EDIT',
+    'procedure SaveYamlTSampleEnum(AEmitter: TYamlEmitter; const AName: String;',
+    '  AValue: TSampleEnum);',
+    'begin',
+    '  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TSampleEnum), Ord(AValue)));',
+    'end;',
+    ''
+    ];
+begin
+  // Given a regen object with enum declarations
+  // When GenerateEnumSerialMethods is called
+  // Then the expected text is returned
+
+  s := nil;
+  cg := TTestableClassRegenerator.Create('testdata/testparseyaml_enums.pas');
+  try
+    cg.LoadInput;
+    cg.ParseInput;
+    cg.ParseYaml;
+
+    // When...
+    s := cg.GenerateEnumSerialMethods;
 
     // Then
     AssertEquals(expected, s);

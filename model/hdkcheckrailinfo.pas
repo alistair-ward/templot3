@@ -46,6 +46,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   THdkCheckRailInfo = class(TOTPersistent)
   private
@@ -97,6 +99,8 @@ type
   THdkCheckRailInfoOwningList = class(TOTOwningList<THdkCheckRailInfo>);
   THdkCheckRailInfoReferenceList = class(TOTReferenceList<THdkCheckRailInfo>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -106,6 +110,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { THdkCheckRailInfo }
 

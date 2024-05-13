@@ -192,6 +192,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TTurnoutInfo2 = class(TOTPersistent)
   private
@@ -342,6 +344,8 @@ type
   TTurnoutInfo2OwningList = class(TOTOwningList<TTurnoutInfo2>);
   TTurnoutInfo2ReferenceList = class(TOTReferenceList<TTurnoutInfo2>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -351,6 +355,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TTurnoutInfo2 }
 

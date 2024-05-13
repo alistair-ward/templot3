@@ -1,0 +1,15 @@
+Name=sub
+||
+// GENERATED METHOD - DO NOT EDIT
+function StrTo|Name|(AValue: String): |Name|;
+begin
+  Result := |Name|(GetEnumValue(TypeInfo(|Name|), AValue));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYaml|Name|(AEmitter: TYamlEmitter; const AName: String;
+  AValue: |Name|);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(|Name|), Ord(AValue)));
+end;
+

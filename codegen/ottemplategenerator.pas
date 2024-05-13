@@ -25,7 +25,7 @@ type
   end;
 
   TOTTemplateInputList = class(TObjectList<TOTTemplateInput>)
-    end;
+  end;
 
   // Performs text substitution for a template
   TOTTemplateSubstitution = class(TOTTemplateInput)
@@ -114,7 +114,7 @@ uses
 const
   DELIM = '|';
 
-{ TOTTemplateGenerator }
+  { TOTTemplateGenerator }
 
 constructor TOTTemplateGenerator.Create;
 begin
@@ -364,9 +364,10 @@ begin
         withinConditional := False;
         removeLine := True;
       end
-      else if line = elseText then begin
+      else
+      if line = elseText then begin
         include := not include;
-        removeLine := true;
+        removeLine := True;
       end
       else begin
         removeLine := (include and (not userValue)) or ((not include) and userValue);
@@ -418,11 +419,14 @@ var
   include: Boolean;
   repeatLines: TStringList;
   temp: TStringList;
+  vi: Integer;
   v: String;
   sub: TOTTemplateSubstitution;
   newLine: String;
+  restOfLine: String;
+  separator: String;
 begin
-  startText := DELIM + 'REPEAT ' + Name + DELIM;
+  startText := DELIM + 'REPEAT ' + Name; // + DELIM;
   endText := DELIM + 'ENDREPEAT ' + Name + DELIM;
 
   repeatLines := TStringList.Create;
@@ -435,9 +439,13 @@ begin
       removeLine := False;
 
       if withinRepeat then begin
-        removeLine := true;
+        removeLine := True;
         if line = endText then begin
-          for v in FUserValues do begin
+          for vi := 0 to FUserValues.Count - 1 do begin
+            v := FUserValues[vi];
+            if vi = FUserValues.Count - 1 then
+              separator := '';
+
             temp := TStringList.Create;
             try
               temp.AddStrings(repeatLines);
@@ -445,15 +453,23 @@ begin
               try
                 sub.userValue := v;
                 sub.Process(temp);
-
-                for newLine in temp do begin
-                  ALines.Insert(i, newLine);
-                  Inc(i);
-                end;
-
               finally
                 sub.Free;
               end;
+
+              sub := TOTTemplateSubstitution.Create('SEP', '');
+              try
+                sub.userValue := separator;
+                sub.Process(temp);
+              finally
+                sub.Free;
+              end;
+
+              for newLine in temp do begin
+                ALines.Insert(i, newLine);
+                Inc(i);
+              end;
+
             finally
               temp.Free;
             end;
@@ -462,13 +478,19 @@ begin
         end
         else begin
           repeatLines.Add(line);
-        end
+        end;
       end
       else begin
-        if line = startText then begin
+        if StartsStr(startText, line) then begin
           withinRepeat := True;
           removeLine := True;
           repeatLines.Clear;
+          restOfLine := Copy(line, Length(startText) + 2);
+          if StartsStr('SEP ', restOfLine) then begin
+            separator := Copy2Symb(Copy(restOfLine, Length('SEP ')+1), '|');
+          end
+          else
+            separator := '';
         end;
       end;
 

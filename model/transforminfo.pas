@@ -112,6 +112,8 @@ attributes:
 }
 
 type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
 
   TTransformInfo = class(TOTPersistent)
   private
@@ -197,6 +199,8 @@ type
   TTransformInfoOwningList = class(TOTOwningList<TTransformInfo>);
   TTransformInfoReferenceList = class(TOTReferenceList<TTransformInfo>);
 
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -206,6 +210,8 @@ uses
 var
   log : ILogger;
 
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
 
 { TTransformInfo }
 

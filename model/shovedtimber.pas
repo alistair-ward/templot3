@@ -11,6 +11,16 @@ uses
   OTPersistentList,
   OTYamlEmitter;
 
+{# enum TShoveCode
+---
+enum: TShoveCode
+values:
+- svcOmit
+- svcEmpty
+- svcShove
+...
+}
+
 
 {# class TShovedTimber
 ---
@@ -42,7 +52,14 @@ attributes:
 }
 
 type
-  TShoveCode = (svcOmit = -1, svcEmpty = 0, svcShove = 1);
+  //# genEnumDeclarations
+  TShoveCode = (
+    svcOmit,
+    svcEmpty,
+    svcShove
+    );
+
+  //# endGenEnumDeclarations
 
   TShovedTimber = class(TOTPersistent)
   private
@@ -85,18 +102,15 @@ type
     procedure SaveYamlAttributes(AEmitter: TYamlEmitter); override;
 
     //# genProperty
-    property timberString: String Read FTimberString Write SetTimberString;
-    property shoveCode: TShoveCode Read FShoveCode Write SetShoveCode;
-    property xtbModifier: Double Read FXtbModifier Write SetXtbModifier;
-    property angleModifier: Double Read FAngleModifier Write SetAngleModifier;
-    property offsetModifier: Double Read FOffsetModifier Write SetOffsetModifier;
-    property lengthModifier: Double Read FLengthModifier Write SetLengthModifier;
-    property widthModifier: Double Read FWidthModifier Write SetWidthModifier;
-    property crabModifier: Double Read FCrabModifier Write SetCrabModifier;
+    property timberString: String read FTimberString write SetTimberString;
+    property shoveCode: TShoveCode read FShoveCode write SetShoveCode;
+    property xtbModifier: Double read FXtbModifier write SetXtbModifier;
+    property angleModifier: Double read FAngleModifier write SetAngleModifier;
+    property offsetModifier: Double read FOffsetModifier write SetOffsetModifier;
+    property lengthModifier: Double read FLengthModifier write SetLengthModifier;
+    property widthModifier: Double read FWidthModifier write SetWidthModifier;
+    property crabModifier: Double read FCrabModifier write SetCrabModifier;
     //# endGenProperty
-
-    function StrToTShoveCode(AValue: String): TShoveCode;
-    procedure SaveYamlTShoveCode(AEmitter: TYamlEmitter; const AName: String; AValue: TShoveCode);
 
     procedure MakeShoved;
     procedure MakeOmit;
@@ -120,6 +134,12 @@ type
 
   TShovedTimberReferenceList = class(TOTReferenceList<TShovedTimber>);
 
+//# genEnumSerialDeclarations
+  function StrToTShoveCode(AValue: String): TShoveCode;
+  procedure SaveYamlTShoveCode(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TShoveCode);
+
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -130,6 +150,21 @@ uses
 var
   log: ILogger;
 
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
+function StrToTShoveCode(AValue: String): TShoveCode;
+begin
+  Result := TShoveCode(GetEnumValue(TypeInfo(TShoveCode), AValue));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYamlTShoveCode(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TShoveCode);
+begin
+  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TShoveCode), Ord(AValue)));
+end;
+
+//# endGenEnumSerialMethods
 
 { TShovedTimber }
 
@@ -318,18 +353,6 @@ begin
 end;
 
 //# endGenGetSetMethods
-
-function TShovedTimber.StrToTShoveCode(AValue: String): TShoveCode;
-begin
-  Result := TShoveCode(GetEnumValue(TypeInfo(TShoveCode), AValue));
-end;
-
-procedure TShovedTimber.SaveYamlTShoveCode(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TShoveCode);
-begin
-  SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TShoveCode), Ord(AValue)));
-end;
-
 
 procedure TShovedTimber.MakeShoved;
 begin

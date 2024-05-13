@@ -162,6 +162,35 @@ uses
 (/)turnout_info1: Tturnout_info1;
 }
 
+{# enum TBackgroundCode
+---
+enum: TBackgroundCode
+values:
+- bkcLibrary
+- bkcUnused
+- bkcBackground
+...
+}
+
+{# enum TRailSection
+---
+enum: TRailSection
+values:
+- rsNoRails
+- rsBullhead
+- rsFlatbottom
+...
+}
+
+{# enum TRailsInclined
+---
+enum: TRailsInclined
+values:
+- riVertical
+- riInclined
+...
+}
+
 
 {# class TBoxDims
 ---
@@ -259,9 +288,25 @@ attributes:
 }
 
 type
-  TBackgroundCode = (bkcLibrary = -1, bkcUnused = 0, bkcBackground = 1);
-  TRailSection = (rsNoRails, rsBullhead, rsFlatbottom);
-  TRailsInclined = (riVertical, riInclined);
+  //# genEnumDeclarations
+  TBackgroundCode = (
+    bkcLibrary,
+    bkcUnused,
+    bkcBackground
+    );
+
+  TRailSection = (
+    rsNoRails,
+    rsBullhead,
+    rsFlatbottom
+    );
+
+  TRailsInclined = (
+    riVertical,
+    riInclined
+    );
+
+  //# endGenEnumDeclarations
 
   TBoxDims = class(TOTPersistent)
   private
@@ -406,17 +451,20 @@ type
   TBoxDimsOwningList = class(TOTOwningList<TBoxDims>);
   TBoxDimsReferenceList = class(TOTReferenceList<TBoxDims>);
 
+//# genEnumSerialDeclarations
+  function StrToTBackgroundCode(AValue: String): TBackgroundCode;
+  procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TBackgroundCode);
 
-function StrToTBackgroundCode(AValue: String): TBackgroundCode;
-procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TBackgroundCode);
-function StrToTRailSection(AValue: String): TRailSection;
-procedure SaveYamlTRailSection(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TRailSection);
-function StrToTRailsInclined(AValue: String): TRailsInclined;
-procedure SaveYamlTRailsInclined(AEmitter: TYamlEmitter; const AName: String;
-  AValue: TRailsInclined);
+  function StrToTRailSection(AValue: String): TRailSection;
+  procedure SaveYamlTRailSection(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TRailSection);
 
+  function StrToTRailsInclined(AValue: String): TRailsInclined;
+  procedure SaveYamlTRailsInclined(AEmitter: TYamlEmitter; const AName: String;
+    AValue: TRailsInclined);
+
+//# endGenEnumSerialDeclarations
 
 implementation
 
@@ -427,38 +475,47 @@ uses
 var
   log: ILogger;
 
-
+//# genEnumSerialMethods
+// GENERATED METHOD - DO NOT EDIT
 function StrToTBackgroundCode(AValue: String): TBackgroundCode;
 begin
   Result := TBackgroundCode(GetEnumValue(TypeInfo(TBackgroundCode), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTBackgroundCode(AEmitter: TYamlEmitter; const AName: String;
   AValue: TBackgroundCode);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TBackgroundCode), Ord(AValue)));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 function StrToTRailSection(AValue: String): TRailSection;
 begin
   Result := TRailSection(GetEnumValue(TypeInfo(TRailSection), AValue));
 end;
 
-procedure SaveYamlTRailSection(AEmitter: TYamlEmitter; const AName: String; AValue: TRailSection);
+// GENERATED METHOD - DO NOT EDIT
+procedure SaveYamlTRailSection(AEmitter: TYamlEmitter; const AName: String;
+  AValue: TRailSection);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TRailSection), Ord(AValue)));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 function StrToTRailsInclined(AValue: String): TRailsInclined;
 begin
   Result := TRailsInclined(GetEnumValue(TypeInfo(TRailsInclined), AValue));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
 procedure SaveYamlTRailsInclined(AEmitter: TYamlEmitter; const AName: String;
   AValue: TRailsInclined);
 begin
   SaveYamlString(AEmitter, AName, GetEnumName(TypeInfo(TRailsInclined), Ord(AValue)));
 end;
+
+//# endGenEnumSerialMethods
 
 { TBoxDims }
 
