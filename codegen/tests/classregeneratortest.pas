@@ -27,6 +27,7 @@ type
     procedure TestParseYaml;
     procedure TestParseYamlCollectionOperations;
     procedure TestParseYamlEnums;
+    procedure TestParseYamlEnumsMultiDoc;
 
     procedure TestGenerateMemberVars;
     procedure TestGenerateGetSetDeclarations;
@@ -288,9 +289,9 @@ var
   cg: TTestableClassRegenerator;
   enum: TEnum;
 begin
-  // Given sample input with attribute containing a sequence of values
+  // Given sample input with an enum yaml block
   // When ParseYaml is called
-  // Then all the attributes are created with the values populated
+  // Then the enum is created with the expected values
 
   cg := TTestableClassRegenerator.Create('testdata/testparseyaml_enums.pas');
   try
@@ -311,7 +312,43 @@ begin
   finally
     cg.Free;
   end;
+end;
 
+procedure TTestClassRegenerator.TestParseYamlEnumsMultiDoc;
+var
+  cg: TTestableClassRegenerator;
+  enum: TEnum;
+begin
+  // Given sample input with a yaml block containing multiple enums and a class
+  // When ParseYaml is called
+  // Then the enums are created with the expected values
+
+  cg := TTestableClassRegenerator.Create('testdata/testparseyaml_enums_multi.pas');
+  try
+    cg.LoadInput;
+    cg.ParseInput;
+
+    // When...
+    cg.ParseYaml;
+
+    // Then...
+    AssertEquals(2, cg.enumCount);
+    enum := cg.enum[0];
+    AssertEquals('TSampleEnum', enum.Name);
+    AssertEquals(3, enum.valueCount);
+    AssertEquals('seValue1', enum.value[0]);
+    AssertEquals('seValue2', enum.value[1]);
+    AssertEquals('seValue3', enum.value[2]);
+    enum := cg.enum[1];
+    AssertEquals('TSample2Enum', enum.Name);
+    AssertEquals(2, enum.valueCount);
+    AssertEquals('se2Value1', enum.value[0]);
+    AssertEquals('se2Value2', enum.value[1]);
+
+    AssertEquals('TSample', cg.ClassName);
+  finally
+    cg.Free;
+  end;
 end;
 
 procedure TTestClassRegenerator.TestGenerateMemberVars;

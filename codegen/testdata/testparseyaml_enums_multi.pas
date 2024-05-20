@@ -1,0 +1,136 @@
+unit Sample;
+
+interface
+
+uses
+  Classes,
+  SysUtils;
+
+{#
+---
+enum: TSampleEnum
+values:
+- seValue1
+- seValue2
+- seValue3
+---
+enum: TSample2Enum
+values:
+- se2Value1
+- se2Value2
+---
+class: TSample
+attributes:
+  - name: tom
+    type: integer
+    extraSetCode: |
+      FCode := eModified;
+      FStatus := 'Modified';
+  - name: dick
+    type: double
+  - name: harry
+    type: string
+    comment: A single line comment
+...
+}
+
+type
+  //# genEnumDeclarations
+  //# endGenEnumDeclarations
+
+  TSample = class(TOTPersistent)
+  private
+    //# genMemberVars
+    //# endGenMemberVars
+
+  protected
+
+    procedure   RestoreAttributes(AStream : TStream); override;
+    procedure   SaveAttributes(AStream : TStream); override;
+
+    //# genGetSetDeclarations
+    //# endGenGetSetDeclarations
+
+  public
+    constructor Create(AParent: TOTPersistent); override;
+    destructor Destroy; override;
+
+    //# genPublicDeclarations
+    //# endGenPublicDeclarations
+
+    procedure   RestoreYamlAttribute(AName, AValue : string); override;
+    procedure   SaveYamlAttributes(AEmitter: TYamlEmitter); override;
+
+    //# genProperty
+    //# endGenProperty
+  end;
+
+//# genEnumSerialDeclarations
+//# endGenEnumSerialDeclarations
+
+implementation
+
+uses
+  TLoggerUnit;
+
+var
+  log : ILogger;
+
+//# genEnumSerialMethods
+//# endGenEnumSerialMethods
+
+{ TSample }
+
+constructor TSample.Create(AParent: TOTPersistent);
+begin
+  inherited Create(AParent);
+  //# genCreate
+  //# endGenCreate
+end;
+
+destructor TSample.Destroy;
+begin
+  //# genDestroy
+  //# endGenDestroy
+  inherited;
+end;
+
+procedure TSample.RestoreYamlAttribute(AName, AValue : string);
+  begin
+  //# genRestoreYamlVars
+  //# endGenRestoreYamlVars
+   inherited RestoreYamlAttribute(AName, AValue);
+  end;
+
+procedure TSample.RestoreAttributes(AStream : TStream);
+  begin
+  inherited;
+
+  //# genRestoreVars
+  //# endGenRestoreVars
+  end;
+
+procedure TSample.SaveAttributes(AStream : TStream);
+  begin
+  inherited;
+
+  //# genSaveVars
+  //# endGenSaveVars
+
+  end;
+  
+procedure TSample.SaveYamlAttributes(AEmitter : TYamlEmitter);
+  begin
+  inherited;
+  //# genSaveYamlVars
+  //# endGenSaveYamlVars
+  end;
+
+//# genGetSetMethods
+//# endGenGetSetMethods
+
+initialization
+  TSample.RegisterClass;
+
+  log := Logger.GetInstance('TSample');
+end.

@@ -12,7 +12,8 @@ The OpenTemplot Persistence Framework is a framework developed in Free Pascal to
 
 == Outline of usage
 
-All persistent objects need to be descendant classes of `TOTPersistent`, and the source files created using the `codegen` tool. Properties of the class that are to be persisted need to be defined in a comment section at the head of the file using a YAML structure defined later. The `codegen` tool reads the YAML data, and generates all the boiler-plate code required by the framework.
+All persistent objects need to be descendant classes of `TOTPersistent`, and the source files created using the `codegen` tool. Properties of the class that are to be persisted need to be defined in a comment section at the head of the file using a YAML structure defined later. The `codegen` tool reads the YAML data, and generates all the boiler-plate code required by the framework. This can include both classes and enumerated types.
+
 
 === Steps to create a new class
 . Use `codegen` to create a new unit
@@ -74,7 +75,7 @@ The YAML defines a sequence of attributes. Each attribute is a map containing th
 This is the attribute name, expected to be in camelCase. This name will be used directly to a property in the class. Variations of the name will be used for the backing variable, get/set methods and list-related methods.
 
 === type
-The Pascal type for the property. `Integer`, `Double` and `String` are supported directly. Other types can be specified if appropriate supporting methods (for conversion to/from string) are provided.
+The Pascal type for the property. `Integer`, `Double`, `String` and `TDateTime` are supported directly. Other types can be specified if appropriate supporting methods (for conversion to/from string) are provided.
 
 === access
 Controls access to the property. Value is a set containing either `get`, `set`, or both. If not specified, the default is both.
@@ -134,6 +135,47 @@ Example:
       about sample
       (not necessarily very complimentary)
 ----
+
+== Defining enumerated types
+
+Enumerated types require additional supporting functions for Saving/Restoring objects to YAML. These support functions are generated automatically if the enumerated type is defined in a YAML block.
+
+Each enumerated type should be defined in a separate YAML document. YAML documents can be defined in their own comment block, or multiple documents can be defined with a single comment block.
+
+An enumerated type is defined by its type name, and the values it can take:
+
+Example:
+----
+{#
+---
+enum: TSampleEnum
+values:
+- seValue1
+- seValue2
+- seValue3
+...
+}
+----
+
+The `---` and `...` are the YAML document delimiters. Multiple enumerated types can be defined in a single block (along with the class definition as well).
+
+Example:
+----
+{#
+---
+enum: TEnum1
+values:
+- eValue1
+- eValue2
+---
+enum: TEnum2
+- e2Value1
+- e2Value2
+...
+----
+
+The enumerated types will be declared in the interface section before the class definition. The supporting `StrTo...` and `...ToStr` functions will be declared at the bottom of the interface section, and then defined in the implementation section.
+
 
 == Saving/Restoring Objects to YAML
 

@@ -527,6 +527,7 @@ var
   state:
   (pyInitial,
     pyExpectingDocumentStart,
+    pyExpectingDocumentEnd,
     pyExpectingMappingStart,
     pyExpectingClassInfo,
     pyExpectingClassInfoValue,
@@ -568,6 +569,12 @@ begin
           state := pyExpectingMappingStart;
         end;
 
+        pyExpectingDocumentEnd: begin
+          if not (event is TDocumentEndEvent) then
+            raise Exception.Create('Expected Yaml Document Start');
+          state := pyExpectingDocumentStart;
+        end;
+
         pyExpectingMappingStart: begin
           if not (event is TMappingStartEvent) then
             raise Exception.CreateFmt('Expected Yaml Mapping Start, line: %d, col: %d',
@@ -577,10 +584,10 @@ begin
 
         pyExpectingClassInfo: begin
           if (event is TMappingEndEvent) then begin
-            // only expecting one class definition
-            break;
+            // only expecting one class or enum per yaml doc
+            state := pyExpectingDocumentEnd;
           end
-          else
+          else begin
           if not (event is TScalarEvent) then
             raise Exception.Create('Expected Yaml Scalar Event (classinfo name)');
 
@@ -596,6 +603,7 @@ begin
           else
           if currentName = 'values' then
             state := pyExpectingSequenceStart;
+          end;
         end;
 
         pyExpectingClassInfoValue: begin
