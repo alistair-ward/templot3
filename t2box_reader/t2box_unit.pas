@@ -3003,7 +3003,18 @@ var
   i: Integer;
 begin
   for i := 0 to psleep_c do
-    pi.sleeperCentres[i] := track.sleeper_centres[i];
+    pi.sleeperCentresInches[i] := track.sleeper_centres[i];
+end;
+
+function ConvertBox2ToRailJointCode(const rail_joints_code: Integer): TRailJointCode;
+begin
+  case rail_joints_code of
+    -1: Result := rjNone;
+    0: Result := rjNormal;
+    1: Result := rjStaggered;
+    else
+      raise Exception.CreateFmt('Unknown rail joint code: %d', [rail_joints_code]);
+  end;
 end;
 
 procedure ConvertBox2ToPlainTrackInfo(const track: TBox2PlainTrackInfo; template: TTemplate);
@@ -3014,9 +3025,9 @@ begin
 
   pi.customPlainTrack := track.pt_custom;
   pi.listIndex := track.list_index;
-  pi.railLength := track.rail_length;
+  pi.railLengthInches := track.rail_length;
   pi.sleepersPerLength := track.sleepers_per_length;
-  pi.railJointsCode := track.rail_joints_code;
+  pi.railJointsCode := ConvertBox2ToRailJointCode(track.rail_joints_code);
   pi.userPegRail := track.user_peg_rail;
   pi.userPegX := track.user_pegx;
   pi.userPegY := track.user_pegy;

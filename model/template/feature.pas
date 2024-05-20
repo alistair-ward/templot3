@@ -16,7 +16,8 @@ uses
   rail_data_unit,
   line,
   Curve,
-  TurnoutInfo1;
+  TurnoutInfo1,
+  TurnoutCurve;
 
 
 {# class TFeature
@@ -63,6 +64,9 @@ type
     function GetNumberOfLines: Integer;
     function GetLine(idx: Integer): TLine;
     function GetNumberOfMarks: Integer;
+    function GetMark(idx: Integer): TMarkEx;
+
+    procedure AddMark(const p1, p2: Tpex; code: EMarkCode);
 
     procedure DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double);
 
@@ -84,6 +88,7 @@ type
     property numberOfLines: Integer read GetNumberOfLines;
     property lines[idx: Integer]: TLine read GetLine;
     property numberOfMarks: Integer read GetNumberOfMarks;
+    property marks[idx: Integer]: TMarkEx read GetMark;
   end;
 
   TFeatureOwningList = class(TOTOwningList<TFeature>);
@@ -224,6 +229,18 @@ function TFeature.GetNumberOfMarks: Integer;
 begin
   CheckCalculated;
   Result := Length(FMarks);
+end;
+
+function TFeature.GetMark(idx: Integer): TMarkEx;
+begin
+  CheckCalculated;
+  Result := FMarks[idx];
+end;
+
+procedure TFeature.AddMark(const p1, p2: Tpex; code: EMarkCode);
+begin
+  SetLength(FMarks, Length(FMarks) + 1);
+  FMarks[High(FMarks)].SetMark(code, p1, p2);
 end;
 
 procedure TFeature.DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double );

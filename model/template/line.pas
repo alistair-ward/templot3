@@ -33,7 +33,7 @@ type
     property startxy: Tpex read FStartxy;
     property endxy: Tpex read FEndxy;
     property numberOfPoints: Integer read GetNumberOfPoints;
-    property point[idx: Integer]: Tpex read GetPoint;
+    property points[idx: Integer]: Tpex read GetPoint;
   end;
 
 

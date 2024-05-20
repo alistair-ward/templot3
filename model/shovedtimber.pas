@@ -173,6 +173,8 @@ begin
   inherited Create(AParent);
   //# genCreate
   //# endGenCreate
+
+  FShoveCode := svcEmpty;
 end;
 
 destructor TShovedTimber.Destroy;

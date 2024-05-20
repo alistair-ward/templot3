@@ -476,12 +476,12 @@ begin
     pt.customPlainTrack := False;
 
   pt.listIndex := pt_i;
-  pt.railLength := railen[pt_i];
+  pt.railLengthInches := railen[pt_i];
   // rail length in inches (only used for custom lengths).
   pt.sleepersPerLength := sleeper_count[pt_i];
   // number of sleepers per length.
   for i := 0 to psleep_c do
-    pt.sleeperCentres[i] := psleep[pt_i, i];   // spacings (only used for custom spacings).
+    pt.sleeperCentresInches[i] := psleep[pt_i, i];   // spacings (only used for custom spacings).
 
   pt.plainTrackSpacingName := Copy(
     plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i], 1, 198);
@@ -938,12 +938,12 @@ begin
   if (pt.customPlainTrack) or (pt.listIndex > 4) then begin
     pt_i := plain_track_form.plain_track_spacings_listbox.Items.Count - 1;
     // list index for current custom plain track.
-    railen[pt_i] := pt.railLength;
+    railen[pt_i] := pt.railLengthInches;
     // custom rail length in inches.
     sleeper_count[pt_i] := pt.sleepersPerLength;
     // number of sleepers per length.
     for n := 0 to psleep_c do
-      psleep[pt_i, n] := pt.sleeperCentres[n];   // custom spacings.
+      psleep[pt_i, n] := pt.sleeperCentresInches[n];   // custom spacings.
 
     plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i] :=
       '  ' + Trim(pt.plainTrackSpacingName);   // put name in the list.

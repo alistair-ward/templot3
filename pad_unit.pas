@@ -52,6 +52,7 @@ uses
   NotchInfo,
   BoxDims,
   TurnoutInfo1,
+  PlainTrackInfo,
   Centreline
   { OT-FIRST ,}{ OT-FIRST ReadHTML,}{ OT-FIRST framview}{,
   OleCtnrs, OleCtrls, SHDocVw};
@@ -3782,7 +3783,7 @@ var
   shovetimb_crab: double = 0;          // timber shove crabwise.  0.78.c 01-02-03.
 
   bontimb: integer = 0;          // number of bonus timbers 0.76.a 23-10-01.
-  rjcode: integer = 0;
+  rjcode: TRailJointCode = rjNormal;
   // plain track rail joints code, 0=normal, 1=staggered, -1=none (cwr).
 
   nine_foot: boolean = False;      // was True pre 0.93.a (9ft timbering was default).
@@ -20324,7 +20325,7 @@ end;
 procedure Tpad_form.normal_joints_menu_entryClick(Sender: TObject);
 
 begin
-  rjcode := 0;
+  rjcode := rjNormal;
   redraw(True);
 end;
 //_______________________________________
@@ -20332,7 +20333,7 @@ end;
 procedure Tpad_form.staggered_joints_menu_entryClick(Sender: TObject);
 
 begin
-  rjcode := 1;
+  rjcode := rjStaggered;
   redraw(True);
 end;
 //_______________________________________
@@ -20340,7 +20341,7 @@ end;
 procedure Tpad_form.no_joints_menu_entryClick(Sender: TObject);
 
 begin
-  rjcode := 0 - 1;
+  rjcode := rjNone;
   redraw(True);
 end;
 //________________________________________
@@ -20350,11 +20351,11 @@ procedure Tpad_form.plain_track_joints_menu_entryClick(Sender: TObject);
 begin
   case rjcode of      // plain track rail joints code, 0=normal, 1=staggered, -1=none (cwr).
 
-    -1:
+    rjNone:
       no_joints_menu_entry.Checked := True;          // radio item.
-    0:
+    rjNormal:
       normal_joints_menu_entry.Checked := True;      // radio item.
-    1:
+    rjStaggered:
       staggered_joints_menu_entry.Checked := True;   // radio item.
   end;//case
 end;

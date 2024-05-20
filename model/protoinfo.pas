@@ -308,6 +308,13 @@ type
     FChairCornerRadius: Double;
     //# endGenMemberVars
 
+    // Templot2 global: inscale
+    FInchScale: Double;
+    // Templot2 global: gmi
+    FInsideFaceMarkLength: Double;
+    // Templot2 global: gmo
+    FOutsideFaceMarkLength: Double;
+
   protected
     procedure Calculate; override;
     procedure RestoreAttributes(AStream : TStream); override;
@@ -352,6 +359,10 @@ type
     procedure SetChairWidth(const AValue: Double);
     procedure SetChairCornerRadius(const AValue: Double);
     //# endGenGetSetDeclarations
+
+    function GetInchScale: Double;
+    function GetInsideFaceMarkLength: Double;
+    function GetOutsideFaceMarkLength: Double;
 
   public
     constructor Create(AParent: TOTPersistent; AOID: TOID = 0); override;
@@ -476,6 +487,10 @@ type
     // inches full-size
     property chairCornerRadius: Double read FChairCornerRadius write SetChairCornerRadius;
     //# endGenProperty
+
+    property inchScale: Double read GetInchScale;
+    property insideFaceMarkLength: Double read GetInsideFaceMarkLength;
+    property outsideFaceMarkLength: Double read GetOutsideFaceMarkLength;
   end;
 
   TProtoInfoOwningList = class(TOTOwningList<TProtoInfo>);
@@ -513,7 +528,12 @@ end;
 
 procedure TProtoInfo.Calculate;
 begin
+  inherited;
   // Add your calculation code here, and cache the results...
+
+  FInchScale := FScale / 12;
+  FInsideFaceMarkLength := 5 * FInchScale;
+  FOutsideFaceMarkLength := 5 * FInchScale;
 end;
 
 procedure TProtoInfo.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
@@ -1110,6 +1130,24 @@ begin
 end;
 
 //# endGenGetSetMethods
+
+function TProtoInfo.GetInchScale: Double;
+begin
+  CheckCalculated;
+  result := FInchScale;
+end;
+
+function TProtoInfo.GetInsideFaceMarkLength: Double;
+begin
+  CheckCalculated;
+  result := FInsideFaceMarkLength;
+end;
+
+function TProtoInfo.GetOutsideFaceMarkLength: Double;
+begin
+  CheckCalculated;
+  result := FOutsideFaceMarkLength;
+end;
 
 initialization
   TProtoInfo.RegisterClass;

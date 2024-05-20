@@ -2748,7 +2748,7 @@ begin      // calculate the switch data.
 
   fbtip := sw_info.fb_tip_offset;  // FB foot from gauge-face at tip.
 
-  if h_diamond  then begin
+  if h_diamond then begin
     // override - ignore sw_info and calc this switch as a half-diamond.
     // switch not used - diagonal rails are all on turnout radius.
 
@@ -2816,10 +2816,10 @@ begin      // calculate the switch data.
 
       if sw_info.switch_radius_inchormax > max_rad_test then begin
         // straight switch
-        swrad := max_rad + g / 2
+        swrad := max_rad + g / 2;
       end
       else begin
-            // switch radius.
+        // switch radius.
         swrad := sw_info.switch_radius_inchormax * inscale;
       end;
 
@@ -2904,7 +2904,7 @@ begin      // calculate the switch data.
 
       if not h_diamond then begin
         // (radians) average of planing angle and heel angle, k1 and k2.
-        beta := ARCTAN(h / lh)
+        beta := ARCTAN(h / lh);
       end
       else
         beta := hdk;
@@ -3325,7 +3325,7 @@ begin
 
     if xing_calc_i <> 0 then begin
       // ^^^ curved or generic crossing.
-      sl := 0                          // no entry sl.
+      sl := 0;                          // no entry sl.
     end
     else begin
       // regular crossing or ^^^ straight turnout radius.
@@ -6741,7 +6741,7 @@ begin
       rdStraightTurnoutWingFootInnerEdge,
       rdStraightTurnoutWindFootOuterEdge: begin
         if gaunt then begin                           // 0.93.a
-          list_size := flcendx / incx          // includes approach track gauntletted rail.
+          list_size := flcendx / incx;          // includes approach track gauntletted rail.
         end
         else begin
           list_size := (flcendx - toex) / incx;  // closure rail - turnout-side wing rail.
@@ -6756,7 +6756,7 @@ begin
       rdCurvedTurnoutWingFootInnerEdge,
       rdCurvedTurnoutWindFootOuterEdge: begin
         if gaunt then begin                               // 0.93.a
-          list_size := wingendx_ms / incx         // includes approach track gauntletted rail.
+          list_size := wingendx_ms / incx;         // includes approach track gauntletted rail.
         end
         else begin
           list_size := (wingendx_ms - toex) / incx; // closure rail - main-side wing rail.
@@ -7205,7 +7205,8 @@ begin
     docurving(True, True, xtr, ytr, dvx1, dvy1, dummy1, dummy2);   // 1st bogie-pin on pad
   end
   else begin
-    if cl_options_code in [cloMainSideTrack, cloTurnoutSideTrack]          // 213a   adjacent centre-lines
+    if cl_options_code in [cloMainSideTrack, cloTurnoutSideTrack]
+    // 213a   adjacent centre-lines
     then
       cl_offset := get_cl_offset
     else
@@ -8539,8 +8540,9 @@ begin
       // !!! mods 18-8-01 0.73.a to ensure plox occurs in the list (for neater blade infill on printing)...
 
       if (aq = rdCurvedTurnoutWingGaugeFace) and (segment_index = 2) and
-        (switch_type = spStraightOrCurved) and (xb < plox) and (xs > plox) and (not plox_done) then begin
-      // planing and switch curve all in one for straight and curved switches...
+        (switch_type = spStraightOrCurved) and (xb < plox) and (xs > plox) and (not plox_done) then
+      begin
+        // planing and switch curve all in one for straight and curved switches...
         xs := blank_start(plox);
         plox_done := True;
       end;
@@ -22661,13 +22663,13 @@ begin
     end;
   end;
 
-  if (joint_marks = True) and (plain_track = False) then begin
+  if (joint_marks) and (not plain_track) then begin
     // switch front joints (we may be overwriting approach track joints already done)...
 
-    if (omit_swfj_marks = False) and (csi.stock_rail > minfp) and (half_diamond = False)
+    if (not omit_swfj_marks) and (csi.stock_rail > minfp) and (not half_diamond)
     // ignore if stock rail length is zero (custom switch).
     then begin
-      if turnout_road_stock_rail_flag = True then begin
+      if turnout_road_stock_rail_flag then begin
         p1.x := xorg;
         p1.y := g - gmi;
         p2.x := xorg;
@@ -22675,7 +22677,7 @@ begin
         enter_mark(True, p1, p2, eMC_6_RailJoint, '');  // curved stock rail end joint mark.
       end;
 
-      if main_road_stock_rail_flag = True then begin
+      if main_road_stock_rail_flag then begin
         p1.x := xorg;
         p1.y := gmi;
         p2.x := xorg;
@@ -22687,10 +22689,10 @@ begin
 
     // switch rail joints...
 
-    if ((half_diamond = False) and (gaunt = False)) or ((half_diamond = True) and
-      (fixed_diamond = False) and (hd_switch_timbering = True))  // 213a
+    if ((not half_diamond) and (not gaunt)) or ((half_diamond) and
+      (not fixed_diamond) and (hd_switch_timbering))  // 213a
     then begin
-      if (omit_swrj_marks = False) and (csi.switch_rail > minfp)
+      if (not omit_swrj_marks) and (csi.switch_rail > minfp)
       // ignore if switch rail length is zero (custom switch).
       then begin
         tempx := toex + csi.switch_rail * inscale;
@@ -22704,7 +22706,7 @@ begin
         else
           tempy := tempy - g;
 
-        if turnout_road_crossing_rail_flag = True then begin
+        if turnout_road_crossing_rail_flag then begin
           p1.x := tempx + gmo * tempsin;
           // ignore rail-width - so mark is offset to the gauge side.
           p1.y := tempy - gmo * tempcos;
@@ -22714,7 +22716,7 @@ begin
           // curved switch rail joint mark.
         end;
 
-        if main_road_crossing_rail_flag = True then begin
+        if main_road_crossing_rail_flag then begin
           p1.x := tempx;
           // ignore rail-width - so mark is offset to the gauge side.
           p1.y := g + gmo;
@@ -22726,15 +22728,14 @@ begin
       end;
       // stock rail joints...
 
-      if (omit_skj_marks = False) and (csi.stock_rail > minfp)
+      if (not omit_skj_marks) and (csi.stock_rail > minfp)
       // ignore if stock rail length is zero (custom switch).
       then begin
 
-        if half_diamond = True
-        // 213a timbering movable K-crossing as a switch..
-
-        then
-          tempx := toex + (csi.stock_rail - csi.switch_front_inches) * inscale   // K-crossing
+        if half_diamond then begin
+          // 213a timbering movable K-crossing as a switch..
+          tempx := toex + (csi.stock_rail - csi.switch_front_inches) * inscale;   // K-crossing
+        end
         else
           tempx := xorg + csi.stock_rail * inscale;   // turnout stock rail length (from JOINT).
 
@@ -22743,7 +22744,7 @@ begin
         tempcos := COS(k);
         tempsin := SIN(k);
 
-        if turnout_road_stock_rail_flag = True then begin
+        if turnout_road_stock_rail_flag then begin
           p1.x := tempx - (gmo + railtop) * tempsin;
           p1.y := tempy + (gmo + railtop) * tempcos;
           p2.x := tempx + (gmi - railtop) * tempsin;
@@ -22753,7 +22754,7 @@ begin
           // curved stock rail joint mark.
         end;
 
-        if main_road_stock_rail_flag = True then begin
+        if main_road_stock_rail_flag then begin
           p1.x := tempx;
           p1.y := gmi - railtop;
           p2.x := tempx;
@@ -22765,16 +22766,15 @@ begin
     end
     else begin    // normal half_diamond (wing rail joints, not point rails NYI) ...
 
-      if (omit_kx_marks = False) and ((hd_proto_timbering = True) or (fixed_diamond = False)) and
-        (gaunt = False)
+      if (not omit_kx_marks) and ((hd_proto_timbering) or (not fixed_diamond)) and
+        (not gaunt)
       // no joints if non prototypical fixed-crossing spacings.
       then begin
 
-        if use_k_custom_wing_rails = True      // // 0.95.a
-        then
+        if use_k_custom_wing_rails then
           kwl := k_custom_wing_long / 2
         else begin
-          if fixed_diamond = True then begin
+          if fixed_diamond then begin
             if hdkn <= 6.375       // 0.94.a bug fix was k3n
             then begin
               if rail_section <> rsFlatbottom   // BH or none.
@@ -22805,7 +22805,7 @@ begin
         tempcos := COS(k);
         tempsin := SIN(k);
 
-        if turnout_road_stock_rail_flag = True then begin
+        if turnout_road_stock_rail_flag then begin
           p1.x := tempx - (gmo + railtop) * tempsin;
           p1.y := tempy + (gmo + railtop) * tempcos;
           p2.x := tempx + gmi * tempsin;
@@ -22815,7 +22815,7 @@ begin
           // curved stock rail joint mark.
         end;
 
-        if main_road_stock_rail_flag = True then begin
+        if main_road_stock_rail_flag then begin
 
           tempx := toex + (kwl * inscale / COS(hdk / 2));  // 0.95.a  was k3
 
@@ -22831,16 +22831,15 @@ begin
 
     // crossing (wing rail front) joints...
 
-    if (half_diamond = False) or (hd_vcheck_rails = 0) or (k3n > 7.99)
+    if (not half_diamond) or (hd_vcheck_rails = 0) or (k3n > 7.99)
     // 205a  remove joint marks if slip and shorter than 1:8
     then begin
 
-      if (omit_wj_marks = False) and (no_timbering = False)
-      // need the timbering calcs for these.
-      then begin
+      if (not omit_wj_marks) and (not no_timbering) then begin
+        // need the timbering calcs for these.
         tempx := (xtbzz + xtbz) / 2;
 
-        if main_road_crossing_rail_flag = True then begin
+        if main_road_crossing_rail_flag then begin
           p1.x := tempx;
           // crossing joint timber centres.
           p1.y := g + gmo + railtop;
@@ -22857,7 +22856,7 @@ begin
         tempcos := COS(k);
         tempsin := SIN(k);
 
-        if turnout_road_crossing_rail_flag = True then begin
+        if turnout_road_crossing_rail_flag then begin
           p1.x := tempx - gmi * tempsin;
           p1.y := tempy + gmi * tempcos;
           p2.x := tempx + (gmo + railtop) * tempsin;
@@ -22870,7 +22869,7 @@ begin
 
     //  vee point and splice rail joints ...
 
-    if (omit_vj_marks = False) and (crossing_vee_flag = True) then begin
+    if (not omit_vj_marks) and (crossing_vee_flag) then begin
 
       if xing_calc_i = 1     // joint position and angles for curviform V-crossing...
       then begin
@@ -22925,7 +22924,7 @@ begin
     // (do nothing for straight switch.)
     then begin
       if switch_type = spStraightOrCurved then begin
-      // curved planing, switch curve starts at toe (mark across between tips instead of strictly radial).
+        // curved planing, switch curve starts at toe (mark across between tips instead of strictly radial).
         p1.x := setx;
         p1.y := g;
         p2.x := toex;
@@ -23942,7 +23941,7 @@ begin
     //eqtimb:=False;      // no equalizing along switch. 29-3-99
     frackeq := 0;           // ensure switch timbers square-on. 29-3-99.
 
-    if gaunt = False then
+    if not gaunt then
       switchtimbers    // first do switch timbers, end sleepers, and approach track.
     else begin
       if xorg > 0 then
@@ -24258,52 +24257,50 @@ var
     slco: integer;
   begin
     repeat
-      if (joint_marks = True) and (rjcode > -1)
+      if (joint_marks) and (rjcode <> rjNone)
       // first mark the next rail-joint.
       then begin
-        if first_joint = False           // skip the point rail joint
-        then begin
-          if retcurve = True then
+        if not first_joint then begin
+          // skip the point rail joint
+          if retcurve then
             ret_offset := aq25offset(xtb, ret_k) - g / 2
           else
             ret_offset := 0;
 
-          if (odd_rail = True) or (rjcode = 0)
-          // staggered or normal, main-side rail.
-          then begin
+          if (odd_rail) or (rjcode = rjNormal) then begin
+            // staggered or normal, main-side rail.
             p1.x := xtb;
             p1.y := gmi + ret_offset;
-            if retcurve = True then
+            if retcurve then
               dotransform(ret_k, xtb, g / 2, p1, p1);       // twist joint marks.
 
             p2.x := xtb;
             p2.y := 0 - j - gmo + ret_offset;
-            if retcurve = True then
+            if retcurve then
               dotransform(ret_k, xtb, g / 2, p2, p2);       // twist joint marks.
 
-            if ((main_road_stock_rail_flag = True) and ((timb_str = 'A') or
+            if ((main_road_stock_rail_flag) and ((timb_str = 'A') or
               (timb_str = 'E') or (timb_str = 'N'))) or
-              ((crossing_vee_flag = True) and (timb_str = 'R')) then
+              ((crossing_vee_flag) and (timb_str = 'R')) then
               enter_mark(True, p1, p2, eMC_6_RailJoint, '');
             // make rail-joint mark, straight stock rail.
           end;
 
-          if (odd_rail = False) or (rjcode = 0)
-          // staggered or normal, turnout-side rail.
-          then begin
+          if (not odd_rail) or (rjcode = rjNormal) then begin
+            // staggered or normal, turnout-side rail.
             p1.x := xtb;
             p1.y := g - gmi + ret_offset;
-            if retcurve = True then
+            if retcurve then
               dotransform(ret_k, xtb, g / 2, p1, p1);       // twist joint marks.
 
             p2.x := xtb;
             p2.y := g + j + gmo + ret_offset;
-            if retcurve = True then
+            if retcurve then
               dotransform(ret_k, xtb, g / 2, p2, p2);       // twist joint marks.
 
-            if ((turnout_road_stock_rail_flag = True) and ((timb_str = 'A') or
+            if ((turnout_road_stock_rail_flag) and ((timb_str = 'A') or
               (timb_str = 'R') or (timb_str = 'N'))) or
-              ((crossing_vee_flag = True) and (timb_str = 'E')) then
+              ((crossing_vee_flag) and (timb_str = 'E')) then
               enter_mark(True, p1, p2, eMC_6_RailJoint, '');
             // make rail-joint mark, curved stock rail.
           end;
@@ -24347,14 +24344,16 @@ var
           end;
         end;
 
-        if (xtb > fpx + k3n * 4.5 * scale) or (dir = -1) then
-          endsleeper(xtb, True, retcurve, joint_sl, dir)
-        // draw normal sleepering beyond 4ft6in scale vee separation, or for approach track.
-        else
+        if (xtb > fpx + k3n * 4.5 * scale) or (dir = -1) then begin
+          // draw normal sleepering beyond 4ft6in scale vee separation, or for approach track.
+          endsleeper(xtb, True, retcurve, joint_sl, dir);
+        end
+        else begin
+          // might be reduced sleepers for crossover exit.
           endsleeper(xtb, full_length, retcurve, joint_sl, dir);
-        // might be reduced sleepers for crossover exit.
+        end;
 
-        if retcurve = False then begin
+        if not retcurve then begin
           case dir of
             -1:
               approach_last_xtb := xtb;   // save last xtb drawn for length snapping...
@@ -24388,7 +24387,7 @@ begin
 
   tb_roll_mm := tb_roll_percent * railen[pt_i] * inscale / 100;  // timber rolling.
 
-  if retcurve = False then begin
+  if not retcurve then begin
     case dir of
       -1:
         approach_last_xtb := 0;      // init for length snapping...
@@ -24399,7 +24398,7 @@ begin
 
   if dir = 1 then begin
     first_joint := True;                     // point rail joints already drawn.
-    if retcurve = True then
+    if retcurve then
       timb_str := 'R'    //  prefix numbering for return curve.
     else
       timb_str := 'E';   //  prefix for numbering exit plain track.
@@ -24409,7 +24408,7 @@ begin
     timb_str := 'A';        // prefix for numbering approach plain track.
   end;
 
-  if plain_track = True then
+  if plain_track then
     xtb := xtb - tb_roll_mm;  // timber rolling offset 0.76.a 13-5-02
   // (first xtb is on turnoutx).
 
@@ -24421,7 +24420,7 @@ begin
 
   // now add any timbering in the rolled section, if any...
 
-  if (plain_track = True) and (tb_roll_mm > minfp) then begin
+  if (plain_track) and (tb_roll_mm > minfp) then begin
     timb_str := 'N';             // "new" inserted sleepers.
     xtb := turnoutx - tb_roll_mm;  // start from first joint already done...
     dir := 1;
@@ -24497,7 +24496,7 @@ begin                             // for rail-joint marks.
 
   // !!! spacings are negative...
 
-  if (plain_track = False) and (half_diamond = False) and (include_switch_timbers = True)   // 218a
+  if (not plain_track) and (not half_diamond) and (include_switch_timbers)   // 218a
   then begin
     repeat
       if csi.sleeper_j1 < (0 - minfp) then begin
@@ -24539,14 +24538,14 @@ begin                             // for rail-joint marks.
     until 0 <> 0;
   end;
 
-  if (xorg > 0) and (half_diamond = False) then
+  if (xorg > 0) and (not half_diamond) then
     plain_sleepers(xorg, -1, True, False);     // approach plain-track wanted.
 
   // now do the switch timbering...
 
-  if plain_track = False then begin
-    if (half_diamond = False)       // turnout or...
-      or ((half_diamond = True) and (fixed_diamond = False) and (hd_switch_timbering = True))
+  if not plain_track then begin
+    if (not half_diamond)       // turnout or...
+      or ((half_diamond) and (not fixed_diamond) and (hd_switch_timbering))
     // 213a
     then begin
       swtb := 0;             // initialise switch timber number
@@ -30590,7 +30589,7 @@ begin
 
     bontimb := 0;                                // no bonus timbers 0.76.a  23-10-01.
     tb_roll_percent := 0;                        // no timber rolling 0.76.a 13-5-02.
-    rjcode := 0;                                 // normal rail joints 0.76.a  23-10-01.
+    rjcode := rjNormal;                          // normal rail joints 0.76.a  23-10-01.
     half_diamond := False;                       // normal switch calcs.
     if peg_code = -2 then
       peg_code := -1;          // so peg on joints can re-initialise.
@@ -31584,12 +31583,12 @@ begin
   pti.customPlainTrack := (pt_i > 4);  // list index for custom plain track.
 
   pti.listIndex := pt_i;
-  pti.railLength := railen[pt_i];
+  pti.railLengthInches := railen[pt_i];
   // rail length in inches (only used for custom lengths).
   pti.sleepersPerLength := sleeper_count[pt_i];
   // number of sleepers per length.
   for n := 0 to psleep_c do
-    pti.sleeperCentres[n] := psleep[pt_i, n];   // spacings (only used for custom spacings).
+    pti.sleeperCentresInches[n] := psleep[pt_i, n];   // spacings (only used for custom spacings).
 
   pti.plainTrackSpacingName :=
     Copy(plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i],
@@ -32924,12 +32923,12 @@ begin
   then begin
     pt_i := plain_track_form.plain_track_spacings_listbox.Items.Count - 1;
     // list index for current custom plain track.
-    railen[pt_i] := pti.railLength;
+    railen[pt_i] := pti.railLengthInches;
     // custom rail length in inches.
     sleeper_count[pt_i] := pti.sleepersPerLength;
     // number of sleepers per length.
     for n := 0 to psleep_c do
-      psleep[pt_i, n] := pti.sleeperCentres[n];   // custom spacings.
+      psleep[pt_i, n] := pti.sleeperCentresInches[n];   // custom spacings.
 
     plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i] :=
       '  ' + Trim(pti.plainTrackSpacingName);   // put name in the list.
@@ -33263,7 +33262,7 @@ begin
 
     bgnd_template_len_mm := ABS(t.boxDims.turnoutInfo1.turnoutLength);
     //  mm overall length.
-    bgnd_rail_len_in := ABS(t.plainTrackInfo.railLength);
+    bgnd_rail_len_in := ABS(t.plainTrackInfo.railLengthInches);
     // proto inches
     bgnd_roll_percent := ABS(t.plainTrackInfo.plainTrackTimberRollingPercent);
     // rolled in percent.

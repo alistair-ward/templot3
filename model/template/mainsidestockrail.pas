@@ -11,7 +11,8 @@ uses
   OTPersistentList,
   OTYamlEmitter,
   Feature,
-  ProtoInfo;
+  ProtoInfo,
+  PlainTrackInfo;
 
 
 {# class TMainsideStockRail
@@ -20,6 +21,9 @@ class: TMainsideStockRail
 attributes:
 - name: protoInfo
   type: TProtoInfo
+  owns: ref
+- name: plainTrackInfo
+  type: TPlainTrackInfo
   owns: ref
 ...
 }
@@ -32,7 +36,11 @@ type
   private
     //# genMemberVars
     FProtoInfo: TOID;
+    FPlainTrackInfo: TOID;
     //# endGenMemberVars
+
+    procedure CalculateLines;
+    procedure CalculateMarks;
 
   protected
     procedure Calculate; override;
@@ -41,7 +49,9 @@ type
 
     //# genGetSetDeclarations
     function GetProtoInfo: TProtoInfo;
+    function GetPlainTrackInfo: TPlainTrackInfo;
     procedure SetProtoInfo(const AValue: TProtoInfo);
+    procedure SetPlainTrackInfo(const AValue: TPlainTrackInfo);
     //# endGenGetSetDeclarations
 
   public
@@ -56,6 +66,7 @@ type
 
     //# genProperty
     property protoInfo: TProtoInfo read GetProtoInfo write SetProtoInfo;
+    property plainTrackInfo: TPlainTrackInfo read GetPlainTrackInfo write SetPlainTrackInfo;
     //# endGenProperty
   end;
 
@@ -68,7 +79,12 @@ type
 implementation
 
 uses
-  TLoggerUnit;
+  TLoggerUnit,
+  point_ex,
+  mark_unit,
+  rail_data_unit,
+  Line,
+  TurnoutInfo1;
 
 var
   log : ILogger;
@@ -83,6 +99,7 @@ begin
   inherited Create(AParent);
   //# genCreate
   FProtoInfo := 0;
+  FPlainTrackInfo := 0;
   //# endGenCreate
 end;
 
@@ -90,13 +107,78 @@ destructor TMainsideStockRail.Destroy;
 begin
   //# genDestroy
   SetReference(FProtoInfo, nil);
+  SetReference(FPlainTrackInfo, nil);
   //# endGenDestroy
   inherited;
+end;
+
+procedure TMainsideStockRail.CalculateLines;
+  var
+    handMultiplier: Integer;
+  begin
+    handMultiplier := TurnoutHandMultiplier(turnoutInfo.hand);
+
+    FLines.Add(TLine.Create(rdStraightStockGaugeFace));
+    DoStraightLine(FLines[0], 0, turnoutInfo.turnoutLength, handMultiplier * protoInfo.gauge/2);
+
+    FLines.Add(TLine.Create(rdStraightStockOuterFace));
+    DoStraightLine(FLines[1], 0, turnoutInfo.turnoutLength, handMultiplier * (protoInfo.gauge/2 + protoInfo.railtopWidth));
+end;
+
+procedure TMainsideStockRail.CalculateMarks;
+var
+  handMultiplier: Integer;
+  railLength: Double;
+  x: Double;
+  p1: Tpex;
+  p2: Tpex;
+  d: Tpex;
+  r: Double;
+  insideOffset: Double;
+  outsideOffset: Double;
+begin
+  if plainTrackInfo.railJointsCode = rjNone then
+    Exit;
+
+  // Plain track
+  // treat the whole length as approach track...
+  //
+  // Approach Track
+  // Marks are applied from the turnout point *backwards* to the start
+  // of the template
+  //
+  // Exit Track
+  // Marks are applied from the end of the turnout *fowards* to the end
+  // of the template
+  //
+
+  handMultiplier := TurnoutHandMultiplier(turnoutInfo.hand);
+  insideOffset := handMultiplier * (protoInfo.gauge / 2 - protoInfo.insideFaceMarkLength);
+  outsideOffset := handMultiplier * (protoInfo.gauge/2 + protoInfo.railtopWidth + protoInfo.outsideFaceMarkLength);
+
+  // first cut... assume plain track...
+  railLength := plainTrackInfo.railLengthInches * protoInfo.inchScale;
+  x := turnoutInfo.originToToe;
+
+  while x > 0 do begin
+    curve.CalculateCurveAt(x, insideOffset, p1, d, r);
+    curve.CalculateCurveAt(x, outsideOffset, p2, d, r);
+
+    AddMark(p1, p2, eMC_6_RailJoint);
+    x := x - railLength;
+  end;
 end;
 
 procedure TMainsideStockRail.Calculate;
 begin
   // Add your calculation code here, and cache the results...
+  inherited;
+
+  FLines.Clear;
+  SetLength(FMarks, 0);
+
+  CalculateLines;
+  CalculateMarks;
 end;
 
 procedure TMainsideStockRail.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
@@ -104,6 +186,9 @@ begin
   //# genRestoreYamlVars
   if AName = 'protoInfo' then
     RestoreYamlObjectRef(FProtoInfo, StrToInteger(AValue), ALoader)
+  else
+  if AName = 'plainTrackInfo' then
+    RestoreYamlObjectRef(FPlainTrackInfo, StrToInteger(AValue), ALoader)
   else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -117,6 +202,7 @@ procedure TMainsideStockRail.RestoreAttributes(AStream : TStream);
 
   //# genRestoreVars
   AStream.ReadBuffer(FProtoInfo, sizeof(TOID));
+  AStream.ReadBuffer(FPlainTrackInfo, sizeof(TOID));
   //# endGenRestoreVars
   end;
 
@@ -128,6 +214,7 @@ procedure TMainsideStockRail.SaveAttributes(AStream : TStream);
 
   //# genSaveVars
   AStream.WriteBuffer(FProtoInfo, sizeof(TOID));
+  AStream.WriteBuffer(FPlainTrackInfo, sizeof(TOID));
   //# endGenSaveVars
   end;
   
@@ -139,6 +226,7 @@ procedure TMainsideStockRail.SaveYamlAttributes(AEmitter : TYamlEmitter);
   
   //# genSaveYamlVars
   SaveYamlObjectReference(AEmitter, 'protoInfo', FProtoInfo);
+  SaveYamlObjectReference(AEmitter, 'plainTrackInfo', FPlainTrackInfo);
   //# endGenSaveYamlVars
   end;
 
@@ -153,6 +241,18 @@ end;
 procedure TMainsideStockRail.SetProtoInfo(const AValue: TProtoInfo);
 begin
   SetReference(FProtoInfo, AValue);
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TMainsideStockRail.GetPlainTrackInfo: TPlainTrackInfo;
+begin
+  Result := TPlainTrackInfo(FromOID(FPlainTrackInfo));
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TMainsideStockRail.SetPlainTrackInfo(const AValue: TPlainTrackInfo);
+begin
+  SetReference(FPlainTrackInfo, AValue);
 end;
 
 //# endGenGetSetMethods

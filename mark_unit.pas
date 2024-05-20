@@ -147,12 +147,21 @@ type
     p1: Tpex;
     p2: Tpex;
     code: EMarkCode;
+
+    procedure SetMark(ACode: EMarkCode; const AP1, AP2: Tpex);
   end;
 
   TMarkExArray = array of TMarkEx;
 
 
 implementation
+
+procedure TMarkEx.SetMark(ACode: EMarkCode; const AP1, AP2: Tpex);
+begin
+  code := ACode;
+  p1 := AP1;
+  p2 := AP2;
+end;
 
 end.
 

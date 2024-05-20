@@ -113,8 +113,8 @@ begin
     CheckEquals(Length(testData), line.numberOfPoints, 'numberOfPoints');
 
     for i := 0 to High(testData) do begin
-      CheckEquals(testData[i].ptX, line.point[i].x, Format('ptX[%d]', [i]));
-      CheckEquals(testData[i].ptY, line.point[i].y, Format('ptY[%d]', [i]));
+      CheckEquals(testData[i].ptX, line.points[i].x, Format('ptX[%d]', [i]));
+      CheckEquals(testData[i].ptY, line.points[i].y, Format('ptY[%d]', [i]));
     end;
 
     CheckEquals(testData[0].curveX, line.startxy.x, 'startxy.x');
