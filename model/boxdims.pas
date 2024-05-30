@@ -14,7 +14,6 @@ uses
   ProtoInfo,
   TransformInfo,
   PlatformTrackbedInfo,
-  AlignmentInfo,
   CheckDiffs,
   TurnoutInfo1;
 
@@ -243,10 +242,6 @@ attributes:
   type: TPlatformTrackbedInfo
   owns: create
   access: [get]
-- name: alignmentInfo
-  type: TAlignmentInfo
-  owns: create
-  access: [get]
 - name: railSection
   type: TRailSection
 - name: flatbottomKludge
@@ -328,7 +323,6 @@ type
     FIdNumberStr: String;
     FTransformInfo: TOID;
     FPlatformTrackbedInfo: TOID;
-    FAlignmentInfo: TOID;
     FRailSection: TRailSection;
     FFlatbottomKludge: Integer;
     FRailsInclined: TRailsInclined;
@@ -356,7 +350,6 @@ type
     function GetProtoInfo: TProtoInfo;
     function GetTransformInfo: TTransformInfo;
     function GetPlatformTrackbedInfo: TPlatformTrackbedInfo;
-    function GetAlignmentInfo: TAlignmentInfo;
     function GetCheckDiffs: TCheckDiffs;
     function GetTurnoutInfo1: TTurnoutInfo1;
     procedure SetThisWasControlTemplate(const AValue: Boolean);
@@ -420,7 +413,6 @@ type
     property idNumberStr: String read FIdNumberStr write SetIdNumberStr;
     property transformInfo: TTransformInfo read GetTransformInfo;
     property platformTrackbedInfo: TPlatformTrackbedInfo read GetPlatformTrackbedInfo;
-    property alignmentInfo: TAlignmentInfo read GetAlignmentInfo;
     property railSection: TRailSection read FRailSection write SetRailSection;
 
     // 0=normal template, 1=inner foot lines, 2=outer foot lines
@@ -540,10 +532,6 @@ begin
   else
     FPlatformTrackbedInfo := 0;
   if AOID = 0 then
-    FAlignmentInfo := TAlignmentInfo.Create(nil).oid
-  else
-    FAlignmentInfo := 0;
-  if AOID = 0 then
     FCheckDiffs := TCheckDiffs.Create(nil).oid
   else
     FCheckDiffs := 0;
@@ -561,7 +549,6 @@ begin
   SetOwned(FProtoInfo, nil);
   SetOwned(FTransformInfo, nil);
   SetOwned(FPlatformTrackbedInfo, nil);
-  SetOwned(FAlignmentInfo, nil);
   SetOwned(FCheckDiffs, nil);
   SetOwned(FTurnoutInfo1, nil);
   //# endGenDestroy
@@ -627,9 +614,6 @@ begin
   else
   if AName = 'platformTrackbedInfo' then
     RestoreYamlObjectOwn(FPlatformTrackbedInfo, StrToInteger(AValue), ALoader)
-  else
-  if AName = 'alignmentInfo' then
-    RestoreYamlObjectOwn(FAlignmentInfo, StrToInteger(AValue), ALoader)
   else
   if AName = 'railSection' then
     FRailSection := StrToTRailSection(AValue)
@@ -704,7 +688,6 @@ begin
   FIdNumberStr := AStream.ReadAnsiString;
   AStream.ReadBuffer(FTransformInfo, sizeof(TOID));
   AStream.ReadBuffer(FPlatformTrackbedInfo, sizeof(TOID));
-  AStream.ReadBuffer(FAlignmentInfo, sizeof(TOID));
   AStream.ReadBuffer(FRailSection, sizeof(TRailSection));
   AStream.ReadBuffer(FFlatbottomKludge, sizeof(Integer));
   AStream.ReadBuffer(FRailsInclined, sizeof(TRailsInclined));
@@ -747,7 +730,6 @@ begin
   AStream.WriteAnsiString(FIdNumberStr);
   AStream.WriteBuffer(FTransformInfo, sizeof(TOID));
   AStream.WriteBuffer(FPlatformTrackbedInfo, sizeof(TOID));
-  AStream.WriteBuffer(FAlignmentInfo, sizeof(TOID));
   AStream.WriteBuffer(FRailSection, sizeof(TRailSection));
   AStream.WriteBuffer(FFlatbottomKludge, sizeof(Integer));
   AStream.WriteBuffer(FRailsInclined, sizeof(TRailsInclined));
@@ -790,7 +772,6 @@ begin
   SaveYamlString(AEmitter, 'idNumberStr', FIdNumberStr);
   SaveYamlObject(AEmitter, 'transformInfo', FTransformInfo);
   SaveYamlObject(AEmitter, 'platformTrackbedInfo', FPlatformTrackbedInfo);
-  SaveYamlObject(AEmitter, 'alignmentInfo', FAlignmentInfo);
   SaveYamlTRailSection(AEmitter, 'railSection', FRailSection);
   SaveYamlInteger(AEmitter, 'flatbottomKludge', FFlatbottomKludge);
   SaveYamlTRailsInclined(AEmitter, 'railsInclined', FRailsInclined);
@@ -931,12 +912,6 @@ end;
 function TBoxDims.GetPlatformTrackbedInfo: TPlatformTrackbedInfo;
 begin
   Result := TPlatformTrackbedInfo(FromOID(FPlatformTrackbedInfo));
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-function TBoxDims.GetAlignmentInfo: TAlignmentInfo;
-begin
-  Result := TAlignmentInfo(FromOID(FAlignmentInfo));
 end;
 
 // GENERATED METHOD - DO NOT EDIT

@@ -48,16 +48,13 @@ Trail_info = record     // rail switch settings.  23-5-01.
 end;
 *)
 
-{# enum TFlaredEnd
+{#
 ---
 enum: TFlaredEnd
 values:
 - feBent
 - feMachined
 ...
-}
-
-{# enum TKnuckleCode
 ---
 enum: TKnuckleCode
 values:
@@ -65,10 +62,6 @@ values:
 - kcSharp
 - kcCustom
 ...
-}
-
-
-{# class TRailInfo
 ---
 class: TRailInfo
 attributes:
@@ -87,6 +80,12 @@ attributes:
   type: Boolean
 - name: switchDrive
   type: Boolean
+- name: drawCentrelineOnly
+  type: Boolean
+  comment: draw track centre-line only for bgnd
+- name: dummyTemplateFlag
+  type: Boolean
+  comment: same as centre-lines only, but drawn as background shape. 211c
 - name: trackCentreLines
   type: Boolean
 - name: turnoutRoadStockRail
@@ -131,6 +130,8 @@ type
     FKDiagonalSideCheckRail: Boolean;
     FKMainSideCheckRail: Boolean;
     FSwitchDrive: Boolean;
+    FDrawCentrelineOnly: Boolean;
+    FDummyTemplateFlag: Boolean;
     FTrackCentreLines: Boolean;
     FTurnoutRoadStockRail: Boolean;
     FTurnoutRoadCheckRail: Boolean;
@@ -154,6 +155,8 @@ type
     procedure SetKDiagonalSideCheckRail(const AValue: Boolean);
     procedure SetKMainSideCheckRail(const AValue: Boolean);
     procedure SetSwitchDrive(const AValue: Boolean);
+    procedure SetDrawCentrelineOnly(const AValue: Boolean);
+    procedure SetDummyTemplateFlag(const AValue: Boolean);
     procedure SetTrackCentreLines(const AValue: Boolean);
     procedure SetTurnoutRoadStockRail(const AValue: Boolean);
     procedure SetTurnoutRoadCheckRail(const AValue: Boolean);
@@ -184,6 +187,12 @@ type
     property kDiagonalSideCheckRail: Boolean read FKDiagonalSideCheckRail write SetKDiagonalSideCheckRail;
     property kMainSideCheckRail: Boolean read FKMainSideCheckRail write SetKMainSideCheckRail;
     property switchDrive: Boolean read FSwitchDrive write SetSwitchDrive;
+
+    // draw track centre-line only for bgnd
+    property drawCentrelineOnly: Boolean read FDrawCentrelineOnly write SetDrawCentrelineOnly;
+
+    // same as centre-lines only, but drawn as background shape. 211c
+    property dummyTemplateFlag: Boolean read FDummyTemplateFlag write SetDummyTemplateFlag;
     property trackCentreLines: Boolean read FTrackCentreLines write SetTrackCentreLines;
     property turnoutRoadStockRail: Boolean read FTurnoutRoadStockRail write SetTurnoutRoadStockRail;
     property turnoutRoadCheckRail: Boolean read FTurnoutRoadCheckRail write SetTurnoutRoadCheckRail;
@@ -294,6 +303,12 @@ begin
   if AName = 'switchDrive' then
     FSwitchDrive := StrToBoolean(AValue)
   else
+  if AName = 'drawCentrelineOnly' then
+    FDrawCentrelineOnly := StrToBoolean(AValue)
+  else
+  if AName = 'dummyTemplateFlag' then
+    FDummyTemplateFlag := StrToBoolean(AValue)
+  else
   if AName = 'trackCentreLines' then
     FTrackCentreLines := StrToBoolean(AValue)
   else
@@ -336,6 +351,8 @@ procedure TRailInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FKDiagonalSideCheckRail, sizeof(Boolean));
   AStream.ReadBuffer(FKMainSideCheckRail, sizeof(Boolean));
   AStream.ReadBuffer(FSwitchDrive, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawCentrelineOnly, sizeof(Boolean));
+  AStream.ReadBuffer(FDummyTemplateFlag, sizeof(Boolean));
   AStream.ReadBuffer(FTrackCentreLines, sizeof(Boolean));
   AStream.ReadBuffer(FTurnoutRoadStockRail, sizeof(Boolean));
   AStream.ReadBuffer(FTurnoutRoadCheckRail, sizeof(Boolean));
@@ -361,6 +378,8 @@ procedure TRailInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FKDiagonalSideCheckRail, sizeof(Boolean));
   AStream.WriteBuffer(FKMainSideCheckRail, sizeof(Boolean));
   AStream.WriteBuffer(FSwitchDrive, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawCentrelineOnly, sizeof(Boolean));
+  AStream.WriteBuffer(FDummyTemplateFlag, sizeof(Boolean));
   AStream.WriteBuffer(FTrackCentreLines, sizeof(Boolean));
   AStream.WriteBuffer(FTurnoutRoadStockRail, sizeof(Boolean));
   AStream.WriteBuffer(FTurnoutRoadCheckRail, sizeof(Boolean));
@@ -386,6 +405,8 @@ procedure TRailInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'kDiagonalSideCheckRail', FKDiagonalSideCheckRail);
   SaveYamlBoolean(AEmitter, 'kMainSideCheckRail', FKMainSideCheckRail);
   SaveYamlBoolean(AEmitter, 'switchDrive', FSwitchDrive);
+  SaveYamlBoolean(AEmitter, 'drawCentrelineOnly', FDrawCentrelineOnly);
+  SaveYamlBoolean(AEmitter, 'dummyTemplateFlag', FDummyTemplateFlag);
   SaveYamlBoolean(AEmitter, 'trackCentreLines', FTrackCentreLines);
   SaveYamlBoolean(AEmitter, 'turnoutRoadStockRail', FTurnoutRoadStockRail);
   SaveYamlBoolean(AEmitter, 'turnoutRoadCheckRail', FTurnoutRoadCheckRail);
@@ -458,6 +479,24 @@ begin
   if AValue <> FSwitchDrive then begin
     SetModified;
     FSwitchDrive := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TRailInfo.SetDrawCentrelineOnly(const AValue: Boolean);
+begin
+  if AValue <> FDrawCentrelineOnly then begin
+    SetModified;
+    FDrawCentrelineOnly := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TRailInfo.SetDummyTemplateFlag(const AValue: Boolean);
+begin
+  if AValue <> FDummyTemplateFlag then begin
+    SetModified;
+    FDummyTemplateFlag := AValue;
   end;
 end;
 

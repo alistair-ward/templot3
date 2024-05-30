@@ -119,21 +119,17 @@ procedure TMainsideStockRail.CalculateLines;
     handMultiplier := TurnoutHandMultiplier(turnoutInfo.hand);
 
     FLines.Add(TLine.Create(rdStraightStockGaugeFace));
-    DoStraightLine(FLines[0], 0, turnoutInfo.turnoutLength, handMultiplier * protoInfo.gauge/2);
+    DoStraightLine(FLines[0], 0, turnoutInfo.turnoutLength, handMultiplier * protoInfo.gauge/2, curve);
 
     FLines.Add(TLine.Create(rdStraightStockOuterFace));
-    DoStraightLine(FLines[1], 0, turnoutInfo.turnoutLength, handMultiplier * (protoInfo.gauge/2 + protoInfo.railtopWidth));
+    DoStraightLine(FLines[1], 0, turnoutInfo.turnoutLength, handMultiplier * (protoInfo.gauge/2 + protoInfo.railtopWidth), curve);
 end;
 
 procedure TMainsideStockRail.CalculateMarks;
 var
   handMultiplier: Integer;
   railLength: Double;
-  x: Double;
-  p1: Tpex;
-  p2: Tpex;
-  d: Tpex;
-  r: Double;
+  startX: Double;
   insideOffset: Double;
   outsideOffset: Double;
 begin
@@ -155,18 +151,13 @@ begin
   handMultiplier := TurnoutHandMultiplier(turnoutInfo.hand);
   insideOffset := handMultiplier * (protoInfo.gauge / 2 - protoInfo.insideFaceMarkLength);
   outsideOffset := handMultiplier * (protoInfo.gauge/2 + protoInfo.railtopWidth + protoInfo.outsideFaceMarkLength);
-
-  // first cut... assume plain track...
   railLength := plainTrackInfo.railLengthInches * protoInfo.inchScale;
-  x := turnoutInfo.originToToe;
 
-  while x > 0 do begin
-    curve.CalculateCurveAt(x, insideOffset, p1, d, r);
-    curve.CalculateCurveAt(x, outsideOffset, p2, d, r);
+  startX := turnoutInfo.originToToe;
+  if plainTrackInfo.railJointsCode = rjStaggered then
+    startX := startX - railLength/2;
 
-    AddMark(p1, p2, eMC_6_RailJoint);
-    x := x - railLength;
-  end;
+  DoRailJoints( startX, 0, railLength, aeApproach, insideOffset, outsideOffset, curve);
 end;
 
 procedure TMainsideStockRail.Calculate;

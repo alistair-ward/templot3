@@ -723,7 +723,7 @@ uses
   mark_unit,
   ConvertTemplateToGlobals,
   BoxDims,
-  AlignmentInfo,
+  Reminder,
   RailInfo;
 
 const
@@ -1507,7 +1507,7 @@ var
 
   empty_str, panel_str: string;  // 208a
   t: TTemplate;
-  alignment: TAlignmentInfo;
+  rem: TReminder;
   idType: char;
 
 begin
@@ -1653,11 +1653,11 @@ begin
       //end;//with
 
 
-      alignment := keeps_list[n].boxDims.alignmentInfo;
+      rem := keeps_list[n].reminder;
 
-      if alignment.reminderFlag then begin
-        rem_memo.Color := alignment.reminderColour;
-        rem_memo.Lines.Text := alignment.reminderStr;
+      if rem.reminderFlag then begin
+        rem_memo.Color := rem.reminderColour;
+        rem_memo.Lines.Text := rem.reminderStr;
 
         rem_label.Visible := True;
         rem_memo.Visible := True;
@@ -6675,8 +6675,8 @@ begin
   marcol := t.boxDims.padMarkerColour;           // 213b..
   marcol_used := t.boxDims.usePadMarkerColour;  // using it
 
-  rem_flag := t.boxDims.alignmentInfo.reminderFlag;    // 216a..
-  rem_col := t.boxDims.alignmentInfo.reminderColour;
+  rem_flag := t.reminder.reminderFlag;    // 216a..
+  rem_col := t.reminder.reminderColour;
 
   with keepform_listbox do begin
     with Canvas do begin
@@ -8492,12 +8492,12 @@ begin
     EXIT;
 
   edit_reminder_menu_entry.Enabled :=
-    keeps_list[list_position].boxDims.alignmentInfo.reminderFlag;
+    keeps_list[list_position].reminder.reminderFlag;
   remove_reminder_menu_entry.Enabled :=
-    keeps_list[list_position].boxDims.alignmentInfo.reminderFlag;
+    keeps_list[list_position].reminder.reminderFlag;
 
   add_reminder_menu_entry.Enabled :=
-    not keeps_list[list_position].boxDims.alignmentInfo.reminderFlag;
+    not keeps_list[list_position].reminder.reminderFlag;
 
 end;
 //______________________________________________________________________________

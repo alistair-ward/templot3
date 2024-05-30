@@ -12,7 +12,8 @@ uses
   OTYamlEmitter,
   point_ex,
   curve_calculator,
-  curve_parameters_interface;
+  curve_parameters_interface,
+  curve_interface;
 
 
 {# class TCurve
@@ -72,7 +73,7 @@ type
   //# genEnumDeclarations
   //# endGenEnumDeclarations
 
-  TCurve = class(TOTPersistent, ICurveParameters)
+  TCurve = class(TOTPersistent, ICurveParameters, ICurve)
   private
     //# genMemberVars
     FFixedRadius: Double;

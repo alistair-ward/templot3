@@ -96,6 +96,7 @@ uses
   OTUndoRedoManager,
   project,
   shovedTimber,
+  Reminder,
   BoxDims,
   RailInfo,
   ProtoInfo,
@@ -103,7 +104,6 @@ uses
   point_ex,
   NotchInfo,
   PlatformTrackbedInfo,
-  AlignmentInfo,
   CheckDiffs,
   CheckEndDiff,
   TurnoutInfo1,
@@ -2692,16 +2692,19 @@ end;
 
 procedure ConvertBox2ToAlignmentInfo(const align: TBox2AlignmentInfo; template: TTemplate);
 var
-  ai: TAlignmentInfo;
+  rem: TReminder;
+  ri: TRailInfo;
   cl: TCentreline;
 begin
-  ai := template.boxDims.alignmentInfo;
+  rem := template.reminder;
 
-  ai.drawCentrelineOnly := align.cl_only_flag;
-  ai.dummyTemplateFlag := align.dummy_template_flag;
-  ai.reminderFlag := align.reminder_flag;
-  ai.reminderColour := align.reminder_colour;
-  ai.reminderStr := align.reminder_str;
+  rem.reminderFlag := align.reminder_flag;
+  rem.reminderColour := align.reminder_colour;
+  rem.reminderStr := align.reminder_str;
+
+  ri := template.boxDims.railInfo;
+  ri.drawCentrelineOnly := align.cl_only_flag;
+  ri.dummyTemplateFlag := align.dummy_template_flag;
 
   cl := template.centreline;
   cl.option := ConvertBox2CentrelineOptionCode(align.cl_options_code_int);

@@ -1218,25 +1218,25 @@ begin
         info_form.curving_label.Caption := curving_label_prefix_str + 'st';
       end;
 
-      if dummy_template = True then
+      if dummy_template then
         dummy_template_menu_radio.Checked := True   // radio items  211c
       else
-      if cl_only = True then
+      if cl_only then
         centre_lines_only_menu_radio.Checked := True       // radio items  0.93.a mods
       else
-      if track_centre_lines_flag = True then
+      if track_centre_lines_flag then
         normal_track_centre_lines_menu_radio.Checked := True
       else
         no_track_centre_lines_menu_radio.Checked := True;   // radio items
 
       switch_drive_menu_entry.Checked :=
-        (switch_drive_flag = True) and (plain_track = False) and (half_diamond = False);  // 0.82.a
-      switch_drive_menu_entry.Enabled := (plain_track = False) and (half_diamond = False);
+        (switch_drive_flag) and (not plain_track) and (not half_diamond);  // 0.82.a
+      switch_drive_menu_entry.Enabled := (not plain_track) and (not half_diamond);
       // 0.82.a
 
-      isolate_crossing_menu_entry.Checked := (isolated_crossing = True) and (plain_track = False);
+      isolate_crossing_menu_entry.Checked := (isolated_crossing) and (not plain_track);
       // 217a
-      isolate_crossing_menu_entry.Enabled := (plain_track = False);
+      isolate_crossing_menu_entry.Enabled := (not plain_track);
       // 217a
 
       swings_in_degs_menu_entry.Enabled :=
@@ -1249,7 +1249,7 @@ begin
       swell_menu_entry.Enabled := not (controlTemplate.curve.isSpiral or controlTemplate.curve.isSlewing);
       // no swell mouse action for transition curves or slews.
 
-      if plain_track = True then begin
+      if plain_track then begin
         template_menu_top_entry.Caption := 'PLAIN  TRACK :';
         adjust_turnout_approach_menu_entry.Caption := 'adjust  pl&ain-track  length';
         // F3   205a
@@ -1257,7 +1257,7 @@ begin
         // F4   205a
       end
       else begin
-        if half_diamond = False then
+        if not half_diamond then
           template_menu_top_entry.Caption := 'TURNOUT :'
         else
           template_menu_top_entry.Caption := 'HALF-DIAMOND :';
@@ -1275,10 +1275,10 @@ begin
       insert_half_diamond_menu_entry.Enabled := plain_track;
 
       convert_turnout_to_half_diamond_menu_entry.Enabled :=
-        (plain_track = False) and (half_diamond = False);
+        (not plain_track) and (not half_diamond);
       convert_half_diamond_to_turnout_menu_entry.Enabled := half_diamond;
-      snap_to_catch_points_menu_entry.Enabled := (plain_track = False) and (half_diamond = False);
-      snap_to_heel_menu_entry.Enabled := (plain_track = False) and (half_diamond = False);
+      snap_to_catch_points_menu_entry.Enabled := (not plain_track) and (not half_diamond);
+      snap_to_heel_menu_entry.Enabled := (not plain_track) and (not half_diamond);
       snap_approach_track_menu_entry.Enabled := not half_diamond;
 
       // 0.93.a ...
@@ -1304,26 +1304,26 @@ begin
         timbers_in_line_menu_entry.Checked := False;
       end
       else begin
-        if (ms_ends = False) or (half_diamond = True) then
+        if (not ms_ends) or (half_diamond) then
           timbers_centralized_menu_entry.Checked := True  // radio item.
         else
           timbers_in_line_menu_entry.Checked := True;     // radio item.
       end;
 
-      if no_timbering = True then
+      if no_timbering then
         no_timbering_menu_entry.Checked := True  // radio item
       else begin
-        if half_diamond = True then
+        if half_diamond then
           half_diamond_timbering_style_menu_entry.Checked := True
         else begin
-          if timbers_equalized = True then begin
-            if equalizing_fixed = False then
+          if timbers_equalized then begin
+            if not equalizing_fixed then
               equalized_incremental_menu_entry.Checked := True  // radio item.
             else
               equalized_constant_menu_entry.Checked := True;    // radio item.
           end
           else begin
-            if square_on_angled = False then
+            if not square_on_angled then
               square_on_menu_entry.Checked := True              // radio item.
             else
               angled_on_menu_entry.Checked := True;             // radio item. 29-7-01.
@@ -1343,9 +1343,9 @@ begin
       timbers_in_line_menu_entry.Enabled :=
         (timbinc > minfp) { ((nine_foot=True) or (eight_foot_six=True))} and not half_diamond;
 
-      if platform_form.Showing = True then begin
+      if platform_form.Showing then begin
         platform_buttons;   // 0.93.a update the platforms form
-        if (draw_ts_platform = True) or (draw_ms_platform = True) then begin
+        if (draw_ts_platform) or (draw_ms_platform) then begin
           adjacent_trackbed_platforms_menu_entry.Checked := True;  // radio item
           adjacent_edges := True;
           do_railedges;
@@ -1354,7 +1354,7 @@ begin
 
       if trackbed_form.Showing = True then begin
         trackbed_buttons;   // 215a update the trackbed form
-        if (draw_ts_trackbed_edge = True) or (draw_ms_trackbed_edge = True) then begin
+        if (draw_ts_trackbed_edge) or (draw_ms_trackbed_edge) then begin
           adjacent_trackbed_platforms_menu_entry.Checked := True;  // radio item
           adjacent_edges := True;
           do_railedges;
@@ -1363,7 +1363,7 @@ begin
 
       // 0.94.a ...
 
-      if shove_timber_form.Showing = True then begin
+      if shove_timber_form.Showing then begin
         shove_timber_form.retain_shoves_on_mint_checkbox.Checked := retain_shoves_on_mint;
         shove_timber_form.retain_shoves_on_make_checkbox.Checked := retain_shoves_on_make;
       end;
@@ -1371,7 +1371,7 @@ begin
       make_tools_retain_shoved_menu_entry.Checked := retain_shoves_on_make;
       make_tools_restore_shoved_menu_entry.Checked := not retain_shoves_on_make;
 
-      if check_diffs_form.Showing = True then begin
+      if check_diffs_form.Showing then begin
         check_diffs_form.retain_diffs_on_mint_checkbox.Checked := retain_diffs_on_mint;
         check_diffs_form.retain_diffs_on_make_checkbox.Checked := retain_diffs_on_make;
       end;
@@ -1381,24 +1381,24 @@ begin
 
     end;//with
 
-    if export_form.Showing = True       // 208a
-    then begin
+    if export_form.Showing then begin
+    // 208a
       export_form.export_dxf_button.Enabled :=
         not export_form.export_control_template_radiobutton.Checked;
     end;
 
 
-    if grid_form.Showing = True      // 0.98.a
-    then begin
+    if grid_form.Showing then begin
+    // 0.98.a
       grid_form.dummy_vehicle_make_copy_button.Enabled :=
         grid_form.show_dummy_vehicles_radio_button.Checked;
 
-      if half_diamond = True then
+      if half_diamond then
         grid_form.turnout_road_dummy_vehicle_radio_button.Caption := 'on diagonal road'
       else
         grid_form.turnout_road_dummy_vehicle_radio_button.Caption := 'on turnout road';
 
-      if plain_track = True then begin
+      if plain_track then begin
         grid_form.main_road_dummy_vehicle_radio_button.Checked := True;
         // radio item
         grid_form.turnout_road_dummy_vehicle_radio_button.Enabled := False;
@@ -1410,13 +1410,13 @@ begin
     do_info_colours; // indicate if control template visible and accessible...
 
 
-    if print_busy = True then
+    if print_busy then
       EXIT; //  do nothing if printer busy using data.
 
-    if data_changed = True       //  only re-calc and draw on data change (from redraw;),
-    //  not if error in calc occurred.
-    then begin
+    if data_changed then begin
+    //  only re-calc and draw on data change (from redraw;),
       if abandon_calcs = True then begin
+        //  not if error in calc occurred.
         case alert(2, '    calculations abandoned',
             '||Sorry, your data confused Templot0. The turnout calculations had to be abandoned.'
             +
@@ -1530,13 +1530,13 @@ begin
           end;//sketchboard in use
   }
 
-    if backup_wanted = True then
+    if backup_wanted then
       create_backup_file(False);     // sets backup_wanted False;
 
 
   finally
 
-    if Application.Active = False then
+    if not Application.Active then
       Done := True           // not active.
     else
       Done := allow_idle;    // True means abandon time-slice and back to Windows.

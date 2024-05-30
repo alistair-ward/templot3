@@ -1638,14 +1638,14 @@ begin
                       Pen.Style := psDot;
                   end;
 
-                  if (not bd.alignmentInfo.drawCentrelineOnly) and (something_drawn) and
+                  if (not bd.railInfo.drawCentrelineOnly) and (something_drawn) and
                     ((aq = rdMainRoadCentreLine) or (aq = rdTurnoutRoadCentreLine)) then
                     CONTINUE;
                   // don't draw centre-lines unless there is nothing else. (cl-only templates).
 
                   if (aq = rdMainRoadCentreLine) or (aq = rdTurnoutRoadCentreLine)   // 212a
                   then begin
-                    if bd.alignmentInfo.dummyTemplateFlag then
+                    if bd.railInfo.dummyTemplateFlag then
                       Pen.Color := shapes_colour  // 212a
                     else
                       Pen.Color := guide_colour;  // centre-lines

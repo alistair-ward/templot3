@@ -48,7 +48,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="131">
+    <Units Count="130">
       <Unit0>
         <Filename Value="opentemplot.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -664,59 +664,54 @@
         <UnitName Value="PlatformTrackbedInfo"/>
       </Unit119>
       <Unit120>
-        <Filename Value="model\alignmentinfo.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="AlignmentInfo"/>
-      </Unit120>
-      <Unit121>
         <Filename Value="model\checkdiffs.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CheckDiffs"/>
-      </Unit121>
-      <Unit122>
+      </Unit120>
+      <Unit121>
         <Filename Value="model\checkenddiff.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CheckEndDiff"/>
-      </Unit122>
-      <Unit123>
+      </Unit121>
+      <Unit122>
         <Filename Value="model\turnoutinfo1.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="TurnoutInfo1"/>
-      </Unit123>
-      <Unit124>
+      </Unit122>
+      <Unit123>
         <Filename Value="model\crossinginfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CrossingInfo"/>
-      </Unit124>
-      <Unit125>
+      </Unit123>
+      <Unit124>
         <Filename Value="model\plaintrackinfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="PlainTrackInfo"/>
-      </Unit125>
-      <Unit126>
+      </Unit124>
+      <Unit125>
         <Filename Value="model\hdkcheckrailinfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="HdkCheckRailInfo"/>
-      </Unit126>
-      <Unit127>
+      </Unit125>
+      <Unit126>
         <Filename Value="model\veecheckrailinfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="VeeCheckRailInfo"/>
-      </Unit127>
-      <Unit128>
+      </Unit126>
+      <Unit127>
         <Filename Value="model\converttemplatetoglobals.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ConvertTemplateToGlobals"/>
-      </Unit128>
-      <Unit129>
+      </Unit127>
+      <Unit128>
         <Filename Value="model\template\centreline.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Centreline"/>
-      </Unit129>
-      <Unit130>
+      </Unit128>
+      <Unit129>
         <Filename Value="model\template\feature.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit130>
+      </Unit129>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

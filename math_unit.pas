@@ -1344,7 +1344,6 @@ uses
   curve,
   BoxDims,
   TransformInfo,
-  AlignmentInfo,
   PlatformTrackbedInfo,
   CrossingInfo,
   ProtoInfo,
@@ -18547,8 +18546,8 @@ begin
 
     if pad_form.stock_rails_menu_entry.Checked  // generator switches...
     then begin
-      if main_road_stock_rail_flag = True      // rail switches per template.
-      then begin
+      if main_road_stock_rail_flag then begin
+        // rail switches per template.
         aqyn[rdStraightStockGaugeFace] := gf;    // straight stock rail.
         aqyn[rdStraightStockOuterFace] := oe;
       end;
@@ -18560,7 +18559,7 @@ begin
     end;
 
     if pad_form.crossing_rails_menu_entry.Checked then begin
-      if main_road_crossing_rail_flag = True then begin
+      if main_road_crossing_rail_flag then begin
         aqyn[rdStraightTurnoutWingGaugeFace] := gf;    // straight turnout/wing rail.
         aqyn[rdStraightTurnoutWingOuterFace] := oe;
       end;
@@ -18608,12 +18607,11 @@ begin
 
   // 0, do nothing.
 
-  if gen_platforms     // generator switch
-  then begin
+  if gen_platforms then begin
+    // generator switch
 
-    if not adjacent_edges
-    // 0.93.a   False=adjacent tracks,  True=trackbed edges and platform edges.
-    then begin
+    if not adjacent_edges then begin
+      // 0.93.a   False=adjacent tracks,  True=trackbed edges and platform edges.
       if (not cl_only) and (rail_section <> rsNoRails) then begin
         // any adjacent tracks...
         //       if gen_tsnr=True
@@ -22217,7 +22215,7 @@ begin
 
   // turnouts or plain track marks...
 
-  if (guide_marks = True) and (centre_lines = True) and (track_centre_lines_flag = True) and
+  if (guide_marks) and (centre_lines) and (track_centre_lines_flag) and
     (turnoutx <> 0)  // 0.93.a  (turnoutx<>0) added
   then begin
     // rail-end mark...
@@ -22564,7 +22562,7 @@ begin
     end;
 
 
-    if (centre_lines = True) and (track_centre_lines_flag = True) then begin
+    if (centre_lines) and (track_centre_lines_flag) then begin
       // toe centre-line mark...
       p1.x := toemidx;
       p1.y := g / 2 - gm;
@@ -22626,15 +22624,15 @@ begin
 
   // tie-bar centre mark...
 
-  if (switch_drive_markx = True) and (switch_drive_flag = True) and
-    (plain_track = False) and (half_diamond = False) and (gaunt = False) then begin
+  if (switch_drive_markx) and (switch_drive_flag) and
+    (not plain_track) and (not half_diamond) and (not gaunt) then begin
     tbe := scale;         // tie-bar ends 1ft scale beyond gauge.
     tbw := 2 * inscale;     // tie-bar half-width 2" scale.
 
     xtb := toex + 18 * inscale;
     // now fixed at 18" from toe to tie-bar. (mod mainly for slip switches) // 0.82.a  13-10-06
 
-    if (turnout_road_crossing_rail_flag = True) or (main_road_crossing_rail_flag = True)
+    if (turnout_road_crossing_rail_flag) or (main_road_crossing_rail_flag)
     // not if no switch blades.
     then begin
       p1.x := xtb - tbw;
@@ -26693,8 +26691,8 @@ begin
     gauge_dims(False, False, False);
     // data from cg current gauge, not from the gauge list (ignore return).
 
-    if (cl_only = False) and (gen_centre_lines_were_off = True) and
-      (centre_lines_menu_entry.Checked = True) then begin
+    if (not cl_only) and (gen_centre_lines_were_off) and
+      (centre_lines_menu_entry.Checked) then begin
       centre_lines_menu_entry.Checked := False;
       // toggle centre-lines off (not needed for this one)...
       centre_lines := False;
@@ -26702,7 +26700,7 @@ begin
       gen_centre_lines_were_off := False;                  // clear the flag again.
     end;
 
-    if (cl_only = True) and (centre_lines_menu_entry.Checked = False)  // toggles on click
+    if (cl_only) and (not centre_lines_menu_entry.Checked)  // toggles on click
     then begin
       centre_lines_menu_entry.Checked := True;     // make sure centre-lines are on.
       centre_lines := True;
@@ -31454,8 +31452,8 @@ var
 begin
   bd := t.boxDims;
   bd.railInfo.trackCentreLines := track_centre_lines_flag;
-  bd.alignmentInfo.drawCentrelineOnly := cl_only;
-  bd.alignmentInfo.dummyTemplateFlag := dummy_template;   // 212a
+  bd.railInfo.drawCentrelineOnly := cl_only;
+  bd.railInfo.dummyTemplateFlag := dummy_template;   // 212a
 end;
 //______________________________________________________________________________
 

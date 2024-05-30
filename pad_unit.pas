@@ -3979,7 +3979,7 @@ uses
   ConvertTemplateToGlobals,
   TurnoutInfo2,
   RailInfo,
-  AlignmentInfo;
+  Reminder;
 
 const
 
@@ -9364,7 +9364,7 @@ end;
 function warn_if_no_timbers: boolean;  // 208c
 
 begin
-  if cl_only = True then begin
+  if cl_only then begin
     if alert(3, '    no  timbers  showing',
       'There are no timbers showing because the control template has been set to show track centre-lines only.'
       + '||Do you want to restore the rails and timbers for this template?',
@@ -16573,7 +16573,7 @@ var
   t_only, dummy1: double;
 
 begin
-  if (xorg < minfp) or (cl_only = True) or (no_timbering = True) then
+  if (xorg < minfp) or (cl_only) or (no_timbering) then
     EXIT;  // no approach track or no sleeper centres.
 
   startx := 0;                           // cancel any blanking, so he can see the change.
@@ -16627,7 +16627,7 @@ end;
 procedure Tpad_form.shorten_approach_one_menu_entryClick(Sender: TObject);
 
 begin
-  if (xorg <= 0) or (cl_only = True) or (no_timbering = True) then
+  if (xorg <= 0) or (cl_only) or (no_timbering) then
     EXIT;      // nothing to shorten or no sleeper centres.
 
   if sleeper_count[pt_i] < 1 then
@@ -16646,7 +16646,7 @@ var
   avspace: double;
 
 begin
-  if (cl_only = True) or (no_timbering = True) then
+  if (cl_only) or (no_timbering) then
     EXIT;    // no sleeper centres.
   if sleeper_count[pt_i] < 1 then
     EXIT;                    // no sleepers in length.
@@ -16684,7 +16684,7 @@ var
   dummy1: double;
 
 begin
-  if (cl_only = True) or (no_timbering = True) then
+  if (cl_only) or (no_timbering) then
     EXIT;      // no sleeper centres.
 
   turnout_i := 1;      // length locked.
@@ -16712,7 +16712,7 @@ end;
 procedure Tpad_form.shorten_exit_one_menu_entryClick(Sender: TObject);
 
 begin
-  if (cl_only = True) or (no_timbering = True) then
+  if (cl_only) or (no_timbering) then
     EXIT;   // no sleeper centres.
   if sleeper_count[pt_i] < 1 then
     EXIT;                    // no sleepers in length.
@@ -16731,7 +16731,7 @@ var
   avspace: double;
 
 begin
-  if (cl_only = True) or (no_timbering = True) then
+  if (cl_only) or (no_timbering) then
     EXIT;   // no sleeper centres.
 
   if (exittb_i = 0) or (turnoutx <= tb_xing_end)    // no exit there...
@@ -20101,7 +20101,7 @@ begin
 
   dummy_template := False;   // 211c
 
-  if centre_lines_menu_entry.Checked = False then
+  if not centre_lines_menu_entry.Checked then
     centre_lines_menu_entry.Click;  // make sure generator centre-lines are on.
 
   shove_timber_form.Close;   // no timbers to shove.
@@ -20139,7 +20139,7 @@ begin
 
   dummy_template := True;     // 211c
 
-  if centre_lines_menu_entry.Checked = False then
+  if not centre_lines_menu_entry.Checked then
     centre_lines_menu_entry.Click;  // make sure generator centre-lines are on.
 
   shove_timber_form.Close;   // no timbers to shove.
@@ -24561,13 +24561,13 @@ procedure Tpad_form.adjust_adjacent_centres_ts_menu_entryClick(Sender: TObject);
 begin
   cancel_adjusts(True);
 
-  if track_centre_lines_flag = False then
+  if not track_centre_lines_flag then
     normal_track_centre_lines_menu_radio.Click;  // make sure showing
 
-  if centre_lines_menu_entry.Checked = False then
+  if not centre_lines_menu_entry.Checked then
     centre_lines_menu_entry.Click;  // make sure generator centre-lines are on.
 
-  if adjacent_edges = True then
+  if adjacent_edges then
     centre_line_option_ts_track_menu_entry.Click;  // put centre-line on TS if rails not showing
 
   mouse_action_selected('    adjacent  centres  TS ...', 'adjacent  centres  TS',
@@ -24581,13 +24581,13 @@ procedure Tpad_form.adjust_adjacent_centres_ms_menu_entryClick(Sender: TObject);
 begin
   cancel_adjusts(True);
 
-  if track_centre_lines_flag = False then
+  if not track_centre_lines_flag then
     normal_track_centre_lines_menu_radio.Click;  // make sure showing
 
-  if centre_lines_menu_entry.Checked = False then
+  if not centre_lines_menu_entry.Checked then
     centre_lines_menu_entry.Click;  // make sure generator centre-lines are on.
 
-  if adjacent_edges = True then
+  if adjacent_edges then
     centre_line_option_ms_track_menu_entry.Click;  // put centre-line on MS if rails not showing.
 
   mouse_action_selected('    adjacent  centres  MS ...', 'adjacent  centres  MS',
@@ -25345,12 +25345,12 @@ begin
     enable_f7_snap_popup_entry.Checked := True;   // radio items.
 
   edit_reminder_popup_entry.Enabled :=
-    keeps_list[clicked_keep_index].boxDims.alignmentInfo.reminderFlag;
+    keeps_list[clicked_keep_index].reminder.reminderFlag;
   remove_reminder_popup_entry.Enabled :=
-    keeps_list[clicked_keep_index].boxDims.alignmentInfo.reminderFlag;
+    keeps_list[clicked_keep_index].reminder.reminderFlag;
 
   add_reminder_popup_entry.Enabled :=
-    not keeps_list[clicked_keep_index].boxDims.alignmentInfo.reminderFlag;
+    not keeps_list[clicked_keep_index].reminder.reminderFlag;
 
   bg_pt := keeps_list[clicked_keep_index].bgnd_plain_track;
   bg_hd := keeps_list[clicked_keep_index].bgnd_half_diamond;
@@ -27136,7 +27136,7 @@ end;
 
 procedure add_reminder_click(index: integer);     // 216a
 var
-  al: TAlignmentInfo;
+  rem: TReminder;
 
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
@@ -27152,10 +27152,10 @@ begin
     do_show_modal(math_form);    // 212a
 
     if ModalResult = mrOk then begin
-      al := keeps_list[index].boxDims.alignmentInfo;
+      rem := keeps_list[index].reminder;
 
-      al.reminderStr := Trim(math_editbox.Text);
-      al.reminderFlag := (Trim(math_editbox.Text) <> '');
+      rem.reminderStr := Trim(math_editbox.Text);
+      rem.reminderFlag := (Trim(math_editbox.Text) <> '');
 
       save_done := False;
       backup_wanted := True;
@@ -27179,12 +27179,12 @@ end;
 
 procedure edit_reminder_click(index: integer);   // 216a
 var
-  al: TAlignmentInfo;
+  rem: TReminder;
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;
 
-  if not keeps_list[index].boxDims.alignmentInfo.reminderFlag then
+  if not keeps_list[index].reminder.reminderFlag then
     EXIT;
 
   with math_form do begin
@@ -27194,15 +27194,15 @@ begin
       '||If you leave the reminder message blank, the reminder will be removed.' +
       '||Reminder messages are limited to 200 characters maximum.');
 
-    math_editbox.Text := keeps_list[index].boxDims.alignmentInfo.reminderStr;
+    math_editbox.Text := keeps_list[index].reminder.reminderStr;
 
     do_show_modal(math_form);    // 212a
 
     if ModalResult = mrOk then begin
-      al := keeps_list[index].boxDims.alignmentInfo;
+      rem := keeps_list[index].reminder;
 
-      al.reminderStr := Trim(math_editbox.Text);
-      al.reminderFlag := (Trim(math_editbox.Text) <> '');
+      rem.reminderStr := Trim(math_editbox.Text);
+      rem.reminderFlag := (Trim(math_editbox.Text) <> '');
 
       save_done := False;
       backup_wanted := True;
@@ -27226,16 +27226,16 @@ end;
 
 procedure remove_reminder_click(index: integer);  // 216a
 var
-  al: TAlignmentInfo;
+  rem: TReminder;
 
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;
 
-  al := keeps_list[index].boxDims.alignmentInfo;
+  rem := keeps_list[index].reminder;
 
-  al.reminderStr := '';
-  al.reminderFlag := False;
+  rem.reminderStr := '';
+  rem.reminderFlag := False;
 
   save_done := False;
   backup_wanted := True;
@@ -27254,17 +27254,17 @@ end;
 
 procedure reminder_colour_click(index: integer);  // 216a
 var
-  al: TAlignmentInfo;
+  rem: TReminder;
 begin
   if (index < 0) or (index > (keeps_list.Count - 1)) or (keeps_list.Count < 1) then
     EXIT;
 
-  al := keeps_list[index].boxDims.alignmentInfo;
+  rem := keeps_list[index].reminder;
 
-    if not al.reminderFlag then
+    if not rem.reminderFlag then
       EXIT; // ???  no reminder here
 
-    al.reminderColour := get_colour('choose  a  colour  for  this  reminder', al.reminderColour);
+    rem.reminderColour := get_colour('choose  a  colour  for  this  reminder', rem.reminderColour);
 
   save_done := False;
   backup_wanted := True;

@@ -89,7 +89,7 @@ end;
 
 procedure TTestTemplate.SetCentreLineOnly(ATemplate: TTemplate; AFlag: Boolean);
 begin
-  ATemplate.boxDims.alignmentInfo.drawCentrelineOnly := AFlag;
+  ATemplate.boxDims.railInfo.drawCentrelineOnly := AFlag;
 end;
 
 procedure TTestTemplate.TestStraightPlainTrackCentreLineOnly;

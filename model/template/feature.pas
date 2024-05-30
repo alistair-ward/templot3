@@ -15,6 +15,7 @@ uses
   mark_unit,
   rail_data_unit,
   line,
+  curve_interface,
   Curve,
   TurnoutInfo1,
   TurnoutCurve;
@@ -36,6 +37,8 @@ attributes:
 type
   //# genEnumDeclarations
   //# endGenEnumDeclarations
+
+  TApproachOrExit = (aeApproach, aeExit);
 
   { TFeature }
 
@@ -68,7 +71,8 @@ type
 
     procedure AddMark(const p1, p2: Tpex; code: EMarkCode);
 
-    procedure DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double);
+    procedure DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double; ACurve: ICurve);
+    procedure DoRailJoints(AStartX, AEndX, ARailLength: Double; AApproachOrExit: TApproachOrExit; AOffset1, AOffset2: Double; ACurve: ICurve);
 
   public
     constructor Create(AParent: TOTPersistent; AOID: TOID = 0); override;
@@ -243,27 +247,63 @@ begin
   FMarks[High(FMarks)].SetMark(code, p1, p2);
 end;
 
-procedure TFeature.DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double );
+procedure TFeature.DoStraightLine(ALine: TLine; AStartX, AEndX, AYOffset: Double; ACurve: ICurve);
 var
   crvX: Double;
-  crv: TCurve;
   incX: Double;
   pt: Tpex;
   dir: Tpex;
   radius: Double;
 begin
-  crv := curve;
   incX := turnoutInfo.stepSize;
   crvX := AStartX;
 
   repeat
-    crv.CalculateCurveAt(crvX, AYOffset, pt, dir, radius);
+    ACurve.CalculateCurveAt(crvX, AYOffset, pt, dir, radius);
     ALine.AddPoint(TPex.xy(crvX, AYOffset), pt);
     crvX := crvX + incX;
   until crvX > AEndX - (incX * 0.1);
 
-  crv.CalculateCurveAt(AEndX, AYOffset, pt, dir, radius);
+  ACurve.CalculateCurveAt(AEndX, AYOffset, pt, dir, radius);
   ALine.AddPoint(TPex.xy(AEndX, AYOffset), pt);
+
+end;
+
+procedure TFeature.DoRailJoints(AStartX, AEndX, ARailLength: Double; AApproachOrExit: TApproachOrExit; AOffset1, AOffset2: Double; ACurve: ICurve);
+var
+  x: Double;
+  p1: Tpex;
+  p2: Tpex;
+  d: Tpex;
+  r: Double;
+  direction: Double;
+begin
+  if AApproachOrExit = aeApproach then
+    direction := -1
+  else
+    direction := 1;
+
+  x := AStartX;
+
+  while true do begin
+    // loop condition check
+    if AApproachOrExit = aeApproach then begin
+      // working backwards
+      if x < AEndX then
+        break;
+    end
+    else begin
+      // going forwards
+      if x > AEndX then
+        break;
+    end;
+
+    ACurve.CalculateCurveAt(x, AOffset1, p1, d, r);
+    ACurve.CalculateCurveAt(x, AOffset2, p2, d, r);
+
+    AddMark(p1, p2, eMC_6_RailJoint);
+    x := x + direction * ARailLength;
+  end;
 
 end;
 

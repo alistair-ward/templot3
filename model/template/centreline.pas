@@ -173,7 +173,7 @@ begin
 
   FCentrelineOffset := CalculateCentrelineOffset;
 
-  DoStraightLine(FLines[0], 0, turnoutInfo.turnoutLength, FCentrelineOffset);
+  DoStraightLine(FLines[0], 0, turnoutInfo.turnoutLength, FCentrelineOffset, curve);
 end;
 
 procedure TCentreline.RestoreYamlAttribute(AName, AValue: String; AIndex: Integer;

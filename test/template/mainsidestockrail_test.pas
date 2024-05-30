@@ -50,7 +50,7 @@ const
   scaleMMperFoot: Double = 5.5;
   inchScale: Double = 5.5 / 12;
 
-{ TTestMainsideStockRail }
+  { TTestMainsideStockRail }
 
 procedure TTestMainsideStockRail.Setup;
 begin
@@ -206,12 +206,12 @@ begin
   //
   // Given straight plain track
   //   and the track is not continuous (30' proto length)
-  //   and the turnout side is Right
+  //   and the turnout side is Left
   // When the track is calculated
   // Then the stock rail has 2 lines
   //  and the rails are MainsideStockGaugeFace and MainsideStockOuterFace
-  //  and the gauge face is 1/2 the gauge to the left of the defined curve
-  //  and the outer face is 1/2 the gauge plus the rail width to the left of the defined curve
+  //  and the gauge face is 1/2 the gauge to the right of the defined curve
+  //  and the outer face is 1/2 the gauge plus the rail width to the right of the defined curve
   //  and there are rail join marks every 30 prototype feet
   //
   FTurnoutInfo.plainTrack := True;
@@ -219,7 +219,8 @@ begin
   FPlainTrackInfo.railJointsCode := rjNormal;
   FPlainTrackInfo.railLengthInches := 30 * 12;
 
-  expectedMarks := Trunc(FTurnoutInfo.turnoutLength / (FPlainTrackInfo.railLengthInches * inchScale)) + 1;
+  expectedMarks := Trunc(FTurnoutInfo.turnoutLength /
+    (FPlainTrackInfo.railLengthInches * inchScale)) + 1;
 
   CheckEquals(2, FStockRail.numberOfLines, 'numberOfLines');
   CheckEquals(expectedMarks, FStockRail.numberOfMarks, 'numberOfMarks');
@@ -247,8 +248,8 @@ begin
     end;
   end;
 
-  insideY := -(FProtoInfo.gauge/2 - FProtoInfo.insideFaceMarkLength);
-  outsideY := -(FProtoInfo.gauge/2 + FProtoInfo.railtopWidth + FProtoInfo.outsideFaceMarkLength);
+  insideY := -(FProtoInfo.gauge / 2 - FProtoInfo.insideFaceMarkLength);
+  outsideY := -(FProtoInfo.gauge / 2 + FProtoInfo.railtopWidth + FProtoInfo.outsideFaceMarkLength);
 
   for n := 0 to FStockRail.numberOfMarks - 1 do begin
     mark := FStockRail.marks[n];
@@ -284,16 +285,18 @@ begin
   // When the track is calculated
   // Then the stock rail has 2 lines
   //  and the rails are MainsideStockGaugeFace and MainsideStockOuterFace
-  //  and the gauge face is 1/2 the gauge to the left of the defined curve
-  //  and the outer face is 1/2 the gauge plus the rail width to the left of the defined curve
+  //  and the gauge face is 1/2 the gauge to the right of the defined curve
+  //  and the outer face is 1/2 the gauge plus the rail width to the right of the defined curve
   //  and there are rail join marks every 30 prototype feet
+  //  and the first mark is 1/2 a track length from the end of the template
   //
   FTurnoutInfo.plainTrack := True;
   FTurnoutInfo.hand := thLeft;
   FPlainTrackInfo.railJointsCode := rjStaggered;
   FPlainTrackInfo.railLengthInches := 30 * 12;
 
-  expectedMarks := Trunc(FTurnoutInfo.turnoutLength / (FPlainTrackInfo.railLengthInches * inchScale));
+  expectedMarks := Trunc(1 + (FTurnoutInfo.turnoutLength - FPlainTrackInfo.railLengthInches *
+    inchScale / 2) / (FPlainTrackInfo.railLengthInches * inchScale));
 
   CheckEquals(2, FStockRail.numberOfLines, 'numberOfLines');
   CheckEquals(expectedMarks, FStockRail.numberOfMarks, 'numberOfMarks');
@@ -321,16 +324,18 @@ begin
     end;
   end;
 
-  insideY := -(FProtoInfo.gauge/2 - FProtoInfo.insideFaceMarkLength);
-  outsideY := -(FProtoInfo.gauge/2 + FProtoInfo.railtopWidth + FProtoInfo.outsideFaceMarkLength);
+  insideY := -(FProtoInfo.gauge / 2 - FProtoInfo.insideFaceMarkLength);
+  outsideY := -(FProtoInfo.gauge / 2 + FProtoInfo.railtopWidth + FProtoInfo.outsideFaceMarkLength);
 
   for n := 0 to FStockRail.numberOfMarks - 1 do begin
     mark := FStockRail.marks[n];
 
     if (n = 0) then begin
       // first mark should be at the 1/2 a rail length from the *end* of the template
-      CheckEquals(1000 - (FPlainTrackInfo.railLengthInches * FProtoInfo.inchScale) / 2, mark.p1.x, 'First mark p1.x');
-      CheckEquals(1000 - (FPlainTrackInfo.railLengthInches * FProtoInfo.inchScale) / 2, mark.p2.x, 'First mark p2.x');
+      CheckEquals(1000 - (FPlainTrackInfo.railLengthInches * FProtoInfo.inchScale) /
+        2, mark.p1.x, 'First mark p1.x');
+      CheckEquals(1000 - (FPlainTrackInfo.railLengthInches * FProtoInfo.inchScale) /
+        2, mark.p2.x, 'First mark p2.x');
     end;
 
     CheckEquals(Ord(eMC_6_RailJoint), Ord(mark.code), Format('Mark %d', [n]));

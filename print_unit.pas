@@ -5775,8 +5775,8 @@ begin          // print background templates...
               pbg_draw_diagram_mode;  // first draw template in diagrammatic mode.
 
             if ((print_settings_form.output_centrelines_checkbox.Checked) and
-              (not output_diagram_mode) and (not bd.alignmentInfo.dummyTemplateFlag)) or ((print_settings_form.output_bgnd_shapes_checkbox.Checked) and
-              (bd.alignmentInfo.dummyTemplateFlag))
+              (not output_diagram_mode) and (not bd.railInfo.dummyTemplateFlag)) or ((print_settings_form.output_bgnd_shapes_checkbox.Checked) and
+              (bd.railInfo.dummyTemplateFlag))
             // 212a dummy templates not part of track plan
 
             then begin
@@ -5787,7 +5787,7 @@ begin          // print background templates...
 
               Pen.Mode := pmCopy;
 
-              if bd.alignmentInfo.dummyTemplateFlag
+              if bd.railInfo.dummyTemplateFlag
               // 212a   dummy template as bgnd shapes
               then begin
                 Pen.Style := psSolid;

@@ -43,13 +43,13 @@ uses
   gauge_unit,
   template_records,
   BoxDims,
+  Reminder,
   RailInfo,
   ProtoInfo,
   CheckDiffs,
   CheckEndDiff,
   TransformInfo,
   PlatformTrackbedInfo,
-  AlignmentInfo,
   TurnoutInfo1,
   TurnoutInfo2,
   PlainTrackInfo,
@@ -115,7 +115,7 @@ var
   cd: TCheckDiffs;
   ti: TTransformInfo;
   pti: TPlatformTrackbedInfo;
-  ai: TAlignmentInfo;
+  rem: TReminder;
   ti1: TTurnoutInfo1;
   ti2: TTurnoutInfo2;
   pt: TPlainTrackInfo;
@@ -151,6 +151,9 @@ begin
   ri.knuckleCode := knuckle_code;
   ri.knuckleRadius := knuckle_radius;   // 214a  extended;
 
+
+  ri.drawCentrelineOnly := cl_only;    // for bgnd centre-line only.
+  ri.dummyTemplateFlag := dummy_template;  // 212a
 
   ri.trackCentreLines := track_centre_lines_flag;
   ri.switchDrive := switch_drive_flag;  // 0.82.a
@@ -371,15 +374,11 @@ begin
 
   target.curve.CopyFrom(controlTemplate.curve);
 
-  ai := bd.alignmentInfo;
+  rem := target.reminder;
 
-  ai.drawCentrelineOnly := cl_only;    // for bgnd centre-line only.
-
-  ai.dummyTemplateFlag := dummy_template;  // 212a
-
-  ai.reminderFlag := False;          // 216a  defaults no reminder yet
-  ai.reminderColour := clYellow;
-  ai.reminderStr := '';
+  rem.reminderFlag := False;          // 216a  defaults no reminder yet
+  rem.reminderColour := clYellow;
+  rem.reminderStr := '';
 
   cl := target.centreline;
   cl.option := cl_options_code;                   // 206a
@@ -637,7 +636,7 @@ var
   pi: TProtoInfo;
   ti: TTransformInfo;
   pti: TPlatformTrackbedInfo;
-  ai: TAlignmentInfo;
+  rem: TReminder;
   ti1: TTurnoutInfo1;
   ti2: TTurnoutInfo2;
   pt: TPlainTrackInfo;
@@ -669,6 +668,9 @@ begin
   knuckle_radius := ri.knuckleRadius;   // 214a  extended;
 
   // rail switches...
+
+  cl_only := ri.drawCentrelineOnly;   // for bgnd centre-line only.
+  dummy_template := ri.dummyTemplateFlag;  // 212a
 
   track_centre_lines_flag := ri.trackCentreLines;
 
@@ -852,13 +854,9 @@ begin
   cl_options_code := cl.option;                   // 206a
   cl_options_custom_offset := cl.customOffset; // 206a
 
-  ai := bd.alignmentInfo;
+  rem := Source.reminder;
 
-  cl_only := ai.drawCentrelineOnly;   // for bgnd centre-line only.
-
-  dummy_template := ai.dummyTemplateFlag;  // 212a
-
-  if ai.reminderFlag       // 216a
+  if rem.reminderFlag       // 216a
   then begin
 
     with jotter_form.jotter_memo.Lines do begin
@@ -868,7 +866,7 @@ begin
       Add('');
       Add(DateToStr(Date) + '   ' + TimeToStr(Time) + '   discarded reminder:');
       Add('');
-      Add(ai.reminderStr);
+      Add(rem.reminderStr);
 
     end;//with
   end;

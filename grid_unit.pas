@@ -231,7 +231,7 @@ uses
   rail_data_unit,
   Template,
   template_records,
-  AlignmentInfo,
+  Reminder,
   BoxDims,
   TurnoutInfo1,
   TurnoutInfo2,
@@ -1452,7 +1452,7 @@ var
 
   midx, midy: double;
   t: TTemplate;
-  alignment: TAlignmentInfo;
+  rem: TReminder;
 
 begin
   memo_count := 0;                      // init
@@ -1481,9 +1481,9 @@ begin
       if (t.group_selected) and (hide_group_templates_menu_entry.Checked) then
         CONTINUE;
 
-      alignment := t.boxDims.alignmentInfo;
+      rem := t.reminder;
 
-      if (alignment.reminderStr = '') or (not alignment.reminderFlag) then
+      if (rem.reminderStr = '') or (not rem.reminderFlag) then
         CONTINUE;
 
       //  first get position of template mid-point on pad...
@@ -1500,10 +1500,10 @@ begin
         with canv do begin
           Pen.Mode := pmCopy;
           Pen.Style := psSolid;
-          Pen.Color := alignment.reminderColour;
+          Pen.Color := rem.reminderColour;
           Pen.Width := 1;
           Brush.Style := bsSolid;
-          Brush.Color := alignment.reminderColour;
+          Brush.Color := rem.reminderColour;
 
           Ellipse(move_to.X - 8, move_to.Y - 8, move_to.X + 8, move_to.Y + 8);
           // 8 dots radius arbitrary
@@ -1536,9 +1536,9 @@ begin
       end;//case
 
       reminder_memo.Tag := n;
-      reminder_memo.Color := alignment.reminderColour;
-      reminder_memo.Lines.Text := alignment.reminderStr;
-      reminder_memo.Hint := alignment.reminderStr +
+      reminder_memo.Color := rem.reminderColour;
+      reminder_memo.Lines.Text := rem.reminderStr;
+      reminder_memo.Hint := rem.reminderStr +
         '  -  click to zoom template  -  right-click for options ';
 
       reminder_memo.Visible := True;
@@ -1553,7 +1553,7 @@ begin
           Pen.Mode := pmCopy;
           Pen.Style := psSolid;
           Pen.Width := 3;
-          Pen.Color := alignment.reminderColour;
+          Pen.Color := rem.reminderColour;
 
           MoveTo(move_to.X, move_to.Y);
           LineTo(line_to.X, line_to.Y);
@@ -2495,7 +2495,7 @@ begin
             if (not using_marker_colour) or (marker_colours_pad < 3) then begin
               // 212a  dummy template = centre-lines as background shapes...
 
-              if bd.alignmentInfo.dummyTemplateFlag then
+              if bd.railInfo.dummyTemplateFlag then
                 Pen.Color := shapes_colour
               else
                 Pen.Color := bgkeep_mark_colour;
@@ -2514,7 +2514,7 @@ begin
 
             // 212a ...
 
-            if bd.alignmentInfo.dummyTemplateFlag then begin
+            if bd.railInfo.dummyTemplateFlag then begin
               Pen.Width := 1;
               if bgnd_form.pad_shapes_linewidth_2_radiobutton.Checked = True then
                 Pen.Width := 2;
