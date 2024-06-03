@@ -2541,17 +2541,18 @@ begin
   ri.knuckleCode := ConvertBox2KnuckleCode(rail_info.knuckle_code_ri);
   ri.knuckleRadius := rail_info.knuckle_radius_ri;
   ri.isolatedCrossing := rail_info.isolated_crossing_sw;
-  ri.kDiagonalSideCheckRail := rail_info.k_diagonal_side_check_rail_sw;
-  ri.kMainSideCheckRail := rail_info.k_main_side_check_rail_sw;
-  ri.switchDrive := rail_info.switch_drive_sw;
-  ri.trackCentreLines := rail_info.track_centre_lines_sw;
-  ri.turnoutRoadStockRail := rail_info.turnout_road_stock_rail_sw;
-  ri.turnoutRoadCheckRail := rail_info.turnout_road_check_rail_sw;
-  ri.turnoutRoadCrossingRail := rail_info.turnout_road_crossing_rail_sw;
-  ri.crossingVee := rail_info.crossing_vee_sw;
-  ri.mainRoadCrossingRail := rail_info.main_road_crossing_rail_sw;
-  ri.mainRoadCheckRail := rail_info.main_road_check_rail_sw;
-  ri.mainRoadStockRail := rail_info.main_road_stock_rail_sw;
+
+  template.drawKDiagonalSideCheckRail := rail_info.k_diagonal_side_check_rail_sw;
+  template.drawKMainSideCheckRail := rail_info.k_main_side_check_rail_sw;
+  template.drawSwitchDrive := rail_info.switch_drive_sw;
+  template.drawTrackCentreLines := rail_info.track_centre_lines_sw;
+  template.drawTurnoutRoadStockRail := rail_info.turnout_road_stock_rail_sw;
+  template.drawTurnoutRoadCheckRail := rail_info.turnout_road_check_rail_sw;
+  template.drawTurnoutRoadCrossingRail := rail_info.turnout_road_crossing_rail_sw;
+  template.drawCrossingVee := rail_info.crossing_vee_sw;
+  template.drawMainRoadCrossingRail := rail_info.main_road_crossing_rail_sw;
+  template.drawMainRoadCheckRail := rail_info.main_road_check_rail_sw;
+  template.drawMainRoadStockRail := rail_info.main_road_stock_rail_sw;
 end;
 
 procedure ConvertBox2ToProtoInfo(proto_info: TBox2ProtoInfo; template: TTemplate);
@@ -2693,7 +2694,6 @@ end;
 procedure ConvertBox2ToAlignmentInfo(const align: TBox2AlignmentInfo; template: TTemplate);
 var
   rem: TReminder;
-  ri: TRailInfo;
   cl: TCentreline;
 begin
   rem := template.reminder;
@@ -2702,9 +2702,8 @@ begin
   rem.reminderColour := align.reminder_colour;
   rem.reminderStr := align.reminder_str;
 
-  ri := template.boxDims.railInfo;
-  ri.drawCentrelineOnly := align.cl_only_flag;
-  ri.dummyTemplateFlag := align.dummy_template_flag;
+  template.drawCentrelineOnly := align.cl_only_flag;
+  template.drawDummyTemplate := align.dummy_template_flag;
 
   cl := template.centreline;
   cl.option := ConvertBox2CentrelineOptionCode(align.cl_options_code_int);

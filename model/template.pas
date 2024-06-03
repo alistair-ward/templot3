@@ -29,57 +29,85 @@ uses
 ---
 class: TTemplate
 attributes:
-  - name: name
-    type: String
-  - name: topLabel
-    type: String
-  - name: memo
-    type: String
-  - name: curve
-    type: TCurve
-    owns: create
-    access: [get]
-  - name: reminder
-    type: TReminder
-    owns: create
-    access: [get]
-  - name: boxDims
-    type: TBoxDims
-    owns: create
-    access: [get]
-  - name: turnoutInfo2
-    type: TTurnoutInfo2
-    owns: create
-    access: [get]
-  - name: plainTrackInfo
-    type: TPlainTrackInfo
-    owns: create
-    access: [get]
-    comment: need the plain track info for approach and exit tracks.
-  - name: turnoutCurve
-    type: TTurnoutCurve
-    owns: create
-    access: [get]
-  - name: shovedTimbers
-    type: TShovedTimberOwningList
-    owns: create
-    access: [get]
-  - name: centreline
-    type: TCentreline
-    owns: create
-    access: [get]
-  - name: turnoutCentreline
-    type: TTurnoutCentreline
-    owns: create
-    access: [get]
-  - name: mainsideStockRail
-    type: TMainsideStockRail
-    owns: create
-    access: [get]
-  - name: turnoutsideStockRail
-    type: TTurnoutsideStockRail
-    owns: create
-    access: [get]
+- name: name
+  type: String
+- name: topLabel
+  type: String
+- name: memo
+  type: String
+- name: curve
+  type: TCurve
+  owns: create
+  access: [get]
+- name: reminder
+  type: TReminder
+  owns: create
+  access: [get]
+- name: boxDims
+  type: TBoxDims
+  owns: create
+  access: [get]
+- name: turnoutInfo2
+  type: TTurnoutInfo2
+  owns: create
+  access: [get]
+- name: plainTrackInfo
+  type: TPlainTrackInfo
+  owns: create
+  access: [get]
+  comment: need the plain track info for approach and exit tracks.
+- name: turnoutCurve
+  type: TTurnoutCurve
+  owns: create
+  access: [get]
+- name: shovedTimbers
+  type: TShovedTimberOwningList
+  owns: create
+  access: [get]
+- name: centreline
+  type: TCentreline
+  owns: create
+  access: [get]
+- name: turnoutCentreline
+  type: TTurnoutCentreline
+  owns: create
+  access: [get]
+- name: mainsideStockRail
+  type: TMainsideStockRail
+  owns: create
+  access: [get]
+- name: turnoutsideStockRail
+  type: TTurnoutsideStockRail
+  owns: create
+  access: [get]
+- name: drawKDiagonalSideCheckRail
+  type: Boolean
+- name: drawKMainSideCheckRail
+  type: Boolean
+- name: drawSwitchDrive
+  type: Boolean
+- name: drawCentrelineOnly
+  type: Boolean
+  comment: draw track centre-line only for bgnd
+- name: drawDummyTemplate
+  type: Boolean
+  comment: same as centre-lines only, but drawn as background shape. 211c
+- name: drawTrackCentreLines
+  type: Boolean
+- name: drawTurnoutRoadStockRail
+  type: Boolean
+- name: drawTurnoutRoadCheckRail
+  type: Boolean
+- name: drawTurnoutRoadCrossingRail
+  type: Boolean
+- name: drawCrossingVee
+  type: Boolean
+- name: drawMainRoadCrossingRail
+  type: Boolean
+- name: drawMainRoadCheckRail
+  type: Boolean
+- name: drawMainRoadStockRail
+  type: Boolean
 ...
 }
 
@@ -104,9 +132,22 @@ type
     FTurnoutCentreline: TOID;
     FMainsideStockRail: TOID;
     FTurnoutsideStockRail: TOID;
+    FDrawKDiagonalSideCheckRail: Boolean;
+    FDrawKMainSideCheckRail: Boolean;
+    FDrawSwitchDrive: Boolean;
+    FDrawCentrelineOnly: Boolean;
+    FDrawDummyTemplate: Boolean;
+    FDrawTrackCentreLines: Boolean;
+    FDrawTurnoutRoadStockRail: Boolean;
+    FDrawTurnoutRoadCheckRail: Boolean;
+    FDrawTurnoutRoadCrossingRail: Boolean;
+    FDrawCrossingVee: Boolean;
+    FDrawMainRoadCrossingRail: Boolean;
+    FDrawMainRoadCheckRail: Boolean;
+    FDrawMainRoadStockRail: Boolean;
     //# endGenMemberVars
 
-    FFeatures: array of TFeature;
+    FFeatures: array of TOID;
 
   protected
     procedure Calculate; override;
@@ -128,6 +169,19 @@ type
     procedure SetName(const AValue: String);
     procedure SetTopLabel(const AValue: String);
     procedure SetMemo(const AValue: String);
+    procedure SetDrawKDiagonalSideCheckRail(const AValue: Boolean);
+    procedure SetDrawKMainSideCheckRail(const AValue: Boolean);
+    procedure SetDrawSwitchDrive(const AValue: Boolean);
+    procedure SetDrawCentrelineOnly(const AValue: Boolean);
+    procedure SetDrawDummyTemplate(const AValue: Boolean);
+    procedure SetDrawTrackCentreLines(const AValue: Boolean);
+    procedure SetDrawTurnoutRoadStockRail(const AValue: Boolean);
+    procedure SetDrawTurnoutRoadCheckRail(const AValue: Boolean);
+    procedure SetDrawTurnoutRoadCrossingRail(const AValue: Boolean);
+    procedure SetDrawCrossingVee(const AValue: Boolean);
+    procedure SetDrawMainRoadCrossingRail(const AValue: Boolean);
+    procedure SetDrawMainRoadCheckRail(const AValue: Boolean);
+    procedure SetDrawMainRoadStockRail(const AValue: Boolean);
     //# endGenGetSetDeclarations
 
     function GetFeature(idx: Integer): TFeature;
@@ -200,6 +254,23 @@ type
     property turnoutCentreline: TTurnoutCentreline read GetTurnoutCentreline;
     property mainsideStockRail: TMainsideStockRail read GetMainsideStockRail;
     property turnoutsideStockRail: TTurnoutsideStockRail read GetTurnoutsideStockRail;
+    property drawKDiagonalSideCheckRail: Boolean read FDrawKDiagonalSideCheckRail write SetDrawKDiagonalSideCheckRail;
+    property drawKMainSideCheckRail: Boolean read FDrawKMainSideCheckRail write SetDrawKMainSideCheckRail;
+    property drawSwitchDrive: Boolean read FDrawSwitchDrive write SetDrawSwitchDrive;
+
+    // draw track centre-line only for bgnd
+    property drawCentrelineOnly: Boolean read FDrawCentrelineOnly write SetDrawCentrelineOnly;
+
+    // same as centre-lines only, but drawn as background shape. 211c
+    property drawDummyTemplate: Boolean read FDrawDummyTemplate write SetDrawDummyTemplate;
+    property drawTrackCentreLines: Boolean read FDrawTrackCentreLines write SetDrawTrackCentreLines;
+    property drawTurnoutRoadStockRail: Boolean read FDrawTurnoutRoadStockRail write SetDrawTurnoutRoadStockRail;
+    property drawTurnoutRoadCheckRail: Boolean read FDrawTurnoutRoadCheckRail write SetDrawTurnoutRoadCheckRail;
+    property drawTurnoutRoadCrossingRail: Boolean read FDrawTurnoutRoadCrossingRail write SetDrawTurnoutRoadCrossingRail;
+    property drawCrossingVee: Boolean read FDrawCrossingVee write SetDrawCrossingVee;
+    property drawMainRoadCrossingRail: Boolean read FDrawMainRoadCrossingRail write SetDrawMainRoadCrossingRail;
+    property drawMainRoadCheckRail: Boolean read FDrawMainRoadCheckRail write SetDrawMainRoadCheckRail;
+    property drawMainRoadStockRail: Boolean read FDrawMainRoadStockRail write SetDrawMainRoadStockRail;
     //# endGenProperty
 
     property featureCount: Integer read GetFeatureCount;
@@ -305,11 +376,34 @@ begin
 end;
 
 procedure TTemplate.Calculate;
+  procedure AddFeature(AFeature: TFeature);
+  begin
+    SetLength(FFeatures, Length(FFeatures) + 1);
+    FFeatures[High(FFeatures)] := AFeature.oid;
+  end;
+
 begin
   // Add your calculation code here, and cache the results...
   inherited;
 
+  SetLength(FFeatures, 0);
 
+  if drawCentrelineOnly or drawTrackCentreLines then begin
+    AddFeature(centreline);
+    if not boxDims.turnoutInfo1.plainTrack then
+      AddFeature(turnoutCentreline);
+    if drawCentrelineOnly then
+      Exit;
+  end;
+
+  if drawMainRoadStockRail then
+    AddFeature(mainsideStockRail);
+
+  if drawTurnoutRoadStockRail then
+    AddFeature(turnoutsideStockRail);
+
+  if (boxDims.turnoutInfo1.plainTrack) then
+    Exit;
 end;
 
 procedure TTemplate.RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader);
@@ -357,6 +451,45 @@ begin
   if AName = 'turnoutsideStockRail' then
     RestoreYamlObjectOwn(FTurnoutsideStockRail, StrToInteger(AValue), ALoader)
   else
+  if AName = 'drawKDiagonalSideCheckRail' then
+    FDrawKDiagonalSideCheckRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawKMainSideCheckRail' then
+    FDrawKMainSideCheckRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawSwitchDrive' then
+    FDrawSwitchDrive := StrToBoolean(AValue)
+  else
+  if AName = 'drawCentrelineOnly' then
+    FDrawCentrelineOnly := StrToBoolean(AValue)
+  else
+  if AName = 'drawDummyTemplate' then
+    FDrawDummyTemplate := StrToBoolean(AValue)
+  else
+  if AName = 'drawTrackCentreLines' then
+    FDrawTrackCentreLines := StrToBoolean(AValue)
+  else
+  if AName = 'drawTurnoutRoadStockRail' then
+    FDrawTurnoutRoadStockRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawTurnoutRoadCheckRail' then
+    FDrawTurnoutRoadCheckRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawTurnoutRoadCrossingRail' then
+    FDrawTurnoutRoadCrossingRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawCrossingVee' then
+    FDrawCrossingVee := StrToBoolean(AValue)
+  else
+  if AName = 'drawMainRoadCrossingRail' then
+    FDrawMainRoadCrossingRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawMainRoadCheckRail' then
+    FDrawMainRoadCheckRail := StrToBoolean(AValue)
+  else
+  if AName = 'drawMainRoadStockRail' then
+    FDrawMainRoadStockRail := StrToBoolean(AValue)
+  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -382,6 +515,19 @@ procedure TTemplate.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FTurnoutCentreline, sizeof(TOID));
   AStream.ReadBuffer(FMainsideStockRail, sizeof(TOID));
   AStream.ReadBuffer(FTurnoutsideStockRail, sizeof(TOID));
+  AStream.ReadBuffer(FDrawKDiagonalSideCheckRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawKMainSideCheckRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawSwitchDrive, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawCentrelineOnly, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawDummyTemplate, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawTrackCentreLines, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawTurnoutRoadStockRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawTurnoutRoadCheckRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawTurnoutRoadCrossingRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawCrossingVee, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawMainRoadCrossingRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawMainRoadCheckRail, sizeof(Boolean));
+  AStream.ReadBuffer(FDrawMainRoadStockRail, sizeof(Boolean));
   //# endGenRestoreVars
   end;
 
@@ -406,6 +552,19 @@ procedure TTemplate.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FTurnoutCentreline, sizeof(TOID));
   AStream.WriteBuffer(FMainsideStockRail, sizeof(TOID));
   AStream.WriteBuffer(FTurnoutsideStockRail, sizeof(TOID));
+  AStream.WriteBuffer(FDrawKDiagonalSideCheckRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawKMainSideCheckRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawSwitchDrive, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawCentrelineOnly, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawDummyTemplate, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawTrackCentreLines, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawTurnoutRoadStockRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawTurnoutRoadCheckRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawTurnoutRoadCrossingRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawCrossingVee, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawMainRoadCrossingRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawMainRoadCheckRail, sizeof(Boolean));
+  AStream.WriteBuffer(FDrawMainRoadStockRail, sizeof(Boolean));
   //# endGenSaveVars
   end;
   
@@ -430,6 +589,19 @@ procedure TTemplate.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlObject(AEmitter, 'turnoutCentreline', FTurnoutCentreline);
   SaveYamlObject(AEmitter, 'mainsideStockRail', FMainsideStockRail);
   SaveYamlObject(AEmitter, 'turnoutsideStockRail', FTurnoutsideStockRail);
+  SaveYamlBoolean(AEmitter, 'drawKDiagonalSideCheckRail', FDrawKDiagonalSideCheckRail);
+  SaveYamlBoolean(AEmitter, 'drawKMainSideCheckRail', FDrawKMainSideCheckRail);
+  SaveYamlBoolean(AEmitter, 'drawSwitchDrive', FDrawSwitchDrive);
+  SaveYamlBoolean(AEmitter, 'drawCentrelineOnly', FDrawCentrelineOnly);
+  SaveYamlBoolean(AEmitter, 'drawDummyTemplate', FDrawDummyTemplate);
+  SaveYamlBoolean(AEmitter, 'drawTrackCentreLines', FDrawTrackCentreLines);
+  SaveYamlBoolean(AEmitter, 'drawTurnoutRoadStockRail', FDrawTurnoutRoadStockRail);
+  SaveYamlBoolean(AEmitter, 'drawTurnoutRoadCheckRail', FDrawTurnoutRoadCheckRail);
+  SaveYamlBoolean(AEmitter, 'drawTurnoutRoadCrossingRail', FDrawTurnoutRoadCrossingRail);
+  SaveYamlBoolean(AEmitter, 'drawCrossingVee', FDrawCrossingVee);
+  SaveYamlBoolean(AEmitter, 'drawMainRoadCrossingRail', FDrawMainRoadCrossingRail);
+  SaveYamlBoolean(AEmitter, 'drawMainRoadCheckRail', FDrawMainRoadCheckRail);
+  SaveYamlBoolean(AEmitter, 'drawMainRoadStockRail', FDrawMainRoadStockRail);
   //# endGenSaveYamlVars
   end;
 
@@ -527,12 +699,129 @@ begin
   Result := TTurnoutsideStockRail(FromOID(FTurnoutsideStockRail));
 end;
 
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawKDiagonalSideCheckRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawKDiagonalSideCheckRail then begin
+    SetModified;
+    FDrawKDiagonalSideCheckRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawKMainSideCheckRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawKMainSideCheckRail then begin
+    SetModified;
+    FDrawKMainSideCheckRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawSwitchDrive(const AValue: Boolean);
+begin
+  if AValue <> FDrawSwitchDrive then begin
+    SetModified;
+    FDrawSwitchDrive := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawCentrelineOnly(const AValue: Boolean);
+begin
+  if AValue <> FDrawCentrelineOnly then begin
+    SetModified;
+    FDrawCentrelineOnly := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawDummyTemplate(const AValue: Boolean);
+begin
+  if AValue <> FDrawDummyTemplate then begin
+    SetModified;
+    FDrawDummyTemplate := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawTrackCentreLines(const AValue: Boolean);
+begin
+  if AValue <> FDrawTrackCentreLines then begin
+    SetModified;
+    FDrawTrackCentreLines := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawTurnoutRoadStockRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawTurnoutRoadStockRail then begin
+    SetModified;
+    FDrawTurnoutRoadStockRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawTurnoutRoadCheckRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawTurnoutRoadCheckRail then begin
+    SetModified;
+    FDrawTurnoutRoadCheckRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawTurnoutRoadCrossingRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawTurnoutRoadCrossingRail then begin
+    SetModified;
+    FDrawTurnoutRoadCrossingRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawCrossingVee(const AValue: Boolean);
+begin
+  if AValue <> FDrawCrossingVee then begin
+    SetModified;
+    FDrawCrossingVee := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawMainRoadCrossingRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawMainRoadCrossingRail then begin
+    SetModified;
+    FDrawMainRoadCrossingRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawMainRoadCheckRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawMainRoadCheckRail then begin
+    SetModified;
+    FDrawMainRoadCheckRail := AValue;
+  end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TTemplate.SetDrawMainRoadStockRail(const AValue: Boolean);
+begin
+  if AValue <> FDrawMainRoadStockRail then begin
+    SetModified;
+    FDrawMainRoadStockRail := AValue;
+  end;
+end;
+
 //# endGenGetSetMethods
 
 function TTemplate.GetFeature(idx: Integer): TFeature;
 begin
   CheckCalculated;
-  Result := FFeatures[idx];
+  Result := TFeature(FromOID(FFeatures[idx]));
 end;
 
 function TTemplate.GetFeatureCount: Integer;

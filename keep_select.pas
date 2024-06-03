@@ -8255,13 +8255,13 @@ begin
 
 
   ri := t.boxDims.railInfo;
-      pt_all := ri.turnoutRoadStockRail and ri.mainRoadStockRail;
+      pt_all := t.drawTurnoutRoadStockRail and t.drawMainRoadStockRail;
 
-      turnout_all := pt_all and ri.turnoutRoadCheckRail and
-        ri.turnoutRoadCrossingRail and ri.crossingVee and ri.mainRoadCheckRail and
-        ri.mainRoadCrossingRail;
+      turnout_all := pt_all and t.drawTurnoutRoadCheckRail and
+        t.drawTurnoutRoadCrossingRail and t.drawCrossingVee and t.drawMainRoadCheckRail and
+        t.drawMainRoadCrossingRail;
 
-      hd_all := turnout_all and ri.kDiagonalSideCheckRail and ri.kMainSideCheckRail;
+      hd_all := turnout_all and t.drawKDiagonalSideCheckRail and t.drawKMainSideCheckRail;
 
 
     if t.boxDims.turnoutInfo1.plainTrack   // plain track template
@@ -8291,13 +8291,13 @@ begin
 
 
   ri := deletedKeep.boxDims.railInfo;
-      pt_all := ri.turnoutRoadStockRail and ri.mainRoadStockRail;
+      pt_all := deletedKeep.drawTurnoutRoadStockRail and deletedKeep.drawMainRoadStockRail;
 
-      turnout_all := pt_all and ri.turnoutRoadCheckRail and
-        ri.turnoutRoadCrossingRail and ri.crossingVee and ri.mainRoadCheckRail and
-        ri.mainRoadCrossingRail;
+      turnout_all := pt_all and deletedKeep.drawTurnoutRoadCheckRail and
+        deletedKeep.drawTurnoutRoadCrossingRail and deletedKeep.drawCrossingVee and deletedKeep.drawMainRoadCheckRail and
+        deletedKeep.drawMainRoadCrossingRail;
 
-      hd_all := turnout_all and ri.kDiagonalSideCheckRail and ri.kMainSideCheckRail;
+      hd_all := turnout_all and deletedKeep.drawKDiagonalSideCheckRail and deletedKeep.drawKMainSideCheckRail;
 
 
     if deletedKeep.boxDims.turnoutInfo1.plainTrack   // plain track template

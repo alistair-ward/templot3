@@ -150,24 +150,24 @@ begin
 
   ri.knuckleCode := knuckle_code;
   ri.knuckleRadius := knuckle_radius;   // 214a  extended;
-
-
-  ri.drawCentrelineOnly := cl_only;    // for bgnd centre-line only.
-  ri.dummyTemplateFlag := dummy_template;  // 212a
-
-  ri.trackCentreLines := track_centre_lines_flag;
-  ri.switchDrive := switch_drive_flag;  // 0.82.a
   ri.isolatedCrossing := isolated_crossing;   // 217a
 
-  ri.turnoutRoadStockRail := turnout_road_stock_rail_flag;
-  ri.turnoutRoadCheckRail := turnout_road_check_rail_flag;
-  ri.turnoutRoadCrossingRail := turnout_road_crossing_rail_flag;
-  ri.crossingVee := crossing_vee_flag;
-  ri.mainRoadCrossingRail := main_road_crossing_rail_flag;
-  ri.mainRoadCheckRail := main_road_check_rail_flag;
-  ri.mainRoadStockRail := main_road_stock_rail_flag;
-  ri.kDiagonalSideCheckRail := k_diagonal_side_check_rail_flag;
-  ri.kMainSideCheckRail := k_main_side_check_rail_flag;
+
+  target.drawCentrelineOnly := cl_only;    // for bgnd centre-line only.
+  target.drawDummyTemplate := dummy_template;  // 212a
+
+  target.drawTrackCentreLines := track_centre_lines_flag;
+  target.drawSwitchDrive := switch_drive_flag;  // 0.82.a
+
+  target.drawTurnoutRoadStockRail := turnout_road_stock_rail_flag;
+  target.drawTurnoutRoadCheckRail := turnout_road_check_rail_flag;
+  target.drawTurnoutRoadCrossingRail := turnout_road_crossing_rail_flag;
+  target.drawCrossingVee := crossing_vee_flag;
+  target.drawMainRoadCrossingRail := main_road_crossing_rail_flag;
+  target.drawMainRoadCheckRail := main_road_check_rail_flag;
+  target.drawMainRoadStockRail := main_road_stock_rail_flag;
+  target.drawKDiagonalSideCheckRail := k_diagonal_side_check_rail_flag;
+  target.drawKMainSideCheckRail := k_main_side_check_rail_flag;
 
   bd.backgroundCode := bkcUnused;                  // can't go on background until in keeps box.
 
@@ -669,26 +669,26 @@ begin
 
   // rail switches...
 
-  cl_only := ri.drawCentrelineOnly;   // for bgnd centre-line only.
-  dummy_template := ri.dummyTemplateFlag;  // 212a
+  cl_only := Source.drawCentrelineOnly;   // for bgnd centre-line only.
+  dummy_template := Source.drawDummyTemplate;  // 212a
 
-  track_centre_lines_flag := ri.trackCentreLines;
+  track_centre_lines_flag := Source.drawTrackCentreLines;
 
-  switch_drive_flag := ri.switchDrive;  // 0.82.a
+  switch_drive_flag := Source.drawSwitchDrive;  // 0.82.a
 
   isolated_crossing := ri.isolatedCrossing;    // 217a
 
 
-  turnout_road_stock_rail_flag := ri.turnoutRoadStockRail;
-  turnout_road_check_rail_flag := ri.turnoutRoadCheckRail;
-  turnout_road_crossing_rail_flag := ri.turnoutRoadCrossingRail;
-  crossing_vee_flag := ri.crossingVee;
-  main_road_crossing_rail_flag := ri.mainRoadCrossingRail;
-  main_road_check_rail_flag := ri.mainRoadCheckRail;
-  main_road_stock_rail_flag := ri.mainRoadStockRail;
+  turnout_road_stock_rail_flag := Source.drawTurnoutRoadStockRail;
+  turnout_road_check_rail_flag := Source.drawTurnoutRoadCheckRail;
+  turnout_road_crossing_rail_flag := Source.drawTurnoutRoadCrossingRail;
+  crossing_vee_flag := Source.drawCrossingVee;
+  main_road_crossing_rail_flag := Source.drawMainRoadCrossingRail;
+  main_road_check_rail_flag := Source.drawMainRoadCheckRail;
+  main_road_stock_rail_flag := Source.drawMainRoadStockRail;
 
-  k_diagonal_side_check_rail_flag := ri.kDiagonalSideCheckRail;
-  k_main_side_check_rail_flag := ri.kMainSideCheckRail;
+  k_diagonal_side_check_rail_flag := Source.drawKDiagonalSideCheckRail;
+  k_main_side_check_rail_flag := Source.drawKMainSideCheckRail;
 
   railedges(gauge_faces, outer_edges, centre_lines);   // use these switches.
 

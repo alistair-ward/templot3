@@ -31,7 +31,6 @@ type
     procedure SetApproachLength(ATemplate: TTemplate; AX: Double);
     procedure SetOverallLength(ATemplate: TTemplate; AX: Double);
     procedure SetHand(ATemplate: TTemplate; AHand: TTurnoutHand);
-    procedure SetCentreLineOnly(ATemplate: TTemplate; AFlag: Boolean);
 
   published
     procedure TestStraightPlainTrackCentreLineOnly;
@@ -87,11 +86,6 @@ begin
   ATemplate.boxDims.turnoutInfo1.hand := AHand;
 end;
 
-procedure TTestTemplate.SetCentreLineOnly(ATemplate: TTemplate; AFlag: Boolean);
-begin
-  ATemplate.boxDims.railInfo.drawCentrelineOnly := AFlag;
-end;
-
 procedure TTestTemplate.TestStraightPlainTrackCentreLineOnly;
 var
   tt: TTemplate;
@@ -120,7 +114,7 @@ begin
     SetApproachLength(tt, 500);
     SetOverallLength(tt, 500);
     SetHand(tt, thRight);
-    SetCentreLineOnly(tt, True);
+    tt.drawCentrelineOnly := True;
 
     CheckEquals(1, tt.featureCount, 'featureCount');
     feature := tt.features[0];
@@ -167,6 +161,11 @@ begin
     SetApproachLength(tt, 500);
     SetOverallLength(tt, 500);
     SetHand(tt, thRight);
+
+    tt.drawCentrelineOnly:=false;
+    tt.drawTrackCentreLines:=true;
+    tt.drawMainRoadStockRail:=true;
+    tt.drawTurnoutRoadStockRail:=true;
 
     CheckEquals(3, tt.featureCount, 'featureCount');
 

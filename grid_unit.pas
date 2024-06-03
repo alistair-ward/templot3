@@ -2495,7 +2495,7 @@ begin
             if (not using_marker_colour) or (marker_colours_pad < 3) then begin
               // 212a  dummy template = centre-lines as background shapes...
 
-              if bd.railInfo.dummyTemplateFlag then
+              if t.drawDummyTemplate then
                 Pen.Color := shapes_colour
               else
                 Pen.Color := bgkeep_mark_colour;
@@ -2514,7 +2514,7 @@ begin
 
             // 212a ...
 
-            if bd.railInfo.dummyTemplateFlag then begin
+            if t.drawDummyTemplate then begin
               Pen.Width := 1;
               if bgnd_form.pad_shapes_linewidth_2_radiobutton.Checked = True then
                 Pen.Width := 2;

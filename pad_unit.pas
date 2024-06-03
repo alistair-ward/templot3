@@ -27355,7 +27355,7 @@ procedure Tpad_form.isolate_crossing_menu_entryClick(Sender: TObject);
 begin
   isolated_crossing := not isolated_crossing;
 
-  if isolated_crossing = True then begin
+  if isolated_crossing then begin
     main_road_i := rloMinimum;   // minimum..
     turnout_road_i := rloMinimum;
 

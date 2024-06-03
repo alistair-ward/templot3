@@ -302,7 +302,7 @@ begin
   for n := 0 to (keeps_list.Count - 1) do begin
     if keeps_list[n].bg_copied = False then
       CONTINUE;
-    if keeps_list[n].boxDims.railInfo.drawCentrelineOnly then
+    if keeps_list[n].drawCentrelineOnly then
       CONTINUE;    // 212a
     if keeps_list[n].boxDims.railSection = rsFlatbottom then
       Result := Result + 1;             // return count.
@@ -354,8 +354,7 @@ begin
     for n := 0 to n_max do begin
       if (keeps_list[n].bg_copied = True)
         // bgnd template
-        and (keeps_list[n].boxDims.railInfo.drawCentrelineOnly =
-        False)  // template has rails   212a
+        and (not keeps_list[n].drawCentrelineOnly)  // template has rails   212a
         and (keeps_list[n].boxDims.railSection =
         rsFlatBottom)                    // FB rail
         and (keeps_list[n].boxDims.flatbottomKludge = 0)

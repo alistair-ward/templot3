@@ -3982,7 +3982,7 @@ begin          // export background templates...
           if t.boxDims.flatbottomKludge > 0 then
             CONTINUE;  // 209c no track background for fb_kludge templates
 
-          if t.boxDims.railInfo.dummyTemplateFlag then
+          if t.drawDummyTemplate then
             CONTINUE;  // 212a dummy templates not part of track plan
 
             if t.boxDims.backgroundCode <> bkcBackground then
@@ -4117,8 +4117,8 @@ begin          // export background templates...
               pbg_draw_diagram_mode;  // now draw template in diagrammatic mode (main rails).
 
             if ((print_settings_form.output_centrelines_checkbox.Checked) and
-              (not output_diagram_mode) and (not bd.railInfo.dummyTemplateFlag)) or ((print_settings_form.output_bgnd_shapes_checkbox.Checked) and
-              (bd.railInfo.dummyTemplateFlag))
+              (not output_diagram_mode) and (not t.drawDummyTemplate)) or ((print_settings_form.output_bgnd_shapes_checkbox.Checked) and
+              (t.drawDummyTemplate))
             // 212a dummy templates not part of track plan
 
             then begin
@@ -4129,9 +4129,8 @@ begin          // export background templates...
 
               Pen.Mode := pmCopy;
 
-              if bd.railInfo.dummyTemplateFlag
-              // 212a   dummy template as bgnd shapes
-              then begin
+              if t.drawDummyTemplate then begin
+                // 212a   dummy template as bgnd shapes
                 Pen.Style := psSolid;
                 Pen.Color := printshape_colour;
                 Pen.Width := printshape_wide;

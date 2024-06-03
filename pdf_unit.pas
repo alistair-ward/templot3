@@ -5272,14 +5272,14 @@ begin          // print background templates...
 
           if (print_settings_form.output_centrelines_checkbox.Checked and
             (not output_diagram_mode) and (not
-            bd.railInfo.dummyTemplateFlag)) or
+            this_template.drawDummyTemplate)) or
             (print_settings_form.output_bgnd_shapes_checkbox.Checked and
-            bd.railInfo.dummyTemplateFlag)
+            this_template.drawDummyTemplate)
           // 212a dummy templates not part of track plan
 
           then begin
 
-            if bd.railInfo.dummyTemplateFlag then
+            if this_template.drawDummyTemplate then
               linestyle := lsCentreline_dummy
             else
               linestyle := lsCentreline_normal;

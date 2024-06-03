@@ -74,34 +74,6 @@ attributes:
   comment: custom setting - inches full-size
 - name: isolatedCrossing
   type: Boolean
-- name: kDiagonalSideCheckRail
-  type: Boolean
-- name: kMainSideCheckRail
-  type: Boolean
-- name: switchDrive
-  type: Boolean
-- name: drawCentrelineOnly
-  type: Boolean
-  comment: draw track centre-line only for bgnd
-- name: dummyTemplateFlag
-  type: Boolean
-  comment: same as centre-lines only, but drawn as background shape. 211c
-- name: trackCentreLines
-  type: Boolean
-- name: turnoutRoadStockRail
-  type: Boolean
-- name: turnoutRoadCheckRail
-  type: Boolean
-- name: turnoutRoadCrossingRail
-  type: Boolean
-- name: crossingVee
-  type: Boolean
-- name: mainRoadCrossingRail
-  type: Boolean
-- name: mainRoadCheckRail
-  type: Boolean
-- name: mainRoadStockRail
-  type: Boolean
 ...
 }
 
@@ -127,19 +99,6 @@ type
     FKnuckleCode: TKnuckleCode;
     FKnuckleRadius: Double;
     FIsolatedCrossing: Boolean;
-    FKDiagonalSideCheckRail: Boolean;
-    FKMainSideCheckRail: Boolean;
-    FSwitchDrive: Boolean;
-    FDrawCentrelineOnly: Boolean;
-    FDummyTemplateFlag: Boolean;
-    FTrackCentreLines: Boolean;
-    FTurnoutRoadStockRail: Boolean;
-    FTurnoutRoadCheckRail: Boolean;
-    FTurnoutRoadCrossingRail: Boolean;
-    FCrossingVee: Boolean;
-    FMainRoadCrossingRail: Boolean;
-    FMainRoadCheckRail: Boolean;
-    FMainRoadStockRail: Boolean;
     //# endGenMemberVars
 
   protected
@@ -152,19 +111,6 @@ type
     procedure SetKnuckleCode(const AValue: TKnuckleCode);
     procedure SetKnuckleRadius(const AValue: Double);
     procedure SetIsolatedCrossing(const AValue: Boolean);
-    procedure SetKDiagonalSideCheckRail(const AValue: Boolean);
-    procedure SetKMainSideCheckRail(const AValue: Boolean);
-    procedure SetSwitchDrive(const AValue: Boolean);
-    procedure SetDrawCentrelineOnly(const AValue: Boolean);
-    procedure SetDummyTemplateFlag(const AValue: Boolean);
-    procedure SetTrackCentreLines(const AValue: Boolean);
-    procedure SetTurnoutRoadStockRail(const AValue: Boolean);
-    procedure SetTurnoutRoadCheckRail(const AValue: Boolean);
-    procedure SetTurnoutRoadCrossingRail(const AValue: Boolean);
-    procedure SetCrossingVee(const AValue: Boolean);
-    procedure SetMainRoadCrossingRail(const AValue: Boolean);
-    procedure SetMainRoadCheckRail(const AValue: Boolean);
-    procedure SetMainRoadStockRail(const AValue: Boolean);
     //# endGenGetSetDeclarations
 
   public
@@ -184,23 +130,6 @@ type
     // custom setting - inches full-size
     property knuckleRadius: Double read FKnuckleRadius write SetKnuckleRadius;
     property isolatedCrossing: Boolean read FIsolatedCrossing write SetIsolatedCrossing;
-    property kDiagonalSideCheckRail: Boolean read FKDiagonalSideCheckRail write SetKDiagonalSideCheckRail;
-    property kMainSideCheckRail: Boolean read FKMainSideCheckRail write SetKMainSideCheckRail;
-    property switchDrive: Boolean read FSwitchDrive write SetSwitchDrive;
-
-    // draw track centre-line only for bgnd
-    property drawCentrelineOnly: Boolean read FDrawCentrelineOnly write SetDrawCentrelineOnly;
-
-    // same as centre-lines only, but drawn as background shape. 211c
-    property dummyTemplateFlag: Boolean read FDummyTemplateFlag write SetDummyTemplateFlag;
-    property trackCentreLines: Boolean read FTrackCentreLines write SetTrackCentreLines;
-    property turnoutRoadStockRail: Boolean read FTurnoutRoadStockRail write SetTurnoutRoadStockRail;
-    property turnoutRoadCheckRail: Boolean read FTurnoutRoadCheckRail write SetTurnoutRoadCheckRail;
-    property turnoutRoadCrossingRail: Boolean read FTurnoutRoadCrossingRail write SetTurnoutRoadCrossingRail;
-    property crossingVee: Boolean read FCrossingVee write SetCrossingVee;
-    property mainRoadCrossingRail: Boolean read FMainRoadCrossingRail write SetMainRoadCrossingRail;
-    property mainRoadCheckRail: Boolean read FMainRoadCheckRail write SetMainRoadCheckRail;
-    property mainRoadStockRail: Boolean read FMainRoadStockRail write SetMainRoadStockRail;
     //# endGenProperty
   end;
 
@@ -294,45 +223,6 @@ begin
   if AName = 'isolatedCrossing' then
     FIsolatedCrossing := StrToBoolean(AValue)
   else
-  if AName = 'kDiagonalSideCheckRail' then
-    FKDiagonalSideCheckRail := StrToBoolean(AValue)
-  else
-  if AName = 'kMainSideCheckRail' then
-    FKMainSideCheckRail := StrToBoolean(AValue)
-  else
-  if AName = 'switchDrive' then
-    FSwitchDrive := StrToBoolean(AValue)
-  else
-  if AName = 'drawCentrelineOnly' then
-    FDrawCentrelineOnly := StrToBoolean(AValue)
-  else
-  if AName = 'dummyTemplateFlag' then
-    FDummyTemplateFlag := StrToBoolean(AValue)
-  else
-  if AName = 'trackCentreLines' then
-    FTrackCentreLines := StrToBoolean(AValue)
-  else
-  if AName = 'turnoutRoadStockRail' then
-    FTurnoutRoadStockRail := StrToBoolean(AValue)
-  else
-  if AName = 'turnoutRoadCheckRail' then
-    FTurnoutRoadCheckRail := StrToBoolean(AValue)
-  else
-  if AName = 'turnoutRoadCrossingRail' then
-    FTurnoutRoadCrossingRail := StrToBoolean(AValue)
-  else
-  if AName = 'crossingVee' then
-    FCrossingVee := StrToBoolean(AValue)
-  else
-  if AName = 'mainRoadCrossingRail' then
-    FMainRoadCrossingRail := StrToBoolean(AValue)
-  else
-  if AName = 'mainRoadCheckRail' then
-    FMainRoadCheckRail := StrToBoolean(AValue)
-  else
-  if AName = 'mainRoadStockRail' then
-    FMainRoadStockRail := StrToBoolean(AValue)
-  else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
 end;
@@ -348,19 +238,6 @@ procedure TRailInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FKnuckleCode, sizeof(TKnuckleCode));
   AStream.ReadBuffer(FKnuckleRadius, sizeof(Double));
   AStream.ReadBuffer(FIsolatedCrossing, sizeof(Boolean));
-  AStream.ReadBuffer(FKDiagonalSideCheckRail, sizeof(Boolean));
-  AStream.ReadBuffer(FKMainSideCheckRail, sizeof(Boolean));
-  AStream.ReadBuffer(FSwitchDrive, sizeof(Boolean));
-  AStream.ReadBuffer(FDrawCentrelineOnly, sizeof(Boolean));
-  AStream.ReadBuffer(FDummyTemplateFlag, sizeof(Boolean));
-  AStream.ReadBuffer(FTrackCentreLines, sizeof(Boolean));
-  AStream.ReadBuffer(FTurnoutRoadStockRail, sizeof(Boolean));
-  AStream.ReadBuffer(FTurnoutRoadCheckRail, sizeof(Boolean));
-  AStream.ReadBuffer(FTurnoutRoadCrossingRail, sizeof(Boolean));
-  AStream.ReadBuffer(FCrossingVee, sizeof(Boolean));
-  AStream.ReadBuffer(FMainRoadCrossingRail, sizeof(Boolean));
-  AStream.ReadBuffer(FMainRoadCheckRail, sizeof(Boolean));
-  AStream.ReadBuffer(FMainRoadStockRail, sizeof(Boolean));
   //# endGenRestoreVars
   end;
 
@@ -375,19 +252,6 @@ procedure TRailInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FKnuckleCode, sizeof(TKnuckleCode));
   AStream.WriteBuffer(FKnuckleRadius, sizeof(Double));
   AStream.WriteBuffer(FIsolatedCrossing, sizeof(Boolean));
-  AStream.WriteBuffer(FKDiagonalSideCheckRail, sizeof(Boolean));
-  AStream.WriteBuffer(FKMainSideCheckRail, sizeof(Boolean));
-  AStream.WriteBuffer(FSwitchDrive, sizeof(Boolean));
-  AStream.WriteBuffer(FDrawCentrelineOnly, sizeof(Boolean));
-  AStream.WriteBuffer(FDummyTemplateFlag, sizeof(Boolean));
-  AStream.WriteBuffer(FTrackCentreLines, sizeof(Boolean));
-  AStream.WriteBuffer(FTurnoutRoadStockRail, sizeof(Boolean));
-  AStream.WriteBuffer(FTurnoutRoadCheckRail, sizeof(Boolean));
-  AStream.WriteBuffer(FTurnoutRoadCrossingRail, sizeof(Boolean));
-  AStream.WriteBuffer(FCrossingVee, sizeof(Boolean));
-  AStream.WriteBuffer(FMainRoadCrossingRail, sizeof(Boolean));
-  AStream.WriteBuffer(FMainRoadCheckRail, sizeof(Boolean));
-  AStream.WriteBuffer(FMainRoadStockRail, sizeof(Boolean));
   //# endGenSaveVars
   end;
   
@@ -402,19 +266,6 @@ procedure TRailInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlTKnuckleCode(AEmitter, 'knuckleCode', FKnuckleCode);
   SaveYamlDouble(AEmitter, 'knuckleRadius', FKnuckleRadius);
   SaveYamlBoolean(AEmitter, 'isolatedCrossing', FIsolatedCrossing);
-  SaveYamlBoolean(AEmitter, 'kDiagonalSideCheckRail', FKDiagonalSideCheckRail);
-  SaveYamlBoolean(AEmitter, 'kMainSideCheckRail', FKMainSideCheckRail);
-  SaveYamlBoolean(AEmitter, 'switchDrive', FSwitchDrive);
-  SaveYamlBoolean(AEmitter, 'drawCentrelineOnly', FDrawCentrelineOnly);
-  SaveYamlBoolean(AEmitter, 'dummyTemplateFlag', FDummyTemplateFlag);
-  SaveYamlBoolean(AEmitter, 'trackCentreLines', FTrackCentreLines);
-  SaveYamlBoolean(AEmitter, 'turnoutRoadStockRail', FTurnoutRoadStockRail);
-  SaveYamlBoolean(AEmitter, 'turnoutRoadCheckRail', FTurnoutRoadCheckRail);
-  SaveYamlBoolean(AEmitter, 'turnoutRoadCrossingRail', FTurnoutRoadCrossingRail);
-  SaveYamlBoolean(AEmitter, 'crossingVee', FCrossingVee);
-  SaveYamlBoolean(AEmitter, 'mainRoadCrossingRail', FMainRoadCrossingRail);
-  SaveYamlBoolean(AEmitter, 'mainRoadCheckRail', FMainRoadCheckRail);
-  SaveYamlBoolean(AEmitter, 'mainRoadStockRail', FMainRoadStockRail);
   //# endGenSaveYamlVars
   end;
 
@@ -452,123 +303,6 @@ begin
   if AValue <> FIsolatedCrossing then begin
     SetModified;
     FIsolatedCrossing := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetKDiagonalSideCheckRail(const AValue: Boolean);
-begin
-  if AValue <> FKDiagonalSideCheckRail then begin
-    SetModified;
-    FKDiagonalSideCheckRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetKMainSideCheckRail(const AValue: Boolean);
-begin
-  if AValue <> FKMainSideCheckRail then begin
-    SetModified;
-    FKMainSideCheckRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetSwitchDrive(const AValue: Boolean);
-begin
-  if AValue <> FSwitchDrive then begin
-    SetModified;
-    FSwitchDrive := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetDrawCentrelineOnly(const AValue: Boolean);
-begin
-  if AValue <> FDrawCentrelineOnly then begin
-    SetModified;
-    FDrawCentrelineOnly := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetDummyTemplateFlag(const AValue: Boolean);
-begin
-  if AValue <> FDummyTemplateFlag then begin
-    SetModified;
-    FDummyTemplateFlag := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetTrackCentreLines(const AValue: Boolean);
-begin
-  if AValue <> FTrackCentreLines then begin
-    SetModified;
-    FTrackCentreLines := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetTurnoutRoadStockRail(const AValue: Boolean);
-begin
-  if AValue <> FTurnoutRoadStockRail then begin
-    SetModified;
-    FTurnoutRoadStockRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetTurnoutRoadCheckRail(const AValue: Boolean);
-begin
-  if AValue <> FTurnoutRoadCheckRail then begin
-    SetModified;
-    FTurnoutRoadCheckRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetTurnoutRoadCrossingRail(const AValue: Boolean);
-begin
-  if AValue <> FTurnoutRoadCrossingRail then begin
-    SetModified;
-    FTurnoutRoadCrossingRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetCrossingVee(const AValue: Boolean);
-begin
-  if AValue <> FCrossingVee then begin
-    SetModified;
-    FCrossingVee := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetMainRoadCrossingRail(const AValue: Boolean);
-begin
-  if AValue <> FMainRoadCrossingRail then begin
-    SetModified;
-    FMainRoadCrossingRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetMainRoadCheckRail(const AValue: Boolean);
-begin
-  if AValue <> FMainRoadCheckRail then begin
-    SetModified;
-    FMainRoadCheckRail := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
-procedure TRailInfo.SetMainRoadStockRail(const AValue: Boolean);
-begin
-  if AValue <> FMainRoadStockRail then begin
-    SetModified;
-    FMainRoadStockRail := AValue;
   end;
 end;
 

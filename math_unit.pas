@@ -4972,8 +4972,9 @@ begin
       end;
     end;//case
 
-    if plain_track = True            //  stop the curved stock rail at the rail-joint
-    then begin                  //  if plain track (approach track) only wanted.
+    if plain_track then begin
+      //  stop the curved stock rail at the rail-joint
+      //  if plain track (approach track) only wanted.
       seg_termx[1, rdCurvedStockGaugeFace] := xorg;
       seg_termx[1, rdCurvedStockOuterFace] := xorg;
       for i := 2 to 4 do begin
@@ -4983,7 +4984,7 @@ begin
     end;
     //end;//with cpi
 
-    if isolated_crossing = True then
+    if isolated_crossing then
       startx := Min(ckx_ms, cuckx) - 3 * scale;
     // 217a  blanking      allow 3ft in front of check rails
 
@@ -8491,8 +8492,7 @@ begin
 
     end;
 
-    if isolated_crossing = True    // 217a
-    then begin
+    if isolated_crossing then begin
       if aq = rdCurvedTurnoutWingGaugeFace then
         xs := blank_start(wingx_minus - scale / 6)                  // 2" arbitrary
       else
@@ -8507,12 +8507,12 @@ begin
     if xs > xe then
       CONTINUE;   // next segment.
 
-    if (half_diamond = True) and (fixed_diamond = True) then
+    if (half_diamond) and (fixed_diamond) then
       plox_done := True             // need full blade infill for fixed diamond. 25-8-02 0.77.a.
     else
       plox_done := False;           // init 18-8-01.
 
-    if (joggled = True) and (aq = rdCurvedTurnoutWingGaugeFace) and (xs = toex)
+    if (joggled) and (aq = rdCurvedTurnoutWingGaugeFace) and (xs = toex)
     // start aq=2 curved switch blade with the blade tip mark if joggled.
     then begin
       if f28000(aq, xs, 0 - joggle_deep) = 1 then
@@ -8706,8 +8706,7 @@ var
 begin
   //if xb>xe then EXIT;     // 20-6-99.
 
-  if isolated_crossing = True    // 217a
-  then begin
+  if isolated_crossing then begin
     if aq = rdCurvedTurnoutWingGaugeFace then
       xs := blank_start(wingx_minus - scale / 6)                  // 2" arbitrary
     else
@@ -9745,8 +9744,7 @@ begin
   if xe > turnoutx then
     xe := turnoutx;     // !!! mod 26-3-99
 
-  if isolated_crossing = True    // 217a
-  then begin
+  if isolated_crossing then begin
     if aq = rdCurvedTurnoutWingGaugeFace then
       xs := blank_start(wingx_minus - scale / 6)                  // 2" arbitrary
     else
@@ -17553,7 +17551,7 @@ procedure toggle_ring_lamp;
 begin
   if toggle_2 = 0 then begin
     toggle_2 := 1;
-    if (cl_only = True) or (warn_centrelines = True) then
+    if (cl_only) or (warn_centrelines) then
       info_form.ring_lamp_panel.Color := clWhite
     else
       info_form.ring_lamp_panel.Color := clRed;
@@ -21867,7 +21865,7 @@ begin
   p2.x := 0;    // not used.
   p2.y := 0;
 
-  if main_road_check_rail_flag = True then begin
+  if main_road_check_rail_flag then begin
     p1.x := ckx_ms;
     p1.y := g / 3;
     enter_mark(True, p1, p2, eMC_501_MSWorkingEnd, '');  // main-side working end
@@ -21877,13 +21875,13 @@ begin
     enter_mark(True, p1, p2, eMC_502_MSExtensionEnd, '');  // main-side extension end
   end;
 
-  if turnout_road_crossing_rail_flag = True then begin
+  if turnout_road_crossing_rail_flag then begin
     p1.x := wingendox;
     p1.y := g * 2 / 3;
     enter_mark(True, p1, p2, eMC_503_MSWingRail, '');  // main-side wing rail
   end;
 
-  if turnout_road_check_rail_flag = True then begin
+  if turnout_road_check_rail_flag then begin
     p1.x := cuckx;
     p1.y := aq3offset(p1.x, dummy_k) - g / 3;  // curved stock rail offset
     enter_mark(True, p1, p2, eMC_504_TSWorkingEnd, '');      // turnout-side working end
@@ -21893,20 +21891,20 @@ begin
     enter_mark(True, p1, p2, eMC_505_TSExtensionEnd, '');      // turnout-side extension end
   end;
 
-  if main_road_crossing_rail_flag = True then begin
+  if main_road_crossing_rail_flag then begin
     p1.x := flcendox;
     p1.y := aq2offset(p1.x, dummy_k) + g / 3;
     enter_mark(True, p1, p2, eMC_506_TSWingRail, '');      // turnout-side wing rail
   end;
 
-  if (half_diamond = True) and (fixed_diamond = True) then begin
-    if k_main_side_check_rail_flag = True then begin
+  if (half_diamond) and (fixed_diamond) then begin
+    if k_main_side_check_rail_flag then begin
       p1.x := kckmsflendox;
       p1.y := aq2offset(p1.x, dummy_k) - g / 8;
       enter_mark(True, p1, p2, eMC_507_MSKCheckRail, '');      // main-side K check rail
     end;
 
-    if k_diagonal_side_check_rail_flag = True then begin
+    if k_diagonal_side_check_rail_flag then begin
       p1.x := kckdsflendox;
       p1.y := g * 9 / 8;
       enter_mark(True, p1, p2, eMC_508_DSWingRail, '');     // diagonal-side wing rail
@@ -22632,9 +22630,8 @@ begin
     xtb := toex + 18 * inscale;
     // now fixed at 18" from toe to tie-bar. (mod mainly for slip switches) // 0.82.a  13-10-06
 
-    if (turnout_road_crossing_rail_flag) or (main_road_crossing_rail_flag)
-    // not if no switch blades.
-    then begin
+    if (turnout_road_crossing_rail_flag) or (main_road_crossing_rail_flag) then begin
+      // not if no switch blades.
       p1.x := xtb - tbw;
       p1.y := g + tbe;
       p2.x := xtb + tbw;
@@ -23169,9 +23166,8 @@ begin
 
     mark_end(rdVeePointGaugeFace, 0, rdVeeSpliceGaugeFace, 0, True);    // blunt nose.
 
-    if (half_diamond = True) and (fixed_diamond = True) then begin
-      if isolated_crossing = False    // 217a
-      then begin
+    if (half_diamond) and (fixed_diamond) then begin
+      if not isolated_crossing then begin
         mark_end(rdStraightTurnoutWingGaugeFace, 0, rdStraightTurnoutWingOuterFace, 0, True);
         // planed faced of point rails for a fixed-diamond. Solid line.
         mark_end(rdCurvedTurnoutWingGaugeFace, 0, rdCurvedTurnoutWingOuterFace, 0, True);
@@ -31447,13 +31443,10 @@ procedure update_centre_lines(t: TTemplate);
 // update stored track centre-line settings to match the control template.
 
 // 0.93.a
-var
-  bd: TBoxDims;
 begin
-  bd := t.boxDims;
-  bd.railInfo.trackCentreLines := track_centre_lines_flag;
-  bd.railInfo.drawCentrelineOnly := cl_only;
-  bd.railInfo.dummyTemplateFlag := dummy_template;   // 212a
+  t.drawTrackCentreLines := track_centre_lines_flag;
+  t.drawCentrelineOnly := cl_only;
+  t.drawDummyTemplate := dummy_template;   // 212a
 end;
 //______________________________________________________________________________
 
