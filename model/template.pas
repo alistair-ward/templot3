@@ -16,13 +16,13 @@ uses
   TurnoutInfo2,
   Reminder,
   PlainTrackInfo,
-  ShovedTimber,
   TurnoutCurve,
   Feature,
   Centreline,
   TurnoutCentreline,
   MainsideStockRail,
-  TurnoutsideStockRail;
+  TurnoutsideStockRail,
+  Timbers;
 
 
 {# class TTemplate
@@ -60,8 +60,8 @@ attributes:
   type: TTurnoutCurve
   owns: create
   access: [get]
-- name: shovedTimbers
-  type: TShovedTimberOwningList
+- name: timbers
+  type: TTimbers
   owns: create
   access: [get]
 - name: centreline
@@ -127,7 +127,7 @@ type
     FTurnoutInfo2: TOID;
     FPlainTrackInfo: TOID;
     FTurnoutCurve: TOID;
-    FShovedTimbers: TOID;
+    FTimbers: TOID;
     FCentreline: TOID;
     FTurnoutCentreline: TOID;
     FMainsideStockRail: TOID;
@@ -161,7 +161,7 @@ type
     function GetTurnoutInfo2: TTurnoutInfo2;
     function GetPlainTrackInfo: TPlainTrackInfo;
     function GetTurnoutCurve: TTurnoutCurve;
-    function GetShovedTimbers: TShovedTimberOwningList;
+    function GetTimbers: TTimbers;
     function GetCentreline: TCentreline;
     function GetTurnoutCentreline: TTurnoutCentreline;
     function GetMainsideStockRail: TMainsideStockRail;
@@ -249,7 +249,7 @@ type
     // need the plain track info for approach and exit tracks.
     property plainTrackInfo: TPlainTrackInfo read GetPlainTrackInfo;
     property turnoutCurve: TTurnoutCurve read GetTurnoutCurve;
-    property shovedTimbers: TShovedTimberOwningList read GetShovedTimbers;
+    property timbers: TTimbers read GetTimbers;
     property centreline: TCentreline read GetCentreline;
     property turnoutCentreline: TTurnoutCentreline read GetTurnoutCentreline;
     property mainsideStockRail: TMainsideStockRail read GetMainsideStockRail;
@@ -325,9 +325,9 @@ begin
   else
     FTurnoutCurve := 0;
   if AOID = 0 then
-    FShovedTimbers := TShovedTimberOwningList.Create(nil).oid
+    FTimbers := TTimbers.Create(nil).oid
   else
-    FShovedTimbers := 0;
+    FTimbers := 0;
   if AOID = 0 then
     FCentreline := TCentreline.Create(nil).oid
   else
@@ -347,6 +347,7 @@ begin
   //# endGenCreate
 
   if AOID = 0 then begin
+    // set up all the internal references/dependencies...
     turnoutCurve.curve := curve;
     centreline.curve := curve;
     turnoutCentreline.curve := curve;
@@ -354,6 +355,10 @@ begin
     mainsideStockRail.curve := curve;
     turnoutsideStockRail.curve := curve;
     turnoutsideStockRail.turnoutCurve := turnoutCurve;
+    timbers.curve := curve;
+    timbers.protoInfo := boxDims.protoInfo;
+    timbers.plainTrackInfo := plainTrackInfo;
+    timbers.turnoutInfo := boxDims.turnoutInfo1;
   end;
 end;
 
@@ -366,7 +371,7 @@ begin
   SetOwned(FTurnoutInfo2, nil);
   SetOwned(FPlainTrackInfo, nil);
   SetOwned(FTurnoutCurve, nil);
-  SetOwned(FShovedTimbers, nil);
+  SetOwned(FTimbers, nil);
   SetOwned(FCentreline, nil);
   SetOwned(FTurnoutCentreline, nil);
   SetOwned(FMainsideStockRail, nil);
@@ -436,8 +441,8 @@ begin
   if AName = 'turnoutCurve' then
     RestoreYamlObjectOwn(FTurnoutCurve, StrToInteger(AValue), ALoader)
   else
-  if AName = 'shovedTimbers' then
-    RestoreYamlObjectOwn(FShovedTimbers, StrToInteger(AValue), ALoader)
+  if AName = 'timbers' then
+    RestoreYamlObjectOwn(FTimbers, StrToInteger(AValue), ALoader)
   else
   if AName = 'centreline' then
     RestoreYamlObjectOwn(FCentreline, StrToInteger(AValue), ALoader)
@@ -510,7 +515,7 @@ procedure TTemplate.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FTurnoutInfo2, sizeof(TOID));
   AStream.ReadBuffer(FPlainTrackInfo, sizeof(TOID));
   AStream.ReadBuffer(FTurnoutCurve, sizeof(TOID));
-  AStream.ReadBuffer(FShovedTimbers, sizeof(TOID));
+  AStream.ReadBuffer(FTimbers, sizeof(TOID));
   AStream.ReadBuffer(FCentreline, sizeof(TOID));
   AStream.ReadBuffer(FTurnoutCentreline, sizeof(TOID));
   AStream.ReadBuffer(FMainsideStockRail, sizeof(TOID));
@@ -547,7 +552,7 @@ procedure TTemplate.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FTurnoutInfo2, sizeof(TOID));
   AStream.WriteBuffer(FPlainTrackInfo, sizeof(TOID));
   AStream.WriteBuffer(FTurnoutCurve, sizeof(TOID));
-  AStream.WriteBuffer(FShovedTimbers, sizeof(TOID));
+  AStream.WriteBuffer(FTimbers, sizeof(TOID));
   AStream.WriteBuffer(FCentreline, sizeof(TOID));
   AStream.WriteBuffer(FTurnoutCentreline, sizeof(TOID));
   AStream.WriteBuffer(FMainsideStockRail, sizeof(TOID));
@@ -584,7 +589,7 @@ procedure TTemplate.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlObject(AEmitter, 'turnoutInfo2', FTurnoutInfo2);
   SaveYamlObject(AEmitter, 'plainTrackInfo', FPlainTrackInfo);
   SaveYamlObject(AEmitter, 'turnoutCurve', FTurnoutCurve);
-  SaveYamlObject(AEmitter, 'shovedTimbers', FShovedTimbers);
+  SaveYamlObject(AEmitter, 'timbers', FTimbers);
   SaveYamlObject(AEmitter, 'centreline', FCentreline);
   SaveYamlObject(AEmitter, 'turnoutCentreline', FTurnoutCentreline);
   SaveYamlObject(AEmitter, 'mainsideStockRail', FMainsideStockRail);
@@ -670,9 +675,9 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-function TTemplate.GetShovedTimbers: TShovedTimberOwningList;
+function TTemplate.GetTimbers: TTimbers;
 begin
-  Result := TShovedTimberOwningList(FromOID(FShovedTimbers));
+  Result := TTimbers(FromOID(FTimbers));
 end;
 
 // GENERATED METHOD - DO NOT EDIT

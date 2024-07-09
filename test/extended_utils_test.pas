@@ -110,14 +110,13 @@ end;
 procedure Ttest_extended_utils.test_e2d_underflow;
 var
   eBytes: TExtBytes;
+  value: Double;
 begin
   eBytes := make_extended(0, -1023, $c000000000000000);
-  try
-    extendedToDouble(eBytes);
-  except
-    exit;
-  end;
-  raise Exception.create('Error: Exception not thrown on underflow');
+  value := extendedToDouble(eBytes);
+
+  if value <> 0 then
+    raise Exception.create('Error: underflow should drop to zero');
 end;
 
 procedure Ttest_extended_utils.test_e2d_overflow;

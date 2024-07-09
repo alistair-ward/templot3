@@ -89,7 +89,7 @@ begin                          // fill dropdown with shoved timbers.
   end;
 
   if current_shove_str = '' then begin
-    if plain_track = False then
+    if not plain_track then
       shove_combo.Text := 'J2'
     else
       shove_combo.Text := 'A1';
@@ -131,7 +131,7 @@ begin
       enter_timber_form.shove_combo.Text + '  is not a valid timber number.',
       '', '', '', '', 'cancel', '', 0);
 
-    if plain_track = False then
+    if not plain_track then
       enter_timber_form.shove_combo.Text := 'J2'
     else
       enter_timber_form.shove_combo.Text := 'A1';
@@ -167,13 +167,13 @@ begin
       num_str := timb_num_strip(extract_tbnumber_str(tbnum_str));
       // get next timber numbering string from the acummulated string.
 
-      if num_str = entered_str   // timber exists...
-      then begin
+      if num_str = entered_str then begin
+        // timber exists...
         current_shove_str := entered_str;
 
         n := find_shove(current_shove_str, True);     // find it or create an empty slot.
-        if n >= 0                                    // valid slot.
-        then begin
+        if n >= 0 then begin
+          // valid slot.
           current_shove_list[n].MakeShoved;
           shove_buttons(True, n);
 
@@ -194,7 +194,7 @@ begin
     'Timber  ' + entered_str + '  is not present in this template.',
     '', '', '', '', '', 'O K    ', 0);
 
-  if plain_track = False then
+  if not plain_track then
     enter_timber_form.shove_combo.Text := 'J2'
   else
     enter_timber_form.shove_combo.Text := 'A1';
@@ -210,8 +210,8 @@ begin
     EXIT;
   end;
 
-  if select_entered = True         // warn him if invalid.
-  then begin
+  if select_entered then begin
+    // warn him if invalid.
     Close;
     show_and_redraw(True, False);    // show it selected, no rollback to this.
   end
@@ -234,8 +234,8 @@ begin
   while Length(in_str) > 0 do begin
     c := in_str[1];
     Delete(in_str, 1, 1);         // extract first char.
-    if (c >= 'A') and (c <= 'Z')    // find prefix letter
-    then begin
+    if (c >= 'A') and (c <= 'Z') then begin
+      // find prefix letter
       out_str := c;   // prefix should be upper case already.
       BREAK;
     end;

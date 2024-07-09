@@ -41,7 +41,11 @@ type
 
 implementation
 
-{ TTestTemplate }
+const
+  scaleMMperFoot: Double = 5.5;
+  inchScale: Double = 5.5 / 12;
+
+  { TTestTemplate }
 
 procedure TTestTemplate.Setup;
 begin
@@ -56,6 +60,7 @@ end;
 function TTestTemplate.MakePlainTrackT55Gauge: TTemplate;
 begin
   Result := TTemplate.Create(nil);
+  Result.boxDims.protoInfo.gauge := 56.5 * inchScale;
   Result.boxDims.turnoutInfo1.plainTrack := True;
 end;
 
@@ -162,10 +167,10 @@ begin
     SetOverallLength(tt, 500);
     SetHand(tt, thRight);
 
-    tt.drawCentrelineOnly:=false;
-    tt.drawTrackCentreLines:=true;
-    tt.drawMainRoadStockRail:=true;
-    tt.drawTurnoutRoadStockRail:=true;
+    tt.drawCentrelineOnly := False;
+    tt.drawTrackCentreLines := True;
+    tt.drawMainRoadStockRail := True;
+    tt.drawTurnoutRoadStockRail := True;
 
     CheckEquals(3, tt.featureCount, 'featureCount');
 

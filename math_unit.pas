@@ -1635,6 +1635,10 @@ var
 
   making_a_diamond: boolean = False;  // 215a
 
+type
+  TTimberEndSize = (tesTimber, tesSleeper, tesReducedLengthSleeper);
+
+
 function f28000(aq: ERailData; xs, ys: double): integer; forward;
 function f29000(aq: ERailData; pc: Tpex): integer; forward;
 //  Put xc,yc (in pc) in rail-data array.
@@ -1741,7 +1745,7 @@ procedure drawtimbcl(retcurve: boolean); forward;
 // mark timber centre-line
 procedure drawtimber(full_length, retcurve: boolean); forward;     // mark timber outline.
 
-procedure timberend(size: integer); forward;
+procedure timberend(size: TTimberEndSize); forward;
 
 function xdims: boolean; forward;
 // 0.93.a as 081   //  calculate rail x dimensions from origin.
@@ -14866,16 +14870,16 @@ begin
   end;//with
 
 
-  if (cancelling_adjusts = True)
+  if (cancelling_adjusts)
     // 0.94.a bug fix -- was "list index out of bounds" on next mouse_down if mouse wasn't moved first time.
-    and (shove_timber_form.Showing = True)     // update enabled shove buttons..
+    and (shove_timber_form.Showing)     // update enabled shove buttons..
     and ((shove_along_mod = 1) or (shove_throw_mod = 1) or (shove_crab_mod = 1) or
     (shove_length_mod = 1) or (shove_width_mod = 1) or (shove_twist_mod = 1)) then begin
     shove_index := find_shove(current_shove_str, False);
     shove_buttons(True, shove_index);
   end;
 
-  if (shift_mod = 1) and (cancelling_adjusts = False) then
+  if (shift_mod = 1) and (not cancelling_adjusts) then
     snap_onto_bgnd_pegs;                     // F7 shift mouse action   0.79.a  27-05-06
 
 end;
@@ -14929,7 +14933,7 @@ var
 
       turnoutx := 132 * scale;     // arbitrary new length 2 chains.
       turnout_i := 1;            // length locked at turnoutx.
-      if plain_track = True then
+      if plain_track then
         xorg := turnoutx
       else
         xorg := 0;
@@ -14953,8 +14957,8 @@ begin
   // 207a now modal if data_entry_form.Visible=True then EXIT;
 
 
-  if shift_state = [ssAlt, ssLeft]     // left click with ALT key.   0.71.b 2-6-01
-  then begin
+  if shift_state = [ssAlt, ssLeft] then begin
+    // left click with ALT key.   0.71.b 2-6-01
     jotter_dx_org := mouse_now_x;       // zero the relative X,Y readout.
     jotter_dy_org := mouse_now_y;       // zero the relative X,Y readout.
 
@@ -14964,7 +14968,7 @@ begin
         ''                    // wait for redraw to refill it.
     else
       jotter_form.jotter_rel_xy_readout_panel.Caption := ' ( mouse action )';
-    if show_ruler_tool = True then begin
+    if show_ruler_tool then begin
       ruler_startx := mouse_now_x;
       ruler_starty := mouse_now_y;
       redraw_pad(True, False);
@@ -14972,34 +14976,32 @@ begin
     EXIT;
   end;
 
-  if (shift_state = [ssAlt, ssRight]) and (show_ruler_tool = True)
-  // right click with ALT key. mod 0.78.a  18-11-02
-  then begin
+  if (shift_state = [ssAlt, ssRight]) and show_ruler_tool then begin
+    // right click with ALT key. mod 0.78.a  18-11-02
     ruler_endx := mouse_now_x;
     ruler_endy := mouse_now_y;
     redraw_pad(True, False);
     EXIT;
   end;
 
-  if (shift_state = [ssAlt, ssMiddle]) or (shift_state = [ssAlt, ssCtrl, ssLeft])
-  // middle click (or Ctrl-left) with ALT key.   0.71.b 2-6-01
-  then begin
+  if (shift_state = [ssAlt, ssMiddle]) or (shift_state = [ssAlt, ssCtrl, ssLeft]) then begin
+    // middle click (or Ctrl-left) with ALT key.   0.71.b 2-6-01
     with jotter_form do begin
-      if (jotter_abs_xy_readout_panel.Visible = True) or
-        (jotter_rel_xy_readout_panel.Visible = True) then begin
+      if (jotter_abs_xy_readout_panel.Visible) or
+        (jotter_rel_xy_readout_panel.Visible) then begin
         jotter_memo.Lines.Add('');
-        if jotter_abs_xy_readout_panel.Visible = True then
+        if jotter_abs_xy_readout_panel.Visible then
           jotter_memo.Lines.Add(jotter_abs_xy_readout_panel.Caption);
-        if jotter_rel_xy_readout_panel.Visible = True then
+        if jotter_rel_xy_readout_panel.Visible then
           jotter_memo.Lines.Add(jotter_rel_xy_readout_panel.Caption);
       end;
     end;//with
     EXIT;
   end;
 
-  if (shift_state = [ssAlt, ssCtrl, ssRight]) and (mouse_modify > -1)
-  // right click with ALT key.   0.71.b 2-6-01
-  then begin                                                    // mouse action in force.
+  if (shift_state = [ssAlt, ssCtrl, ssRight]) and (mouse_modify > -1) then begin
+    // right click with ALT key.   0.71.b 2-6-01
+    // mouse action in force.
     with jotter_form do begin
       jotter_memo.Lines.Add('');
       jotter_memo.Lines.Add(action_form.action_label.Caption);
@@ -15008,9 +15010,8 @@ begin
     EXIT;
   end;
 
-  if (mouse_draw_lines = True) and (mouse_button = mbLeft)
-  // we are simply drawing with the mouse - save co-ords and exit.
-  then begin
+  if (mouse_draw_lines) and (mouse_button = mbLeft) then begin
+    // we are simply drawing with the mouse - save co-ords and exit.
     draw_mouse_down_X := X;      // screen coords for line drawing start point.
     draw_mouse_down_Y := Y;
 
@@ -15024,18 +15025,17 @@ begin
     EXIT;
   end;
 
-  if (mouse_draw_lines = True) and (mouse_button = mbRight)
-  // cancel mouse drawing on right button.
-  then begin
+  if (mouse_draw_lines) and (mouse_button = mbRight) then begin
+    // cancel mouse drawing on right button.
     show_and_redraw(True, False);  // on idle, no rollback.
     EXIT;
   end;
 
   if (mouse_modify = -1)           // 291a     not if mouse action in force
-    and (bgnd_form.Visible = True) and (zoom_rectangle = False) and
-    (group_fence_rectangle = False) and (output_boundary_rectangle =
-    False)  // 0.93.a  // he clicked shape corners.
-    and (drawn_shape_rectangle = False)      // 214a
+    and (bgnd_form.Visible) and (not zoom_rectangle) and
+    (not group_fence_rectangle) and
+    (not output_boundary_rectangle)  // 0.93.a  // he clicked shape corners.
+    and (not drawn_shape_rectangle)      // 214a
   then begin
     with pad_form.Canvas do begin
       Pen.Style := psSolid;
@@ -15087,8 +15087,8 @@ begin
 
   // 0.91.a if mouse_button=mbMiddle then EXIT;       // shouldn't get here!
 
-  if ((zoom_rectangle = True) or (group_fence_rectangle = True) or
-    (output_boundary_rectangle = True) or (drawn_shape_rectangle = True)) and
+  if ((zoom_rectangle) or (group_fence_rectangle) or
+    (output_boundary_rectangle) or (drawn_shape_rectangle)) and
     (mouse_button = mbLeft)
   // 0.93.a    // drawing with the mouse - save co-ords and exit.
   then begin
@@ -15101,8 +15101,8 @@ begin
 
   //---------------------
 
-  if clicks_accepted = True {name_highlighted<>-1}      // over a bgnd template name label?
-  then begin
+  if clicks_accepted then begin
+    // over a bgnd template name label?
     clicks_accepted := False;                   // only one click.
 
     clicked_keep_index := hover_keep_index;     // save the list indices.
@@ -15110,26 +15110,23 @@ begin
 
     list_position := clicked_keep_index;  // make it current in the box.
 
-    if (classic_templot = False) and (mouse_button = mbLeft) and (click_bgnd_select = False)
-    // 0.93.a Quick mode left click on label
-    then begin
+    if (not classic_templot) and (mouse_button = mbLeft) and (not click_bgnd_select) then begin
+      // 0.93.a Quick mode left click on label
       bgnd_clicked_in_quick_mode := True;
       pad_form.make_control_popup_entry.Click;
       bgnd_clicked_in_quick_mode := False;
       EXIT;
     end;
 
-    if (click_bgnd_select = True) and (mouse_button = mbLeft)
-    // bgnd keep to or from group selection list.
-    then begin
+    if (click_bgnd_select) and (mouse_button = mbLeft) then begin
+      // bgnd keep to or from group selection list.
       click_bgnd_to_selected;
       EXIT;
     end;
 
 
-    if (shift_click) or (mouse_button = mbRight)
-    // right click or either click if shift key was down when highlighted.
-    then begin
+    if (shift_click) or (mouse_button = mbRight) then begin
+      // right click or either click if shift key was down when highlighted.
       if (clicked_keep_index > -1) and (clicked_keep_index < keeps_list.Count) and
         (keeps_list.Count > 0) then begin
 
@@ -15175,11 +15172,10 @@ begin
   end;// clicks_accepted
   //--------------------------
 
-  if mouse_button = mbRight                       //  right-click :
-  then begin
-    if popup_if_clicked(True) = False
-    // go check if he clicked on a bgnd template and do pop-up.   // 0.93.a
-    then begin
+  if mouse_button = mbRight then begin
+    //  right-click :
+    if not popup_if_clicked(True) then begin
+      // go check if he clicked on a bgnd template and do pop-up.   // 0.93.a
 
       // multiple monitors... 0.91.b
 
@@ -15201,24 +15197,23 @@ begin
     EXIT;
   end;
 
-  if mouse_modify = -1               // no mouse action selected.
-  then begin
-    if (shove_timber_form.Showing = True) and (hide_current_flag = False) then begin
+  if mouse_modify = -1 then begin
+    // no mouse action selected.
+    if (shove_timber_form.Showing) and (not hide_current_flag) then begin
       if shove_number_clicked(pad_click_X, pad_click_Y) = True then
         EXIT; // clicked on a timber number
     end;
 
-    if (check_diffs_form.Showing = True) and (hide_current_flag = False)   // 0.94.a ...
-    then begin
-      if checkrail_label_clicked(pad_click_X, pad_click_Y) = True then
+    if (check_diffs_form.Showing) and (not hide_current_flag) then begin
+      // 0.94.a ...
+      if checkrail_label_clicked(pad_click_X, pad_click_Y) then
         EXIT; // clicked on a check-rail label
     end;
 
 
-    if popup_if_clicked(False) = False
-    // go check if he clicked on a bgnd template and do pop-up.
-    then begin
-      if pad_form.allow_left_drag_panning_menu_entry.Checked = True then begin
+    if not popup_if_clicked(False) then begin
+      // go check if he clicked on a bgnd template and do pop-up.
+      if pad_form.allow_left_drag_panning_menu_entry.Checked then begin
         allow_left_button_pan := True;  // 0.91.c
         Screen.Cursor := crSizeAll;     // 0.91.c
 
@@ -23899,23 +23894,23 @@ begin
   approach_last_xtb := 0;         // init for length snapping...
   exit_last_xtb := turnoutx;
 
-  if (half_diamond = True) and (hd_timbers > 0)     // init for slip timber extensions...
+  if (half_diamond) and (hd_timbers > 0)     // init for slip timber extensions...
   then begin
     sliptipsl := fpx - toex - scale * k3n;
     // from hd toe to slip-switch toe (arbitrary where wing rails 12" separation).
     sliprad := sliptipsl / TAN(k3 / 2);    // approx slip road radius.
   end;
 
-  if timber_marks = True then begin
+  if timber_marks then begin
 
-    if outline_extensions = True then
+    if outline_extensions then
       tbl := 4.5 * inscale             // outline extensions = 4.5" scale
     else
       tbl := 0;
 
     tbq := scale;              // centre-line extensions = 1ft scale
 
-    if nine_foot = True then
+    if nine_foot then
       tbred := 3 * inscale     // standard 9ft timbering, with
     // 3" length reduction each end for 8ft 6" timbers.
     else
@@ -23925,11 +23920,11 @@ begin
 
     // 208a mods...
 
-    tbnumy_screen := ynsnorm - tbq - 1.5;
     // default y-position of timber numbering. 1.5mm below end of timber centre-line (only used if timber centre-lines not drawn).
+    tbnumy_screen := ynsnorm - tbq - 1.5;
 
-    tbnumy_output := ynsnorm - tbq - 6;
     // 208a mod   // default y-position of timber numbering. 6mm below end of timber centre-line (only used if timber centre-lines not drawn).
+    tbnumy_output := ynsnorm - tbq - 6;
 
 
     //eqtimb:=False;      // no equalizing along switch. 29-3-99
@@ -23946,10 +23941,10 @@ begin
 
     // now do crossing timbers from Z timber on...
 
-    if plain_track = False then begin
+    if not plain_track then begin
 
-      if include_xing_timbers = True   // 218a
-      then begin
+      if include_xing_timbers then begin
+        // 218a
 
         timb_str := 'X';        // restart numbering. "X" for crossing
         tbn := 1;
@@ -23966,9 +23961,8 @@ begin
 
         //eqtimb:=timbers_equalized;      // allow equalizing if wanted.
 
-        if (half_diamond = True) or (timbers_equalized = True) or (square_on_angled = True)
-        // mod 29-7-01.
-        then
+        if (half_diamond) or (timbers_equalized) or (square_on_angled) then
+          // mod 29-7-01.
           frackeq := 1    // full equalizing angle or angled-on through crossing.
         else
           frackeq := 0;   // square-on through crossing. 29-3-99.
@@ -24012,16 +24006,15 @@ begin
 
           unmod_xtb := xtb;            // so can restore for spacing calc...
 
-          if (curviform_timbering = True) and (tradius_is_straight = False) and
+          if (curviform_timbering) and (not tradius_is_straight) and
             (xing_calc_i = 1) and (xtb > (xtba + xingtb_v))
           // only for timbers "C" and above
 
           then begin
             mod_for_curvi := True;
 
-            if ((xtb - fpx) / k3n) < (15 * inscale)
-            // if rail separation under 15" (crossing chairs needed)
-            then begin
+            if ((xtb - fpx) / k3n) < (15 * inscale) then begin
+              // if rail separation under 15" (crossing chairs needed)
               try
                 curvi_alpha := (xtb - fpx) / ABS(tradius);
                 // angle turned through beyond FP.
@@ -24040,11 +24033,10 @@ begin
             end
             else begin
               // next timbers (ordinary chairs)...
-              if xtb_mod > 0
-              // some mods have taken place
-              then begin
-                if (xtb - modded_xtb) > (31 * inscale)     // 31" max spacing arbitrary
-                then begin
+              if xtb_mod > 0 then begin
+                // some mods have taken place
+                if (xtb - modded_xtb) > (31 * inscale) then begin
+                  // 31" max spacing arbitrary
                   total_space_remaining :=
                     tb_xing_end - modded_xtb;
 
@@ -24078,8 +24070,8 @@ begin
 
           dotimber(False, False);         // do at xtb, timber width.
 
-          if mod_for_curvi = True          // 215a
-          then
+          if mod_for_curvi then
+            // 215a
             xtb := unmod_xtb;
 
           last_xtb := xtb;                   // save position of last one.
@@ -24101,7 +24093,7 @@ begin
 
         // for wing rail joints ...
 
-        if (half_diamond = True) and (hd_timbers <> 0)   // 215a this is a slip
+        if (half_diamond) and (hd_timbers <> 0)   // 215a this is a slip
         then
           xtbzz := xtbz - 28 * inscale         // 215a so use 28" next spacing
         else
@@ -24109,29 +24101,28 @@ begin
         // move back joint spacing from Z. mod 0.75.a 11-10-01.
       end;
 
-      if include_closure_timbers = True   // 218a
-      then begin
+      if include_closure_timbers then begin
+        // 218a
 
         // then fill closure timbers between switch and crossing...
 
         timb_str := 'T';        // restart closure numbering.
 
-        if gaunt = True then
+        if gaunt then
           tbn := 1
         else
           tbn := 2;       // first closure timber has been drawn with the switch.
 
-        if (half_diamond = True) and (hd_timbers <> 0)   // 215a this is a slip
-
-        then
+        if (half_diamond) and (hd_timbers <> 0) then
+          // 215a this is a slip
           xtbzz := xtbz - 28 * inscale   // 215a so use 28" next spacing
 
         else
           xtbzz := xtbz - wingj_sp * inscale;
         // move back joint spacing from Z. mod 0.75.a 11-10-01.
 
-        if (timbers_equalized = True) and (equalizing_fixed = True) and
-          (half_diamond = False) and (ABS(k3n) > minfp) then begin
+        if (timbers_equalized) and (equalizing_fixed) and
+          (not half_diamond) and (ABS(k3n) > minfp) then begin
           eqfix_closeup := 20 * inscale / k3n;
           // 20"/xing RAM arbitrary - close up a bit for constant equalizing.
           if eqfix_closeup > (6 * inscale) then
@@ -24158,19 +24149,19 @@ begin
         for tbnext := 1 to tbint do begin
           xtb := xtbclose_start + tbnext * xclosespace;      // x to next timber
 
-          if half_diamond = True then
+          if half_diamond then
             frackeq := 1      // ignore flags, always constant.
           else begin
 
-            if timbers_equalized = True then begin
-              if equalizing_fixed = True then
+            if timbers_equalized then begin
+              if equalizing_fixed then
                 frackeq := 1              // constant equalizing angle.
               else
                 frackeq := tbnext / tbint;
               // incremental, so fraction of the equalizing angle to avoid sudden change at heel of switch.
             end
             else begin
-              if square_on_angled = True then
+              if square_on_angled then
                 frackeq := 1   // angled-on 20-7-01
               else
                 frackeq := 0;  // square-on closure timbers. 29-3-99.
@@ -24199,8 +24190,8 @@ begin
 
         plain_sleepers(exit_begin, 1, full_length, False);
 
-        if retpar_i = 1    // and finally any return curve sleepering...
-        then begin
+        if retpar_i = 1 then begin
+          // and finally any return curve sleepering...
           full_length := True;
           frackeq := 0;
           // square-on.
@@ -24217,7 +24208,7 @@ begin
       timb_str := 'B';        //  prefix for bonus timber numbering.
       tbn := 1;               //  init numbering.
 
-      if plain_track = True then
+      if plain_track then
         bontimb_posx := turnoutx - tb_roll_percent * railen[pt_i] * inscale /
           100  // adjust for any timber rolling.
       else
@@ -24445,7 +24436,7 @@ begin
   if xtb > (turnoutx + scale / 3) then
     EXIT;    // max 4" beyond rail end (much shortened template?).
 
-  timberend(1);     // get yfs, yfsred to sleeper end
+  timberend(tesSleeper);     // get yfs, yfsred to sleeper end
 
   if pad_form.timber_centres_menu_entry.Checked = True then
     drawtimbcl(False);   // sleeper centre-lines wanted.
@@ -24775,7 +24766,7 @@ begin
   if (tandem_timb = 4) and (xtb > (atx + 66 * inscale)) then
     EXIT;  // 218b tandems, not beyond C timber
 
-  timberend(0);
+  timberend(tesTimber);
   // get yns, yfs for it, and equalizing angle for timber width.
 
   if pad_form.timber_centres_menu_entry.Checked = True then
@@ -24830,8 +24821,8 @@ begin
   // mods 208a  p1=number position on screen,  p2=number position for print/output...
 
   try
-    if retcurve = True    // sleepering the return curve..
-    then begin
+    if retcurve then begin
+      // sleepering the return curve..
       y := aq25offset(xtb, kret) - g - scale;     // g +1ft scale arbitrary.
 
       p1.y := y + (tb + g / 2) * COS(kret);
@@ -24843,7 +24834,7 @@ begin
       p2.x := p1.x;
     end
     else begin
-      if pad_form.timber_centres_menu_entry.Checked = True then begin
+      if pad_form.timber_centres_menu_entry.Checked then begin
         p1 := number_point_screen;     // gets changed for omitted timber below.
         p2 := number_point_output;
       end
@@ -24861,8 +24852,8 @@ begin
 
     marktext_str := timb_str + IntToStr(tbn);     // set up numbering text string
 
-    if shove_timber_form.Showing = False        // not shoving.
-    then begin
+    if not shove_timber_form.Showing then begin
+      // not shoving.
       for n := 0 to current_shove_list.Count - 1 do begin
         if (marktext_str = current_shove_list[n].timberString) and
           (current_shove_list[n].shoveCode = svcOmit) then
@@ -24907,7 +24898,7 @@ begin
       end;//case
     end;
 
-    if shove_omitted = True then
+    if shove_omitted then
       marktext_str := '!' + marktext_str;   // indicate it's omitted while shoving.
 
     enter_mark(True, p1, p2, eMC_99_TimberNumber, marktext_str);
@@ -24930,30 +24921,29 @@ begin
   if x > (turnoutx + scale / 3) then
     EXIT;     // max 4" beyond rail end.
 
-  if (plain_track = False) and (dir = -1) and (approach_rails_only = True) then
+  if (not plain_track) and (dir = -1) and (approach_rails_only) then
     EXIT;   // 218a   no approach sleepering
 
-  if joint = True then
+  if joint then
     sl_width := jt_slwide
   else
     sl_width := slwide;
 
   xtb := x;                                   // !!! xtb is still global.
-  if full_length = True then
-    timberend(1)     // get yfs, yfsred to sleeper end
+  if full_length then
+    timberend(tesSleeper)     // get yfs, yfsred to sleeper end
   else
-    timberend(2);
+    timberend(tesReducedLengthSleeper);
 
-  if pad_form.timber_centres_menu_entry.Checked = True then
+  if pad_form.timber_centres_menu_entry.Checked then
     drawtimbcl(retcurve);     // sleeper centre-lines wanted
-  if pad_form.timber_outlines_menu_entry.Checked = True
-  // sleeper outlines wanted
-  then begin
+  if pad_form.timber_outlines_menu_entry.Checked then begin
+    // sleeper outlines wanted
     xns := xtb - sl_width * inscale / 2;      // sleeper width, ( half each side of centre )
     xfs := xtb + sl_width * inscale / 2;
     drawtimber(full_length, retcurve);
   end;
-  if pad_form.timber_numbers_menu_entry.Checked = True then
+  if pad_form.timber_numbers_menu_entry.Checked then
     tbnumber(retcurve)  // numbering wanted.
   else
     tbn := tbn + 1;         // do numbering last because increments tbn. (needed for timber shoves).
@@ -25951,7 +25941,7 @@ begin
 end;
 //_______________________________________________________________________________________________________________________________
 
-procedure timberend(size: integer);            //  calc timber ends and equalizing angle.
+procedure timberend(size: TTimberEndSize);            //  calc timber ends and equalizing angle.
 
 //   enter with xtb and return yns, yfs for centre of timber ends.
 //   size=0 is timber, size=1 is sleeper, size=2 is reduced-length sleeper (for crossover exit track)
@@ -25970,7 +25960,7 @@ begin
 
   // extend timbers for tandem   218a  ...
 
-  if (size = 0) and (tandem_timb > 0) then begin
+  if (size = tesTimber) and (tandem_timb > 0) then begin
     if tandem_timb = 1 then
       if xtb > dpx then
         rawns := (g - rawfs) * 3 / 4;     // =1  1st double-sided tandem turnout
@@ -25994,7 +25984,7 @@ begin
 
   // calc extension length of half_diamond timbers for slip...
 
-  if (size = 0) and (half_diamond = True) and (hd_timbers > 0) and (xtb > setx) and
+  if (size = tesTimber) and (half_diamond) and (hd_timbers > 0) and (xtb > setx) and
     (xtb < (toex + sliptipsl)) then begin
     extended_for_slip := True;
     try
@@ -26020,7 +26010,7 @@ begin
   // mods 0.78.a   11-11-02... (adjustable step size, also for 00 gauge).
 
   case size of
-    0: begin                          // timber...
+    tesTimber: begin                          // timber...
       if timbinc > minfp             // stepped timber lengths.
       then begin
         rawtblen := rawfs - rawns;                // raw timber length.
@@ -26040,7 +26030,7 @@ begin
       end;
     end;
 
-    1: begin
+    tesSleeper: begin
       tblen := tb;        // standard sleeper.
 
       if (gaunt = False) or (xtb >= xorg) or (plain_track = True)
@@ -26055,7 +26045,7 @@ begin
       maintimb := 0;             // flag sleeper width.
     end;
 
-    2: begin
+    tesReducedLengthSleeper: begin
       tblen := tb / 8;             // 1/8th of standard sleeper.
       yfsnorm := rawns + tblen;    // return adjusted far end.
       yaq3 := g;                 // for end centralizing.
@@ -26067,25 +26057,24 @@ begin
 
   end;//case
 
-  if (half_diamond = True) and (size = 0) then begin
-    if tradius_is_straight = True then
+  if (half_diamond) and (size = tesTimber) then begin
+    if tradius_is_straight then
       keq := k3 / 2   // regular diamond, timbers equalized-constant at half V-crossing angle.
     else
       keq := k / 2;   // 0.93.a irregular diamond, maintain timbers at half angle in stock rail.
   end
   else begin
-    if timbers_equalized = True       // equalized style, rotate timbers...
-    then begin
-      if (equalizing_fixed = True) and (frackeq <> 0)
-      // constant angle and not a square-on portion..
-      then
+    if timbers_equalized then begin
+      // equalized style, rotate timbers...
+      if (equalizing_fixed) and (frackeq <> 0) then
+        // constant angle and not a square-on portion..
         keq := k3 / 2                           // constant angle = half of crossing angle.
       else
         keq := k / 2 * frackeq;
       // angle is half gradient of curved stock rail, modified by the equalizing fraction in force for this timber.
     end
     else begin                                     // square-on style...
-      if (square_on_angled = True) and (frackeq <> 0) then
+      if (square_on_angled) and (frackeq <> 0) then
         keq := k    // to turnout road. (29-7-01 approximately square to turnout road, rotation point is not on outer rail)
       else
         keq := 0;   // to main road.
@@ -26101,18 +26090,18 @@ begin
   // centralize ends if wanted...
 
   eqendmod := 0;            // init amount of movement needed.
-  if size <> 2              // normal length sleeper or timber.
-  then begin
-    if ((half_diamond = False) and
-      (ms_ends = False))  // turnout/plain track with centralized ends.
-      or (half_diamond = True) and (tandem_timb <> 4)
+  if size <> tesReducedLengthSleeper then begin
+    // normal length sleeper or timber.
+    if ((not half_diamond) and
+      (not ms_ends))  // turnout/plain track with centralized ends.
+      or (half_diamond) and (tandem_timb <> 4)
     // half-diamond always centralized    unless partial in a tandem 218b
     then
       eqendmod := 0 - rawns - (tblen - yaq3) / 2;        // amount of centralizing mod needed.
 
     // modify if extended for slip one side only...
 
-    if (half_diamond = True) and (extended_for_slip = True)
+    if (half_diamond) and (extended_for_slip)
     // half-diamond extended timbers for slip.
     then begin
       case hd_timbers of
@@ -26130,7 +26119,7 @@ begin
   yfs := yfsnorm + randmod + eqendmod;          // return far end
 
   ynsred := yns + tbred;                        // and the reduced near end
-  if size = 2 then
+  if size = tesReducedLengthSleeper then
     yfsred := yfs
   else
     yfsred := yfs - tbred;         // and the reduced far end.
@@ -29692,7 +29681,7 @@ begin
 
   // 208c mods -- bug fix
 
-  if no_timbering = True then begin
+  if no_timbering then begin
     alert(3, '    no  timbers',
       'There are no timbers to shove because the control template has been set to `0no timbering`1.'
       + '||To restore the timbers, click one of the timbering styles in the `0real > timbering >`1 menu options.',
@@ -29701,7 +29690,7 @@ begin
   end;
 
 
-  if cl_only = True then begin
+  if cl_only then begin
     if alert(3, '    no  timbers  showing',
       'There are no timbers to shove because the control template has been set to show track centre-lines only.'
       +
@@ -31576,10 +31565,10 @@ begin
   pti.listIndex := pt_i;
   pti.railLengthInches := railen[pt_i];
   // rail length in inches (only used for custom lengths).
-  pti.sleepersPerLength := sleeper_count[pt_i];
+  pti.ClearSleeperCentresInches;
   // number of sleepers per length.
-  for n := 0 to psleep_c do
-    pti.sleeperCentresInches[n] := psleep[pt_i, n];   // spacings (only used for custom spacings).
+  for n := 0 to sleeper_count[pt_i] do
+    pti.AddSleeperCentresInches(psleep[pt_i, n]);   // spacings (only used for custom spacings).
 
   pti.plainTrackSpacingName :=
     Copy(plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i],
@@ -32916,10 +32905,14 @@ begin
     // list index for current custom plain track.
     railen[pt_i] := pti.railLengthInches;
     // custom rail length in inches.
-    sleeper_count[pt_i] := pti.sleepersPerLength;
+    sleeper_count[pt_i] := pti.sleeperCentresInchesCount;
     // number of sleepers per length.
-    for n := 0 to psleep_c do
-      psleep[pt_i, n] := pti.sleeperCentresInches[n];   // custom spacings.
+    for n := 0 to psleep_c do begin
+      if (n < pti.sleeperCentresInchesCount) then
+        psleep[pt_i, n] := pti.sleeperCentresInches[n]   // custom spacings.
+      else
+        psleep[pt_i, n] := 0;
+    end;
 
     plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i] :=
       '  ' + Trim(pti.plainTrackSpacingName);   // put name in the list.

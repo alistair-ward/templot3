@@ -15,7 +15,7 @@ type
   { TLine }
 
   TLine = class
-    private
+  private
     FRailCode: ERailData;
     FStartxy: Tpex;
     FEndxy: Tpex;
@@ -24,16 +24,16 @@ type
     function GetNumberOfPoints: Integer;
     function GetPoint(idx: Integer): Tpex;
 
-    public
+  public
     constructor Create(ARailCode: ERailData);
 
     procedure AddPoint(const ACurveCoord: Tpex; const APoint: Tpex);
 
-    property railCode: ERailData read FRailCode;
-    property startxy: Tpex read FStartxy;
-    property endxy: Tpex read FEndxy;
-    property numberOfPoints: Integer read GetNumberOfPoints;
-    property points[idx: Integer]: Tpex read GetPoint;
+    property railCode: ERailData Read FRailCode;
+    property startxy: Tpex Read FStartxy;
+    property endxy: Tpex Read FEndxy;
+    property numberOfPoints: Integer Read GetNumberOfPoints;
+    property points[idx: Integer]: Tpex Read GetPoint;
   end;
 
 
@@ -42,7 +42,7 @@ implementation
 uses
   Math;
 
-{ TLine }
+  { TLine }
 
 function TLine.GetNumberOfPoints: Integer;
 begin
@@ -70,7 +70,7 @@ begin
   end;
   FEndxy := ACurveCoord;
 
-  SetLength(FPoints, Length(FPoints)+1);
+  SetLength(FPoints, Length(FPoints) + 1);
   FPoints[High(FPoints)] := APoint;
 end;
 

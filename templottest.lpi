@@ -27,7 +27,7 @@
         <PackageName Value="FCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="107">
+    <Units Count="110">
       <Unit0>
         <Filename Value="templottest.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -501,6 +501,19 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Reminder"/>
       </Unit106>
+      <Unit107>
+        <Filename Value="model\timbers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Timbers"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="model\template\timber.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="test\timbers_test.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit109>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

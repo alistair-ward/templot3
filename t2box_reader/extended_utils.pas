@@ -92,11 +92,10 @@ begin
     else begin
       exponent := exponent - 16383;               // un-bias the exponent (ext)
 
-      if exponent < -1022 then
-        raise Exception.Create('====== INVALID FLOAT - UNDERFLOW - ' +
-                                       IntTohex(exponent) +
-                                       '=======>')
-
+      if exponent < -1022 then begin
+        // don't throw exception on underflow, just set to 0
+        rsltDouble := 0.0;
+      end
       else
       if exponent > 1023 then
         raise Exception.Create('====== INVALID FLOAT - OVERFLOW - ' +

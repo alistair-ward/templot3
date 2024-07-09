@@ -104,7 +104,6 @@ end;
 // copy control template data to the keep template.
 //
 procedure fill_kd(target: TTemplate);
-
 var
   i: integer;
   rand_label_factor: double;
@@ -122,7 +121,6 @@ var
   swi: TSwitchInfo;
   xi: TCrossingInfo;
   cl: TCentreline;
-
 begin
   target.Name := Copy(current_name_str, 1, 99);
   target.topLabel := Copy(info_form.gauge_label.Caption, 1, 99);
@@ -417,7 +415,7 @@ begin
 
   // compatibility mods 211a  217a ...
 
-  ti1.turnoutRoadCode:=turnout_road_i;
+  ti1.turnoutRoadCode := turnout_road_i;
 
   ti1.turnoutLength := turnoutx;           //  mm overall length.
   ti1.originToToe := xorg;                //  mm approach length.
@@ -475,12 +473,12 @@ begin
     pt.customPlainTrack := False;
 
   pt.listIndex := pt_i;
-  pt.railLengthInches := railen[pt_i];
   // rail length in inches (only used for custom lengths).
-  pt.sleepersPerLength := sleeper_count[pt_i];
+  pt.railLengthInches := railen[pt_i];
   // number of sleepers per length.
-  for i := 0 to psleep_c do
-    pt.sleeperCentresInches[i] := psleep[pt_i, i];   // spacings (only used for custom spacings).
+  pt.ClearSleeperCentresInches;
+  for i := 0 to sleeper_count[pt_i] - 1 do
+    pt.AddSleeperCentresInches(psleep[pt_i, i]);   // spacings
 
   pt.plainTrackSpacingName := Copy(
     plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i], 1, 198);
@@ -626,7 +624,7 @@ begin
 
 
   // copy all the current shoved timber data to the keep.
-  target.shovedTimbers.CopyFrom(current_shove_list);
+  target.timbers.shovedTimbers.CopyFrom(current_shove_list);
 end;
 
 procedure copy_keep(Source: TTemplate);
@@ -938,10 +936,14 @@ begin
     // list index for current custom plain track.
     railen[pt_i] := pt.railLengthInches;
     // custom rail length in inches.
-    sleeper_count[pt_i] := pt.sleepersPerLength;
+    sleeper_count[pt_i] := pt.sleeperCentresInchesCount;
     // number of sleepers per length.
-    for n := 0 to psleep_c do
-      psleep[pt_i, n] := pt.sleeperCentresInches[n];   // custom spacings.
+    for n := 0 to psleep_c do begin
+      if n < pt.sleeperCentresInchesCount then
+        psleep[pt_i, n] := pt.sleeperCentresInches[n]   // custom spacings.
+      else
+        psleep[pt_i, n] := 0;
+    end;
 
     plain_track_form.plain_track_spacings_listbox.Items.Strings[pt_i] :=
       '  ' + Trim(pt.plainTrackSpacingName);   // put name in the list.
@@ -1080,7 +1082,7 @@ begin
 
 
   // copy all the shoved timber data.
-  current_shove_list.CopyFrom(Source.shovedTimbers);
+  current_shove_list.CopyFrom(Source.timbers.shovedTimbers);
 
   // and update everything...
   update_menus;

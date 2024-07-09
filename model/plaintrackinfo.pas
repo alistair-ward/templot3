@@ -88,13 +88,11 @@ attributes:
 - name: railLengthInches
   type: Double
   comment: rail length in inches.
-- name: sleepersPerLength
-  type: Integer
-  comment: number of sleepers per length.
 - name: sleeperCentresInches
   type: Double
-  array: 0..psleep_c
-  comment: spacings in inches for custom
+  array: dynamic
+  operations: [add, delete, clear]
+  comment: timber centres (in inches).
 - name: railJointsCode
   type: TRailJointCode
 - name: userPegRail
@@ -132,8 +130,7 @@ type
     FCustomPlainTrack: Boolean;
     FListIndex: Integer;
     FRailLengthInches: Double;
-    FSleepersPerLength: Integer;
-    FSleeperCentresInches: array[0..psleep_c] of Double;
+    FSleeperCentresInches: array of Double;
     FRailJointsCode: TRailJointCode;
     FUserPegRail: Integer;
     FUserPegDataValid: Boolean;
@@ -152,10 +149,10 @@ type
 
     //# genGetSetDeclarations
     function GetSleeperCentresInches(AIndex: Integer): Double;
+    function GetSleeperCentresInchesCount: Integer;
     procedure SetCustomPlainTrack(const AValue: Boolean);
     procedure SetListIndex(const AValue: Integer);
     procedure SetRailLengthInches(const AValue: Double);
-    procedure SetSleepersPerLength(const AValue: Integer);
     procedure SetSleeperCentresInches(AIndex: Integer; const AValue: Double);
     procedure SetRailJointsCode(const AValue: TRailJointCode);
     procedure SetUserPegRail(const AValue: Integer);
@@ -173,6 +170,9 @@ type
     destructor Destroy; override;
 
     //# genPublicDeclarations
+    function AddSleeperCentresInches(AValue: Double): Integer;
+    procedure DeleteSleeperCentresInches(AIndex: Integer);
+    procedure ClearSleeperCentresInches;
     //# endGenPublicDeclarations
 
     procedure   RestoreYamlAttribute(AName, AValue : String; AIndex: Integer; ALoader: TOTPersistentLoader); override;
@@ -185,11 +185,9 @@ type
     // rail length in inches.
     property railLengthInches: Double read FRailLengthInches write SetRailLengthInches;
 
-    // number of sleepers per length.
-    property sleepersPerLength: Integer read FSleepersPerLength write SetSleepersPerLength;
-
-    // spacings in inches for custom
+    // timber centres (in inches).
     property sleeperCentresInches[AIndex: Integer]: Double read GetSleeperCentresInches write SetSleeperCentresInches;
+    property sleeperCentresInchesCount: Integer read GetSleeperCentresInchesCount;
     property railJointsCode: TRailJointCode read FRailJointsCode write SetRailJointsCode;
     property userPegRail: Integer read FUserPegRail write SetUserPegRail;
     property userPegDataValid: Boolean read FUserPegDataValid write SetUserPegDataValid;
@@ -271,8 +269,8 @@ begin
   if AName = 'railLengthInches' then
     FRailLengthInches := StrToDouble(AValue)
   else
-  if AName = 'sleepersPerLength' then
-    FSleepersPerLength := StrToInteger(AValue)
+  if AName = 'sleeperCentresInches-length' then
+    SetLength(FSleeperCentresInches, StrToInteger(AValue))
   else
   if AName = 'sleeperCentresInches' then
     FSleeperCentresInches[Integer(Ord(Low(FSleeperCentresInches))+AIndex)] := StrToDouble(AValue)
@@ -318,7 +316,7 @@ procedure TPlainTrackInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FCustomPlainTrack, sizeof(Boolean));
   AStream.ReadBuffer(FListIndex, sizeof(Integer));
   AStream.ReadBuffer(FRailLengthInches, sizeof(Double));
-  AStream.ReadBuffer(FSleepersPerLength, sizeof(Integer));
+  SetLength(FSleeperCentresInches, AStream.ReadDWord);
   AStream.ReadBuffer(FSleeperCentresInches[Low(FSleeperCentresInches)], (Ord(High(FSleeperCentresInches))-Ord(Low(FSleeperCentresInches)) + 1)*sizeof(Double));
   AStream.ReadBuffer(FRailJointsCode, sizeof(TRailJointCode));
   AStream.ReadBuffer(FUserPegRail, sizeof(Integer));
@@ -342,7 +340,7 @@ procedure TPlainTrackInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FCustomPlainTrack, sizeof(Boolean));
   AStream.WriteBuffer(FListIndex, sizeof(Integer));
   AStream.WriteBuffer(FRailLengthInches, sizeof(Double));
-  AStream.WriteBuffer(FSleepersPerLength, sizeof(Integer));
+  AStream.WriteDWord(Length(FSleeperCentresInches));
   AStream.WriteBuffer(FSleeperCentresInches[Low(FSleeperCentresInches)], (Ord(High(FSleeperCentresInches))-Ord(Low(FSleeperCentresInches)) + 1)*sizeof(Double));
   AStream.WriteBuffer(FRailJointsCode, sizeof(TRailJointCode));
   AStream.WriteBuffer(FUserPegRail, sizeof(Integer));
@@ -366,7 +364,7 @@ procedure TPlainTrackInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlBoolean(AEmitter, 'customPlainTrack', FCustomPlainTrack);
   SaveYamlInteger(AEmitter, 'listIndex', FListIndex);
   SaveYamlDouble(AEmitter, 'railLengthInches', FRailLengthInches);
-  SaveYamlInteger(AEmitter, 'sleepersPerLength', FSleepersPerLength);
+  SaveYamlInteger(AEmitter, 'sleeperCentresInches-length', Length(FSleeperCentresInches));
   SaveYamlSequence(AEmitter, 'sleeperCentresInches');
   for i := Ord(Low(FSleeperCentresInches)) to Ord(High(FSleeperCentresInches)) do
     SaveYamlSequenceDouble(AEmitter, FSleeperCentresInches[Integer(i)]);
@@ -412,15 +410,6 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TPlainTrackInfo.SetSleepersPerLength(const AValue: Integer);
-begin
-  if AValue <> FSleepersPerLength then begin
-    SetModified;
-    FSleepersPerLength := AValue;
-  end;
-end;
-
-// GENERATED METHOD - DO NOT EDIT
 function TPlainTrackInfo.GetSleeperCentresInches(AIndex: Integer): Double;
 begin
   Result := FSleeperCentresInches[AIndex];
@@ -433,6 +422,35 @@ begin
     SetModified;
     FSleeperCentresInches[AIndex] := AValue;
   end;
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TPlainTrackInfo.GetSleeperCentresInchesCount: Integer;
+begin
+  Result := Length(FSleeperCentresInches);
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+function TPlainTrackInfo.AddSleeperCentresInches(AValue: Double): Integer;
+begin
+  SetModified;
+  SetLength(FSleeperCentresInches, Length(FSleeperCentresInches) + 1);
+  FSleeperCentresInches[High(FSleeperCentresInches)] := AValue;
+  Result := High(FSleeperCentresInches);
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TPlainTrackInfo.DeleteSleeperCentresInches(AIndex: Integer);
+begin
+  SetModified;
+  Delete(FSleeperCentresInches, AIndex, 1);
+end;
+
+// GENERATED METHOD - DO NOT EDIT
+procedure TPlainTrackInfo.ClearSleeperCentresInches;
+begin
+  SetModified;
+  SetLength(FSleeperCentresInches, 0);
 end;
 
 // GENERATED METHOD - DO NOT EDIT

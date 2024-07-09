@@ -2313,21 +2313,22 @@ var
   i: Integer;
   filePosition: Int64;
 begin
+  filePosition := FilePos(boxFile);
+
   // first get the count of shoved timbers for this template...
   shoveCount := parse_integer(boxFile, 'shoveCount');
 
   if shoveCount > 0 then begin
     // now get the data for all the shoved timbers...
     SetLength(box2Template.shovedTimbers, shoveCount);
-    filePosition := FilePos(boxFile);
     for i := 0 to shoveCount - 1 do begin
       ReadOneShoveData(boxFile, box2Template.shovedTimbers[i]);
     end;
-    numberRead := FilePos(boxFile) - filePosition;
-
-    if numberRead <> segmentLength then
-      ReadFileError;
   end;
+
+  numberRead := FilePos(boxFile) - filePosition;
+  if numberRead <> segmentLength then
+    ReadFileError;
 end;
 
 procedure ReadBlockStart(var boxFile: file; var blockStart: TBox2BlockStart);
@@ -2441,7 +2442,7 @@ var
   t: TShovedTimber;
 begin
   for i := 0 to High(box2Timbers) do begin
-    template.shovedTimbers.Add(ConvertBox2ToShovedTimber(box2Timbers[i]));
+    template.timbers.shovedTimbers.Add(ConvertBox2ToShovedTimber(box2Timbers[i]));
   end;
 end;
 
@@ -3004,16 +3005,20 @@ procedure ConvertBox2SleeperCentres(const track: TBox2PlainTrackInfo; pi: TPlain
 var
   i: Integer;
 begin
-  for i := 0 to psleep_c do
-    pi.sleeperCentresInches[i] := track.sleeper_centres[i];
+  pi.ClearSleeperCentresInches;
+  for i := 0 to track.sleepers_per_length - 1 do
+    pi.AddSleeperCentresInches(track.sleeper_centres[i]);
 end;
 
 function ConvertBox2ToRailJointCode(const rail_joints_code: Integer): TRailJointCode;
 begin
   case rail_joints_code of
-    -1: Result := rjNone;
-    0: Result := rjNormal;
-    1: Result := rjStaggered;
+    -1:
+      Result := rjNone;
+    0:
+      Result := rjNormal;
+    1:
+      Result := rjStaggered;
     else
       raise Exception.CreateFmt('Unknown rail joint code: %d', [rail_joints_code]);
   end;
@@ -3028,7 +3033,6 @@ begin
   pi.customPlainTrack := track.pt_custom;
   pi.listIndex := track.list_index;
   pi.railLengthInches := track.rail_length;
-  pi.sleepersPerLength := track.sleepers_per_length;
   pi.railJointsCode := ConvertBox2ToRailJointCode(track.rail_joints_code);
   pi.userPegRail := track.user_peg_rail;
   pi.userPegX := track.user_pegx;
@@ -3324,174 +3328,180 @@ begin
 
   // added 0.78.d 19-02-03...
   UndoRedoManager.SetMark('Import');
+  try
+    resave_needed := False;                         // init.
+    restored_save_done := False;                    // init.
+    loaded_version := 50000;                        // init for lowest template version in the file.
+    later_file := False;                            // init.
 
-  resave_needed := False;                         // init.
-  restored_save_done := False;                    // init.
-  loaded_version := 50000;                        // init for lowest template version in the file.
-  later_file := False;                            // init.
+    loading_in_progress := True;
+    // 208c lock out any auto backups while loading -- in case any dialogs shown and OnIdle fires
 
-  loading_in_progress := True;
-  // 208c lock out any auto backups while loading -- in case any dialogs shown and OnIdle fires
+    try // 208c
 
-  try // 208c
+      // begin loading...
 
-    // begin loading...
+      saved_cursor := Screen.Cursor;
 
-    saved_cursor := Screen.Cursor;
+      try
+        Screen.Cursor := crHourGlass;        // could take a while if big file.
+        if not Application.Terminated then
+          Application.ProcessMessages;       // so let the form repaint.
 
-    try
-      Screen.Cursor := crHourGlass;        // could take a while if big file.
-      if Application.Terminated = False then
-        Application.ProcessMessages;       // so let the form repaint.
+        // first clear all existing (sets save_done:=True), and save existing for undo.
+        clear_keeps(False, True);
 
-      // first clear all existing (sets save_done:=True), and save existing for undo.
-      clear_keeps(False, True);
+        if not BoxFileIsNewFormat(box_str) then
+          Exit;
 
-      if not BoxFileIsNewFormat(box_str) then
-        Exit;
+        // load the file...
+        if normal_load then
+          waitMessage := TWaitForm.ShowWaitMessage('loading  templates ...');
 
-      // load the file...
-      if normal_load then
-        waitMessage := TWaitForm.ShowWaitMessage('loading  templates ...');
+        if not Application.Terminated then
+          Application.ProcessMessages;           // let the wait form fully paint.
 
-      if not Application.Terminated then
-        Application.ProcessMessages;           // let the wait form fully paint.
+        LoadNewFormat(box_str, projectTitle, gridInfo, newProject);
 
-      LoadNewFormat(box_str, projectTitle, gridInfo, newProject);
+        // file loaded...
 
-      // file loaded...
-
-      if (file_name = '') then
-        loaded_str := box_str     // file name from the "open" dialog.
-      else begin
-        if ExtractFileExt(file_name) = '.box' then
-          loaded_str := file_name
-        else
-          loaded_str := 'data file';        // don't confuse him with internal file names.
-      end;
-
-      if (ExtractFileExt(loaded_str) = '.box') and (normal_load) then begin
-        // 208d not for file viewer
-        boxmru_update(loaded_str);                              // 0.82.a  update the mru list.
-
-        box_project_title_str := projectTitle;  // change the title to the one loaded last.
-
-        // file loaded, check it and update the background drawing...
-        with old_next_data.old_keep_dims1.box_dims1 do begin
-
-          //     0.79.a 20-05-06  -- saved grid info -- read from last template only...
-          //     0.91.d -- read these only if prefs not being used on startup.
-
-          // 0.79 file or later --- change grid to as loaded...
-          if (grid_units_code <> 0) and (user_prefs_in_use = False) then begin
-
-            grid_labels_code_i := grid_units_code;
-
-            grid_spacex := x_grid_spacing;
-            grid_spacey := y_grid_spacing;
-
-            if ruler_units = 0 then
-              update_ruler_div;   // 0.93.a ruler as grid option
-
-          end;// if 0.79 or later
-
-        end;//with old_next_data.old_keep_dims1
-
-        save_done := not resave_needed;        // this boxful matches file.
-        {xxx        if load_backup = False then} begin
-          keep_form.box_file_label.Caption := ' last reloaded from :  ' + loaded_str;
-          keep_form.box_file_label.Hint := keep_form.box_file_label.Caption;
-          // in case too long for caption
-
-          saved_box_str := loaded_str;
-          // for print of box contents list.
-          reloaded_box_str := '|    ' + loaded_str;
-          // ditto.
+        if (file_name = '') then
+          loaded_str := box_str     // file name from the "open" dialog.
+        else begin
+          if ExtractFileExt(file_name) = '.box' then
+            loaded_str := file_name
+          else
+            loaded_str := 'data file';        // don't confuse him with internal file names.
         end;
+
+        if (ExtractFileExt(loaded_str) = '.box') and (normal_load) then begin
+          // 208d not for file viewer
+          boxmru_update(loaded_str);                              // 0.82.a  update the mru list.
+
+          box_project_title_str := projectTitle;  // change the title to the one loaded last.
+
+          // file loaded, check it and update the background drawing...
+          with old_next_data.old_keep_dims1.box_dims1 do begin
+
+            //     0.79.a 20-05-06  -- saved grid info -- read from last template only...
+            //     0.91.d -- read these only if prefs not being used on startup.
+
+            // 0.79 file or later --- change grid to as loaded...
+            if (grid_units_code <> 0) and (not user_prefs_in_use) then begin
+
+              grid_labels_code_i := grid_units_code;
+
+              grid_spacex := x_grid_spacing;
+              grid_spacey := y_grid_spacing;
+
+              if ruler_units = 0 then
+                update_ruler_div;   // 0.93.a ruler as grid option
+
+            end;// if 0.79 or later
+
+          end;//with old_next_data.old_keep_dims1
+
+          save_done := not resave_needed;        // this boxful matches file.
+          {xxx        if load_backup = False then} begin
+            keep_form.box_file_label.Caption := ' last reloaded from :  ' + loaded_str;
+            keep_form.box_file_label.Hint := keep_form.box_file_label.Caption;
+            // in case too long for caption
+
+            saved_box_str := loaded_str;
+            // for print of box contents list.
+            reloaded_box_str := '|    ' + loaded_str;
+            // ditto.
+          end;
+        end;
+
+        current_state(0);       // update or create listbox entries, need names for refresh...
+
+        // refresh or clear backgrounds for newly loaded keeps...
+
+        if keeps_list.Count <= 0 then
+          EXIT;   // cleared on error or nothing loaded.
+
+        with keep_form do begin
+
+          i := 0;
+
+          for n := i to (keeps_list.Count - 1) do begin
+            t := keeps_list[n];
+            if t.boxDims.backgroundCode = bkcBackground then begin
+              if update_background_menu_entry.Checked then begin
+                last_bgnd_loaded_index := n;
+                // update index to highest loaded bgnd (for minting).
+                list_position := n;
+                // put new keep on background.
+                copy_keep_to_background(n, False, True);
+                // don't update info, reloading=True.
+              end
+              else begin
+                t.boxDims.backgroundCode := bkcUnused;          // make it unused instead.
+              end;
+            end;
+          end;//for
+
+          if update_background_menu_entry.Checked then
+            pad_form.fit_bgnd_menu_entry.Click;  // show the new background.
+
+        end;//with
+
+        backup_wanted := True;                    // file loaded ok, update the backup.
+        Result := True;                           // file loaded.
+
+      finally
+        waitMessage := nil;
+        Screen.Cursor := saved_cursor;
+        current_state(-1);                   // tidy up after any error exits.
+
+      end;//try
+
+      if (later_file) and (normal_load)   // normal_load 208d (off for file viewer)
+      then begin
+        alert(1, 'php/980    later  file   -   ( from  version  ' + FormatFloat(
+          '0.00', loaded_version / 100) + ' )',
+          'The file which you just reloaded contained one or more templates from a later version of Templot0 than this one.'
+          +
+          ' Some features may not be available or may be drawn differently.' +
+          '||The earliest loaded template was from version  ' +
+          FormatFloat('0.00', loaded_version / 100) +
+          '|This version of Templot0 is  ' + GetVersionString(voShort) +
+          '||Please refer to the Templot web site at  templot.com  for information about upgrading to the latest version, or click| <A HREF="online_ref980.85a">more information online</A> .',
+          '', '', '', '', '', 'continue', 0);
       end;
 
-      current_state(0);       // update or create listbox entries, need names for refresh...
+      if (loaded_version < 200) and (normal_load)   // normal_load 208d (off for file viewer)
+      then begin
+        i := alert(2, 'php/980    old  file   -   ( from  version  ' +
+          FormatFloat('0.00', loaded_version / 100) + ' )',
+          'The file which you just reloaded contained one or more templates from an earlier version of Templot0.'
+          + '||These have been modified to make them compatible with this version, but some features may now be drawn differently or require adjustment.'
+          //+'||To re-create the templates from scratch in line with this version, click the blue bar below or select the PROGRAM > NORMALIZE ALL TEMPLATES menu item on the PROGRAM PANEL window.'
+          + '||The earliest loaded template was from version  ' +
+          FormatFloat('0.00', loaded_version / 100) + '|This version of Templot0 is  ' +
+          GetVersionString(voShort) +
+          '||Click for <A HREF="online_ref980.85a">more information online</A> about the differences between these two versions.'
+          //+'||Please refer to the Templot web site at  templot.com  for information about the differences between these two versions.'
+          + '||green_panel_begin tree.gif The template name labels are now shown in the boxed style by default.'
+          + ' To revert to the previous style click the `0trackpad > trackpad background options > background name labels > transparent`1 menu item,|or click below.' + '||To hide the name labels, press the `0END`2 key on the keyboard, or the `0SHIFT+ENTER`2 keys, or click the `0trackpad > hide name labels`1 menu item, or click below.green_panel_end', '', '', 'hide  name  labels', 'change  to  transparent  name  labels', '', 'continue', 0);
 
-      // refresh or clear backgrounds for newly loaded keeps...
+        if i = 3 then
+          hide_name_labels := True;
 
-      if keeps_list.Count <= 0 then
-        EXIT;   // cleared on error or nothing loaded.
-
-      with keep_form do begin
-
-        i := 0;
-
-        for n := i to (keeps_list.Count - 1) do begin
-          t := keeps_list[n];
-          if t.boxDims.backgroundCode = bkcBackground then begin
-            if update_background_menu_entry.Checked then begin
-              last_bgnd_loaded_index := n;
-              // update index to highest loaded bgnd (for minting).
-              list_position := n;
-              // put new keep on background.
-              copy_keep_to_background(n, False, True);
-              // don't update info, reloading=True.
-            end
-            else begin
-              t.boxDims.backgroundCode := bkcUnused;          // make it unused instead.
-            end;
-          end;
-        end;//for
-
-        if update_background_menu_entry.Checked = True then
-          pad_form.fit_bgnd_menu_entry.Click;  // show the new background.
-
-      end;//with
-
-      backup_wanted := True;                    // file loaded ok, update the backup.
-      Result := True;                           // file loaded.
+        if i = 4 then
+          pad_form.transparent_names_menu_entry.Checked := True;    // radio item.
+      end;
 
     finally
-      waitMessage := nil;
-      Screen.Cursor := saved_cursor;
-      current_state(-1);                   // tidy up after any error exits.
-
+      loading_in_progress := False;  // 208c allow backups only after dialogs
     end;//try
 
-    if (later_file = True) and (normal_load = True)   // normal_load 208d (off for file viewer)
-    then begin
-      alert(1, 'php/980    later  file   -   ( from  version  ' + FormatFloat(
-        '0.00', loaded_version / 100) + ' )',
-        'The file which you just reloaded contained one or more templates from a later version of Templot0 than this one.'
-        +
-        ' Some features may not be available or may be drawn differently.' +
-        '||The earliest loaded template was from version  ' +
-        FormatFloat('0.00', loaded_version / 100) +
-        '|This version of Templot0 is  ' + GetVersionString(voShort) +
-        '||Please refer to the Templot web site at  templot.com  for information about upgrading to the latest version, or click| <A HREF="online_ref980.85a">more information online</A> .',
-        '', '', '', '', '', 'continue', 0);
-    end;
-
-    if (loaded_version < 200) and (normal_load = True)   // normal_load 208d (off for file viewer)
-    then begin
-      i := alert(2, 'php/980    old  file   -   ( from  version  ' +
-        FormatFloat('0.00', loaded_version / 100) + ' )',
-        'The file which you just reloaded contained one or more templates from an earlier version of Templot0.'
-        + '||These have been modified to make them compatible with this version, but some features may now be drawn differently or require adjustment.'
-        //+'||To re-create the templates from scratch in line with this version, click the blue bar below or select the PROGRAM > NORMALIZE ALL TEMPLATES menu item on the PROGRAM PANEL window.'
-        + '||The earliest loaded template was from version  ' +
-        FormatFloat('0.00', loaded_version / 100) + '|This version of Templot0 is  ' +
-        GetVersionString(voShort) +
-        '||Click for <A HREF="online_ref980.85a">more information online</A> about the differences between these two versions.'
-        //+'||Please refer to the Templot web site at  templot.com  for information about the differences between these two versions.'
-        + '||green_panel_begin tree.gif The template name labels are now shown in the boxed style by default.'
-        + ' To revert to the previous style click the `0trackpad > trackpad background options > background name labels > transparent`1 menu item,|or click below.' + '||To hide the name labels, press the `0END`2 key on the keyboard, or the `0SHIFT+ENTER`2 keys, or click the `0trackpad > hide name labels`1 menu item, or click below.green_panel_end', '', '', 'hide  name  labels', 'change  to  transparent  name  labels', '', 'continue', 0);
-
-      if i = 3 then
-        hide_name_labels := True;
-
-      if i = 4 then
-        pad_form.transparent_names_menu_entry.Checked := True;    // radio item.
-    end;
-
-  finally
-    loading_in_progress := False;  // 208c allow backups only after dialogs
-  end;//try
+  except
+    UndoRedoManager.Rollback;
+    raise;
+  end;
+  UndoRedoManager.Commit;
 end;
 
 
