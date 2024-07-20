@@ -31421,9 +31421,9 @@ begin
 
   bd.protoInfo.railtopWidth := cpi.railtop_pi;
   bd.protoInfo.railBottom := cpi.railbottom_pi;
-  bd.protoInfo.railHeight := cpi.rail_height_pi;
+  bd.protoInfo.railHeightInches := cpi.rail_height_pi;
   bd.protoInfo.railInclination := cpi.rail_inclination_pi;
-  bd.protoInfo.footHeight := cpi.foot_height_pi;
+  bd.protoInfo.footHeightInches := cpi.foot_height_pi;
 
 end;
 //______________________________________________________________________________
@@ -31535,15 +31535,15 @@ begin
 
   pi := t.boxDims.protoInfo;
 
-  pi.wingRailReachMainSide1 := cpi.wing_ms_reach1_pi;
-  pi.wingRailReachMainSide2 := cpi.wing_ms_reach2_pi;
+  pi.wingRailReachMainSide1Inches := cpi.wing_ms_reach1_pi;
+  pi.wingRailReachMainSide2Inches := cpi.wing_ms_reach2_pi;
 
-  pi.checkRailLengthMainSide1 := cpi.ck_ms_working1_pi;
-  pi.checkRailLengthMainSide2 := cpi.ck_ms_working2_pi;
-  pi.checkRailLengthMainSide3 := cpi.ck_ms_working3_pi;
+  pi.checkRailLengthMainSide1Inches := cpi.ck_ms_working1_pi;
+  pi.checkRailLengthMainSide2Inches := cpi.ck_ms_working2_pi;
+  pi.checkRailLengthMainSide3Inches := cpi.ck_ms_working3_pi;
 
-  pi.checkRailExtensionMainSide1 := cpi.ck_ms_ext1_pi;
-  pi.checkRailExtensionMainSide2 := cpi.ck_ms_ext2_pi;
+  pi.checkRailExtensionMainSide1Inches := cpi.ck_ms_ext1_pi;
+  pi.checkRailExtensionMainSide2Inches := cpi.ck_ms_ext2_pi;
 
   pi.flareLength := cpi.xing_fl_pi;
 
@@ -31604,18 +31604,19 @@ begin
 
   pi := t.boxDims.protoInfo;
 
-  pi.turnoutTimberWidth := tbwide;           // inches full-size width of turnout timbers.
-  pi.sleeperWidth := slwide;           // inches full-size width of plain sleepers.
+  pi.turnoutTimberWidthInches := tbwide;           // inches full-size width of turnout timbers.
+  pi.sleeperWidthInches := slwide;           // inches full-size width of plain sleepers.
 
-  pi.sleeperWidthAtRailJoint := jt_slwide;
   // inches full-size width of joint sleepers. 212a
+  pi.sleeperWidthAtRailJointInches := jt_slwide;
 
-  pi.maxTimberSpacing := ftimbspmax;
   // inches full-size max timber-spacing for closure space.
+  pi.maxTimberSpacingInches  // inches full-size max timber-spacing for closure space.
+ := ftimbspmax;
   pi.sleeperLength := tb;                   // plain sleepers length.
 
-  pi.mainsideEnds := ms_ends;
   //  True=main side ends in line, False=ends centralized.
+  pi.mainsideEnds := ms_ends;
   pi.timberEndRandomising := randend;       //  amount of timber-end randomising.
   pi.timberAngleRandomising := randangle;   //  amount of timber_angle randomising.
 

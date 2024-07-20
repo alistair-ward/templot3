@@ -181,13 +181,13 @@ attributes:
 - name: minimumRadius
   type: Double
   comment: mm minimum radius for check.
-- name: turnoutTimberWidth
+- name: turnoutTimberWidthInches
   type: Double
   comment: inches full-size width of turnout timbers.
-- name: sleeperWidth
+- name: sleeperWidthInches
   type: Double
   comment: inches full-size width of plain sleepers (not at rail joints 212a).
-- name: maxTimberSpacing
+- name: maxTimberSpacingInches
   type: Double
   comment: inches full-size max timber-spacing for closure space.
 - name: sleeperLength
@@ -196,7 +196,7 @@ attributes:
 - name: mainsideEnds
   type: Boolean
   comment: True=main side ends in line, False=ends centralized.
-- name: sleeperWidthAtRailJoint
+- name: sleeperWidthAtRailJointInches
   type: Double
   comment: inches full-size width of plain sleepers at rail joints.
 - name: timberEndRandomising
@@ -208,55 +208,55 @@ attributes:
 - name: timberAngleRandomising
   type: Double
   comment: amount of timber_angle randomising.
-- name: checkRailLengthMainSide1
+- name: checkRailLengthMainSide1Inches
   type: Double
   comment: full-size inches - size 1 MS check rail working length (back from "A").
-- name: checkRailLengthMainSide2
+- name: checkRailLengthMainSide2Inches
   type: Double
   comment: full-size inches - size 2 MS check rail working length (back from "A").
-- name: checkRailLengthMainSide3
+- name: checkRailLengthMainSide3Inches
   type: Double
   comment: full-size inches - size 3 MS check rail working length (back from "A").
-- name: checkRailExtensionMainSide1
+- name: checkRailExtensionMainSide1Inches
   type: Double
   comment: full-size inches - size 1 MS check rail extension length (forward from "A").
-- name: checkRailExtensionMainSide2
+- name: checkRailExtensionMainSide2Inches
   type: Double
   comment: full-size inches - size 2 MS check rail extension length (forward from "A").
-- name: wingRailReachMainSide1
+- name: wingRailReachMainSide1Inches
   type: Double
   comment: full-size inches - size 1 MS wing rail reach length (forward from "A").
-- name: wingRailReachMainSide2
+- name: wingRailReachMainSide2Inches
   type: Double
   comment: full-size inches - size 2 MS wing rail reach length (forward from "A").
 - name:  railBottom
   type: Double
   comment: mm width of railfoot (FB).
-- name: railHeight
+- name: railHeightInches
   type: Double
   comment: full-size inches rail height (for 3D in DXF).
-- name: seatThick
+- name: seatThickInches
   type: Double
   comment: full-size inches chair seating thickness (for 3D in DXF).
-- name: oldPlainSleeperLength
+- name: oldPlainSleeperLengthInches
   type: Double
   comment: inches full-size (unlike tb_pi which is mm). used internally for gauge changes (no meaning in file).
 - name: railInclination
   type: Double
   comment: radians
-- name: footHeight
+- name: footHeightInches
   type: Double
   comment: inches full-size edge thickness
-- name: chairOutLength
+- name: chairOutLengthInches
   type: Double
   comment: inches full-size from rail gauge-face
-- name: chairInLength
+- name: chairInLengthInches
   type: Double
   comment: inches full-size
-- name: chairWidth
+- name: chairWidthInches
   type: Double
   comment: inches full-size
-- name: chairCornerRadius
+- name: chairCornerRadiusInches
   type: Double
   comment: inches full-size
 ...
@@ -280,32 +280,32 @@ type
     FMainSideTrackCentres: Double;
     FReturnCurveTrackCentres: Double;
     FMinimumRadius: Double;
-    FTurnoutTimberWidth: Double;
-    FSleeperWidth: Double;
-    FMaxTimberSpacing: Double;
+    FTurnoutTimberWidthInches: Double;
+    FSleeperWidthInches: Double;
+    FMaxTimberSpacingInches: Double;
     FSleeperLength: Double;
     FMainsideEnds: Boolean;
-    FSleeperWidthAtRailJoint: Double;
+    FSleeperWidthAtRailJointInches: Double;
     FTimberEndRandomising: Double;
     FTimberThickness: Double;
     FTimberAngleRandomising: Double;
-    FCheckRailLengthMainSide1: Double;
-    FCheckRailLengthMainSide2: Double;
-    FCheckRailLengthMainSide3: Double;
-    FCheckRailExtensionMainSide1: Double;
-    FCheckRailExtensionMainSide2: Double;
-    FWingRailReachMainSide1: Double;
-    FWingRailReachMainSide2: Double;
+    FCheckRailLengthMainSide1Inches: Double;
+    FCheckRailLengthMainSide2Inches: Double;
+    FCheckRailLengthMainSide3Inches: Double;
+    FCheckRailExtensionMainSide1Inches: Double;
+    FCheckRailExtensionMainSide2Inches: Double;
+    FWingRailReachMainSide1Inches: Double;
+    FWingRailReachMainSide2Inches: Double;
     FRailBottom: Double;
-    FRailHeight: Double;
-    FSeatThick: Double;
-    FOldPlainSleeperLength: Double;
+    FRailHeightInches: Double;
+    FSeatThickInches: Double;
+    FOldPlainSleeperLengthInches: Double;
     FRailInclination: Double;
-    FFootHeight: Double;
-    FChairOutLength: Double;
-    FChairInLength: Double;
-    FChairWidth: Double;
-    FChairCornerRadius: Double;
+    FFootHeightInches: Double;
+    FChairOutLengthInches: Double;
+    FChairInLengthInches: Double;
+    FChairWidthInches: Double;
+    FChairCornerRadiusInches: Double;
     //# endGenMemberVars
 
     // Templot2 global: inscale
@@ -332,32 +332,32 @@ type
     procedure SetMainSideTrackCentres(const AValue: Double);
     procedure SetReturnCurveTrackCentres(const AValue: Double);
     procedure SetMinimumRadius(const AValue: Double);
-    procedure SetTurnoutTimberWidth(const AValue: Double);
-    procedure SetSleeperWidth(const AValue: Double);
-    procedure SetMaxTimberSpacing(const AValue: Double);
+    procedure SetTurnoutTimberWidthInches(const AValue: Double);
+    procedure SetSleeperWidthInches(const AValue: Double);
+    procedure SetMaxTimberSpacingInches(const AValue: Double);
     procedure SetSleeperLength(const AValue: Double);
     procedure SetMainsideEnds(const AValue: Boolean);
-    procedure SetSleeperWidthAtRailJoint(const AValue: Double);
+    procedure SetSleeperWidthAtRailJointInches(const AValue: Double);
     procedure SetTimberEndRandomising(const AValue: Double);
     procedure SetTimberThickness(const AValue: Double);
     procedure SetTimberAngleRandomising(const AValue: Double);
-    procedure SetCheckRailLengthMainSide1(const AValue: Double);
-    procedure SetCheckRailLengthMainSide2(const AValue: Double);
-    procedure SetCheckRailLengthMainSide3(const AValue: Double);
-    procedure SetCheckRailExtensionMainSide1(const AValue: Double);
-    procedure SetCheckRailExtensionMainSide2(const AValue: Double);
-    procedure SetWingRailReachMainSide1(const AValue: Double);
-    procedure SetWingRailReachMainSide2(const AValue: Double);
+    procedure SetCheckRailLengthMainSide1Inches(const AValue: Double);
+    procedure SetCheckRailLengthMainSide2Inches(const AValue: Double);
+    procedure SetCheckRailLengthMainSide3Inches(const AValue: Double);
+    procedure SetCheckRailExtensionMainSide1Inches(const AValue: Double);
+    procedure SetCheckRailExtensionMainSide2Inches(const AValue: Double);
+    procedure SetWingRailReachMainSide1Inches(const AValue: Double);
+    procedure SetWingRailReachMainSide2Inches(const AValue: Double);
     procedure SetRailBottom(const AValue: Double);
-    procedure SetRailHeight(const AValue: Double);
-    procedure SetSeatThick(const AValue: Double);
-    procedure SetOldPlainSleeperLength(const AValue: Double);
+    procedure SetRailHeightInches(const AValue: Double);
+    procedure SetSeatThickInches(const AValue: Double);
+    procedure SetOldPlainSleeperLengthInches(const AValue: Double);
     procedure SetRailInclination(const AValue: Double);
-    procedure SetFootHeight(const AValue: Double);
-    procedure SetChairOutLength(const AValue: Double);
-    procedure SetChairInLength(const AValue: Double);
-    procedure SetChairWidth(const AValue: Double);
-    procedure SetChairCornerRadius(const AValue: Double);
+    procedure SetFootHeightInches(const AValue: Double);
+    procedure SetChairOutLengthInches(const AValue: Double);
+    procedure SetChairInLengthInches(const AValue: Double);
+    procedure SetChairWidthInches(const AValue: Double);
+    procedure SetChairCornerRadiusInches(const AValue: Double);
     //# endGenGetSetDeclarations
 
     function GetInchScale: Double;
@@ -410,13 +410,13 @@ type
     property minimumRadius: Double read FMinimumRadius write SetMinimumRadius;
 
     // inches full-size width of turnout timbers.
-    property turnoutTimberWidth: Double read FTurnoutTimberWidth write SetTurnoutTimberWidth;
+    property turnoutTimberWidthInches: Double read FTurnoutTimberWidthInches write SetTurnoutTimberWidthInches;
 
     // inches full-size width of plain sleepers (not at rail joints 212a).
-    property sleeperWidth: Double read FSleeperWidth write SetSleeperWidth;
+    property sleeperWidthInches: Double read FSleeperWidthInches write SetSleeperWidthInches;
 
     // inches full-size max timber-spacing for closure space.
-    property maxTimberSpacing: Double read FMaxTimberSpacing write SetMaxTimberSpacing;
+    property maxTimberSpacingInches: Double read FMaxTimberSpacingInches write SetMaxTimberSpacingInches;
 
     // plain sleeper length mm.
     property sleeperLength: Double read FSleeperLength write SetSleeperLength;
@@ -425,7 +425,7 @@ type
     property mainsideEnds: Boolean read FMainsideEnds write SetMainsideEnds;
 
     // inches full-size width of plain sleepers at rail joints.
-    property sleeperWidthAtRailJoint: Double read FSleeperWidthAtRailJoint write SetSleeperWidthAtRailJoint;
+    property sleeperWidthAtRailJointInches: Double read FSleeperWidthAtRailJointInches write SetSleeperWidthAtRailJointInches;
 
     // amount of timber-end randomising.
     property timberEndRandomising: Double read FTimberEndRandomising write SetTimberEndRandomising;
@@ -437,55 +437,55 @@ type
     property timberAngleRandomising: Double read FTimberAngleRandomising write SetTimberAngleRandomising;
 
     // full-size inches - size 1 MS check rail working length (back from "A").
-    property checkRailLengthMainSide1: Double read FCheckRailLengthMainSide1 write SetCheckRailLengthMainSide1;
+    property checkRailLengthMainSide1Inches: Double read FCheckRailLengthMainSide1Inches write SetCheckRailLengthMainSide1Inches;
 
     // full-size inches - size 2 MS check rail working length (back from "A").
-    property checkRailLengthMainSide2: Double read FCheckRailLengthMainSide2 write SetCheckRailLengthMainSide2;
+    property checkRailLengthMainSide2Inches: Double read FCheckRailLengthMainSide2Inches write SetCheckRailLengthMainSide2Inches;
 
     // full-size inches - size 3 MS check rail working length (back from "A").
-    property checkRailLengthMainSide3: Double read FCheckRailLengthMainSide3 write SetCheckRailLengthMainSide3;
+    property checkRailLengthMainSide3Inches: Double read FCheckRailLengthMainSide3Inches write SetCheckRailLengthMainSide3Inches;
 
     // full-size inches - size 1 MS check rail extension length (forward from "A").
-    property checkRailExtensionMainSide1: Double read FCheckRailExtensionMainSide1 write SetCheckRailExtensionMainSide1;
+    property checkRailExtensionMainSide1Inches: Double read FCheckRailExtensionMainSide1Inches write SetCheckRailExtensionMainSide1Inches;
 
     // full-size inches - size 2 MS check rail extension length (forward from "A").
-    property checkRailExtensionMainSide2: Double read FCheckRailExtensionMainSide2 write SetCheckRailExtensionMainSide2;
+    property checkRailExtensionMainSide2Inches: Double read FCheckRailExtensionMainSide2Inches write SetCheckRailExtensionMainSide2Inches;
 
     // full-size inches - size 1 MS wing rail reach length (forward from "A").
-    property wingRailReachMainSide1: Double read FWingRailReachMainSide1 write SetWingRailReachMainSide1;
+    property wingRailReachMainSide1Inches: Double read FWingRailReachMainSide1Inches write SetWingRailReachMainSide1Inches;
 
     // full-size inches - size 2 MS wing rail reach length (forward from "A").
-    property wingRailReachMainSide2: Double read FWingRailReachMainSide2 write SetWingRailReachMainSide2;
+    property wingRailReachMainSide2Inches: Double read FWingRailReachMainSide2Inches write SetWingRailReachMainSide2Inches;
 
     // mm width of railfoot (FB).
     property railBottom: Double read FRailBottom write SetRailBottom;
 
     // full-size inches rail height (for 3D in DXF).
-    property railHeight: Double read FRailHeight write SetRailHeight;
+    property railHeightInches: Double read FRailHeightInches write SetRailHeightInches;
 
     // full-size inches chair seating thickness (for 3D in DXF).
-    property seatThick: Double read FSeatThick write SetSeatThick;
+    property seatThickInches: Double read FSeatThickInches write SetSeatThickInches;
 
     // inches full-size (unlike tb_pi which is mm). used internally for gauge changes (no meaning in file).
-    property oldPlainSleeperLength: Double read FOldPlainSleeperLength write SetOldPlainSleeperLength;
+    property oldPlainSleeperLengthInches: Double read FOldPlainSleeperLengthInches write SetOldPlainSleeperLengthInches;
 
     // radians
     property railInclination: Double read FRailInclination write SetRailInclination;
 
     // inches full-size edge thickness
-    property footHeight: Double read FFootHeight write SetFootHeight;
+    property footHeightInches: Double read FFootHeightInches write SetFootHeightInches;
 
     // inches full-size from rail gauge-face
-    property chairOutLength: Double read FChairOutLength write SetChairOutLength;
+    property chairOutLengthInches: Double read FChairOutLengthInches write SetChairOutLengthInches;
 
     // inches full-size
-    property chairInLength: Double read FChairInLength write SetChairInLength;
+    property chairInLengthInches: Double read FChairInLengthInches write SetChairInLengthInches;
 
     // inches full-size
-    property chairWidth: Double read FChairWidth write SetChairWidth;
+    property chairWidthInches: Double read FChairWidthInches write SetChairWidthInches;
 
     // inches full-size
-    property chairCornerRadius: Double read FChairCornerRadius write SetChairCornerRadius;
+    property chairCornerRadiusInches: Double read FChairCornerRadiusInches write SetChairCornerRadiusInches;
     //# endGenProperty
 
     property inchScale: Double read GetInchScale;
@@ -572,14 +572,14 @@ begin
   if AName = 'minimumRadius' then
     FMinimumRadius := StrToDouble(AValue)
   else
-  if AName = 'turnoutTimberWidth' then
-    FTurnoutTimberWidth := StrToDouble(AValue)
+  if AName = 'turnoutTimberWidthInches' then
+    FTurnoutTimberWidthInches := StrToDouble(AValue)
   else
-  if AName = 'sleeperWidth' then
-    FSleeperWidth := StrToDouble(AValue)
+  if AName = 'sleeperWidthInches' then
+    FSleeperWidthInches := StrToDouble(AValue)
   else
-  if AName = 'maxTimberSpacing' then
-    FMaxTimberSpacing := StrToDouble(AValue)
+  if AName = 'maxTimberSpacingInches' then
+    FMaxTimberSpacingInches := StrToDouble(AValue)
   else
   if AName = 'sleeperLength' then
     FSleeperLength := StrToDouble(AValue)
@@ -587,8 +587,8 @@ begin
   if AName = 'mainsideEnds' then
     FMainsideEnds := StrToBoolean(AValue)
   else
-  if AName = 'sleeperWidthAtRailJoint' then
-    FSleeperWidthAtRailJoint := StrToDouble(AValue)
+  if AName = 'sleeperWidthAtRailJointInches' then
+    FSleeperWidthAtRailJointInches := StrToDouble(AValue)
   else
   if AName = 'timberEndRandomising' then
     FTimberEndRandomising := StrToDouble(AValue)
@@ -599,56 +599,56 @@ begin
   if AName = 'timberAngleRandomising' then
     FTimberAngleRandomising := StrToDouble(AValue)
   else
-  if AName = 'checkRailLengthMainSide1' then
-    FCheckRailLengthMainSide1 := StrToDouble(AValue)
+  if AName = 'checkRailLengthMainSide1Inches' then
+    FCheckRailLengthMainSide1Inches := StrToDouble(AValue)
   else
-  if AName = 'checkRailLengthMainSide2' then
-    FCheckRailLengthMainSide2 := StrToDouble(AValue)
+  if AName = 'checkRailLengthMainSide2Inches' then
+    FCheckRailLengthMainSide2Inches := StrToDouble(AValue)
   else
-  if AName = 'checkRailLengthMainSide3' then
-    FCheckRailLengthMainSide3 := StrToDouble(AValue)
+  if AName = 'checkRailLengthMainSide3Inches' then
+    FCheckRailLengthMainSide3Inches := StrToDouble(AValue)
   else
-  if AName = 'checkRailExtensionMainSide1' then
-    FCheckRailExtensionMainSide1 := StrToDouble(AValue)
+  if AName = 'checkRailExtensionMainSide1Inches' then
+    FCheckRailExtensionMainSide1Inches := StrToDouble(AValue)
   else
-  if AName = 'checkRailExtensionMainSide2' then
-    FCheckRailExtensionMainSide2 := StrToDouble(AValue)
+  if AName = 'checkRailExtensionMainSide2Inches' then
+    FCheckRailExtensionMainSide2Inches := StrToDouble(AValue)
   else
-  if AName = 'wingRailReachMainSide1' then
-    FWingRailReachMainSide1 := StrToDouble(AValue)
+  if AName = 'wingRailReachMainSide1Inches' then
+    FWingRailReachMainSide1Inches := StrToDouble(AValue)
   else
-  if AName = 'wingRailReachMainSide2' then
-    FWingRailReachMainSide2 := StrToDouble(AValue)
+  if AName = 'wingRailReachMainSide2Inches' then
+    FWingRailReachMainSide2Inches := StrToDouble(AValue)
   else
   if AName = 'railBottom' then
     FRailBottom := StrToDouble(AValue)
   else
-  if AName = 'railHeight' then
-    FRailHeight := StrToDouble(AValue)
+  if AName = 'railHeightInches' then
+    FRailHeightInches := StrToDouble(AValue)
   else
-  if AName = 'seatThick' then
-    FSeatThick := StrToDouble(AValue)
+  if AName = 'seatThickInches' then
+    FSeatThickInches := StrToDouble(AValue)
   else
-  if AName = 'oldPlainSleeperLength' then
-    FOldPlainSleeperLength := StrToDouble(AValue)
+  if AName = 'oldPlainSleeperLengthInches' then
+    FOldPlainSleeperLengthInches := StrToDouble(AValue)
   else
   if AName = 'railInclination' then
     FRailInclination := StrToDouble(AValue)
   else
-  if AName = 'footHeight' then
-    FFootHeight := StrToDouble(AValue)
+  if AName = 'footHeightInches' then
+    FFootHeightInches := StrToDouble(AValue)
   else
-  if AName = 'chairOutLength' then
-    FChairOutLength := StrToDouble(AValue)
+  if AName = 'chairOutLengthInches' then
+    FChairOutLengthInches := StrToDouble(AValue)
   else
-  if AName = 'chairInLength' then
-    FChairInLength := StrToDouble(AValue)
+  if AName = 'chairInLengthInches' then
+    FChairInLengthInches := StrToDouble(AValue)
   else
-  if AName = 'chairWidth' then
-    FChairWidth := StrToDouble(AValue)
+  if AName = 'chairWidthInches' then
+    FChairWidthInches := StrToDouble(AValue)
   else
-  if AName = 'chairCornerRadius' then
-    FChairCornerRadius := StrToDouble(AValue)
+  if AName = 'chairCornerRadiusInches' then
+    FChairCornerRadiusInches := StrToDouble(AValue)
   else
   //# endGenRestoreYamlVars
     inherited RestoreYamlAttribute(AName, AValue, AIndex, ALoader);
@@ -672,32 +672,32 @@ procedure TProtoInfo.RestoreAttributes(AStream : TStream);
   AStream.ReadBuffer(FMainSideTrackCentres, sizeof(Double));
   AStream.ReadBuffer(FReturnCurveTrackCentres, sizeof(Double));
   AStream.ReadBuffer(FMinimumRadius, sizeof(Double));
-  AStream.ReadBuffer(FTurnoutTimberWidth, sizeof(Double));
-  AStream.ReadBuffer(FSleeperWidth, sizeof(Double));
-  AStream.ReadBuffer(FMaxTimberSpacing, sizeof(Double));
+  AStream.ReadBuffer(FTurnoutTimberWidthInches, sizeof(Double));
+  AStream.ReadBuffer(FSleeperWidthInches, sizeof(Double));
+  AStream.ReadBuffer(FMaxTimberSpacingInches, sizeof(Double));
   AStream.ReadBuffer(FSleeperLength, sizeof(Double));
   AStream.ReadBuffer(FMainsideEnds, sizeof(Boolean));
-  AStream.ReadBuffer(FSleeperWidthAtRailJoint, sizeof(Double));
+  AStream.ReadBuffer(FSleeperWidthAtRailJointInches, sizeof(Double));
   AStream.ReadBuffer(FTimberEndRandomising, sizeof(Double));
   AStream.ReadBuffer(FTimberThickness, sizeof(Double));
   AStream.ReadBuffer(FTimberAngleRandomising, sizeof(Double));
-  AStream.ReadBuffer(FCheckRailLengthMainSide1, sizeof(Double));
-  AStream.ReadBuffer(FCheckRailLengthMainSide2, sizeof(Double));
-  AStream.ReadBuffer(FCheckRailLengthMainSide3, sizeof(Double));
-  AStream.ReadBuffer(FCheckRailExtensionMainSide1, sizeof(Double));
-  AStream.ReadBuffer(FCheckRailExtensionMainSide2, sizeof(Double));
-  AStream.ReadBuffer(FWingRailReachMainSide1, sizeof(Double));
-  AStream.ReadBuffer(FWingRailReachMainSide2, sizeof(Double));
+  AStream.ReadBuffer(FCheckRailLengthMainSide1Inches, sizeof(Double));
+  AStream.ReadBuffer(FCheckRailLengthMainSide2Inches, sizeof(Double));
+  AStream.ReadBuffer(FCheckRailLengthMainSide3Inches, sizeof(Double));
+  AStream.ReadBuffer(FCheckRailExtensionMainSide1Inches, sizeof(Double));
+  AStream.ReadBuffer(FCheckRailExtensionMainSide2Inches, sizeof(Double));
+  AStream.ReadBuffer(FWingRailReachMainSide1Inches, sizeof(Double));
+  AStream.ReadBuffer(FWingRailReachMainSide2Inches, sizeof(Double));
   AStream.ReadBuffer(FRailBottom, sizeof(Double));
-  AStream.ReadBuffer(FRailHeight, sizeof(Double));
-  AStream.ReadBuffer(FSeatThick, sizeof(Double));
-  AStream.ReadBuffer(FOldPlainSleeperLength, sizeof(Double));
+  AStream.ReadBuffer(FRailHeightInches, sizeof(Double));
+  AStream.ReadBuffer(FSeatThickInches, sizeof(Double));
+  AStream.ReadBuffer(FOldPlainSleeperLengthInches, sizeof(Double));
   AStream.ReadBuffer(FRailInclination, sizeof(Double));
-  AStream.ReadBuffer(FFootHeight, sizeof(Double));
-  AStream.ReadBuffer(FChairOutLength, sizeof(Double));
-  AStream.ReadBuffer(FChairInLength, sizeof(Double));
-  AStream.ReadBuffer(FChairWidth, sizeof(Double));
-  AStream.ReadBuffer(FChairCornerRadius, sizeof(Double));
+  AStream.ReadBuffer(FFootHeightInches, sizeof(Double));
+  AStream.ReadBuffer(FChairOutLengthInches, sizeof(Double));
+  AStream.ReadBuffer(FChairInLengthInches, sizeof(Double));
+  AStream.ReadBuffer(FChairWidthInches, sizeof(Double));
+  AStream.ReadBuffer(FChairCornerRadiusInches, sizeof(Double));
   //# endGenRestoreVars
   end;
 
@@ -719,32 +719,32 @@ procedure TProtoInfo.SaveAttributes(AStream : TStream);
   AStream.WriteBuffer(FMainSideTrackCentres, sizeof(Double));
   AStream.WriteBuffer(FReturnCurveTrackCentres, sizeof(Double));
   AStream.WriteBuffer(FMinimumRadius, sizeof(Double));
-  AStream.WriteBuffer(FTurnoutTimberWidth, sizeof(Double));
-  AStream.WriteBuffer(FSleeperWidth, sizeof(Double));
-  AStream.WriteBuffer(FMaxTimberSpacing, sizeof(Double));
+  AStream.WriteBuffer(FTurnoutTimberWidthInches, sizeof(Double));
+  AStream.WriteBuffer(FSleeperWidthInches, sizeof(Double));
+  AStream.WriteBuffer(FMaxTimberSpacingInches, sizeof(Double));
   AStream.WriteBuffer(FSleeperLength, sizeof(Double));
   AStream.WriteBuffer(FMainsideEnds, sizeof(Boolean));
-  AStream.WriteBuffer(FSleeperWidthAtRailJoint, sizeof(Double));
+  AStream.WriteBuffer(FSleeperWidthAtRailJointInches, sizeof(Double));
   AStream.WriteBuffer(FTimberEndRandomising, sizeof(Double));
   AStream.WriteBuffer(FTimberThickness, sizeof(Double));
   AStream.WriteBuffer(FTimberAngleRandomising, sizeof(Double));
-  AStream.WriteBuffer(FCheckRailLengthMainSide1, sizeof(Double));
-  AStream.WriteBuffer(FCheckRailLengthMainSide2, sizeof(Double));
-  AStream.WriteBuffer(FCheckRailLengthMainSide3, sizeof(Double));
-  AStream.WriteBuffer(FCheckRailExtensionMainSide1, sizeof(Double));
-  AStream.WriteBuffer(FCheckRailExtensionMainSide2, sizeof(Double));
-  AStream.WriteBuffer(FWingRailReachMainSide1, sizeof(Double));
-  AStream.WriteBuffer(FWingRailReachMainSide2, sizeof(Double));
+  AStream.WriteBuffer(FCheckRailLengthMainSide1Inches, sizeof(Double));
+  AStream.WriteBuffer(FCheckRailLengthMainSide2Inches, sizeof(Double));
+  AStream.WriteBuffer(FCheckRailLengthMainSide3Inches, sizeof(Double));
+  AStream.WriteBuffer(FCheckRailExtensionMainSide1Inches, sizeof(Double));
+  AStream.WriteBuffer(FCheckRailExtensionMainSide2Inches, sizeof(Double));
+  AStream.WriteBuffer(FWingRailReachMainSide1Inches, sizeof(Double));
+  AStream.WriteBuffer(FWingRailReachMainSide2Inches, sizeof(Double));
   AStream.WriteBuffer(FRailBottom, sizeof(Double));
-  AStream.WriteBuffer(FRailHeight, sizeof(Double));
-  AStream.WriteBuffer(FSeatThick, sizeof(Double));
-  AStream.WriteBuffer(FOldPlainSleeperLength, sizeof(Double));
+  AStream.WriteBuffer(FRailHeightInches, sizeof(Double));
+  AStream.WriteBuffer(FSeatThickInches, sizeof(Double));
+  AStream.WriteBuffer(FOldPlainSleeperLengthInches, sizeof(Double));
   AStream.WriteBuffer(FRailInclination, sizeof(Double));
-  AStream.WriteBuffer(FFootHeight, sizeof(Double));
-  AStream.WriteBuffer(FChairOutLength, sizeof(Double));
-  AStream.WriteBuffer(FChairInLength, sizeof(Double));
-  AStream.WriteBuffer(FChairWidth, sizeof(Double));
-  AStream.WriteBuffer(FChairCornerRadius, sizeof(Double));
+  AStream.WriteBuffer(FFootHeightInches, sizeof(Double));
+  AStream.WriteBuffer(FChairOutLengthInches, sizeof(Double));
+  AStream.WriteBuffer(FChairInLengthInches, sizeof(Double));
+  AStream.WriteBuffer(FChairWidthInches, sizeof(Double));
+  AStream.WriteBuffer(FChairCornerRadiusInches, sizeof(Double));
   //# endGenSaveVars
   end;
   
@@ -766,32 +766,32 @@ procedure TProtoInfo.SaveYamlAttributes(AEmitter : TYamlEmitter);
   SaveYamlDouble(AEmitter, 'mainSideTrackCentres', FMainSideTrackCentres);
   SaveYamlDouble(AEmitter, 'returnCurveTrackCentres', FReturnCurveTrackCentres);
   SaveYamlDouble(AEmitter, 'minimumRadius', FMinimumRadius);
-  SaveYamlDouble(AEmitter, 'turnoutTimberWidth', FTurnoutTimberWidth);
-  SaveYamlDouble(AEmitter, 'sleeperWidth', FSleeperWidth);
-  SaveYamlDouble(AEmitter, 'maxTimberSpacing', FMaxTimberSpacing);
+  SaveYamlDouble(AEmitter, 'turnoutTimberWidthInches', FTurnoutTimberWidthInches);
+  SaveYamlDouble(AEmitter, 'sleeperWidthInches', FSleeperWidthInches);
+  SaveYamlDouble(AEmitter, 'maxTimberSpacingInches', FMaxTimberSpacingInches);
   SaveYamlDouble(AEmitter, 'sleeperLength', FSleeperLength);
   SaveYamlBoolean(AEmitter, 'mainsideEnds', FMainsideEnds);
-  SaveYamlDouble(AEmitter, 'sleeperWidthAtRailJoint', FSleeperWidthAtRailJoint);
+  SaveYamlDouble(AEmitter, 'sleeperWidthAtRailJointInches', FSleeperWidthAtRailJointInches);
   SaveYamlDouble(AEmitter, 'timberEndRandomising', FTimberEndRandomising);
   SaveYamlDouble(AEmitter, 'timberThickness', FTimberThickness);
   SaveYamlDouble(AEmitter, 'timberAngleRandomising', FTimberAngleRandomising);
-  SaveYamlDouble(AEmitter, 'checkRailLengthMainSide1', FCheckRailLengthMainSide1);
-  SaveYamlDouble(AEmitter, 'checkRailLengthMainSide2', FCheckRailLengthMainSide2);
-  SaveYamlDouble(AEmitter, 'checkRailLengthMainSide3', FCheckRailLengthMainSide3);
-  SaveYamlDouble(AEmitter, 'checkRailExtensionMainSide1', FCheckRailExtensionMainSide1);
-  SaveYamlDouble(AEmitter, 'checkRailExtensionMainSide2', FCheckRailExtensionMainSide2);
-  SaveYamlDouble(AEmitter, 'wingRailReachMainSide1', FWingRailReachMainSide1);
-  SaveYamlDouble(AEmitter, 'wingRailReachMainSide2', FWingRailReachMainSide2);
+  SaveYamlDouble(AEmitter, 'checkRailLengthMainSide1Inches', FCheckRailLengthMainSide1Inches);
+  SaveYamlDouble(AEmitter, 'checkRailLengthMainSide2Inches', FCheckRailLengthMainSide2Inches);
+  SaveYamlDouble(AEmitter, 'checkRailLengthMainSide3Inches', FCheckRailLengthMainSide3Inches);
+  SaveYamlDouble(AEmitter, 'checkRailExtensionMainSide1Inches', FCheckRailExtensionMainSide1Inches);
+  SaveYamlDouble(AEmitter, 'checkRailExtensionMainSide2Inches', FCheckRailExtensionMainSide2Inches);
+  SaveYamlDouble(AEmitter, 'wingRailReachMainSide1Inches', FWingRailReachMainSide1Inches);
+  SaveYamlDouble(AEmitter, 'wingRailReachMainSide2Inches', FWingRailReachMainSide2Inches);
   SaveYamlDouble(AEmitter, 'railBottom', FRailBottom);
-  SaveYamlDouble(AEmitter, 'railHeight', FRailHeight);
-  SaveYamlDouble(AEmitter, 'seatThick', FSeatThick);
-  SaveYamlDouble(AEmitter, 'oldPlainSleeperLength', FOldPlainSleeperLength);
+  SaveYamlDouble(AEmitter, 'railHeightInches', FRailHeightInches);
+  SaveYamlDouble(AEmitter, 'seatThickInches', FSeatThickInches);
+  SaveYamlDouble(AEmitter, 'oldPlainSleeperLengthInches', FOldPlainSleeperLengthInches);
   SaveYamlDouble(AEmitter, 'railInclination', FRailInclination);
-  SaveYamlDouble(AEmitter, 'footHeight', FFootHeight);
-  SaveYamlDouble(AEmitter, 'chairOutLength', FChairOutLength);
-  SaveYamlDouble(AEmitter, 'chairInLength', FChairInLength);
-  SaveYamlDouble(AEmitter, 'chairWidth', FChairWidth);
-  SaveYamlDouble(AEmitter, 'chairCornerRadius', FChairCornerRadius);
+  SaveYamlDouble(AEmitter, 'footHeightInches', FFootHeightInches);
+  SaveYamlDouble(AEmitter, 'chairOutLengthInches', FChairOutLengthInches);
+  SaveYamlDouble(AEmitter, 'chairInLengthInches', FChairInLengthInches);
+  SaveYamlDouble(AEmitter, 'chairWidthInches', FChairWidthInches);
+  SaveYamlDouble(AEmitter, 'chairCornerRadiusInches', FChairCornerRadiusInches);
   //# endGenSaveYamlVars
   end;
 
@@ -896,29 +896,29 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetTurnoutTimberWidth(const AValue: Double);
+procedure TProtoInfo.SetTurnoutTimberWidthInches(const AValue: Double);
 begin
-  if AValue <> FTurnoutTimberWidth then begin
+  if AValue <> FTurnoutTimberWidthInches then begin
     SetModified;
-    FTurnoutTimberWidth := AValue;
+    FTurnoutTimberWidthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetSleeperWidth(const AValue: Double);
+procedure TProtoInfo.SetSleeperWidthInches(const AValue: Double);
 begin
-  if AValue <> FSleeperWidth then begin
+  if AValue <> FSleeperWidthInches then begin
     SetModified;
-    FSleeperWidth := AValue;
+    FSleeperWidthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetMaxTimberSpacing(const AValue: Double);
+procedure TProtoInfo.SetMaxTimberSpacingInches(const AValue: Double);
 begin
-  if AValue <> FMaxTimberSpacing then begin
+  if AValue <> FMaxTimberSpacingInches then begin
     SetModified;
-    FMaxTimberSpacing := AValue;
+    FMaxTimberSpacingInches := AValue;
   end;
 end;
 
@@ -941,11 +941,11 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetSleeperWidthAtRailJoint(const AValue: Double);
+procedure TProtoInfo.SetSleeperWidthAtRailJointInches(const AValue: Double);
 begin
-  if AValue <> FSleeperWidthAtRailJoint then begin
+  if AValue <> FSleeperWidthAtRailJointInches then begin
     SetModified;
-    FSleeperWidthAtRailJoint := AValue;
+    FSleeperWidthAtRailJointInches := AValue;
   end;
 end;
 
@@ -977,65 +977,65 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetCheckRailLengthMainSide1(const AValue: Double);
+procedure TProtoInfo.SetCheckRailLengthMainSide1Inches(const AValue: Double);
 begin
-  if AValue <> FCheckRailLengthMainSide1 then begin
+  if AValue <> FCheckRailLengthMainSide1Inches then begin
     SetModified;
-    FCheckRailLengthMainSide1 := AValue;
+    FCheckRailLengthMainSide1Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetCheckRailLengthMainSide2(const AValue: Double);
+procedure TProtoInfo.SetCheckRailLengthMainSide2Inches(const AValue: Double);
 begin
-  if AValue <> FCheckRailLengthMainSide2 then begin
+  if AValue <> FCheckRailLengthMainSide2Inches then begin
     SetModified;
-    FCheckRailLengthMainSide2 := AValue;
+    FCheckRailLengthMainSide2Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetCheckRailLengthMainSide3(const AValue: Double);
+procedure TProtoInfo.SetCheckRailLengthMainSide3Inches(const AValue: Double);
 begin
-  if AValue <> FCheckRailLengthMainSide3 then begin
+  if AValue <> FCheckRailLengthMainSide3Inches then begin
     SetModified;
-    FCheckRailLengthMainSide3 := AValue;
+    FCheckRailLengthMainSide3Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetCheckRailExtensionMainSide1(const AValue: Double);
+procedure TProtoInfo.SetCheckRailExtensionMainSide1Inches(const AValue: Double);
 begin
-  if AValue <> FCheckRailExtensionMainSide1 then begin
+  if AValue <> FCheckRailExtensionMainSide1Inches then begin
     SetModified;
-    FCheckRailExtensionMainSide1 := AValue;
+    FCheckRailExtensionMainSide1Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetCheckRailExtensionMainSide2(const AValue: Double);
+procedure TProtoInfo.SetCheckRailExtensionMainSide2Inches(const AValue: Double);
 begin
-  if AValue <> FCheckRailExtensionMainSide2 then begin
+  if AValue <> FCheckRailExtensionMainSide2Inches then begin
     SetModified;
-    FCheckRailExtensionMainSide2 := AValue;
+    FCheckRailExtensionMainSide2Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetWingRailReachMainSide1(const AValue: Double);
+procedure TProtoInfo.SetWingRailReachMainSide1Inches(const AValue: Double);
 begin
-  if AValue <> FWingRailReachMainSide1 then begin
+  if AValue <> FWingRailReachMainSide1Inches then begin
     SetModified;
-    FWingRailReachMainSide1 := AValue;
+    FWingRailReachMainSide1Inches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetWingRailReachMainSide2(const AValue: Double);
+procedure TProtoInfo.SetWingRailReachMainSide2Inches(const AValue: Double);
 begin
-  if AValue <> FWingRailReachMainSide2 then begin
+  if AValue <> FWingRailReachMainSide2Inches then begin
     SetModified;
-    FWingRailReachMainSide2 := AValue;
+    FWingRailReachMainSide2Inches := AValue;
   end;
 end;
 
@@ -1049,29 +1049,29 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetRailHeight(const AValue: Double);
+procedure TProtoInfo.SetRailHeightInches(const AValue: Double);
 begin
-  if AValue <> FRailHeight then begin
+  if AValue <> FRailHeightInches then begin
     SetModified;
-    FRailHeight := AValue;
+    FRailHeightInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetSeatThick(const AValue: Double);
+procedure TProtoInfo.SetSeatThickInches(const AValue: Double);
 begin
-  if AValue <> FSeatThick then begin
+  if AValue <> FSeatThickInches then begin
     SetModified;
-    FSeatThick := AValue;
+    FSeatThickInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetOldPlainSleeperLength(const AValue: Double);
+procedure TProtoInfo.SetOldPlainSleeperLengthInches(const AValue: Double);
 begin
-  if AValue <> FOldPlainSleeperLength then begin
+  if AValue <> FOldPlainSleeperLengthInches then begin
     SetModified;
-    FOldPlainSleeperLength := AValue;
+    FOldPlainSleeperLengthInches := AValue;
   end;
 end;
 
@@ -1085,47 +1085,47 @@ begin
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetFootHeight(const AValue: Double);
+procedure TProtoInfo.SetFootHeightInches(const AValue: Double);
 begin
-  if AValue <> FFootHeight then begin
+  if AValue <> FFootHeightInches then begin
     SetModified;
-    FFootHeight := AValue;
+    FFootHeightInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetChairOutLength(const AValue: Double);
+procedure TProtoInfo.SetChairOutLengthInches(const AValue: Double);
 begin
-  if AValue <> FChairOutLength then begin
+  if AValue <> FChairOutLengthInches then begin
     SetModified;
-    FChairOutLength := AValue;
+    FChairOutLengthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetChairInLength(const AValue: Double);
+procedure TProtoInfo.SetChairInLengthInches(const AValue: Double);
 begin
-  if AValue <> FChairInLength then begin
+  if AValue <> FChairInLengthInches then begin
     SetModified;
-    FChairInLength := AValue;
+    FChairInLengthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetChairWidth(const AValue: Double);
+procedure TProtoInfo.SetChairWidthInches(const AValue: Double);
 begin
-  if AValue <> FChairWidth then begin
+  if AValue <> FChairWidthInches then begin
     SetModified;
-    FChairWidth := AValue;
+    FChairWidthInches := AValue;
   end;
 end;
 
 // GENERATED METHOD - DO NOT EDIT
-procedure TProtoInfo.SetChairCornerRadius(const AValue: Double);
+procedure TProtoInfo.SetChairCornerRadiusInches(const AValue: Double);
 begin
-  if AValue <> FChairCornerRadius then begin
+  if AValue <> FChairCornerRadiusInches then begin
     SetModified;
-    FChairCornerRadius := AValue;
+    FChairCornerRadiusInches := AValue;
   end;
 end;
 

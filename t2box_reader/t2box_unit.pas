@@ -2573,35 +2573,35 @@ begin
   pi.mainSideTrackCentres := proto_info.trmscent_pi;
   pi.returnCurveTrackCentres := proto_info.retcent_pi;
   pi.minimumRadius := proto_info.min_radius_pi;
-  pi.turnoutTimberWidth := proto_info.tbwide_pi;
-  pi.sleeperWidth := proto_info.slwide_pi;
-  pi.maxTimberSpacing := proto_info.ftimbspmax_pi;
+  pi.turnoutTimberWidthInches := proto_info.tbwide_pi;
+  pi.sleeperWidthInches := proto_info.slwide_pi;
+  pi.maxTimberSpacingInches := proto_info.ftimbspmax_pi;
   pi.sleeperLength := proto_info.tb_pi;
   pi.mainsideEnds := proto_info.mainside_ends_pi;
-  pi.sleeperWidthAtRailJoint := proto_info.jt_slwide_pi;
+  pi.sleeperWidthAtRailJointInches := proto_info.jt_slwide_pi;
   pi.timberEndRandomising := proto_info.random_end_pi;
   pi.timberThickness := proto_info.timber_thick_pi;
   pi.timberEndRandomising := proto_info.random_angle_pi;
 
-  pi.checkRailLengthMainSide1 := proto_info.ck_ms_working1_pi;
-  pi.checkRailLengthMainSide2 := proto_info.ck_ms_working2_pi;
-  pi.checkRailLengthMainSide3 := proto_info.ck_ms_working3_pi;
+  pi.checkRailLengthMainSide1Inches := proto_info.ck_ms_working1_pi;
+  pi.checkRailLengthMainSide2Inches := proto_info.ck_ms_working2_pi;
+  pi.checkRailLengthMainSide3Inches := proto_info.ck_ms_working3_pi;
 
-  pi.checkRailExtensionMainSide1 := proto_info.ck_ms_ext1_pi;
-  pi.checkRailExtensionMainSide2 := proto_info.ck_ms_ext2_pi;
-  pi.wingRailReachMainSide1 := proto_info.wing_ms_reach1_pi;
-  pi.wingRailReachMainSide2 := proto_info.wing_ms_reach2_pi;
+  pi.checkRailExtensionMainSide1Inches := proto_info.ck_ms_ext1_pi;
+  pi.checkRailExtensionMainSide2Inches := proto_info.ck_ms_ext2_pi;
+  pi.wingRailReachMainSide1Inches := proto_info.wing_ms_reach1_pi;
+  pi.wingRailReachMainSide2Inches := proto_info.wing_ms_reach2_pi;
   pi.railBottom := proto_info.railbottom_pi;
-  pi.railHeight := proto_info.rail_height_pi;
-  pi.seatThick := proto_info.seat_thick_pi;
+  pi.railHeightInches := proto_info.rail_height_pi;
+  pi.seatThickInches := proto_info.seat_thick_pi;
 
-  pi.oldPlainSleeperLength := proto_info.old_tb_pi;
+  pi.oldPlainSleeperLengthInches := proto_info.old_tb_pi;
   pi.railInclination := proto_info.rail_inclination_pi;
-  pi.footHeight := proto_info.foot_height_pi;
-  pi.chairOutLength := proto_info.chair_outlen_pi;
-  pi.chairInLength := proto_info.chair_inlen_pi;
-  pi.chairWidth := proto_info.chair_width_pi;
-  pi.chairCornerRadius := proto_info.chair_corner_pi;
+  pi.footHeightInches := proto_info.foot_height_pi;
+  pi.chairOutLengthInches := proto_info.chair_outlen_pi;
+  pi.chairInLengthInches := proto_info.chair_inlen_pi;
+  pi.chairWidthInches := proto_info.chair_width_pi;
+  pi.chairCornerRadiusInches := proto_info.chair_corner_pi;
 
 end;
 

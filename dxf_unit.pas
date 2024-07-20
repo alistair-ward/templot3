@@ -955,8 +955,8 @@ begin
 
       proto := t.boxDims.protoInfo;
         // 3-D data for this template...
-        rail_foot_z := 0 - proto.railHeight * proto.scale / 12;          // rail top is z datum.
-        timb_top_z := rail_foot_z - proto.seatThick * proto.scale / 12;
+        rail_foot_z := 0 - proto.railHeightInches * proto.scale / 12;          // rail top is z datum.
+        timb_top_z := rail_foot_z - proto.seatThickInches * proto.scale / 12;
         timb_bot_z := timb_top_z - proto.timberThickness * proto.scale / 12;
 
       ti2 := t.TurnoutInfo2;
