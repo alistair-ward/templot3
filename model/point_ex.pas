@@ -53,6 +53,7 @@ type
     function normalise: Tpex;
     function dot(const b: Tpex): double;
     function angleFromVectorToVector( const toVector: Tpex): double;
+    function distanceTo(const b: Tpex): double;
 
     class operator negative(a: Tpex): Tpex;
     class operator +(a, b: Tpex): Tpex;
@@ -158,6 +159,11 @@ begin
   normal.set_xy(-y, x);
   yy := normal.dot(toVector);
   Result := arctan2(yy, xx);
+end;
+
+function Tpex.distanceTo(const b: Tpex): double;
+begin
+  Result := (b - self).magnitude;
 end;
 
 function StrToTpex(const AValue: String): Tpex;

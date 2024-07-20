@@ -183,8 +183,13 @@ var
   sleeperCount: Integer;
   sleeperPrefix: Char;
   sleeperLabel: String;
+  sleeperWidth: Double;
+  sleeperLength: Double;
+  mainsideOffset: Double;
   railLength: Double;
   railStartX: Double;
+const
+  centrelineExtraLengthInches = 12;
 begin
   pti := plainTrackInfo;
   inchScale := protoInfo.inchScale;
@@ -220,7 +225,15 @@ begin
 
     sleeperLabel := sleeperPrefix + IntToStr(sleeperCount);
 
-    FTimbers.Add(TTimber.Create(sleeperLabel, x));
+    if isJointSleeper then
+       sleeperWidth := protoInfo.sleeperWidthAtRailJointInches * inchScale
+    else
+        sleeperWidth := protoInfo.sleeperWidthInches * inchScale;
+
+    sleeperLength := protoInfo.sleeperLength;
+    mainsideOffset := -sleeperLength / 2;
+
+    FTimbers.Add(TTimber.Create(sleeperLabel, x, sleeperWidth, sleeperLength, mainsideOffset, centrelineExtraLengthInches * inchScale));
 
     sleeperCount := sleeperCount + 1;
     i := i + 1;
@@ -263,7 +276,7 @@ var
   i: Integer;
 begin
   for i := 0 to FTimbers.Count - 1 do begin
-    FTimbers[i].Calculate(curve);
+    FTimbers[i].Calculate(curve, TurnoutHandMultiplier(turnoutInfo.hand));
   end;
 end;
 
